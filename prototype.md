@@ -1,19 +1,28 @@
 # 🚂 Rail Rumble
 
-A competitive multiplayer tower defense game where players **control railway intersections** to redirect enemies toward opponents.
+Rail Rumble is a turn-based multiplayer strategy game where players control railway intersections to redirect enemy waves toward opponents.
 
 ---
 
 ## 🎯 Core Idea
 
-Players do not directly attack each other.
+Instead of directly attacking other players, the game focuses on indirect interaction.
 
-Instead, they:
-- Control railway switches (intersections)
-- Redirect enemy waves
-- Compete for survival and score
+Players:
+- control railway switches (intersections)
+- redirect enemy waves
+- try to survive while influencing others
 
-👉 Strategy + Chaos + Social interaction
+The goal is to combine **strategy, chaos, and social gameplay**.
+
+---
+
+## 🧠 Development Note
+
+The idea for this project was not created entirely within the prototype week.  
+I started thinking about the concept a few days earlier and discussed it with friends, iterating on how to make the core mechanic (enemy redirection) interesting and interactive.
+
+Because of that, the overall structure was already quite clear before building the prototype, which allowed me to develop the design relatively quickly.
 
 ---
 
@@ -23,7 +32,9 @@ Each turn, a player will:
 
 1. Draw a card  
 2. Play a card  
-3. Build towers or switch railway direction  
+3. Build towers or change railway direction  
+
+Enemies continuously move through the system, and players influence **where they go** rather than simply stopping them.
 
 ---
 
@@ -33,9 +44,9 @@ Each turn, a player will:
 
 - 4 players (Red, Blue, Green, Yellow)
 - Each player protects their own base (carrot)
-- Enemies travel along railway tracks
+- Enemies move along fixed railway tracks
 - Towers automatically attack enemies
-- Players influence enemy routes using cards
+- Players influence enemy routes using cards and node control
 
 ---
 
@@ -44,9 +55,9 @@ Each turn, a player will:
 ![Player Turn](Doc/image/yourTurn.png)
 
 - Turn-based system
-- Clear step-by-step flow
-- Active player highlighted
-- UI guides decision making
+- Clear step-by-step interaction
+- Active player is highlighted
+- UI helps guide decisions
 
 ---
 
@@ -54,16 +65,16 @@ Each turn, a player will:
 
 ![Card System](Doc/image/Uno.png)
 
-Cards are the **main interaction system**.
+Cards are the main way players interact with each other.
 
 Examples:
-- Switch Track → change enemy path
-- Block Player → disrupt opponent
-- Boost Tower → increase damage
-- Capture Point → gain control
+- Switch Track → change enemy direction
+- Block Player → restrict opponent actions
+- Boost Tower → temporarily increase damage
+- Capture Point → gain control of a node
 - Claim Resource → gain advantage
 
-👉 Inspired by UNO-style interaction + strategy cards
+This system is inspired by UNO-style interaction combined with strategy elements.
 
 ---
 
@@ -71,13 +82,13 @@ Examples:
 
 ![Intersection Control](Doc/image/control.png)
 
-- Railway intersections are **controllable nodes**
-- Each node has an owner (player)
+- Railway intersections act as controllable nodes
+- Each node is owned by a player
 - Only the owner can change its direction
 
-👉 This creates:
-- Strategic control zones
-- Player conflict without direct combat
+This creates:
+- strategic control over the map
+- indirect player interaction without direct attacks
 
 ---
 
@@ -85,11 +96,11 @@ Examples:
 
 ![Target Selection](Doc/image/change.png)
 
-Players can choose a **target opponent**.
+Players can choose a target opponent.
 
-- Selected target becomes the destination of enemies
-- Current target is clearly displayed
-- UI highlights ownership and flow direction
+- The selected player becomes the destination of enemies
+- The UI clearly shows the current target
+- Ownership and flow direction are visually indicated
 
 ---
 
@@ -99,11 +110,11 @@ Players can choose a **target opponent**.
 
 After switching:
 
-- Enemy path dynamically updates
-- Enemies are redirected to the chosen target
-- Flow direction is visualized with colored tracks
+- Enemy paths update dynamically
+- Enemies are redirected toward the selected player
+- Flow is visualized through colored tracks
 
-👉 This is the core "attack" mechanism of the game
+This is effectively the main “attack” mechanic of the game.
 
 ---
 
@@ -111,13 +122,13 @@ After switching:
 
 - Each player protects their own base
 - Base HP = 0 → player loses
-- Game ends after all waves
-- Final ranking based on score
+- The game ends after all waves
+- Final ranking is based on score
 
 ### 🧠 Scoring
 
-- Kill enemies → +Score  
-- Base takes damage → -Score  
+- Killing enemies → +Score  
+- Taking damage → -Score  
 
 ---
 
@@ -125,67 +136,49 @@ After switching:
 
 ![Match Result](Doc/image/rank.png)
 
-- Ranking of all players
-- Score breakdown:
-  - Controlled railway
-  - Defense performance
-  - Enemy waves handled
+- Player rankings
+- Score breakdown based on performance
 
 ---
 
-## 🎮 Design Highlights
+## 🎯 Target Users
 
-### 1️⃣ Indirect PvP
-No direct attacks — all interaction happens through:
-- Path control
-- Enemy redirection
-
----
-
-### 2️⃣ Strategy + Randomness
-- Card system introduces randomness
-- Control system rewards planning
+### 1️⃣ Players who enjoy indirect competition  
+This game is designed for players who prefer influencing others rather than direct combat.  
+Instead of attacking opponents directly, players interact by controlling enemy flow and creating pressure through the system.
 
 ---
 
-### 3️⃣ Social Gameplay
-Players can:
-- Cooperate
-- Betray
-- Redirect enemies to others
+### 2️⃣ Players who like both strategy and unpredictability  
+The game combines planning and randomness.  
+Players can make strategic decisions through map control, while the card system introduces moments of unpredictability that keep the experience dynamic.
 
 ---
 
-### 4️⃣ Easy to Play, Hard to Master
-- Simple rules
-- Deep strategy through:
-  - Map control
-  - Timing
-  - Card usage
+### 3️⃣ Players who enjoy social and interactive gameplay  
+Rail Rumble is intended for small groups of players who enjoy interacting during gameplay.  
+Players can cooperate, compete, or disrupt each other, making the experience more engaging in a shared setting.
 
 ---
 
-## 🛠️ Tech / Prototype Notes
+### 4️⃣ Casual players who want depth without complexity  
+The core rules are simple and easy to understand, making the game accessible.  
+At the same time, the interaction between timing, positioning, and player decisions adds depth for those who want to think more strategically.
 
-- 2D top-down design
-- Turn-based system (single-device multiplayer friendly)
-- Pathfinding based on dynamic graph switching
-- UI-driven interaction
 
 ---
 
-## 🚀 Future Improvements
+## 📌 Asset & Image Disclaimer
 
-- More card types
-- Better balance system
-- More maps with complex intersections
-- Online multiplayer support
+The visual assets in this prototype (UI mockups, scenes, and interface elements) were generated using Gemini based on my design prompts.
 
----
+This was mainly to improve clarity and readability of the gameplay ideas, as I wanted to present the mechanics more clearly than rough sketches.
 
-## 📌 Summary
+These images are used only for:
+- concept visualization  
+- system explanation  
+- presentation purposes  
 
-Rail Rumble is a **strategy + party-style tower defense game** where:
+They do not represent a fully implemented game.
 
-> 💥 You don't attack players —  
-> 💥 You send chaos to them.
+All gameplay mechanics, system design, and interaction ideas are original work.
