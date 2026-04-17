@@ -1,10 +1,10 @@
-# 🚂 Rail Rumble
+# Rail Rumble
 
 Rail Rumble is a turn-based multiplayer strategy game where players control railway intersections to redirect enemy waves toward opponents.
 
 ---
 
-## 🎯 Core Idea
+## Core Idea
 
 Instead of directly attacking other players, the game focuses on indirect interaction.
 
@@ -17,7 +17,7 @@ The goal is to combine **strategy, chaos, and social gameplay**.
 
 ---
 
-## 🧠 Development Note
+## Development Note
 
 The idea for this project was not created entirely within the prototype week.  
 I started thinking about the concept a few days earlier and discussed it with friends, iterating on how to make the core mechanic (enemy redirection) interesting and interactive.
@@ -26,7 +26,7 @@ Because of that, the overall structure was already quite clear before building t
 
 ---
 
-## 🧠 Core Gameplay Loop
+## Core Gameplay Loop
 
 Each turn, a player will:
 
@@ -38,7 +38,7 @@ Enemies continuously move through the system, and players influence **where they
 
 ---
 
-## 🎮 Main Gameplay Screen
+## Main Gameplay Screen
 
 ![Main Gameplay](Doc/image/base2.png)
 
@@ -50,7 +50,7 @@ Enemies continuously move through the system, and players influence **where they
 
 ---
 
-## 🔄 Player Turn Flow
+## Player Turn Flow
 
 ![Player Turn](Doc/image/yourTurn.png)
 
@@ -61,7 +61,7 @@ Enemies continuously move through the system, and players influence **where they
 
 ---
 
-## 🃏 Card System
+## Card System
 
 ![Card System](Doc/image/Uno.png)
 
@@ -78,7 +78,7 @@ This system is inspired by UNO-style interaction combined with strategy elements
 
 ---
 
-## 🧠 Core Mechanic: Intersection Control
+## Core Mechanic: Intersection Control
 
 ![Intersection Control](Doc/image/control.png)
 
@@ -92,7 +92,7 @@ This creates:
 
 ---
 
-## 🎯 Target Selection Mechanic
+## Target Selection Mechanic
 
 ![Target Selection](Doc/image/change.png)
 
@@ -104,7 +104,7 @@ Players can choose a target opponent.
 
 ---
 
-## 🛤️ Enemy Routing Result
+## Enemy Routing Result
 
 ![Routing Result](Doc/image/changeWay.png)
 
@@ -118,21 +118,21 @@ This is effectively the main “attack” mechanic of the game.
 
 ---
 
-## 📘 Basic Rules
+## Basic Rules
 
 - Each player protects their own base
 - Base HP = 0 → player loses
 - The game ends after all waves
 - Final ranking is based on score
 
-### 🧠 Scoring
+### Scoring
 
 - Killing enemies → +Score  
 - Taking damage → -Score  
 
 ---
 
-## 🏆 Match Results
+## Match Results
 
 ![Match Result](Doc/image/rank.png)
 
@@ -141,7 +141,7 @@ This is effectively the main “attack” mechanic of the game.
 
 ---
 
-## 🎯 Target Users
+## Target Users
 
 ### 1️⃣ Players who enjoy indirect competition  
 This game is designed for players who prefer influencing others rather than direct combat.  
@@ -168,7 +168,7 @@ At the same time, the interaction between timing, positioning, and player decisi
 
 ---
 
-## 📌 Asset & Image Disclaimer
+## Asset & Image Disclaimer
 
 The visual assets in this prototype (UI mockups, scenes, and interface elements) were generated using Gemini based on my design prompts.
 
