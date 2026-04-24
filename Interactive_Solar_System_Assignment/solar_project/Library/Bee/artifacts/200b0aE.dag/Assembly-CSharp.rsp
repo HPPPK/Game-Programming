@@ -354,6 +354,7 @@
 -analyzer:"/Applications/Unity/Hub/Editor/2022.3.62f3/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 "Assets/Scripts/LookAtTarget.cs"
 "Assets/Scripts/Projectile.cs"
+"Assets/Scripts/QuitGame.cs"
 "Assets/Scripts/RotateAround.cs"
 "Assets/Scripts/RotateSelf.cs"
 "Assets/Scripts/SpaceFact.cs"
