@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class CursorToolManager : MonoBehaviour
 {
@@ -15,6 +17,10 @@ public class CursorToolManager : MonoBehaviour
     public Vector2 hammerHotSpot = Vector2.zero;
 
     public bool isHammerMode = false;
+
+    [Header("Mode UI")]
+    public GameObject darkOverlay;
+    public GameObject targetingUI;
 
     private enum CursorState
     {
@@ -33,7 +39,22 @@ public class CursorToolManager : MonoBehaviour
 
     void Start()
     {
+        EnsureEventSystem();
+        ResolveModeUI();
         ApplyNormalCursor();
+        SetModeUI(false);
+    }
+
+    public void ToggleHammerTool()
+    {
+        if (isHammerMode)
+        {
+            ExitToolMode();
+        }
+        else
+        {
+            EnterHammerMode();
+        }
     }
 
     public void EnterHammerMode()
@@ -45,17 +66,86 @@ public class CursorToolManager : MonoBehaviour
 
         isHammerMode = true;
         ApplyHammerCursor();
+
+        if (GateTargetingManager.Instance != null)
+        {
+            GateTargetingManager.Instance.EnterGateTargetMode(GateActionType.OpenGate);
+        }
+        else
+        {
+            SetModeUI(true);
+        }
     }
 
     public void ExitToolMode()
     {
         if (!isHammerMode && hasAppliedCursor && currentCursorState == CursorState.Default)
         {
+            SetModeUI(false);
             return;
         }
 
         isHammerMode = false;
         ApplyNormalCursor();
+        SetModeUI(false);
+    }
+
+    private void SetModeUI(bool active)
+    {
+        ResolveModeUI();
+
+        if (darkOverlay != null)
+        {
+            darkOverlay.SetActive(active);
+        }
+
+        if (targetingUI != null)
+        {
+            targetingUI.SetActive(active);
+        }
+    }
+
+    private void EnsureEventSystem()
+    {
+        if (EventSystem.current != null)
+        {
+            return;
+        }
+
+        GameObject eventSystemObject = new GameObject("EventSystem");
+        eventSystemObject.AddComponent<EventSystem>();
+        eventSystemObject.AddComponent<StandaloneInputModule>();
+        Debug.Log("Created missing EventSystem for UI button clicks.");
+    }
+
+    private void ResolveModeUI()
+    {
+        if (darkOverlay == null)
+        {
+            darkOverlay = FindSceneObject("DarkOverlay");
+        }
+
+        if (targetingUI == null)
+        {
+            targetingUI = FindSceneObject("TargetingUI");
+        }
+    }
+
+    private GameObject FindSceneObject(string objectName)
+    {
+        GameObject[] objects = Resources.FindObjectsOfTypeAll<GameObject>();
+
+        for (int i = 0; i < objects.Length; i++)
+        {
+            GameObject obj = objects[i];
+
+            if (obj.name == objectName && obj.scene.IsValid())
+            {
+                return obj;
+            }
+        }
+
+        return null;
     }
 
     private void ApplyNormalCursor()
