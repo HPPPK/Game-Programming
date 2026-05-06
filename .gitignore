@@ -3,3 +3,12 @@
 
 # Local template workspace
 template/
+
+# Unity generated files
+FinalGame/CanalTD/Library/
+FinalGame/CanalTD/Temp/
+FinalGame/CanalTD/Obj/
+FinalGame/CanalTD/Build/
+FinalGame/CanalTD/Builds/
+FinalGame/CanalTD/Logs/
+FinalGame/CanalTD/UserSettings/
