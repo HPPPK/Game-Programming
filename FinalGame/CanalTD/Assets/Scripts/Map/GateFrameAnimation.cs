@@ -10,8 +10,8 @@ public class GateFrameAnimation : MonoBehaviour
     [Header("Gate State")]
     public bool isBlocking = true;
     public bool isLocked = false;
-
-    [Header("Path Link")]
+    public Color normalColor = Color.white;
+    public Color hoverColor = Color.yellow;
 
     private bool isPlaying = false;
     private SpriteRenderer sr;
@@ -52,48 +52,17 @@ public class GateFrameAnimation : MonoBehaviour
             return;
         }
 
-        if (CursorToolManager.Instance == null)
-        {
-            Debug.LogWarning("No CursorToolManager found.");
-            return;
-        }
-
-        if (GateTargetingManager.Instance == null)
-        {
-            Debug.LogWarning("No GateTargetingManager found.");
-            return;
-        }
-
-        if (!CursorToolManager.Instance.isHammerMode)
-        {
-            Debug.Log(name + " clicked, but gate targeting cursor is OFF.");
-            return;
-        }
-
-        if (!GateTargetingManager.Instance.IsTargetingGate())
-        {
-            Debug.Log(name + " clicked, but not in gate targeting mode.");
-            return;
-        }
-
-        // 这里只负责选中 Gate，真正的 Open Gate / Lock Gate 效果由 Confirm 按钮触发。
-        GateTargetingManager.Instance.SelectGate(this);
+        ToggleGate();
     }
 
     void OnMouseEnter()
     {
-        if (GateTargetingManager.Instance != null)
-        {
-            GateTargetingManager.Instance.PreviewGate(this, true);
-        }
+        SetHighlight(true, hoverColor);
     }
 
     void OnMouseExit()
     {
-        if (GateTargetingManager.Instance != null)
-        {
-            GateTargetingManager.Instance.PreviewGate(this, false);
-        }
+        SetHighlight(false, normalColor);
     }
 
     public void SetHighlight(bool highlighted, Color color)
@@ -122,6 +91,16 @@ public class GateFrameAnimation : MonoBehaviour
         return !isLocked && isBlocking && !isPlaying;
     }
 
+    public bool ToggleGate()
+    {
+        if (isBlocking)
+        {
+            return OpenGate();
+        }
+
+        return LockGate();
+    }
+
     public bool OpenGate()
     {
         if (isPlaying)
@@ -143,7 +122,6 @@ public class GateFrameAnimation : MonoBehaviour
         }
 
         isBlocking = false;
-        PathGraphState.MarkDirty();
         StartCoroutine(UnblockGate());
         Debug.Log("OpenGate opened: " + name);
         return true;
@@ -166,14 +144,11 @@ public class GateFrameAnimation : MonoBehaviour
         if (!isBlocking)
         {
             isBlocking = true;
-            PathGraphState.MarkDirty();
             StartCoroutine(BlockGate());
         }
         else
         {
             ApplyBlockingVisual();
-            PathGraphState.MarkDirty();
-            StartCoroutine(FinishGateTargetingNextFrame());
         }
 
         Debug.Log("LockGate built/closed " + name);
@@ -207,8 +182,6 @@ public class GateFrameAnimation : MonoBehaviour
         isPlaying = false;
 
         Debug.Log(name + " is now UNBLOCKED");
-
-        FinishGateTargeting();
     }
 
     IEnumerator BlockGate()
@@ -228,14 +201,6 @@ public class GateFrameAnimation : MonoBehaviour
 
         ApplyBlockingVisual();
         isPlaying = false;
-
-        FinishGateTargeting();
-    }
-
-    IEnumerator FinishGateTargetingNextFrame()
-    {
-        yield return null;
-        FinishGateTargeting();
     }
 
     void ApplyBlockingVisual()
@@ -253,22 +218,8 @@ public class GateFrameAnimation : MonoBehaviour
         }
 
         sr.enabled = true;
-        sr.color = Color.white;
+        sr.color = normalColor;
         isBlocking = true;
-    }
-
-    void FinishGateTargeting()
-    {
-        if (GateTargetingManager.Instance != null &&
-            GateTargetingManager.Instance.IsTargetingGate())
-        {
-            GateTargetingManager.Instance.ExitGateTargetMode();
-        }
-
-        if (CursorToolManager.Instance != null)
-        {
-            CursorToolManager.Instance.ExitToolMode();
-        }
     }
 
     public bool IsBlocking()
