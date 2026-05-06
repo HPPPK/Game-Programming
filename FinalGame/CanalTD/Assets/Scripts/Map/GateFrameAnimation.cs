@@ -52,7 +52,26 @@ public class GateFrameAnimation : MonoBehaviour
             return;
         }
 
-        ToggleGate();
+        if (CursorToolManager.Instance == null)
+        {
+            Debug.LogWarning("No CursorToolManager found.");
+            return;
+        }
+
+        if (!CursorToolManager.Instance.isHammerMode)
+        {
+            Debug.Log(name + " clicked, but gate targeting cursor is OFF.");
+            return;
+        }
+
+        if (isBlocking)
+        {
+            OpenGate();
+        }
+        else
+        {
+            LockGate();
+        }
     }
 
     void OnMouseEnter()
@@ -89,16 +108,6 @@ public class GateFrameAnimation : MonoBehaviour
     public bool CanOpen()
     {
         return !isLocked && isBlocking && !isPlaying;
-    }
-
-    public bool ToggleGate()
-    {
-        if (isBlocking)
-        {
-            return OpenGate();
-        }
-
-        return LockGate();
     }
 
     public bool OpenGate()
@@ -149,6 +158,7 @@ public class GateFrameAnimation : MonoBehaviour
         else
         {
             ApplyBlockingVisual();
+            StartCoroutine(FinishGateTargetingNextFrame());
         }
 
         Debug.Log("LockGate built/closed " + name);
@@ -182,6 +192,8 @@ public class GateFrameAnimation : MonoBehaviour
         isPlaying = false;
 
         Debug.Log(name + " is now UNBLOCKED");
+
+        FinishGateTargeting();
     }
 
     IEnumerator BlockGate()
@@ -201,6 +213,14 @@ public class GateFrameAnimation : MonoBehaviour
 
         ApplyBlockingVisual();
         isPlaying = false;
+
+        FinishGateTargeting();
+    }
+
+    IEnumerator FinishGateTargetingNextFrame()
+    {
+        yield return null;
+        FinishGateTargeting();
     }
 
     void ApplyBlockingVisual()
@@ -220,6 +240,14 @@ public class GateFrameAnimation : MonoBehaviour
         sr.enabled = true;
         sr.color = normalColor;
         isBlocking = true;
+    }
+
+    void FinishGateTargeting()
+    {
+        if (CursorToolManager.Instance != null)
+        {
+            CursorToolManager.Instance.ExitToolMode();
+        }
     }
 
     public bool IsBlocking()
