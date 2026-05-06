@@ -64,6 +64,13 @@ public class GateFrameAnimation : MonoBehaviour
             return;
         }
 
+        if (GateTargetingManager.Instance != null &&
+            GateTargetingManager.Instance.IsTargetingGate())
+        {
+            GateTargetingManager.Instance.SelectGate(this);
+            return;
+        }
+
         if (isBlocking)
         {
             OpenGate();
@@ -76,12 +83,28 @@ public class GateFrameAnimation : MonoBehaviour
 
     void OnMouseEnter()
     {
-        SetHighlight(true, hoverColor);
+        if (GateTargetingManager.Instance != null &&
+            GateTargetingManager.Instance.IsTargetingGate())
+        {
+            GateTargetingManager.Instance.PreviewGate(this, true);
+        }
+        else
+        {
+            SetHighlight(true, hoverColor);
+        }
     }
 
     void OnMouseExit()
     {
-        SetHighlight(false, normalColor);
+        if (GateTargetingManager.Instance != null &&
+            GateTargetingManager.Instance.IsTargetingGate())
+        {
+            GateTargetingManager.Instance.PreviewGate(this, false);
+        }
+        else
+        {
+            SetHighlight(false, normalColor);
+        }
     }
 
     public void SetHighlight(bool highlighted, Color color)
@@ -244,7 +267,12 @@ public class GateFrameAnimation : MonoBehaviour
 
     void FinishGateTargeting()
     {
-        if (CursorToolManager.Instance != null)
+        if (GateTargetingManager.Instance != null &&
+            GateTargetingManager.Instance.IsTargetingGate())
+        {
+            GateTargetingManager.Instance.ExitGateTargetMode();
+        }
+        else if (CursorToolManager.Instance != null)
         {
             CursorToolManager.Instance.ExitToolMode();
         }
