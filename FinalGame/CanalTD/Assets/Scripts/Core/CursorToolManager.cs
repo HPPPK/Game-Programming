@@ -17,10 +17,6 @@ public class CursorToolManager : MonoBehaviour
 
     public bool isHammerMode = false;
 
-    [Header("Mode UI")]
-    public GameObject darkOverlay;
-    public GameObject targetingUI;
-
     private enum CursorState
     {
         Default,
@@ -40,7 +36,6 @@ public class CursorToolManager : MonoBehaviour
     {
         EnsureEventSystem();
         ApplyNormalCursor();
-        SetModeUI(false);
     }
 
     public void ToggleHammerTool()
@@ -65,7 +60,8 @@ public class CursorToolManager : MonoBehaviour
         isHammerMode = true;
         ApplyHammerCursor();
 
-        if (GateTargetingManager.Instance != null)
+        if (GateTargetingManager.Instance != null &&
+            !GateTargetingManager.Instance.IsTargetingGate())
         {
             bool enteredTargetMode = GateTargetingManager.Instance.EnterGateTargetMode(GateActionType.OpenGate);
 
@@ -74,68 +70,17 @@ public class CursorToolManager : MonoBehaviour
                 ExitToolMode();
             }
         }
-        else
-        {
-            SetModeUI(true);
-        }
     }
 
     public void ExitToolMode()
     {
         if (!isHammerMode && hasAppliedCursor && currentCursorState == CursorState.Default)
         {
-            SetModeUI(false);
             return;
         }
 
         isHammerMode = false;
         ApplyNormalCursor();
-        SetModeUI(false);
-    }
-
-    private void SetModeUI(bool active)
-    {
-        ResolveModeUI();
-
-        if (darkOverlay != null)
-        {
-            darkOverlay.SetActive(active);
-        }
-
-        if (targetingUI != null)
-        {
-            targetingUI.SetActive(active);
-        }
-    }
-
-    private void ResolveModeUI()
-    {
-        if (darkOverlay == null)
-        {
-            darkOverlay = FindSceneObject("DarkOverlay");
-        }
-
-        if (targetingUI == null)
-        {
-            targetingUI = FindSceneObject("TargetingUI");
-        }
-    }
-
-    private GameObject FindSceneObject(string objectName)
-    {
-        GameObject[] objects = Resources.FindObjectsOfTypeAll<GameObject>();
-
-        for (int i = 0; i < objects.Length; i++)
-        {
-            GameObject obj = objects[i];
-
-            if (obj.name == objectName && obj.scene.IsValid())
-            {
-                return obj;
-            }
-        }
-
-        return null;
     }
 
     private void EnsureEventSystem()
@@ -148,7 +93,6 @@ public class CursorToolManager : MonoBehaviour
         GameObject eventSystemObject = new GameObject("EventSystem");
         eventSystemObject.AddComponent<EventSystem>();
         eventSystemObject.AddComponent<StandaloneInputModule>();
-        Debug.Log("Created missing EventSystem for UI button clicks.");
     }
 
     private void ApplyNormalCursor()
