@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 
 public class CursorToolManager : MonoBehaviour
 {
@@ -40,7 +39,6 @@ public class CursorToolManager : MonoBehaviour
     void Start()
     {
         EnsureEventSystem();
-        ResolveModeUI();
         ApplyNormalCursor();
         SetModeUI(false);
     }
@@ -69,7 +67,12 @@ public class CursorToolManager : MonoBehaviour
 
         if (GateTargetingManager.Instance != null)
         {
-            GateTargetingManager.Instance.EnterGateTargetMode(GateActionType.OpenGate);
+            bool enteredTargetMode = GateTargetingManager.Instance.EnterGateTargetMode(GateActionType.OpenGate);
+
+            if (!enteredTargetMode)
+            {
+                ExitToolMode();
+            }
         }
         else
         {
@@ -105,19 +108,6 @@ public class CursorToolManager : MonoBehaviour
         }
     }
 
-    private void EnsureEventSystem()
-    {
-        if (EventSystem.current != null)
-        {
-            return;
-        }
-
-        GameObject eventSystemObject = new GameObject("EventSystem");
-        eventSystemObject.AddComponent<EventSystem>();
-        eventSystemObject.AddComponent<StandaloneInputModule>();
-        Debug.Log("Created missing EventSystem for UI button clicks.");
-    }
-
     private void ResolveModeUI()
     {
         if (darkOverlay == null)
@@ -146,6 +136,19 @@ public class CursorToolManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void EnsureEventSystem()
+    {
+        if (EventSystem.current != null)
+        {
+            return;
+        }
+
+        GameObject eventSystemObject = new GameObject("EventSystem");
+        eventSystemObject.AddComponent<EventSystem>();
+        eventSystemObject.AddComponent<StandaloneInputModule>();
+        Debug.Log("Created missing EventSystem for UI button clicks.");
     }
 
     private void ApplyNormalCursor()
