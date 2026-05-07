@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class CursorToolManager : MonoBehaviour
 {
@@ -34,20 +33,7 @@ public class CursorToolManager : MonoBehaviour
 
     void Start()
     {
-        EnsureEventSystem();
         ApplyNormalCursor();
-    }
-
-    public void ToggleHammerTool()
-    {
-        if (isHammerMode)
-        {
-            ExitToolMode();
-        }
-        else
-        {
-            EnterHammerMode();
-        }
     }
 
     public void EnterHammerMode()
@@ -59,17 +45,6 @@ public class CursorToolManager : MonoBehaviour
 
         isHammerMode = true;
         ApplyHammerCursor();
-
-        if (GateTargetingManager.Instance != null &&
-            !GateTargetingManager.Instance.IsTargetingGate())
-        {
-            bool enteredTargetMode = GateTargetingManager.Instance.EnterGateTargetMode(GateActionType.OpenGate);
-
-            if (!enteredTargetMode)
-            {
-                ExitToolMode();
-            }
-        }
     }
 
     public void ExitToolMode()
@@ -81,18 +56,6 @@ public class CursorToolManager : MonoBehaviour
 
         isHammerMode = false;
         ApplyNormalCursor();
-    }
-
-    private void EnsureEventSystem()
-    {
-        if (EventSystem.current != null)
-        {
-            return;
-        }
-
-        GameObject eventSystemObject = new GameObject("EventSystem");
-        eventSystemObject.AddComponent<EventSystem>();
-        eventSystemObject.AddComponent<StandaloneInputModule>();
     }
 
     private void ApplyNormalCursor()
