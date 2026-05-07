@@ -58,27 +58,26 @@ public class GateFrameAnimation : MonoBehaviour
             return;
         }
 
+        if (GateTargetingManager.Instance == null)
+        {
+            Debug.LogWarning("No GateTargetingManager found.");
+            return;
+        }
+
         if (!CursorToolManager.Instance.isHammerMode)
         {
             Debug.Log(name + " clicked, but gate targeting cursor is OFF.");
             return;
         }
 
-        if (GateTargetingManager.Instance != null &&
-            GateTargetingManager.Instance.IsTargetingGate())
+        if (!GateTargetingManager.Instance.IsTargetingGate())
         {
-            GateTargetingManager.Instance.SelectGate(this);
+            Debug.Log(name + " clicked, but not in gate targeting mode.");
             return;
         }
 
-        if (isBlocking)
-        {
-            OpenGate();
-        }
-        else
-        {
-            LockGate();
-        }
+        // 这里只负责选中 Gate，真正的 Open Gate / Lock Gate 效果由 Confirm 按钮触发。
+        GateTargetingManager.Instance.SelectGate(this);
     }
 
     void OnMouseEnter()

@@ -20,6 +20,7 @@ public class GateTargetingManager : MonoBehaviour
     [Header("Colors")]
     public Color normalMapColor = Color.white;
     public Color dimMapColor = new Color(0.45f, 0.45f, 0.45f, 1f);
+
     public Color normalGateColor = Color.white;
     public Color highlightGateColor = Color.yellow;
     public Color selectedGateColor = Color.green;
@@ -27,7 +28,7 @@ public class GateTargetingManager : MonoBehaviour
     public Color lockSelectedColor = new Color(0.25f, 1f, 0.45f, 1f);
 
     private GateFrameAnimation[] gates;
-    private readonly List<GateFrameAnimation> validTargets = new List<GateFrameAnimation>();
+    private List<GateFrameAnimation> validTargets = new List<GateFrameAnimation>();
     private GateFrameAnimation selectedGate;
     private bool isTargetingGate = false;
     private GateActionType currentActionType = GateActionType.None;
@@ -57,8 +58,7 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         RefreshGates();
-        validTargets.Clear();
-        validTargets.AddRange(GetValidGates(actionType));
+        validTargets = GetValidGates(actionType);
 
         if (validTargets.Count == 0)
         {
@@ -71,14 +71,49 @@ public class GateTargetingManager : MonoBehaviour
         currentActionType = actionType;
         selectedGate = null;
 
-        SetTargetingVisuals(true);
+        if (normalGameplayUI != null)
+        {
+            normalGameplayUI.interactable = false;
+            normalGameplayUI.blocksRaycasts = false;
+        }
+
+        if (darkOverlay != null)
+        {
+            darkOverlay.SetActive(true);
+        }
+
+        if (targetingUI != null)
+        {
+            targetingUI.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("TargetingUI is not assigned.");
+        }
+
+        foreach (Tilemap tilemap in tilemapsToDim)
+        {
+            if (tilemap != null)
+            {
+                tilemap.color = dimMapColor;
+            }
+        }
+
+        foreach (SpriteRenderer sr in spritesToDim)
+        {
+            if (sr != null)
+            {
+                sr.color = dimMapColor;
+            }
+        }
 
         foreach (GateFrameAnimation gate in validTargets)
         {
+            Debug.Log("Valid gate target: " + gate.name);
             gate.SetHighlight(true, GetValidTargetColor());
         }
 
-        Debug.Log("Gate targeting mode ON. Action = " + currentActionType);
+        Debug.Log("Gate targeting mode ON. Action = " + currentActionType + ". Valid targets = " + validTargets.Count);
         return true;
     }
 
@@ -132,12 +167,13 @@ public class GateTargetingManager : MonoBehaviour
 
         selectedGate = gate;
         selectedGate.SetHighlight(true, GetSelectedTargetColor());
+
         Debug.Log("Gate selected: " + gate.name);
     }
 
     public bool IsValidTarget(GateFrameAnimation gate)
     {
-        return gate != null && validTargets.Contains(gate);
+        return gate != null && validTargets != null && validTargets.Contains(gate);
     }
 
     public void PreviewGate(GateFrameAnimation gate, bool hovering)
@@ -149,13 +185,28 @@ public class GateTargetingManager : MonoBehaviour
         gate.SetHighlight(true, hovering ? GetHoverTargetColor() : GetValidTargetColor());
     }
 
+    private Color GetValidTargetColor()
+    {
+        return currentActionType == GateActionType.LockGate ? lockPreviewColor : highlightGateColor;
+    }
+
+    private Color GetHoverTargetColor()
+    {
+        return currentActionType == GateActionType.LockGate ? lockSelectedColor : selectedGateColor;
+    }
+
+    private Color GetSelectedTargetColor()
+    {
+        return currentActionType == GateActionType.LockGate ? lockSelectedColor : selectedGateColor;
+    }
+
     public void ConfirmSelection()
     {
         if (!isTargetingGate) return;
 
         if (selectedGate == null)
         {
-            ShowToast("Select a gate first.");
+            Debug.Log("No gate selected.");
             return;
         }
 
@@ -173,7 +224,10 @@ public class GateTargetingManager : MonoBehaviour
         if (!actionSucceeded)
         {
             Debug.LogWarning("Gate action failed: " + currentActionType);
+            return;
         }
+
+        ExitGateTargetMode();
     }
 
     public void CancelSelection()
@@ -185,10 +239,38 @@ public class GateTargetingManager : MonoBehaviour
     {
         isTargetingGate = false;
         currentActionType = GateActionType.None;
-        selectedGate = null;
-        validTargets.Clear();
 
-        SetTargetingVisuals(false);
+        if (normalGameplayUI != null)
+        {
+            normalGameplayUI.interactable = true;
+            normalGameplayUI.blocksRaycasts = true;
+        }
+
+        if (darkOverlay != null)
+        {
+            darkOverlay.SetActive(false);
+        }
+
+        if (targetingUI != null)
+        {
+            targetingUI.SetActive(false);
+        }
+
+        foreach (Tilemap tilemap in tilemapsToDim)
+        {
+            if (tilemap != null)
+            {
+                tilemap.color = normalMapColor;
+            }
+        }
+
+        foreach (SpriteRenderer sr in spritesToDim)
+        {
+            if (sr != null)
+            {
+                sr.color = normalMapColor;
+            }
+        }
 
         if (gates != null)
         {
@@ -201,12 +283,34 @@ public class GateTargetingManager : MonoBehaviour
             }
         }
 
+        selectedGate = null;
+        validTargets.Clear();
+
         if (CursorToolManager.Instance != null)
         {
             CursorToolManager.Instance.ExitToolMode();
         }
 
         Debug.Log("Gate targeting mode OFF.");
+    }
+
+    void ForceExitVisualState()
+    {
+        if (targetingUI != null)
+        {
+            targetingUI.SetActive(false);
+        }
+
+        if (darkOverlay != null)
+        {
+            darkOverlay.SetActive(false);
+        }
+
+        if (normalGameplayUI != null)
+        {
+            normalGameplayUI.interactable = true;
+            normalGameplayUI.blocksRaycasts = true;
+        }
     }
 
     public bool IsTargetingGate()
@@ -217,60 +321,5 @@ public class GateTargetingManager : MonoBehaviour
     public void ShowToast(string message)
     {
         Debug.Log(message);
-    }
-
-    private void ForceExitVisualState()
-    {
-        SetTargetingVisuals(false);
-    }
-
-    private void SetTargetingVisuals(bool active)
-    {
-        if (normalGameplayUI != null)
-        {
-            normalGameplayUI.interactable = !active;
-            normalGameplayUI.blocksRaycasts = !active;
-        }
-
-        if (darkOverlay != null)
-        {
-            darkOverlay.SetActive(active);
-        }
-
-        if (targetingUI != null)
-        {
-            targetingUI.SetActive(active);
-        }
-
-        foreach (Tilemap tilemap in tilemapsToDim)
-        {
-            if (tilemap != null)
-            {
-                tilemap.color = active ? dimMapColor : normalMapColor;
-            }
-        }
-
-        foreach (SpriteRenderer sr in spritesToDim)
-        {
-            if (sr != null)
-            {
-                sr.color = active ? dimMapColor : normalMapColor;
-            }
-        }
-    }
-
-    private Color GetValidTargetColor()
-    {
-        return currentActionType == GateActionType.LockGate ? lockPreviewColor : highlightGateColor;
-    }
-
-    private Color GetHoverTargetColor()
-    {
-        return currentActionType == GateActionType.LockGate ? lockSelectedColor : selectedGateColor;
-    }
-
-    private Color GetSelectedTargetColor()
-    {
-        return currentActionType == GateActionType.LockGate ? lockSelectedColor : selectedGateColor;
     }
 }

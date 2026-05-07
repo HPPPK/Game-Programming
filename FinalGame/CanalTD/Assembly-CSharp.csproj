@@ -69,8 +69,8 @@
     <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />
     <Compile Include="Assets/Scripts/Map/GateFrameAnimation.cs" />
     <Compile Include="Assets/Scripts/UI/CastleHealthBar.cs" />
+    <Compile Include="Assets/Scripts/Card/GateTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
-    <Compile Include="Assets/Scripts/Map/GateTargetingManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
