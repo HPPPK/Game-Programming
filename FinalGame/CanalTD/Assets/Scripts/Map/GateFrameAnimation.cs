@@ -10,8 +10,8 @@ public class GateFrameAnimation : MonoBehaviour
     [Header("Gate State")]
     public bool isBlocking = true;
     public bool isLocked = false;
-    public Color normalColor = Color.white;
-    public Color hoverColor = Color.yellow;
+
+    [Header("Path Link")]
 
     private bool isPlaying = false;
     private SpriteRenderer sr;
@@ -82,27 +82,17 @@ public class GateFrameAnimation : MonoBehaviour
 
     void OnMouseEnter()
     {
-        if (GateTargetingManager.Instance != null &&
-            GateTargetingManager.Instance.IsTargetingGate())
+        if (GateTargetingManager.Instance != null)
         {
             GateTargetingManager.Instance.PreviewGate(this, true);
-        }
-        else
-        {
-            SetHighlight(true, hoverColor);
         }
     }
 
     void OnMouseExit()
     {
-        if (GateTargetingManager.Instance != null &&
-            GateTargetingManager.Instance.IsTargetingGate())
+        if (GateTargetingManager.Instance != null)
         {
             GateTargetingManager.Instance.PreviewGate(this, false);
-        }
-        else
-        {
-            SetHighlight(false, normalColor);
         }
     }
 
@@ -260,7 +250,7 @@ public class GateFrameAnimation : MonoBehaviour
         }
 
         sr.enabled = true;
-        sr.color = normalColor;
+        sr.color = Color.white;
         isBlocking = true;
     }
 
@@ -271,7 +261,8 @@ public class GateFrameAnimation : MonoBehaviour
         {
             GateTargetingManager.Instance.ExitGateTargetMode();
         }
-        else if (CursorToolManager.Instance != null)
+
+        if (CursorToolManager.Instance != null)
         {
             CursorToolManager.Instance.ExitToolMode();
         }

@@ -48841,7 +48841,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!61 &601892984
 BoxCollider2D:
@@ -50013,7 +50013,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!1 &779954644
 GameObject:
@@ -51096,7 +51096,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!61 &904384003
 BoxCollider2D:
@@ -53084,7 +53084,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!61 &1179650404
 BoxCollider2D:
@@ -53818,7 +53818,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!61 &1367910646
 BoxCollider2D:
@@ -54608,7 +54608,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!61 &1490299093
 BoxCollider2D:
@@ -54771,7 +54771,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!61 &1510678141
 BoxCollider2D:
@@ -56224,7 +56224,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!61 &1691434506
 BoxCollider2D:
@@ -56538,7 +56538,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!1 &1749933314
 GameObject:
@@ -57918,7 +57918,7 @@ MonoBehaviour:
   - {fileID: 6634609189023006448, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   - {fileID: -7108364864660226427, guid: 0fdbf1fb6e925416986858326cedf57f, type: 3}
   frameRate: 0.05
-  isBlocking: 1
+  isBlocking: 0
   isLocked: 0
 --- !u!61 &2066340025
 BoxCollider2D:

@@ -227,11 +227,21 @@ public class GateTargetingManager : MonoBehaviour
             return;
         }
 
-        ExitGateTargetMode();
+        CardDrawManager cardManager = FindObjectOfType<CardDrawManager>();
+        if (cardManager != null)
+        {
+            cardManager.ConfirmPendingCard();
+        }
     }
 
     public void CancelSelection()
     {
+        CardDrawManager cardManager = FindObjectOfType<CardDrawManager>();
+        if (cardManager != null)
+        {
+            cardManager.CancelPendingCard();
+        }
+
         ExitGateTargetMode();
     }
 
@@ -320,6 +330,14 @@ public class GateTargetingManager : MonoBehaviour
 
     public void ShowToast(string message)
     {
+        CardDrawManager cardManager = FindObjectOfType<CardDrawManager>();
+
+        if (cardManager != null)
+        {
+            cardManager.ShowWarningMessage(message);
+            return;
+        }
+
         Debug.Log(message);
     }
 }
