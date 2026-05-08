@@ -1,3 +1,26 @@
+/*
+ * File: CastleBase.cs
+ *
+ * Purpose:
+ * This script represents one player's castle/base health. Enemy arrival nodes
+ * call TakeDamage() on this script, and the base tracks whether its HP has
+ * reached zero.
+ *
+ * Runtime behavior:
+ * - Start() initializes currentHP to maxHP.
+ * - Update() optionally allows keyboard test damage when testDamageKey is assigned.
+ * - TakeDamage() subtracts HP, clamps it to zero, and triggers game-over behavior.
+ * - OnGameOver() currently logs the loss and turns the castle SpriteRenderer gray.
+ *
+ * Inspector setup:
+ * - playerName is used in debug messages.
+ * - maxHP controls the starting health.
+ * - testDamageKey can be used during testing; leave it as None for normal play.
+ *
+ * Dependency notes:
+ * - CastleEndNode calls TakeDamage() when an enemy reaches that endpoint.
+ * - CastleHealthBar reads currentHP and maxHP to update the visual HP display.
+ */
 using UnityEngine;
 
 public class CastleBase : MonoBehaviour

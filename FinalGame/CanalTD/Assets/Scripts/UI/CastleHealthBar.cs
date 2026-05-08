@@ -1,3 +1,29 @@
+/*
+ * File: CastleHealthBar.cs
+ *
+ * Purpose:
+ * This script displays and animates a castle's HP bar. It reads health values
+ * from CastleBase, scales the fill object, updates optional text, and plays a
+ * short damage reaction when HP decreases.
+ *
+ * Runtime behavior:
+ * - Start() records the original fill/bar transform values.
+ * - Update() compares current HP with lastHP to detect damage.
+ * - UpdateBarSmooth() smoothly changes the fill scale and position.
+ * - UpdateBarInstant() sets the correct visual value immediately at startup.
+ * - DamageFlashRoutine() briefly turns the fill red and scales the bar up/down.
+ *
+ * Inspector setup:
+ * - castleBase should point to the CastleBase this UI represents.
+ * - fill should be the transform that visually shrinks as HP decreases.
+ * - hpTextUI is optional and shows "current/max" HP.
+ * - smoothSpeed controls interpolation speed.
+ * - punchScale, punchDuration, and recoverDuration control hit feedback.
+ *
+ * Dependency notes:
+ * - CastleBase owns the actual HP numbers.
+ * - This script only displays HP; it does not apply damage or decide game over.
+ */
 using UnityEngine;
 using TMPro;
 using System.Collections;

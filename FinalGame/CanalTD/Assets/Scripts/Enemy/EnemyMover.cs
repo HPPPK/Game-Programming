@@ -1,3 +1,30 @@
+/*
+ * File: EnemyMover.cs
+ *
+ * Purpose:
+ * This script moves one spawned enemy along a selected path made of PathNode
+ * objects. The enemy does not decide the path by itself; it asks
+ * EnemyPathAssignmentManager for a path from the spawn node to a reachable castle.
+ *
+ * Main gameplay flow:
+ * 1. EnemySpawner instantiates an enemy prefab and calls Init(startNode).
+ * 2. Init() asks EnemyPathAssignmentManager for a valid List<PathNode>.
+ * 3. The enemy starts at path[0], then moves toward path[1], path[2], and so on.
+ * 4. MoveAlongPath() uses Vector3.MoveTowards() every frame.
+ * 5. When the enemy reaches a CastleEndNode, the castle endpoint applies damage
+ *    and destroys the enemy.
+ *
+ * Inspector setup:
+ * - moveSpeed controls movement speed in world units per second.
+ * - reachDistance controls how close the enemy must be to count as arrived.
+ * - The enemy prefab should have a SpriteRenderer if horizontal flipping is desired.
+ *
+ * Dependency notes:
+ * - EnemyPathAssignmentManager chooses the path and balances targets.
+ * - PathNode and PathEdge define the graph used by the pathfinder.
+ * - CastleEndNode handles final damage when the enemy reaches a castle.
+ */
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyMover : MonoBehaviour
@@ -6,9 +33,8 @@ public class EnemyMover : MonoBehaviour
     public float moveSpeed = 2f;
     public float reachDistance = 0.05f;
 
-    private PathNode previousNode;
-    private PathNode currentNode;
-    private PathNode targetNode;
+    private List<PathNode> path;
+    private int currentPathIndex = 0;
     private SpriteRenderer spriteRenderer;
 
     private bool initialized = false;
@@ -27,31 +53,40 @@ public class EnemyMover : MonoBehaviour
             return;
         }
 
-        previousNode = null;
-        currentNode = startNode;
-        targetNode = currentNode.GetNextNode(previousNode);
-        transform.position = startNode.transform.position;
-
-        if (targetNode == null)
+        if (EnemyPathAssignmentManager.Instance == null)
         {
-            Debug.LogWarning(name + " has no next path node.");
+            Debug.LogWarning("No EnemyPathAssignmentManager found.");
             Destroy(gameObject);
             return;
         }
 
+        path = EnemyPathAssignmentManager.Instance.GetPathToLeastAssignedReachableCastle(startNode);
+
+        if (path == null || path.Count == 0)
+        {
+            Debug.LogWarning(name + " cannot find path.");
+            Destroy(gameObject);
+            return;
+        }
+
+        transform.position = startNode.transform.position;
+
+        // path[0] is startNode, so movement begins at path[1].
+        currentPathIndex = 1;
         initialized = true;
     }
 
     void Update()
     {
         if (!initialized) return;
-        if (targetNode == null) return;
+        if (path == null || currentPathIndex >= path.Count) return;
 
-        MoveToTargetNode();
+        MoveAlongPath();
     }
 
-    void MoveToTargetNode()
+    void MoveAlongPath()
     {
+        PathNode targetNode = path[currentPathIndex];
         Vector3 targetPosition = targetNode.transform.position;
         Vector3 direction = targetPosition - transform.position;
 
@@ -75,30 +110,15 @@ public class EnemyMover : MonoBehaviour
 
         if (Vector3.Distance(transform.position, targetPosition) <= reachDistance)
         {
-            transform.position = targetPosition;
-            ArriveAtTargetNode();
-        }
-    }
+            CastleEndNode castleEndNode = targetNode as CastleEndNode;
 
-    void ArriveAtTargetNode()
-    {
-        CastleEndNode castleEndNode = targetNode as CastleEndNode;
+            if (castleEndNode != null)
+            {
+                castleEndNode.OnEnemyArrive(gameObject);
+                return;
+            }
 
-        if (castleEndNode != null)
-        {
-            castleEndNode.OnEnemyArrive(gameObject);
-            initialized = false;
-            return;
-        }
-
-        previousNode = currentNode;
-        currentNode = targetNode;
-        targetNode = currentNode.GetNextNode(previousNode);
-
-        if (targetNode == null)
-        {
-            Debug.LogWarning(name + " reached a path node with no next node: " + currentNode.name);
-            Destroy(gameObject);
+            currentPathIndex++;
         }
     }
 }

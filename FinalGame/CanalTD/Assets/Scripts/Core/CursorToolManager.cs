@@ -1,3 +1,28 @@
+/*
+ * File: CursorToolManager.cs
+ *
+ * Purpose:
+ * This singleton controls the player's cursor/tool state. The normal state uses
+ * the default cursor, while hammer mode uses a hammer cursor so the player can
+ * clearly see that they are choosing a gate target.
+ *
+ * Runtime behavior:
+ * - Start() applies the normal cursor at scene load.
+ * - EnterHammerMode() switches the internal state and applies the hammer cursor.
+ * - ExitToolMode() leaves hammer mode and restores the normal cursor.
+ * - The script avoids repeatedly applying the same cursor every frame.
+ *
+ * Inspector setup:
+ * - normalCursor is optional; null means Unity's default cursor.
+ * - hammerCursor should be assigned for gate-targeting feedback.
+ * - Cursor texture import settings matter: Texture Type Cursor is safest.
+ * - hot spot values define which pixel of the cursor counts as the click point.
+ *
+ * Dependency notes:
+ * - CardDrawManager enters hammer mode when a gate card starts targeting.
+ * - GateFrameAnimation checks isHammerMode before accepting a gate click.
+ * - GateTargetingManager exits tool mode when targeting finishes or is cancelled.
+ */
 using UnityEngine;
 
 public class CursorToolManager : MonoBehaviour

@@ -1,3 +1,28 @@
+/*
+ * File: doorChange.cs
+ *
+ * Purpose:
+ * This script controls a simple open/closed door object. It can swap sprites,
+ * show/hide separate visual GameObjects, and invoke UnityEvents when the door
+ * changes state.
+ *
+ * Runtime behavior:
+ * - Awake() applies the starting visual state.
+ * - ToggleDoor() switches between Closed and Open.
+ * - OnMouseDown() optionally toggles the door when clicked.
+ * - OpenDoor() and CloseDoor() are public methods for buttons/events.
+ * - SetDoorState() is the central state setter and invokes the correct event.
+ *
+ * Inspector setup:
+ * - targetRenderer/closedSprite/openSprite are used for sprite-swap mode.
+ * - closedVisual/openVisual are used for GameObject toggle mode.
+ * - onDoorOpened/onDoorClosed can trigger other scene actions.
+ * - clickToToggle controls whether direct mouse clicks change the door.
+ *
+ * Dependency notes:
+ * - This script is independent from GateFrameAnimation and the pathfinding gate
+ *   system. It is a general-purpose visual door toggle.
+ */
 using UnityEngine;
 using UnityEngine.Events;
 

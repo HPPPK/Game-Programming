@@ -1,3 +1,33 @@
+/*
+ * File: CardDrawManager.cs
+ *
+ * Purpose:
+ * This script controls the card system used by the player during gameplay.
+ * It builds a deck from the card prefab list, shuffles the deck, draws cards
+ * into UI slots, lets the player select/discard/play a card, and coordinates
+ * cards that require gate targeting.
+ *
+ * Main gameplay flow:
+ * 1. Start() creates a deck by adding several copies of each card prefab.
+ * 2. DrawCard() finds an empty hand slot and instantiates one card prefab there.
+ * 3. CardInstanceSelectable reports clicks back to this manager through SelectCard().
+ * 4. PlaySelectedCard() animates the selected card toward the draw pile area.
+ * 5. If the card name maps to a GateActionType, this manager opens gate targeting
+ *    mode and keeps the card hidden as pendingPlayedCard.
+ * 6. GateTargetingManager later calls ConfirmPendingCard() or CancelPendingCard()
+ *    depending on whether the gate action is confirmed or cancelled.
+ *
+ * Inspector setup:
+ * - cardTypePrefabs should contain the available card UI prefabs.
+ * - cardSlots should point to the UI transforms where cards can be placed.
+ * - drawPileVisual is optional and is used as the visual animation target.
+ * - warningText is optional and displays short player feedback messages.
+ *
+ * Important dependency notes:
+ * - CardInstanceSelectable must exist on card prefabs, or it is added at runtime.
+ * - GateTargetingManager is used only for cards that affect gates.
+ * - CursorToolManager is used to switch the cursor into hammer/targeting mode.
+ */
 using UnityEngine;
 using TMPro;
 using System.Collections;
@@ -280,8 +310,8 @@ public class CardDrawManager : MonoBehaviour
             pendingPlayedCard = card;
             selectedCard = null;
 
-            // 先把牌隐藏起来，不销毁。
-            // Confirm 后销毁，Cancel 后恢复到手牌槽。
+            // Hide the played card without destroying it yet.
+            // Confirm will consume it; Cancel will return it to the hand slot.
             card.gameObject.SetActive(false);
 
             if (CursorToolManager.Instance != null)

@@ -1,3 +1,34 @@
+/*
+ * File: GateFrameAnimation.cs
+ *
+ * Purpose:
+ * This script controls one gate's visual animation, click handling, and blocking
+ * state. It is attached directly to a gate GameObject with a SpriteRenderer and
+ * Collider2D.
+ *
+ * Main gameplay flow:
+ * 1. Start() caches SpriteRenderer/Collider2D and applies the correct starting
+ *    sprite based on isBlocking.
+ * 2. Update() checks mouse clicks and calls CheckClick().
+ * 3. CheckClick() only accepts clicks when the cursor is in hammer mode and
+ *    GateTargetingManager is currently targeting gates.
+ * 4. The gate reports itself to GateTargetingManager.SelectGate(this).
+ * 5. OpenGate() plays the opening animation and makes the gate non-blocking.
+ * 6. LockGate() plays the closing animation or applies the blocking visual.
+ * 7. When the gate changes, PathGraphState.MarkDirty() tells path systems to
+ *    refresh cached paths.
+ *
+ * Inspector setup:
+ * - frames should contain the ordered animation sprites.
+ * - frameRate controls time between animation frames.
+ * - isBlocking defines whether the gate begins closed/blocking.
+ * - isLocked prevents the gate from being opened.
+ *
+ * Dependency notes:
+ * - GateTargetingManager controls selection, highlighting, confirm, and cancel.
+ * - CursorToolManager controls whether the player is allowed to click gates.
+ * - PathEdge checks IsBlocking() to know if a path through this gate is open.
+ */
 using UnityEngine;
 using System.Collections;
 
@@ -76,7 +107,7 @@ public class GateFrameAnimation : MonoBehaviour
             return;
         }
 
-        // 这里只负责选中 Gate，真正的 Open Gate / Lock Gate 效果由 Confirm 按钮触发。
+        // This only selects the gate. The real Open Gate / Lock Gate effect is triggered by the Confirm button.
         GateTargetingManager.Instance.SelectGate(this);
     }
 
@@ -143,6 +174,7 @@ public class GateFrameAnimation : MonoBehaviour
         }
 
         isBlocking = false;
+        PathGraphState.MarkDirty();
         StartCoroutine(UnblockGate());
         Debug.Log("OpenGate opened: " + name);
         return true;
@@ -165,11 +197,13 @@ public class GateFrameAnimation : MonoBehaviour
         if (!isBlocking)
         {
             isBlocking = true;
+            PathGraphState.MarkDirty();
             StartCoroutine(BlockGate());
         }
         else
         {
             ApplyBlockingVisual();
+            PathGraphState.MarkDirty();
             StartCoroutine(FinishGateTargetingNextFrame());
         }
 
