@@ -7,13 +7,6 @@ public class PathNode : MonoBehaviour
     public class PathConnection
     {
         public PathNode targetNode;
-        public GateFrameAnimation linkedGate;
-        public int priority;
-
-        public bool IsOpen()
-        {
-            return targetNode != null && (linkedGate == null || !linkedGate.IsBlocking());
-        }
     }
 
     [Header("Outgoing Paths")]
@@ -23,11 +16,16 @@ public class PathNode : MonoBehaviour
 
     public PathNode GetNextNode(PathNode previousNode)
     {
-        List<PathConnection> availableEdges = new List<PathConnection>();
+        if (edges == null || edges.Count == 0)
+        {
+            return null;
+        }
+
+        List<PathNode> candidates = new List<PathNode>();
 
         foreach (PathConnection edge in edges)
         {
-            if (edge == null || !edge.IsOpen())
+            if (edge == null || edge.targetNode == null)
             {
                 continue;
             }
@@ -37,18 +35,18 @@ public class PathNode : MonoBehaviour
                 continue;
             }
 
-            availableEdges.Add(edge);
+            candidates.Add(edge.targetNode);
         }
 
-        if (availableEdges.Count == 0)
+        if (candidates.Count == 0)
         {
-            return previousNode;
+            return null;
         }
 
-        PathConnection selectedEdge = availableEdges[nextEdgeIndex % availableEdges.Count];
+        PathNode selectedNode = candidates[nextEdgeIndex % candidates.Count];
         nextEdgeIndex++;
 
-        return selectedEdge.targetNode;
+        return selectedNode;
     }
 
     private void OnDrawGizmos()
@@ -62,7 +60,7 @@ public class PathNode : MonoBehaviour
         {
             if (edge == null || edge.targetNode == null) continue;
 
-            Gizmos.color = edge.IsOpen() ? Color.cyan : Color.red;
+            Gizmos.color = Color.cyan;
             Gizmos.DrawLine(transform.position, edge.targetNode.transform.position);
         }
     }

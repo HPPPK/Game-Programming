@@ -287,11 +287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1852508435}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 209442629}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &31709192
 Transform:
   m_ObjectHideFlags: 0
@@ -2828,11 +2824,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 475109329}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 593345183}
-    linkedGate: {fileID: 1490299091}
-    priority: 0
 --- !u!4 &65887301
 Transform:
   m_ObjectHideFlags: 0
@@ -2879,11 +2871,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 2119926343}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1583190562}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &68588927
 Transform:
   m_ObjectHideFlags: 0
@@ -3141,11 +3129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 351915275}
-    linkedGate: {fileID: 0}
-    priority: 1
   - targetNode: {fileID: 1111235845}
-    linkedGate: {fileID: 0}
-    priority: 1
 --- !u!4 &124679005
 Transform:
   m_ObjectHideFlags: 0
@@ -3415,11 +3399,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 2081240312}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 188666843}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &172950339
 Transform:
   m_ObjectHideFlags: 0
@@ -3481,17 +3461,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1303713405}
-    linkedGate: {fileID: 904384001}
-    priority: 0
   - targetNode: {fileID: 1511887140}
-    linkedGate: {fileID: 1367910644}
-    priority: 0
   - targetNode: {fileID: 172950338}
-    linkedGate: {fileID: 779508091}
-    priority: 0
   - targetNode: {fileID: 1592181984}
-    linkedGate: {fileID: 1179650402}
-    priority: 0
 --- !u!1 &209442628
 GameObject:
   m_ObjectHideFlags: 0
@@ -3523,17 +3495,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 593345183}
-    linkedGate: {fileID: 1490299091}
-    priority: 0
   - targetNode: {fileID: 31709191}
-    linkedGate: {fileID: 1179650402}
-    priority: 0
   - targetNode: {fileID: 587218308}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 351915275}
-    linkedGate: {fileID: 601892982}
-    priority: 0
 --- !u!4 &209442630
 Transform:
   m_ObjectHideFlags: 0
@@ -47625,11 +47589,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 209442629}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 124679004}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &351915276
 Transform:
   m_ObjectHideFlags: 0
@@ -47810,11 +47770,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1655936681}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 846777264}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &455747654
 Transform:
   m_ObjectHideFlags: 0
@@ -47876,11 +47832,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1460414700}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 773885403}
-    linkedGate: {fileID: 1727971697}
-    priority: 0
 --- !u!1 &475109328
 GameObject:
   m_ObjectHideFlags: 0
@@ -47912,11 +47864,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 65887300}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 581866774}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &475109330
 Transform:
   m_ObjectHideFlags: 0
@@ -48012,11 +47960,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 86204277}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 917067016}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &481721490
 Transform:
   m_ObjectHideFlags: 0
@@ -48063,11 +48007,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1111235845}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 511879502}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &493952596
 Transform:
   m_ObjectHideFlags: 0
@@ -48213,11 +48153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 493952595}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 721523288}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!1 &520640913
 GameObject:
   m_ObjectHideFlags: 0
@@ -48397,11 +48333,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1041513036}
-    linkedGate: {fileID: 0}
-    priority: 1
   - targetNode: {fileID: 767216020}
-    linkedGate: {fileID: 0}
-    priority: 1
 --- !u!1 &573255075
 GameObject:
   m_ObjectHideFlags: 0
@@ -48448,11 +48380,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 938889052}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1041513036}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!1 &577981502
 GameObject:
   m_ObjectHideFlags: 0
@@ -48531,17 +48459,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1778370543}
-    linkedGate: {fileID: 1691434504}
-    priority: 0
   - targetNode: {fileID: 878945030}
-    linkedGate: {fileID: 2066340023}
-    priority: 0
   - targetNode: {fileID: 475109329}
-    linkedGate: {fileID: 1490299091}
-    priority: 0
   - targetNode: {fileID: 1460414700}
-    linkedGate: {fileID: 1727971697}
-    priority: 0
 --- !u!1 &587074954
 GameObject:
   m_ObjectHideFlags: 0
@@ -48706,11 +48626,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 209442629}
-    linkedGate: {fileID: 0}
-    priority: 1
   - targetNode: {fileID: 1165490186}
-    linkedGate: {fileID: 0}
-    priority: 1
 --- !u!4 &587218309
 Transform:
   m_ObjectHideFlags: 0
@@ -48772,11 +48688,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 209442629}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 65887300}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!1 &601892980
 GameObject:
   m_ObjectHideFlags: 0
@@ -49552,11 +49464,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 511879502}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1717599402}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!1 &728518992
 GameObject:
   m_ObjectHideFlags: 0
@@ -49799,8 +49707,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 537083400}
-    linkedGate: {fileID: 0}
-    priority: 1
 --- !u!1 &773885401
 GameObject:
   m_ObjectHideFlags: 0
@@ -49847,11 +49753,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 464302954}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1041513036}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!1 &779508086
 GameObject:
   m_ObjectHideFlags: 0
@@ -50679,11 +50581,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 455747653}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1275071903}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &846777265
 Transform:
   m_ObjectHideFlags: 0
@@ -50833,56 +50731,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 848080696}
   m_CullTransparentMesh: 1
---- !u!1 &862299804
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 862299805}
-  - component: {fileID: 862299806}
-  m_Layer: 0
-  m_Name: PathfinderTester
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &862299805
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 862299804}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1863090657}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &862299806
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 862299804}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c54afb6984084af38f3fa4080fa5b79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startNode: {fileID: 767216020}
-  castleEnds:
-  - {fileID: 99986916}
-  - {fileID: 1920113786}
-  - {fileID: 865880182}
-  - {fileID: 86204277}
 --- !u!1 &862595453
 GameObject:
   m_ObjectHideFlags: 0
@@ -50914,11 +50762,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1103986447}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1511887140}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &862595455
 Transform:
   m_ObjectHideFlags: 0
@@ -51012,11 +50856,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1544897580}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 581866774}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &878945031
 Transform:
   m_ObjectHideFlags: 0
@@ -52085,11 +51925,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 481721489}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1416274799}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &917067017
 Transform:
   m_ObjectHideFlags: 0
@@ -52136,11 +51972,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1717599402}
-    linkedGate: {fileID: 0}
-    priority: 1
   - targetNode: {fileID: 573255077}
-    linkedGate: {fileID: 0}
-    priority: 1
 --- !u!4 &938889053
 Transform:
   m_ObjectHideFlags: 0
@@ -52379,11 +52211,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 865880182}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1425163244}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1012574341
 Transform:
   m_ObjectHideFlags: 0
@@ -52445,17 +52273,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 773885403}
-    linkedGate: {fileID: 1727971697}
-    priority: 0
   - targetNode: {fileID: 1517811468}
-    linkedGate: {fileID: 779508091}
-    priority: 0
   - targetNode: {fileID: 573255077}
-    linkedGate: {fileID: 1510678139}
-    priority: 0
   - targetNode: {fileID: 537083400}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!1 &1088766008
 GameObject:
   m_ObjectHideFlags: 0
@@ -52620,11 +52440,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1425163244}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 862595454}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1103986448
 Transform:
   m_ObjectHideFlags: 0
@@ -52671,11 +52487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1413661364}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1717599402}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1104463337
 Transform:
   m_ObjectHideFlags: 0
@@ -52722,14 +52534,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 124679004}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 493952595}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1602341063}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1111235846
 Transform:
   m_ObjectHideFlags: 0
@@ -52895,8 +52701,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 587218308}
-    linkedGate: {fileID: 0}
-    priority: 1
 --- !u!4 &1165490187
 Transform:
   m_ObjectHideFlags: 0
@@ -53599,11 +53403,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 846777264}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1778370543}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1275071904
 Transform:
   m_ObjectHideFlags: 0
@@ -53650,11 +53450,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1657320522}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 188666843}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1303713406
 Transform:
   m_ObjectHideFlags: 0
@@ -54082,11 +53878,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1602341063}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1104463336}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1413661365
 Transform:
   m_ObjectHideFlags: 0
@@ -54133,11 +53925,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 917067016}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1657320522}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1416274800
 Transform:
   m_ObjectHideFlags: 0
@@ -54330,11 +54118,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1012574340}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1103986447}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1425163245
 Transform:
   m_ObjectHideFlags: 0
@@ -54471,11 +54255,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 581866774}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 464302954}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!1 &1478648562
 GameObject:
   m_ObjectHideFlags: 0
@@ -54901,11 +54681,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 862595454}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 188666843}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1511887141
 Transform:
   m_ObjectHideFlags: 0
@@ -54967,11 +54743,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1041513036}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 2081240312}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!1 &1520327068
 GameObject:
   m_ObjectHideFlags: 0
@@ -55212,11 +54984,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 878945030}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 2119926343}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1544897581
 Transform:
   m_ObjectHideFlags: 0
@@ -55718,11 +55486,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1920113786}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 68588926}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1583190563
 Transform:
   m_ObjectHideFlags: 0
@@ -55769,11 +55533,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1852508435}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 188666843}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1592181985
 Transform:
   m_ObjectHideFlags: 0
@@ -55904,11 +55664,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1111235845}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1413661364}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1602341064
 Transform:
   m_ObjectHideFlags: 0
@@ -55955,11 +55711,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 0}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 455747653}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1655936682
 Transform:
   m_ObjectHideFlags: 0
@@ -56006,11 +55758,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1416274799}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1303713405}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1657320523
 Transform:
   m_ObjectHideFlags: 0
@@ -56354,14 +56102,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 721523288}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 1104463336}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 938889052}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1717599403
 Transform:
   m_ObjectHideFlags: 0
@@ -56540,55 +56282,6 @@ MonoBehaviour:
   frameRate: 0.05
   isBlocking: 0
   isLocked: 0
---- !u!1 &1749933314
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1749933315}
-  - component: {fileID: 1749933316}
-  m_Layer: 0
-  m_Name: EnemyPathAssignmentManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1749933315
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749933314}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1863090657}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1749933316
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749933314}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f93d85e2815b45d5b92403b9f2e5600, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  castleEnds:
-  - {fileID: 99986916}
-  - {fileID: 1920113786}
-  - {fileID: 865880182}
-  - {fileID: 86204277}
 --- !u!1 &1778146311
 GameObject:
   m_ObjectHideFlags: 0
@@ -56753,11 +56446,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1275071903}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 581866774}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1778370544
 Transform:
   m_ObjectHideFlags: 0
@@ -56993,11 +56682,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 31709191}
-    linkedGate: {fileID: 1179650402}
-    priority: 0
   - targetNode: {fileID: 1592181984}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &1852508436
 Transform:
   m_ObjectHideFlags: 0
@@ -57044,9 +56729,7 @@ Transform:
   m_Children:
   - {fileID: 714559855}
   - {fileID: 1571698433}
-  - {fileID: 1749933315}
   - {fileID: 476970905}
-  - {fileID: 862299805}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1867806419
@@ -58048,11 +57731,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1517811468}
-    linkedGate: {fileID: 779508091}
-    priority: 0
   - targetNode: {fileID: 172950338}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &2081240313
 Transform:
   m_ObjectHideFlags: 0
@@ -58232,11 +57911,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   edges:
   - targetNode: {fileID: 1544897580}
-    linkedGate: {fileID: 0}
-    priority: 0
   - targetNode: {fileID: 68588926}
-    linkedGate: {fileID: 0}
-    priority: 0
 --- !u!4 &2119926344
 Transform:
   m_ObjectHideFlags: 0
