@@ -1,3 +1,27 @@
+/*
+ * File: CardInstanceSelectable.cs
+ *
+ * Purpose:
+ * This script lives on a card instance after it is drawn into the player's hand.
+ * It remembers which original prefab created the card, reports click selection
+ * back to CardDrawManager, and moves the UI card upward/downward to show whether
+ * it is currently selected.
+ *
+ * Runtime behavior:
+ * - Init() is called by CardDrawManager right after a card prefab is instantiated.
+ * - OnPointerClick() sends this card instance back to CardDrawManager.SelectCard().
+ * - SetSelected(true) moves the card up by moveUp pixels.
+ * - SetSelected(false) restores the card to its original anchored position.
+ *
+ * Inspector/setup notes:
+ * - Usually this script is placed on card prefabs.
+ * - If the prefab does not have it, CardDrawManager adds it at runtime.
+ * - The object must have a RectTransform because this script moves UI elements.
+ *
+ * Dependency notes:
+ * - This class does not decide whether a card effect succeeds.
+ * - CardDrawManager owns deck state, selected-card state, and card play effects.
+ */
 using UnityEngine;
 using UnityEngine.EventSystems;
 

@@ -1,3 +1,33 @@
+/*
+ * File: GateTargetingManager.cs
+ *
+ * Purpose:
+ * This manager controls the temporary mode where the player chooses a gate after
+ * playing a gate-related card. It dims the map, highlights valid gates, tracks
+ * the selected gate, and runs the final Open Gate or Lock Gate action when the
+ * player confirms the choice.
+ *
+ * Main gameplay flow:
+ * 1. CardDrawManager calls EnterGateTargetMode(actionType) after a gate card is played.
+ * 2. This manager finds every GateFrameAnimation in the scene.
+ * 3. It filters gates into validTargets based on the requested GateActionType.
+ * 4. Valid gates are highlighted and the targeting UI/dark overlay is shown.
+ * 5. GateFrameAnimation calls SelectGate(this) when the player clicks a valid gate.
+ * 6. ConfirmSelection() executes OpenGate() or LockGate() on the selected gate.
+ * 7. The pending card is confirmed through CardDrawManager only after the gate
+ *    action succeeds.
+ *
+ * Inspector setup:
+ * - tilemapsToDim and spritesToDim define which map visuals get darkened.
+ * - targetingUI should contain the confirm/cancel controls for targeting mode.
+ * - darkOverlay is the screen overlay shown while picking a gate.
+ * - normalGameplayUI is disabled during targeting so normal UI does not receive clicks.
+ *
+ * Dependency notes:
+ * - GateFrameAnimation owns each individual gate's animation and blocking state.
+ * - CardDrawManager owns the pending card that should be consumed or returned.
+ * - CursorToolManager exits hammer mode when targeting ends.
+ */
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
