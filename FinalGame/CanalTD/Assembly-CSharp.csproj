@@ -67,13 +67,16 @@
     <Compile Include="Assets/Scripts/Map/WaypointPath.cs" />
     <Compile Include="Assets/Scripts/Card/CardHoverUI.cs" />
     <Compile Include="Assets/Scripts/Card/CardInstanceSelectable.cs" />
+    <Compile Include="Assets/Scripts/Enemy/EnemySpawner.cs" />
     <Compile Include="Assets/Scripts/Map/doorChange.cs" />
     <Compile Include="Assets/Scripts/Card/CardDrawManager.cs" />
     <Compile Include="Assets/Scripts/Map/GateActionType.cs" />
     <Compile Include="Assets/Scripts/Path/PathNode.cs" />
     <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />
     <Compile Include="Assets/Scripts/Path/CastleEndNode.cs" />
+    <Compile Include="Assets/Scripts/Enemy/EnemyMover.cs" />
     <Compile Include="Assets/Scripts/Map/GateFrameAnimation.cs" />
+    <Compile Include="Assets/Scripts/Enemy/WaveManager.cs" />
     <Compile Include="Assets/Scripts/UI/CastleHealthBar.cs" />
     <Compile Include="Assets/Scripts/Card/GateTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
