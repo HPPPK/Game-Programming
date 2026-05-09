@@ -68,6 +68,7 @@
     <Compile Include="Assets/Scripts/Enemy/EnemyTargetSelector.cs" />
     <Compile Include="Assets/Scripts/Card/CardHoverUI.cs" />
     <Compile Include="Assets/Scripts/Card/CardInstanceSelectable.cs" />
+    <Compile Include="Assets/Scripts/Path/GatePathBlocker.cs" />
     <Compile Include="Assets/Scripts/Path/PathGraphState.cs" />
     <Compile Include="Assets/Scripts/Path/PathEdge.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemySpawner.cs" />

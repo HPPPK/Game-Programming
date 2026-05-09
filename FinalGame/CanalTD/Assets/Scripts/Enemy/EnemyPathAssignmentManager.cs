@@ -8,12 +8,15 @@
  * through available paths so enemies do not all use the exact same route.
  *
  * Main gameplay flow:
- * 1. WaveManager calls ResetAssignments() at the start of a wave.
+ * 1. WaveManager calls ResetAssignmentsForWave() at the start of a wave.
  * 2. EnemyMover calls GetPathToLeastAssignedReachableCastle(startNode).
- * 3. The manager finds castles that can currently be reached from startNode.
- * 4. It picks the reachable castle with the fewest assigned enemies.
- * 5. It chooses one path for that castle, preferring longer path groups first.
- * 6. It returns a List<PathNode> for EnemyMover to follow.
+ * 3. The manager finds all castles that can currently be reached from startNode.
+ * 4. It creates a wave plan so every reachable castle gets enemies when the
+ *    wave has enough enemies to cover all reachable castles.
+ * 5. Farther castles receive a larger quota through distance weighting.
+ * 6. Each castle's valid paths are also weighted by path length, so longer
+ *    paths are chosen more often.
+ * 7. It returns a List<PathNode> for EnemyMover to follow.
  *
  * Cache behavior:
  * - cachedPaths stores all paths between a start node and a castle.
@@ -35,16 +38,22 @@ public class EnemyPathAssignmentManager : MonoBehaviour
 {
     public static EnemyPathAssignmentManager Instance;
 
-    private const int MaxPathDepth = 40;
-    private const int MaxPaths = 50;
+    private const int MaxPathDepth = 80;
+    private const int MaxPaths = 300;
 
     [Header("Castle End Nodes")]
     public CastleEndNode[] castleEnds;
 
+    [Header("Weighted Distribution")]
+    [SerializeField] private float castleDistanceWeightPower = 1f;
+    [SerializeField] private float pathLengthWeightPower = 1f;
+
     private Dictionary<CastleEndNode, int> assignedCounts = new Dictionary<CastleEndNode, int>();
-    private Dictionary<string, int> pathGroupCounts = new Dictionary<string, int>();
     private Dictionary<string, List<List<PathNode>>> cachedPaths = new Dictionary<string, List<List<PathNode>>>();
+    private Dictionary<PathNode, int> plannedEnemyCountsByStart = new Dictionary<PathNode, int>();
+    private Dictionary<PathNode, Queue<List<PathNode>>> plannedPathsByStart = new Dictionary<PathNode, Queue<List<PathNode>>>();
     private int cachedVersion = -1;
+    private int fallbackWaveEnemyCount = 1;
 
     void Awake()
     {
@@ -55,7 +64,13 @@ public class EnemyPathAssignmentManager : MonoBehaviour
     public void ResetAssignments()
     {
         assignedCounts.Clear();
-        pathGroupCounts.Clear();
+        plannedEnemyCountsByStart.Clear();
+        plannedPathsByStart.Clear();
+
+        if (castleEnds == null)
+        {
+            return;
+        }
 
         foreach (CastleEndNode castle in castleEnds)
         {
@@ -63,6 +78,35 @@ public class EnemyPathAssignmentManager : MonoBehaviour
             {
                 assignedCounts[castle] = 0;
             }
+        }
+    }
+
+    public void ResetAssignmentsForWave(int totalEnemyCount, EnemySpawner[] spawners)
+    {
+        ResetAssignments();
+
+        fallbackWaveEnemyCount = Mathf.Max(1, totalEnemyCount);
+
+        if (spawners == null || spawners.Length == 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < totalEnemyCount; i++)
+        {
+            EnemySpawner spawner = spawners[i % spawners.Length];
+
+            if (spawner == null || spawner.startNode == null)
+            {
+                continue;
+            }
+
+            if (!plannedEnemyCountsByStart.ContainsKey(spawner.startNode))
+            {
+                plannedEnemyCountsByStart[spawner.startNode] = 0;
+            }
+
+            plannedEnemyCountsByStart[spawner.startNode]++;
         }
     }
 
@@ -75,36 +119,126 @@ public class EnemyPathAssignmentManager : MonoBehaviour
 
         InvalidateCacheIfNeeded();
 
-        CastleEndNode bestCastle = ChooseLeastAssignedReachableCastle(startNode);
+        if (!plannedPathsByStart.ContainsKey(startNode) || plannedPathsByStart[startNode].Count == 0)
+        {
+            BuildPathPlanForStartNode(startNode);
+        }
 
-        if (bestCastle == null)
+        if (!plannedPathsByStart.ContainsKey(startNode) || plannedPathsByStart[startNode].Count == 0)
         {
             Debug.LogWarning("No reachable castle from " + startNode.name);
             return null;
         }
 
-        assignedCounts[bestCastle]++;
+        List<PathNode> selectedPath = plannedPathsByStart[startNode].Dequeue();
+        CastleEndNode selectedCastle = GetPathCastle(selectedPath);
 
-        List<PathNode> selectedPath = ChooseWeightedPathForCastle(startNode, bestCastle);
-
-        if (selectedPath == null || selectedPath.Count == 0)
+        if (selectedCastle != null)
         {
-            Debug.LogWarning("No cached path available from " + startNode.name + " to " + bestCastle.name);
-            return null;
+            assignedCounts[selectedCastle]++;
         }
 
         Debug.Log(
-            "Assigned enemy to " + bestCastle.name +
-            " | castle count = " + assignedCounts[bestCastle] +
+            "Assigned enemy to " + (selectedCastle != null ? selectedCastle.name : "UnknownCastle") +
+            " | castle count = " + (selectedCastle != null ? assignedCounts[selectedCastle] : 0) +
             " | path length = " + selectedPath.Count
         );
 
         return selectedPath;
     }
 
-    private List<CastleEndNode> GetReachableCastles(PathNode startNode)
+    private void BuildPathPlanForStartNode(PathNode startNode)
     {
-        List<CastleEndNode> reachableCastles = new List<CastleEndNode>();
+        List<CastlePathOptions> reachableOptions = GetReachableCastlePathOptions(startNode);
+
+        if (reachableOptions.Count == 0)
+        {
+            plannedPathsByStart[startNode] = new Queue<List<PathNode>>();
+            return;
+        }
+
+        int plannedEnemyCount = GetPlannedEnemyCountForStartNode(startNode);
+        List<float> castleWeights = new List<float>();
+
+        foreach (CastlePathOptions option in reachableOptions)
+        {
+            castleWeights.Add(Mathf.Pow(Mathf.Max(1f, option.AveragePathLength), castleDistanceWeightPower));
+        }
+
+        List<int> castleQuotas = AllocateQuotas(plannedEnemyCount, castleWeights, true);
+        List<List<PathNode>> plannedPaths = new List<List<PathNode>>();
+        List<Queue<List<PathNode>>> castlePathQueues = new List<Queue<List<PathNode>>>();
+
+        for (int i = 0; i < reachableOptions.Count; i++)
+        {
+            CastlePathOptions option = reachableOptions[i];
+            int castleQuota = castleQuotas[i];
+
+            if (castleQuota <= 0)
+            {
+                continue;
+            }
+
+            List<float> pathWeights = new List<float>();
+
+            foreach (List<PathNode> path in option.Paths)
+            {
+                pathWeights.Add(Mathf.Pow(Mathf.Max(1f, path.Count), pathLengthWeightPower));
+            }
+
+            List<int> pathQuotas = AllocateQuotas(castleQuota, pathWeights, false);
+            List<List<PathNode>> plannedCastlePaths = new List<List<PathNode>>();
+
+            for (int pathIndex = 0; pathIndex < option.Paths.Count; pathIndex++)
+            {
+                for (int copy = 0; copy < pathQuotas[pathIndex]; copy++)
+                {
+                    plannedCastlePaths.Add(option.Paths[pathIndex]);
+                }
+            }
+
+            castlePathQueues.Add(new Queue<List<PathNode>>(plannedCastlePaths));
+
+            Debug.Log(
+                "Wave plan from " + startNode.name +
+                " -> " + option.Castle.name +
+                " | quota = " + castleQuota +
+                " | paths = " + option.Paths.Count +
+                " | shortest = " + option.ShortestPathLength +
+                " | longest = " + option.LongestPathLength
+            );
+        }
+
+        bool addedPath = true;
+
+        while (addedPath)
+        {
+            addedPath = false;
+
+            foreach (Queue<List<PathNode>> castleQueue in castlePathQueues)
+            {
+                if (castleQueue.Count == 0)
+                {
+                    continue;
+                }
+
+                plannedPaths.Add(castleQueue.Dequeue());
+                addedPath = true;
+            }
+        }
+
+        plannedPathsByStart[startNode] = new Queue<List<PathNode>>(plannedPaths);
+    }
+
+    private List<CastlePathOptions> GetReachableCastlePathOptions(PathNode startNode)
+    {
+        List<CastlePathOptions> reachableOptions = new List<CastlePathOptions>();
+
+        if (castleEnds == null || castleEnds.Length == 0)
+        {
+            Debug.LogWarning("EnemyPathAssignmentManager has no castleEnds assigned.");
+            return reachableOptions;
+        }
 
         foreach (CastleEndNode castle in castleEnds)
         {
@@ -117,128 +251,19 @@ public class EnemyPathAssignmentManager : MonoBehaviour
                 continue;
             }
 
-            int longest = validPaths[0].Count;
-            int shortest = validPaths[validPaths.Count - 1].Count;
+            CastlePathOptions option = new CastlePathOptions(castle, validPaths);
 
             Debug.Log(
                 "Reachable castle " + castle.name +
                 " | valid paths = " + validPaths.Count +
-                " | longest = " + longest +
-                " | shortest = " + shortest
+                " | longest = " + option.LongestPathLength +
+                " | shortest = " + option.ShortestPathLength
             );
 
-            reachableCastles.Add(castle);
+            reachableOptions.Add(option);
         }
 
-        return reachableCastles;
-    }
-
-    private CastleEndNode ChooseLeastAssignedReachableCastle(PathNode startNode)
-    {
-        List<CastleEndNode> reachableCastles = GetReachableCastles(startNode);
-
-        CastleEndNode bestCastle = null;
-        int bestCount = int.MaxValue;
-
-        foreach (CastleEndNode castle in reachableCastles)
-        {
-            int count = assignedCounts.ContainsKey(castle) ? assignedCounts[castle] : 0;
-
-            if (count < bestCount)
-            {
-                bestCount = count;
-                bestCastle = castle;
-            }
-        }
-
-        return bestCastle;
-    }
-
-    private bool IsCastleReachable(PathNode startNode, CastleEndNode castle)
-    {
-        return GetValidPaths(startNode, castle).Count > 0;
-    }
-
-    private List<PathNode> ChooseWeightedPathForCastle(PathNode startNode, CastleEndNode castle)
-    {
-        List<List<PathNode>> allPaths = GetValidPaths(startNode, castle);
-
-        if (allPaths.Count == 0)
-        {
-            return null;
-        }
-
-        Dictionary<int, List<List<PathNode>>> lengthGroups = new Dictionary<int, List<List<PathNode>>>();
-
-        foreach (List<PathNode> path in allPaths)
-        {
-            int length = path.Count;
-
-            if (!lengthGroups.ContainsKey(length))
-            {
-                lengthGroups[length] = new List<List<PathNode>>();
-            }
-
-            lengthGroups[length].Add(path);
-        }
-
-        List<int> lengths = new List<int>(lengthGroups.Keys);
-        lengths.Sort((a, b) => b.CompareTo(a)); // longest first
-
-        float roll = Random.value;
-        int selectedGroupIndex = SelectWeightedLengthGroupIndex(roll, lengths.Count);
-
-        int selectedLength = lengths[selectedGroupIndex];
-        List<List<PathNode>> group = lengthGroups[selectedLength];
-
-        string groupKey = startNode.name + "_" + castle.name + "_len_" + selectedLength;
-
-        if (!pathGroupCounts.ContainsKey(groupKey))
-        {
-            pathGroupCounts[groupKey] = 0;
-        }
-
-        int pathIndex = pathGroupCounts[groupKey] % group.Count;
-        pathGroupCounts[groupKey]++;
-
-        return group[pathIndex];
-    }
-
-    private int SelectWeightedLengthGroupIndex(float roll, int groupCount)
-    {
-        if (groupCount <= 1)
-        {
-            return 0;
-        }
-
-        if (roll < 0.60f)
-        {
-            return 0;
-        }
-
-        if (groupCount == 2)
-        {
-            return 1;
-        }
-
-        if (roll < 0.85f)
-        {
-            return 1;
-        }
-
-        if (groupCount == 3)
-        {
-            return 2;
-        }
-
-        if (roll < 0.95f)
-        {
-            return 2;
-        }
-
-        int remainingGroupCount = groupCount - 3;
-        int remainingIndex = Random.Range(0, remainingGroupCount);
-        return 3 + remainingIndex;
+        return reachableOptions;
     }
 
     private List<List<PathNode>> GetValidPaths(PathNode startNode, CastleEndNode castle)
@@ -252,7 +277,7 @@ public class EnemyPathAssignmentManager : MonoBehaviour
     {
         InvalidateCacheIfNeeded();
 
-        string key = startNode.name + "_" + castle.name;
+        string key = startNode.GetInstanceID() + "_" + castle.GetInstanceID();
 
         if (!cachedPaths.ContainsKey(key))
         {
@@ -262,12 +287,140 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         return cachedPaths[key];
     }
 
+    private int GetPlannedEnemyCountForStartNode(PathNode startNode)
+    {
+        if (plannedEnemyCountsByStart.ContainsKey(startNode))
+        {
+            return Mathf.Max(1, plannedEnemyCountsByStart[startNode]);
+        }
+
+        return fallbackWaveEnemyCount;
+    }
+
+    private List<int> AllocateQuotas(int totalCount, List<float> weights, bool guaranteeOneIfPossible)
+    {
+        List<int> quotas = new List<int>();
+
+        if (weights == null || weights.Count == 0)
+        {
+            return quotas;
+        }
+
+        for (int i = 0; i < weights.Count; i++)
+        {
+            quotas.Add(0);
+        }
+
+        if (totalCount <= 0)
+        {
+            return quotas;
+        }
+
+        int remainingCount = totalCount;
+
+        if (guaranteeOneIfPossible && totalCount >= weights.Count)
+        {
+            for (int i = 0; i < quotas.Count; i++)
+            {
+                quotas[i] = 1;
+            }
+
+            remainingCount -= weights.Count;
+        }
+
+        if (remainingCount <= 0)
+        {
+            return quotas;
+        }
+
+        float totalWeight = 0f;
+
+        foreach (float weight in weights)
+        {
+            totalWeight += Mathf.Max(0.01f, weight);
+        }
+
+        List<float> remainders = new List<float>();
+        int assigned = 0;
+
+        for (int i = 0; i < weights.Count; i++)
+        {
+            float exactShare = remainingCount * (Mathf.Max(0.01f, weights[i]) / totalWeight);
+            int wholeShare = Mathf.FloorToInt(exactShare);
+
+            quotas[i] += wholeShare;
+            assigned += wholeShare;
+            remainders.Add(exactShare - wholeShare);
+        }
+
+        int leftovers = remainingCount - assigned;
+
+        while (leftovers > 0)
+        {
+            int bestIndex = 0;
+            float bestRemainder = float.MinValue;
+
+            for (int i = 0; i < remainders.Count; i++)
+            {
+                if (remainders[i] > bestRemainder)
+                {
+                    bestRemainder = remainders[i];
+                    bestIndex = i;
+                }
+            }
+
+            quotas[bestIndex]++;
+            remainders[bestIndex] = -1f;
+            leftovers--;
+        }
+
+        return quotas;
+    }
+
+    private CastleEndNode GetPathCastle(List<PathNode> path)
+    {
+        if (path == null || path.Count == 0)
+        {
+            return null;
+        }
+
+        return path[path.Count - 1] as CastleEndNode;
+    }
+
     private void InvalidateCacheIfNeeded()
     {
         if (cachedVersion != PathGraphState.Version)
         {
             cachedPaths.Clear();
+            plannedPathsByStart.Clear();
             cachedVersion = PathGraphState.Version;
+        }
+    }
+
+    private class CastlePathOptions
+    {
+        public CastleEndNode Castle { get; private set; }
+        public List<List<PathNode>> Paths { get; private set; }
+        public int LongestPathLength { get; private set; }
+        public int ShortestPathLength { get; private set; }
+        public float AveragePathLength { get; private set; }
+
+        public CastlePathOptions(CastleEndNode castle, List<List<PathNode>> paths)
+        {
+            Castle = castle;
+            Paths = paths;
+
+            int totalLength = 0;
+
+            LongestPathLength = paths[0].Count;
+            ShortestPathLength = paths[paths.Count - 1].Count;
+
+            foreach (List<PathNode> path in paths)
+            {
+                totalLength += path.Count;
+            }
+
+            AveragePathLength = (float)totalLength / paths.Count;
         }
     }
 }

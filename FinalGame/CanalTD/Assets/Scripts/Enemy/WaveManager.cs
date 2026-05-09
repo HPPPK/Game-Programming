@@ -59,7 +59,7 @@ public class WaveManager : MonoBehaviour
 
         if (EnemyPathAssignmentManager.Instance != null)
         {
-            EnemyPathAssignmentManager.Instance.ResetAssignments();
+            EnemyPathAssignmentManager.Instance.ResetAssignmentsForWave(enemyCount, spawners);
         }
 
         StartCoroutine(SpawnWaveRoutine());
