@@ -16,9 +16,11 @@ The main improvements include:
 
 ---
 
-## Project Structure
+## AI Assistance Disclosure
 
-The main Unity project is located in:
+AI-assisted coding support was used only for the following two gameplay scripts:
 
-```text
-2D shooter/
+- `SpeedBoostPowerUp.cs`: used for the Speed Boost power-up feature in level 3.
+- `BlackHoleHazard.cs`: used for the Black Hole Hazard feature in level 3.
+
+These two scripts were drafted and revised with the help of AI tools ChatGPT. The code was then manually reviewed, added to the Unity project, connected to scene objects, adjusted through Inspector settings, and tested in Play Mode by the project author.
