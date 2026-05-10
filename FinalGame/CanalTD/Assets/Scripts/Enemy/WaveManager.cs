@@ -38,6 +38,11 @@ public class WaveManager : MonoBehaviour
 
     private bool isSpawning = false;
 
+    public bool IsSpawning
+    {
+        get { return isSpawning; }
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
