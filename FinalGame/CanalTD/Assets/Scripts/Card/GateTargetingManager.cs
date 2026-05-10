@@ -106,6 +106,8 @@ public class GateTargetingManager : MonoBehaviour
         currentActionType = actionType;
         selectedGate = null;
 
+        EnterHammerTool();
+
         ResolveHammerButton();
 
         if (normalGameplayUI != null)
@@ -298,6 +300,17 @@ public class GateTargetingManager : MonoBehaviour
         ExitGateTargetMode();
     }
 
+    public void ToggleHammerTool()
+    {
+        if (!isTargetingGate)
+        {
+            ShowToast("Play a gate card first.");
+            return;
+        }
+
+        ToggleHammerToolState();
+    }
+
     public void ExitGateTargetMode()
     {
         isTargetingGate = false;
@@ -354,10 +367,7 @@ public class GateTargetingManager : MonoBehaviour
         selectedGate = null;
         validTargets.Clear();
 
-        if (CursorToolManager.Instance != null)
-        {
-            CursorToolManager.Instance.ExitToolMode();
-        }
+        ExitHammerTool();
 
         Debug.Log("Gate targeting mode OFF.");
     }
@@ -436,6 +446,61 @@ public class GateTargetingManager : MonoBehaviour
     public bool IsTargetingGate()
     {
         return isTargetingGate;
+    }
+
+    public bool IsHammerToolActive()
+    {
+        if (VisualCursorFollower.Instance != null)
+        {
+            return VisualCursorFollower.Instance.IsHammerMode();
+        }
+
+        return CursorToolManager.Instance != null && CursorToolManager.Instance.IsHammerMode;
+    }
+
+    void EnterHammerTool()
+    {
+        if (VisualCursorFollower.Instance != null)
+        {
+            VisualCursorFollower.Instance.SetHammerCursor();
+            return;
+        }
+
+        if (CursorToolManager.Instance != null)
+        {
+            CursorToolManager.Instance.EnterHammerMode();
+        }
+    }
+
+    void ExitHammerTool()
+    {
+        if (VisualCursorFollower.Instance != null)
+        {
+            VisualCursorFollower.Instance.SetNormalCursor();
+            return;
+        }
+
+        if (CursorToolManager.Instance != null)
+        {
+            CursorToolManager.Instance.ExitToolMode();
+        }
+    }
+
+    void ToggleHammerToolState()
+    {
+        if (VisualCursorFollower.Instance != null)
+        {
+            VisualCursorFollower.Instance.ToggleHammerCursor();
+            return;
+        }
+
+        if (CursorToolManager.Instance != null)
+        {
+            CursorToolManager.Instance.ToggleHammerMode();
+            return;
+        }
+
+        Debug.LogWarning("No cursor controller found.");
     }
 
     public void ShowToast(string message)

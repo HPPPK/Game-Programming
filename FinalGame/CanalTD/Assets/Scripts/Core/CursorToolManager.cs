@@ -9,11 +9,12 @@
  * Runtime behavior:
  * - EnterHammerMode() switches the internal state used by gate targeting.
  * - ExitHammerMode() leaves hammer mode.
+ * - ToggleHammerMode() is intended for the HammerButton.
  * - ExitToolMode() is kept as a compatibility wrapper for existing scripts.
  *
  * Inspector setup:
- * - Use CursorVisualFollower on a UI Image to show a visual hammer cursor.
- * - Keep the actual system cursor visible for accurate clicking.
+ * - VisualCursorFollower is the main visual cursor controller in the scene.
+ * - Do not use Cursor.SetCursor here.
  *
  * Dependency notes:
  * - CardDrawManager enters hammer mode when a gate card starts targeting.
@@ -39,12 +40,22 @@ public class CursorToolManager : MonoBehaviour
 
     public void EnterHammerMode()
     {
-        isHammerMode = true;
+        SetHammerMode(true);
     }
 
     public void ExitHammerMode()
     {
-        isHammerMode = false;
+        SetHammerMode(false);
+    }
+
+    public void ToggleHammerMode()
+    {
+        SetHammerMode(!isHammerMode);
+    }
+
+    public void SetHammerMode(bool enabled)
+    {
+        isHammerMode = enabled;
     }
 
     public void ExitToolMode()

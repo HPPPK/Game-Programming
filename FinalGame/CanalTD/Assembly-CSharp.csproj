@@ -80,6 +80,7 @@
     <Compile Include="Assets/Scripts/Path/Pathfinder.cs" />
     <Compile Include="Assets/Scripts/UI/PlayerStatusPanelUI.cs" />
     <Compile Include="Assets/Scripts/Path/PathNode.cs" />
+    <Compile Include="Assets/Scripts/Core/cursor.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyPathAssignmentManager.cs" />
     <Compile Include="Assets/Scripts/UI/ManualUIButtonDebug.cs" />
     <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />

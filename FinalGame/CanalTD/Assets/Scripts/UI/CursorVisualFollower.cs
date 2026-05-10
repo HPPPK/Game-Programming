@@ -2,9 +2,9 @@
  * File: CursorVisualFollower.cs
  *
  * Purpose:
- * Shows a visual cursor sprite as a UI Image that follows the mouse. The real
- * system cursor remains visible and is still used for all clicking, so this
- * avoids Cursor.SetCursor hot spot offset problems.
+ * Shows a visual cursor sprite as a UI Image that follows the mouse. It never
+ * calls Cursor.SetCursor, so the old cursor hot spot offset problem cannot
+ * affect UI or world click detection.
  *
  * Unity setup:
  * - Create ScreenCanvas/CursorVisual.
@@ -44,11 +44,14 @@ public class CursorVisualFollower : MonoBehaviour
 
     void Start()
     {
+        Cursor.visible = false;
         RefreshVisual();
     }
 
     void Update()
     {
+        Cursor.visible = false;
+
         if (cursorImage != null)
         {
             cursorImage.position = Input.mousePosition;
