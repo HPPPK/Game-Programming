@@ -21,6 +21,9 @@
  * - tilemapsToDim and spritesToDim define which map visuals get darkened.
  * - targetingUI should contain the confirm/cancel controls for targeting mode.
  * - darkOverlay is the screen overlay shown while picking a gate.
+ * - hammerButton is shown only while the player is choosing a gate target. If
+ *   it is not assigned manually, this script tries to find a child named
+ *   "HammerButton" under normalGameplayUI.
  * - normalGameplayUI is disabled during targeting so normal UI does not receive clicks.
  *
  * Dependency notes:
@@ -45,6 +48,7 @@ public class GateTargetingManager : MonoBehaviour
     [Header("UI")]
     public GameObject targetingUI;
     public GameObject darkOverlay;
+    public GameObject hammerButton;
     public CanvasGroup normalGameplayUI;
 
     [Header("Colors")]
@@ -70,6 +74,7 @@ public class GateTargetingManager : MonoBehaviour
 
     void Start()
     {
+        ResolveHammerButton();
         RefreshGates();
         ForceExitVisualState();
     }
@@ -101,6 +106,8 @@ public class GateTargetingManager : MonoBehaviour
         currentActionType = actionType;
         selectedGate = null;
 
+        ResolveHammerButton();
+
         if (normalGameplayUI != null)
         {
             normalGameplayUI.interactable = false;
@@ -119,6 +126,11 @@ public class GateTargetingManager : MonoBehaviour
         else
         {
             Debug.LogWarning("TargetingUI is not assigned.");
+        }
+
+        if (hammerButton != null)
+        {
+            hammerButton.SetActive(true);
         }
 
         foreach (Tilemap tilemap in tilemapsToDim)
@@ -168,7 +180,7 @@ public class GateTargetingManager : MonoBehaviour
             }
             else if (actionType == GateActionType.OpenGate)
             {
-                valid = gate.IsBlocking() && !gate.IsLocked();
+                valid = gate.CanOpen();
             }
 
             if (valid)
@@ -178,6 +190,17 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         return results;
+    }
+
+    public bool HasValidGateTargets(GateActionType actionType)
+    {
+        if (actionType == GateActionType.None)
+        {
+            return false;
+        }
+
+        RefreshGates();
+        return GetValidGates(actionType).Count > 0;
     }
 
     public void SelectGate(GateFrameAnimation gate)
@@ -296,6 +319,11 @@ public class GateTargetingManager : MonoBehaviour
             targetingUI.SetActive(false);
         }
 
+        if (hammerButton != null)
+        {
+            hammerButton.SetActive(false);
+        }
+
         foreach (Tilemap tilemap in tilemapsToDim)
         {
             if (tilemap != null)
@@ -336,6 +364,8 @@ public class GateTargetingManager : MonoBehaviour
 
     void ForceExitVisualState()
     {
+        ResolveHammerButton();
+
         if (targetingUI != null)
         {
             targetingUI.SetActive(false);
@@ -346,10 +376,60 @@ public class GateTargetingManager : MonoBehaviour
             darkOverlay.SetActive(false);
         }
 
+        if (hammerButton != null)
+        {
+            hammerButton.SetActive(false);
+        }
+
         if (normalGameplayUI != null)
         {
             normalGameplayUI.interactable = true;
             normalGameplayUI.blocksRaycasts = true;
+        }
+    }
+
+    void ResolveHammerButton()
+    {
+        if (hammerButton != null)
+        {
+            return;
+        }
+
+        ResolveNormalGameplayUI();
+
+        if (normalGameplayUI == null)
+        {
+            return;
+        }
+
+        Transform[] children = normalGameplayUI.GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform child in children)
+        {
+            if (child != null && child.name == "HammerButton")
+            {
+                hammerButton = child.gameObject;
+                return;
+            }
+        }
+    }
+
+    void ResolveNormalGameplayUI()
+    {
+        if (normalGameplayUI != null)
+        {
+            return;
+        }
+
+        CanvasGroup[] canvasGroups = FindObjectsOfType<CanvasGroup>(true);
+
+        foreach (CanvasGroup canvasGroup in canvasGroups)
+        {
+            if (canvasGroup != null && canvasGroup.name == "NormalGameplayUI")
+            {
+                normalGameplayUI = canvasGroup;
+                return;
+            }
         }
     }
 
