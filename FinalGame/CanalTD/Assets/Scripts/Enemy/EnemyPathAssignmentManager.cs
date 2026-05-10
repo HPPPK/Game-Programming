@@ -13,8 +13,8 @@
  * 3. The manager finds all castles that can currently be reached from startNode.
  * 4. It creates a wave plan so every reachable castle gets enemies when the
  *    wave has enough enemies to cover all reachable castles.
- * 5. Farther castles receive a larger quota through distance weighting.
- * 6. Each castle's valid paths are also weighted by path length, so longer
+ * 5. Reachable castles receive an even enemy quota for the current wave.
+ * 6. Each castle's valid paths are weighted by path length, so longer
  *    paths are chosen more often.
  * 7. It returns a List<PathNode> for EnemyMover to follow.
  *
@@ -44,8 +44,7 @@ public class EnemyPathAssignmentManager : MonoBehaviour
     [Header("Castle End Nodes")]
     public CastleEndNode[] castleEnds;
 
-    [Header("Weighted Distribution")]
-    [SerializeField] private float castleDistanceWeightPower = 1f;
+    [Header("Weighted Path Distribution")]
     [SerializeField] private float pathLengthWeightPower = 1f;
 
     private Dictionary<CastleEndNode, int> assignedCounts = new Dictionary<CastleEndNode, int>();
@@ -162,7 +161,7 @@ public class EnemyPathAssignmentManager : MonoBehaviour
 
         foreach (CastlePathOptions option in reachableOptions)
         {
-            castleWeights.Add(Mathf.Pow(Mathf.Max(1f, option.AveragePathLength), castleDistanceWeightPower));
+            castleWeights.Add(1f);
         }
 
         List<int> castleQuotas = AllocateQuotas(plannedEnemyCount, castleWeights, true);
