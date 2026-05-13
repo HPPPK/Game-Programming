@@ -83,21 +83,16 @@ public class GateFrameAnimation : MonoBehaviour
             return;
         }
 
-        if (CursorToolManager.Instance == null)
-        {
-            Debug.LogWarning("No CursorToolManager found.");
-            return;
-        }
-
         if (GateTargetingManager.Instance == null)
         {
             Debug.LogWarning("No GateTargetingManager found.");
             return;
         }
 
-        if (!CursorToolManager.Instance.isHammerMode)
+        if (!GateTargetingManager.Instance.IsHammerToolActive())
         {
             Debug.Log(name + " clicked, but gate targeting cursor is OFF.");
+            GateTargetingManager.Instance.ShowToast("Select the hammer tool first.");
             return;
         }
 
@@ -296,10 +291,7 @@ public class GateFrameAnimation : MonoBehaviour
             GateTargetingManager.Instance.ExitGateTargetMode();
         }
 
-        if (CursorToolManager.Instance != null)
-        {
-            CursorToolManager.Instance.ExitToolMode();
-        }
+        // GateTargetingManager exits the cursor/tool state.
     }
 
     public bool IsBlocking()

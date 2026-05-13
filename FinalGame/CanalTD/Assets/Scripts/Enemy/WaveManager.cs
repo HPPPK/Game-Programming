@@ -38,6 +38,11 @@ public class WaveManager : MonoBehaviour
 
     private bool isSpawning = false;
 
+    public bool IsSpawning
+    {
+        get { return isSpawning; }
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -59,7 +64,7 @@ public class WaveManager : MonoBehaviour
 
         if (EnemyPathAssignmentManager.Instance != null)
         {
-            EnemyPathAssignmentManager.Instance.ResetAssignments();
+            EnemyPathAssignmentManager.Instance.ResetAssignmentsForWave(enemyCount, spawners);
         }
 
         StartCoroutine(SpawnWaveRoutine());

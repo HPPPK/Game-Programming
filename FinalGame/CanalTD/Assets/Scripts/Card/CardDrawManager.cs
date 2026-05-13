@@ -99,6 +99,12 @@ public class CardDrawManager : MonoBehaviour
     {
         if (isBusy) return;
 
+        if (TurnManager.Instance != null && !TurnManager.Instance.CanDrawCard())
+        {
+            StartCoroutine(ShowWarning("Cannot draw this turn."));
+            return;
+        }
+
         int emptySlotIndex = FindEmptySlot();
 
         if (emptySlotIndex == -1)
@@ -164,12 +170,43 @@ public class CardDrawManager : MonoBehaviour
 
         Debug.Log("Drew card: " + cardPrefab.name + ". Cards left in deck = " + deck.Count);
 
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance.SpendAP(1);
+            TurnManager.Instance.OnCardDrawn();
+        }
+
         isBusy = false;
     }
 
     public bool CanSelectCards()
     {
         return !isBusy && pendingPlayedCard == null;
+    }
+
+    public int GetHandCardCount()
+    {
+        if (cardSlots == null)
+        {
+            return 0;
+        }
+
+        int count = 0;
+
+        foreach (Transform slot in cardSlots)
+        {
+            if (slot == null)
+            {
+                continue;
+            }
+
+            if (slot.Find("CardView") != null)
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     public void SelectCard(CardInstanceSelectable card)
@@ -227,9 +264,25 @@ public class CardDrawManager : MonoBehaviour
         if (isBusy) return;
         if (pendingPlayedCard != null) return;
 
+        if (TurnManager.Instance != null && !TurnManager.Instance.CanPlayCard())
+        {
+            StartCoroutine(ShowWarning("Cannot play a card this turn."));
+            return;
+        }
+
         if (selectedCard == null)
         {
             StartCoroutine(ShowWarning("No card selected!"));
+            return;
+        }
+
+        GateActionType gateActionType = GetGateActionType(selectedCard.sourcePrefab.name);
+
+        if (gateActionType != GateActionType.None &&
+            (GateTargetingManager.Instance == null ||
+             !GateTargetingManager.Instance.HasValidGateTargets(gateActionType)))
+        {
+            StartCoroutine(ShowWarning("No valid gates."));
             return;
         }
 
@@ -326,6 +379,11 @@ public class CardDrawManager : MonoBehaviour
         selectedCard = null;
         Destroy(card.gameObject);
 
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance.OnCardConfirmed();
+        }
+
         isBusy = false;
     }
 
@@ -335,6 +393,11 @@ public class CardDrawManager : MonoBehaviour
 
         Destroy(pendingPlayedCard.gameObject);
         pendingPlayedCard = null;
+
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance.OnCardConfirmed();
+        }
 
         Debug.Log("Pending card confirmed and consumed.");
     }
@@ -350,6 +413,11 @@ public class CardDrawManager : MonoBehaviour
         ResetCardRect(cardRect);
 
         pendingPlayedCard = null;
+
+        if (TurnManager.Instance != null)
+        {
+            TurnManager.Instance.OnCardCanceled();
+        }
 
         Debug.Log("Pending card cancelled and returned to hand.");
     }
