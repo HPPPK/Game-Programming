@@ -86,6 +86,7 @@
     <Compile Include="Assets/Imported Custom Asset Packages/Developer Console/Scripts/Commands/ListScenesCommand.cs" />
     <Compile Include="Assets/Scripts/Health&amp;Damage/Damage.cs" />
     <Compile Include="Assets/Scripts/Enemies/EnemySpawner.cs" />
+    <Compile Include="Assets/Scripts/NewBehaviourScript.cs" />
     <Compile Include="Assets/Scripts/Player/Controller.cs" />
     <Compile Include="Assets/Scripts/UI/UIPage.cs" />
     <Compile Include="Assets/Imported Custom Asset Packages/Developer Console/Scripts/Commands/DeveloperConsoleCommand.cs" />

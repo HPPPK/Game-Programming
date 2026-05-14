@@ -56,6 +56,9 @@ public class CardDrawManager : MonoBehaviour
     public TextMeshProUGUI warningText;
     public float warningTime = 1.2f;
 
+    [Header("Number UI")]
+    public PresentTheNumberUI presentTheNumberUI;
+
     private List<GameObject> deck = new List<GameObject>();
     private bool isBusy = false;
     private CardInstanceSelectable selectedCard;
@@ -65,6 +68,7 @@ public class CardDrawManager : MonoBehaviour
     {
         BuildDeck();
         ShuffleDeck();
+        RefreshPresentNumberUI();
         Debug.Log("Deck ready. Total cards = " + deck.Count);
     }
 
@@ -169,6 +173,7 @@ public class CardDrawManager : MonoBehaviour
         }
 
         Debug.Log("Drew card: " + cardPrefab.name + ". Cards left in deck = " + deck.Count);
+        RefreshPresentNumberUI();
 
         if (TurnManager.Instance != null)
         {
@@ -200,7 +205,9 @@ public class CardDrawManager : MonoBehaviour
                 continue;
             }
 
-            if (slot.Find("CardView") != null)
+            Transform cardView = slot.Find("CardView");
+
+            if (cardView != null && cardView.gameObject.activeSelf)
             {
                 count++;
             }
@@ -257,6 +264,7 @@ public class CardDrawManager : MonoBehaviour
         selectedCard = null;
 
         Destroy(cardObject);
+        StartCoroutine(RefreshPresentNumberUINextFrame());
     }
 
     public void PlaySelectedCard()
@@ -378,6 +386,7 @@ public class CardDrawManager : MonoBehaviour
 
         selectedCard = null;
         Destroy(card.gameObject);
+        StartCoroutine(RefreshPresentNumberUINextFrame());
 
         if (TurnManager.Instance != null)
         {
@@ -393,6 +402,7 @@ public class CardDrawManager : MonoBehaviour
 
         Destroy(pendingPlayedCard.gameObject);
         pendingPlayedCard = null;
+        StartCoroutine(RefreshPresentNumberUINextFrame());
 
         if (TurnManager.Instance != null)
         {
@@ -413,6 +423,7 @@ public class CardDrawManager : MonoBehaviour
         ResetCardRect(cardRect);
 
         pendingPlayedCard = null;
+        RefreshPresentNumberUI();
 
         if (TurnManager.Instance != null)
         {
@@ -491,5 +502,19 @@ public class CardDrawManager : MonoBehaviour
     public void ShowWarningMessage(string message)
     {
         StartCoroutine(ShowWarning(message));
+    }
+
+    private void RefreshPresentNumberUI()
+    {
+        if (presentTheNumberUI != null)
+        {
+            presentTheNumberUI.SetCardCount(GetHandCardCount());
+        }
+    }
+
+    private IEnumerator RefreshPresentNumberUINextFrame()
+    {
+        yield return null;
+        RefreshPresentNumberUI();
     }
 }
