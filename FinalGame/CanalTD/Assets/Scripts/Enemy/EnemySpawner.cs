@@ -30,18 +30,23 @@ public class EnemySpawner : MonoBehaviour
     [Header("Start Node")]
     public PathNode startNode;
 
-    public void SpawnOne()
+    public GameObject SpawnOne()
+    {
+        return SpawnOne(null);
+    }
+
+    public GameObject SpawnOne(WaveConfig config)
     {
         if (enemyPrefab == null)
         {
             Debug.LogError(name + " spawn failed: enemyPrefab is missing.");
-            return;
+            return null;
         }
 
         if (startNode == null)
         {
             Debug.LogError(name + " spawn failed: startNode is missing.");
-            return;
+            return null;
         }
 
         GameObject enemy = Instantiate(
@@ -56,9 +61,22 @@ public class EnemySpawner : MonoBehaviour
         {
             Debug.LogError("Spawned enemy has no EnemyMover component.");
             Destroy(enemy);
-            return;
+            return null;
+        }
+
+        if (config != null)
+        {
+            EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+
+            if (enemyHealth != null)
+            {
+                enemyHealth.ApplyWaveStats(config);
+            }
+
+            mover.castleDamage = config.castleDamage;
         }
 
         mover.Init(startNode);
+        return enemy;
     }
 }

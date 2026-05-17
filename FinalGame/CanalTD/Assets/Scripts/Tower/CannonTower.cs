@@ -5,6 +5,7 @@ public class CannonTower : MonoBehaviour
     [Header("Owner")]
     public int ownerPlayerId = 0;
     public PlayerResource ownerResource;
+    public SpriteRenderer towerSpriteRenderer;
 
     [Header("Attack")]
     public float attackRange = 3f;
@@ -16,6 +17,14 @@ public class CannonTower : MonoBehaviour
     public Transform firePoint;
 
     private float attackTimer = 0f;
+
+    private void Awake()
+    {
+        if (towerSpriteRenderer == null)
+        {
+            towerSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        }
+    }
 
     private void Update()
     {
@@ -87,6 +96,38 @@ public class CannonTower : MonoBehaviour
         {
             projectile.Initialize(target, damage, ownerResource);
         }
+    }
+
+    public void ApplyOwnerVisual(PlayerManager playerManager, int playerId)
+    {
+        ApplyOwnerVisual(playerManager, playerId, false);
+    }
+
+    public void ApplyOwnerVisual(PlayerManager playerManager, int playerId, bool applyFallbackVisual)
+    {
+        if (towerSpriteRenderer == null)
+        {
+            towerSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        }
+
+        if (towerSpriteRenderer == null)
+        {
+            return;
+        }
+
+        if (applyFallbackVisual && playerManager != null)
+        {
+            Sprite towerSprite = playerManager.GetTowerSpriteForPlayer(playerId);
+
+            if (towerSprite != null)
+            {
+                towerSpriteRenderer.sprite = towerSprite;
+            }
+        }
+
+        Color color = towerSpriteRenderer.color;
+        color.a = 1f;
+        towerSpriteRenderer.color = color;
     }
 
     private void OnDrawGizmosSelected()

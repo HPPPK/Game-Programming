@@ -33,6 +33,9 @@ public class EnemyMover : MonoBehaviour
     public float moveSpeed = 2f;
     public float reachDistance = 0.05f;
 
+    [Header("Castle Damage")]
+    public int castleDamage = 1;
+
     private List<PathNode> path;
     private int currentPathIndex = 0;
     private SpriteRenderer spriteRenderer;
