@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class EnemyHealth : MonoBehaviour
 {
@@ -9,7 +11,9 @@ public class EnemyHealth : MonoBehaviour
 
     [Header("Reward")]
     public int goldReward = 1;
-    public int scoreReward = 1;
+    [FormerlySerializedAs("scoreReward")]
+    public int killerScoreReward = 2;
+    public int assistScoreReward = 1;
 
     [Header("Death Visual")]
     public SpriteRenderer spriteRenderer;
@@ -17,8 +21,12 @@ public class EnemyHealth : MonoBehaviour
     public Animator animator;
     public float destroyDelay = 0.5f;
 
+    [Header("Health Bar")]
+    public EnemyHealthBarSprite healthBar;
+
     private bool isDead = false;
     private PlayerResource lastDamageOwner;
+    private HashSet<PlayerResource> damageParticipants = new HashSet<PlayerResource>();
 
     private void Awake()
     {
@@ -35,6 +43,43 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        if (currentHP <= 0)
+        {
+            currentHP = maxHP;
+        }
+
+        if (healthBar != null)
+        {
+            healthBar.SetHealth(currentHP, maxHP);
+        }
+    }
+
+    public void ApplyWaveStats(WaveConfig config)
+    {
+        if (config == null)
+        {
+            return;
+        }
+
+        maxHP = Mathf.Max(1, config.enemyMaxHP);
+        currentHP = maxHP;
+        goldReward = config.goldReward;
+        killerScoreReward = config.killerScoreReward;
+        assistScoreReward = config.assistScoreReward;
+
+        isDead = false;
+        lastDamageOwner = null;
+        damageParticipants.Clear();
+
+        if (healthBar != null)
+        {
+            healthBar.gameObject.SetActive(true);
+            healthBar.SetHealth(currentHP, maxHP);
+        }
+    }
+
     public void TakeDamage(int damage, PlayerResource damageOwner)
     {
         if (isDead)
@@ -43,7 +88,23 @@ public class EnemyHealth : MonoBehaviour
         }
 
         currentHP -= damage;
-        lastDamageOwner = damageOwner;
+
+        if (damageOwner != null)
+        {
+            damageParticipants.Add(damageOwner);
+            lastDamageOwner = damageOwner;
+        }
+
+        if (currentHP < 0)
+        {
+            currentHP = 0;
+        }
+
+        if (healthBar != null)
+        {
+            healthBar.SetHealth(currentHP, maxHP);
+            healthBar.PlayDamageFlash();
+        }
 
         if (currentHP <= 0)
         {
@@ -62,7 +123,16 @@ public class EnemyHealth : MonoBehaviour
 
         if (lastDamageOwner != null)
         {
-            lastDamageOwner.AddKillReward(goldReward, scoreReward);
+            lastDamageOwner.AddMoney(goldReward);
+            lastDamageOwner.AddScore(killerScoreReward);
+        }
+
+        foreach (PlayerResource participant in damageParticipants)
+        {
+            if (participant != null && participant != lastDamageOwner)
+            {
+                participant.AddScore(assistScoreReward);
+            }
         }
 
         Collider2D collider2D = GetComponent<Collider2D>();
@@ -85,6 +155,11 @@ public class EnemyHealth : MonoBehaviour
         if (spriteRenderer != null && deathSprite != null)
         {
             spriteRenderer.sprite = deathSprite;
+        }
+
+        if (healthBar != null)
+        {
+            healthBar.gameObject.SetActive(false);
         }
 
         StartCoroutine(DestroyAfterDelay());
