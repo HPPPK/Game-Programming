@@ -92,6 +92,7 @@
     <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />
     <Compile Include="Assets/Scripts/Tower/BuildTowerManager.cs" />
     <Compile Include="Assets/Scripts/UI/CursorVisualFollower.cs" />
+    <Compile Include="Assets/Scripts/Card/TileTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Path/CastleEndNode.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyMover.cs" />
     <Compile Include="Assets/Scripts/Path/PathfinderTester.cs" />

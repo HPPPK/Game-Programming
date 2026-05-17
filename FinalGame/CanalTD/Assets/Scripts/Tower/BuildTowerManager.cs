@@ -47,6 +47,18 @@ public class BuildTowerManager : MonoBehaviour
 
     private void TryBuildTowerAtMouse()
     {
+        if (GateTargetingManager.Instance != null && GateTargetingManager.Instance.IsAnyTargetingActive())
+        {
+            return;
+        }
+
+        TileTargetingManager tileTargetingManager = FindObjectOfType<TileTargetingManager>();
+
+        if (tileTargetingManager != null && tileTargetingManager.IsTargeting())
+        {
+            return;
+        }
+
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
         {
             return;

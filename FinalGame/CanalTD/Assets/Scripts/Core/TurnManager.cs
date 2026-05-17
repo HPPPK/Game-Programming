@@ -29,7 +29,10 @@ public class TurnManager : MonoBehaviour
 
     private void Start()
     {
-        StartTurn();
+        if (FindObjectOfType<GamePhaseManager>() == null)
+        {
+            StartTurn();
+        }
     }
 
     public void StartTurn()
@@ -57,7 +60,7 @@ public class TurnManager : MonoBehaviour
     {
         if (hasDrawnCard)
         {
-            ShowToast("You already drew a card this turn.");
+            ShowToast("You already drew this turn.");
             return false;
         }
 

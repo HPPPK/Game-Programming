@@ -58,6 +58,7 @@ public class GateOwnershipManager : MonoBehaviour
         bool foundLinkedArea = false;
         bool hasUnownedClaimableArea = false;
         bool hasOtherPlayerClaimableArea = false;
+        bool hasInactiveOwnedArea = false;
 
         foreach (TowerBuildArea buildArea in buildAreas)
         {
@@ -73,7 +74,11 @@ public class GateOwnershipManager : MonoBehaviour
                 return "";
             }
 
-            if (buildArea.IsClaimable() && buildArea.IsUnowned())
+            if (buildArea.IsClaimable() && buildArea.IsOwnedBy(playerId) && buildArea.IsInactiveForPlayer(playerId))
+            {
+                hasInactiveOwnedArea = true;
+            }
+            else if (buildArea.IsClaimable() && buildArea.IsUnowned())
             {
                 hasUnownedClaimableArea = true;
             }
@@ -86,6 +91,11 @@ public class GateOwnershipManager : MonoBehaviour
         if (!foundLinkedArea)
         {
             return allowUnlinkedGates ? "" : "This gate is not controllable.";
+        }
+
+        if (hasInactiveOwnedArea)
+        {
+            return "This land activates next turn.";
         }
 
         if (hasUnownedClaimableArea)

@@ -129,50 +129,7 @@ public class GateTargetingManager : MonoBehaviour
         currentActionType = actionType;
         selectedGate = null;
 
-        EnterHammerTool();
-
-        ResolveHammerButton();
-
-        if (normalGameplayUI != null)
-        {
-            normalGameplayUI.interactable = false;
-            normalGameplayUI.blocksRaycasts = false;
-        }
-
-        if (darkOverlay != null)
-        {
-            darkOverlay.SetActive(true);
-        }
-
-        if (targetingUI != null)
-        {
-            targetingUI.SetActive(true);
-        }
-        else
-        {
-            Debug.LogWarning("TargetingUI is not assigned.");
-        }
-
-        if (hammerButton != null)
-        {
-            hammerButton.SetActive(true);
-        }
-
-        foreach (Tilemap tilemap in tilemapsToDim)
-        {
-            if (tilemap != null)
-            {
-                tilemap.color = dimMapColor;
-            }
-        }
-
-        foreach (SpriteRenderer sr in spritesToDim)
-        {
-            if (sr != null)
-            {
-                sr.color = dimMapColor;
-            }
-        }
+        EnterTargetingVisualState();
 
         foreach (GateFrameAnimation gate in validTargets)
         {
@@ -407,6 +364,100 @@ public class GateTargetingManager : MonoBehaviour
         isTargetingGate = false;
         currentActionType = GateActionType.None;
 
+        ExitTargetingVisualState();
+
+        if (gates != null)
+        {
+            foreach (GateFrameAnimation gate in gates)
+            {
+                if (gate != null)
+                {
+                    gate.SetHighlight(false, normalGateColor);
+                }
+            }
+        }
+
+        selectedGate = null;
+        validTargets.Clear();
+
+        Debug.Log("Gate targeting mode OFF.");
+    }
+
+    void ForceExitVisualState()
+    {
+        ResolveHammerButton();
+
+        if (targetingUI != null)
+        {
+            targetingUI.SetActive(false);
+        }
+
+        if (darkOverlay != null)
+        {
+            darkOverlay.SetActive(false);
+        }
+
+        if (hammerButton != null)
+        {
+            hammerButton.SetActive(false);
+        }
+
+        if (normalGameplayUI != null)
+        {
+            normalGameplayUI.interactable = true;
+            normalGameplayUI.blocksRaycasts = true;
+        }
+    }
+
+    void EnterTargetingVisualState()
+    {
+        EnterHammerTool();
+        ResolveHammerButton();
+
+        if (normalGameplayUI != null)
+        {
+            normalGameplayUI.interactable = false;
+            normalGameplayUI.blocksRaycasts = false;
+        }
+
+        if (darkOverlay != null)
+        {
+            darkOverlay.SetActive(true);
+        }
+
+        if (targetingUI != null)
+        {
+            targetingUI.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("TargetingUI is not assigned.");
+        }
+
+        if (hammerButton != null)
+        {
+            hammerButton.SetActive(true);
+        }
+
+        foreach (Tilemap tilemap in tilemapsToDim)
+        {
+            if (tilemap != null)
+            {
+                tilemap.color = dimMapColor;
+            }
+        }
+
+        foreach (SpriteRenderer sr in spritesToDim)
+        {
+            if (sr != null)
+            {
+                sr.color = dimMapColor;
+            }
+        }
+    }
+
+    void ExitTargetingVisualState()
+    {
         if (normalGameplayUI != null)
         {
             normalGameplayUI.interactable = true;
@@ -444,49 +495,7 @@ public class GateTargetingManager : MonoBehaviour
             }
         }
 
-        if (gates != null)
-        {
-            foreach (GateFrameAnimation gate in gates)
-            {
-                if (gate != null)
-                {
-                    gate.SetHighlight(false, normalGateColor);
-                }
-            }
-        }
-
-        selectedGate = null;
-        validTargets.Clear();
-
         ExitHammerTool();
-
-        Debug.Log("Gate targeting mode OFF.");
-    }
-
-    void ForceExitVisualState()
-    {
-        ResolveHammerButton();
-
-        if (targetingUI != null)
-        {
-            targetingUI.SetActive(false);
-        }
-
-        if (darkOverlay != null)
-        {
-            darkOverlay.SetActive(false);
-        }
-
-        if (hammerButton != null)
-        {
-            hammerButton.SetActive(false);
-        }
-
-        if (normalGameplayUI != null)
-        {
-            normalGameplayUI.interactable = true;
-            normalGameplayUI.blocksRaycasts = true;
-        }
     }
 
     void ResolveHammerButton()
@@ -535,6 +544,11 @@ public class GateTargetingManager : MonoBehaviour
     }
 
     public bool IsTargetingGate()
+    {
+        return isTargetingGate;
+    }
+
+    public bool IsAnyTargetingActive()
     {
         return isTargetingGate;
     }

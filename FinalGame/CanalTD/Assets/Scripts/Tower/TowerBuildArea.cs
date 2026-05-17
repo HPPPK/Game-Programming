@@ -17,6 +17,11 @@ public class TowerBuildArea : MonoBehaviour
     public bool isOwned = false;
     public int landPurchaseCost = 18;
     public PlayerManager playerManager;
+    public int inactiveForPlayerId = -1;
+    public bool activatesNextTurn = false;
+
+    [Header("Take Over")]
+    public bool isFrozenOrSealed = false;
 
     [Header("Gate Links")]
     public List<GameObject> linkedGates = new List<GameObject>();
@@ -105,6 +110,11 @@ public class TowerBuildArea : MonoBehaviour
 
     public bool CanControlGate(int playerId)
     {
+        if (IsInactiveForPlayer(playerId))
+        {
+            return false;
+        }
+
         if (areaType == BuildAreaType.Public)
         {
             return true;
@@ -149,7 +159,63 @@ public class TowerBuildArea : MonoBehaviour
     {
         isOwned = false;
         ownerPlayerId = -1;
+        ClearActivationDelay();
         RefreshOwnershipVisual(playerManager);
+    }
+
+    public bool CanBeTakenOverBy(int playerId)
+    {
+        return areaType == BuildAreaType.Claimable &&
+            isOwned &&
+            ownerPlayerId >= 0 &&
+            ownerPlayerId != playerId &&
+            !isFrozenOrSealed;
+    }
+
+    public int GetNormalTakeoverCost()
+    {
+        return Mathf.CeilToInt(landPurchaseCost * 1.5f);
+    }
+
+    public int GetTakeOverCardCost()
+    {
+        return Mathf.CeilToInt(GetNormalTakeoverCost() / 2f);
+    }
+
+    public void MarkInactiveUntilNextTurn(int playerId)
+    {
+        inactiveForPlayerId = playerId;
+        activatesNextTurn = true;
+    }
+
+    public void ActivateForPlayerIfPending(int playerId)
+    {
+        if (IsInactiveForPlayer(playerId))
+        {
+            ClearActivationDelay();
+        }
+    }
+
+    public bool IsInactiveForPlayer(int playerId)
+    {
+        return activatesNextTurn && inactiveForPlayerId == playerId;
+    }
+
+    public void ClearActivationDelay()
+    {
+        inactiveForPlayerId = -1;
+        activatesNextTurn = false;
+    }
+
+    public void RemoveCurrentTower()
+    {
+        if (currentTower != null)
+        {
+            Destroy(currentTower);
+        }
+
+        currentTower = null;
+        isOccupied = false;
     }
 
     public void RefreshOwnershipVisual(PlayerManager visualPlayerManager)
@@ -198,6 +264,17 @@ public class TowerBuildArea : MonoBehaviour
 
         highlightRenderer.enabled = true;
         highlightRenderer.color = available ? availableColor : unavailableColor;
+    }
+
+    public void ShowHighlight(Color color)
+    {
+        if (highlightRenderer == null)
+        {
+            return;
+        }
+
+        highlightRenderer.enabled = true;
+        highlightRenderer.color = color;
     }
 
     public void HideHighlight()

@@ -3,13 +3,13 @@
  *
  * Purpose:
  * This script controls the card system used by the player during gameplay.
- * It builds a deck from the card prefab list, shuffles the deck, draws cards
+ * It builds a runtime deck from Inspector deck entries, shuffles and draws cards
  * into UI slots, lets the player select/discard/play a card, and coordinates
  * cards that require gate targeting.
  *
  * Main gameplay flow:
- * 1. Start() creates a deck by adding several copies of each card prefab.
- * 2. DrawCard() finds an empty hand slot and instantiates one card prefab there.
+ * 1. InitializeDeck() builds the configured runtime deck.
+ * 2. DrawCard() adds one prefab reference to the current player's PlayerHand.
  * 3. CardInstanceSelectable reports clicks back to this manager through SelectCard().
  * 4. PlaySelectedCard() animates the selected card toward the draw pile area.
  * 5. If the card name maps to a GateActionType, this manager opens gate targeting
@@ -18,7 +18,7 @@
  *    depending on whether the gate action is confirmed or cancelled.
  *
  * Inspector setup:
- * - cardTypePrefabs should contain the available card UI prefabs.
+ * - deckEntries should contain the 28-card deck composition.
  * - cardSlots should point to the UI transforms where cards can be placed.
  * - drawPileVisual is optional and is used as the visual animation target.
  * - warningText is optional and displays short player feedback messages.
@@ -33,13 +33,23 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 
+[System.Serializable]
+public class CardDeckEntry
+{
+    public GameObject cardPrefab;
+    public int copies = 1;
+}
+
 public class CardDrawManager : MonoBehaviour
 {
     [Header("9 Card Type Prefabs")]
     public GameObject[] cardTypePrefabs;
 
     [Header("Deck Settings")]
+    public List<CardDeckEntry> deckEntries = new List<CardDeckEntry>();
     public int copiesPerCardType = 4;
+    public int initialCardsPerPlayer = 2;
+    public bool rebuildDeckWhenEmpty = true;
 
     [Header("Card Slots")]
     public Transform[] cardSlots;
@@ -68,7 +78,12 @@ public class CardDrawManager : MonoBehaviour
     [Header("Player Manager")]
     public PlayerManager playerManager;
 
-    private List<GameObject> deck = new List<GameObject>();
+    [Header("Tile Targeting")]
+    public TileTargetingManager tileTargetingManager;
+
+    private List<GameObject> runtimeDeck = new List<GameObject>();
+    private bool deckInitialized = false;
+    private bool initialHandsDealt = false;
     private bool isBusy = false;
     private CardInstanceSelectable selectedCard;
     private CardInstanceSelectable pendingPlayedCard;
@@ -91,36 +106,92 @@ public class CardDrawManager : MonoBehaviour
 
     void Start()
     {
-        BuildDeck();
-        ShuffleDeck();
+        if (!deckInitialized)
+        {
+            InitializeDeck();
+        }
+
         RenderCurrentPlayerHand();
-        Debug.Log("Deck ready. Total cards = " + deck.Count);
     }
 
-    void BuildDeck()
+    public void InitializeDeck()
     {
-        deck.Clear();
+        runtimeDeck.Clear();
+
+        if (HasConfiguredDeckEntries())
+        {
+            foreach (CardDeckEntry entry in deckEntries)
+            {
+                if (entry == null || entry.cardPrefab == null)
+                {
+                    continue;
+                }
+
+                int copyCount = Mathf.Max(0, entry.copies);
+
+                for (int i = 0; i < copyCount; i++)
+                {
+                    runtimeDeck.Add(entry.cardPrefab);
+                }
+            }
+        }
+        else
+        {
+            BuildDeckFromLegacyPrefabs();
+        }
+
+        ShuffleRuntimeDeck();
+        deckInitialized = true;
+        Debug.Log("Deck ready. Total cards = " + runtimeDeck.Count);
+    }
+
+    private void BuildDeckFromLegacyPrefabs()
+    {
+        if (cardTypePrefabs == null)
+        {
+            return;
+        }
 
         foreach (GameObject prefab in cardTypePrefabs)
         {
-            if (prefab == null) continue;
+            if (prefab == null)
+            {
+                continue;
+            }
 
             for (int i = 0; i < copiesPerCardType; i++)
             {
-                deck.Add(prefab);
+                runtimeDeck.Add(prefab);
             }
         }
     }
 
-    void ShuffleDeck()
+    private bool HasConfiguredDeckEntries()
     {
-        for (int i = 0; i < deck.Count; i++)
+        if (deckEntries == null || deckEntries.Count == 0)
         {
-            int randomIndex = Random.Range(i, deck.Count);
+            return false;
+        }
 
-            GameObject temp = deck[i];
-            deck[i] = deck[randomIndex];
-            deck[randomIndex] = temp;
+        foreach (CardDeckEntry entry in deckEntries)
+        {
+            if (entry != null && entry.cardPrefab != null && entry.copies > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void ShuffleRuntimeDeck()
+    {
+        for (int i = 0; i < runtimeDeck.Count; i++)
+        {
+            int randomIndex = Random.Range(i, runtimeDeck.Count);
+            GameObject temp = runtimeDeck[i];
+            runtimeDeck[i] = runtimeDeck[randomIndex];
+            runtimeDeck[randomIndex] = temp;
         }
     }
 
@@ -136,13 +207,13 @@ public class CardDrawManager : MonoBehaviour
 
         if (IsCurrentHandFull())
         {
-            StartCoroutine(ShowWarning("Hand is full!"));
+            StartCoroutine(ShowWarning("Hand limit reached."));
             return;
         }
 
-        if (deck.Count <= 0)
+        if (!HasDrawableCard())
         {
-            StartCoroutine(ShowWarning("Deck is empty!"));
+            StartCoroutine(ShowWarning("Deck is empty."));
             return;
         }
 
@@ -180,8 +251,19 @@ public class CardDrawManager : MonoBehaviour
 
         yield return new WaitForSeconds(animationTime);
 
-        GameObject cardPrefab = deck[0];
-        deck.RemoveAt(0);
+        GameObject cardPrefab = DrawOneCardFromDeck();
+
+        if (cardPrefab == null)
+        {
+            if (drawPileVisual != null)
+            {
+                drawPileVisual.SetActive(false);
+            }
+
+            StartCoroutine(ShowWarning("Deck is empty."));
+            isBusy = false;
+            yield break;
+        }
 
         PlayerHand currentHand = GetCurrentPlayerHand();
 
@@ -205,10 +287,152 @@ public class CardDrawManager : MonoBehaviour
             drawPileVisual.SetActive(false);
         }
 
-        Debug.Log("Drew card: " + cardPrefab.name + ". Cards left in deck = " + deck.Count);
+        Debug.Log("Drew card: " + cardPrefab.name + ". Cards left in deck = " + GetRemainingDeckCount());
         RenderCurrentPlayerHand();
 
         isBusy = false;
+    }
+
+    public void DealInitialHands()
+    {
+        DealInitialHands(initialCardsPerPlayer);
+    }
+
+    public void DealInitialHands(int cardsPerPlayer)
+    {
+        if (initialHandsDealt)
+        {
+            return;
+        }
+
+        if (playerManager == null || playerManager.players == null)
+        {
+            Debug.LogWarning("Cannot deal initial hands because PlayerManager is not assigned.");
+            return;
+        }
+
+        if (!deckInitialized)
+        {
+            InitializeDeck();
+        }
+
+        foreach (PlayerResource player in playerManager.players)
+        {
+            if (player == null)
+            {
+                continue;
+            }
+
+            PlayerHand hand = player.GetPlayerHand();
+
+            if (hand == null)
+            {
+                continue;
+            }
+
+            hand.Clear();
+
+            for (int i = 0; i < cardsPerPlayer; i++)
+            {
+                if (!TryAddCardToHand(hand, false))
+                {
+                    break;
+                }
+            }
+
+            player.SyncCardCountFromHand();
+        }
+
+        initialHandsDealt = true;
+        Debug.Log("Initial hands dealt.");
+        RenderCurrentPlayerHand();
+    }
+
+    public bool TryDrawForCurrentPlayer(bool countsAsTurnDraw)
+    {
+        PlayerResource currentPlayer = GetCurrentPlayerResource();
+        return currentPlayer != null && TryDrawForPlayer(currentPlayer.playerId, countsAsTurnDraw);
+    }
+
+    public bool TryDrawForPlayer(int playerId, bool countsAsTurnDraw)
+    {
+        PlayerResource player = GetPlayerResource(playerId);
+
+        if (player == null)
+        {
+            return false;
+        }
+
+        if (countsAsTurnDraw)
+        {
+            TurnManager manager = GetTurnManager();
+
+            if (manager != null && !manager.TryConsumeDraw())
+            {
+                return false;
+            }
+        }
+
+        PlayerHand hand = player.GetPlayerHand();
+        bool added = TryAddCardToHand(hand, true);
+
+        if (added)
+        {
+            player.SyncCardCountFromHand();
+
+            if (playerManager != null && playerManager.GetCurrentPlayerId() == playerId)
+            {
+                RenderCurrentPlayerHand();
+            }
+            else if (playerManager != null)
+            {
+                playerManager.RefreshPlayerUI(playerId);
+            }
+
+            if (countsAsTurnDraw)
+            {
+                Debug.Log("Drew card for " + player.GetDisplayName() + ".");
+            }
+        }
+        else if (playerManager != null && playerManager.GetCurrentPlayerId() == playerId)
+        {
+            RenderCurrentPlayerHand();
+        }
+
+        return added;
+    }
+
+    private bool TryAddCardToHand(PlayerHand hand, bool showWarnings)
+    {
+        if (hand == null)
+        {
+            return false;
+        }
+
+        if (!hand.CanAddCard())
+        {
+            if (showWarnings)
+            {
+                Debug.Log("Hand limit reached.");
+                StartCoroutine(ShowWarning("Hand limit reached."));
+            }
+
+            return false;
+        }
+
+        GameObject cardPrefab = DrawOneCardFromDeck();
+
+        if (cardPrefab == null)
+        {
+            if (showWarnings)
+            {
+                StartCoroutine(ShowWarning("Deck is empty."));
+            }
+
+            return false;
+        }
+
+        return hand.AddCard(cardPrefab);
     }
 
     public bool CanSelectCards()
@@ -309,11 +533,10 @@ public class CardDrawManager : MonoBehaviour
                 SyncCurrentPlayerCardCount();
             }
 
-            deck.Add(returnedPrefab);
-            ShuffleDeck();
+            AddCardToDeck(returnedPrefab);
         }
 
-        Debug.Log("Discarded card and returned to deck: " + (returnedPrefab != null ? returnedPrefab.name : "Unknown") + ". Cards in deck = " + deck.Count);
+        Debug.Log("Discarded card and returned to deck: " + (returnedPrefab != null ? returnedPrefab.name : "Unknown") + ". Cards in deck = " + GetRemainingDeckCount());
 
         selectedCard = null;
 
@@ -344,6 +567,12 @@ public class CardDrawManager : MonoBehaviour
              !GateTargetingManager.Instance.HasValidGateTargets(gateActionType)))
         {
             StartCoroutine(ShowWarning("No valid gates."));
+            return;
+        }
+
+        if (IsTakeOverCard(selectedCard.sourcePrefab.name) && tileTargetingManager == null)
+        {
+            StartCoroutine(ShowWarning("Tile targeting manager is missing."));
             return;
         }
 
@@ -445,6 +674,24 @@ public class CardDrawManager : MonoBehaviour
             yield break;
         }
 
+        if (IsTakeOverCard(playedCardName))
+        {
+            if (tileTargetingManager == null ||
+                !tileTargetingManager.BeginTakeOverTargeting())
+            {
+                ResetCardRect(cardRect);
+                card.SetSelected(true);
+                isBusy = false;
+                yield break;
+            }
+
+            pendingPlayedCard = card;
+            selectedCard = null;
+            card.gameObject.SetActive(false);
+            isBusy = false;
+            yield break;
+        }
+
         TurnManager manager = GetTurnManager();
 
         if (manager != null && !manager.TryConsumePlayCard())
@@ -465,11 +712,16 @@ public class CardDrawManager : MonoBehaviour
 
     public void ConfirmPendingCard()
     {
+        ConfirmPendingCard(true);
+    }
+
+    public void ConfirmPendingCard(bool consumePlayAction)
+    {
         if (pendingPlayedCard == null) return;
 
         TurnManager manager = GetTurnManager();
 
-        if (manager != null && !manager.TryConsumePlayCard())
+        if (consumePlayAction && manager != null && !manager.TryConsumePlayCard())
         {
             return;
         }
@@ -482,9 +734,37 @@ public class CardDrawManager : MonoBehaviour
         Debug.Log("Pending card confirmed and consumed.");
     }
 
+    public bool ConsumeSelectedCardAfterSuccessfulTargeting()
+    {
+        if (pendingPlayedCard == null)
+        {
+            return false;
+        }
+
+        TurnManager manager = GetTurnManager();
+
+        if (manager != null && !manager.TryConsumePlayCard())
+        {
+            return false;
+        }
+
+        RemoveCardFromCurrentHand(pendingPlayedCard.sourcePrefab);
+        Destroy(pendingPlayedCard.gameObject);
+        pendingPlayedCard = null;
+        RenderCurrentPlayerHand();
+
+        Debug.Log("Pending card confirmed and consumed.");
+        return true;
+    }
+
     public void CancelPendingCard()
     {
         if (pendingPlayedCard == null) return;
+
+        if (tileTargetingManager != null && tileTargetingManager.IsTargeting())
+        {
+            tileTargetingManager.ExitWithoutConsumingCard();
+        }
 
         GameObject cardObject = pendingPlayedCard.gameObject;
         cardObject.SetActive(true);
@@ -535,6 +815,12 @@ public class CardDrawManager : MonoBehaviour
         }
 
         return GateActionType.None;
+    }
+
+    private bool IsTakeOverCard(string cardName)
+    {
+        cardName = cardName.Trim();
+        return cardName == "TakeOver" || cardName == "Take Over";
     }
 
     IEnumerator ShowWarning(string message)
@@ -721,6 +1007,17 @@ public class CardDrawManager : MonoBehaviour
         return playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
     }
 
+    private int GetCurrentPlayerId()
+    {
+        if (playerManager != null)
+        {
+            return playerManager.GetCurrentPlayerId();
+        }
+
+        TurnManager manager = GetTurnManager();
+        return manager != null ? manager.currentPlayerId : 0;
+    }
+
     private PlayerHand GetCurrentPlayerHand()
     {
         if (playerManager != null)
@@ -734,6 +1031,13 @@ public class CardDrawManager : MonoBehaviour
 
     private bool IsCurrentHandFull()
     {
+        PlayerHand currentHand = GetCurrentPlayerHand();
+
+        if (currentHand != null)
+        {
+            return !currentHand.CanAddCard();
+        }
+
         int maxCards = cardSlots != null ? cardSlots.Length : 0;
         return maxCards > 0 && GetHandCardCount() >= maxCards;
     }
@@ -757,5 +1061,76 @@ public class CardDrawManager : MonoBehaviour
         {
             currentPlayer.SyncCardCountFromHand();
         }
+    }
+
+    private bool HasDrawableCard()
+    {
+        return GetRemainingDeckCount() > 0;
+    }
+
+    private GameObject DrawOneCardFromDeck()
+    {
+        if (!deckInitialized)
+        {
+            InitializeDeck();
+        }
+
+        if (runtimeDeck.Count <= 0 && rebuildDeckWhenEmpty)
+        {
+            InitializeDeck();
+        }
+
+        if (runtimeDeck.Count <= 0)
+        {
+            return null;
+        }
+
+        GameObject cardPrefab = runtimeDeck[0];
+        runtimeDeck.RemoveAt(0);
+        return cardPrefab;
+    }
+
+    private void AddCardToDeck(GameObject cardPrefab)
+    {
+        if (cardPrefab == null)
+        {
+            return;
+        }
+
+        runtimeDeck.Add(cardPrefab);
+        ShuffleRuntimeDeck();
+    }
+
+    private int GetRemainingDeckCount()
+    {
+        if (!deckInitialized)
+        {
+            InitializeDeck();
+        }
+
+        if (runtimeDeck.Count <= 0 && rebuildDeckWhenEmpty)
+        {
+            InitializeDeck();
+        }
+
+        return runtimeDeck.Count;
+    }
+
+    private PlayerResource GetPlayerResource(int playerId)
+    {
+        if (playerManager == null || playerManager.players == null)
+        {
+            return null;
+        }
+
+        foreach (PlayerResource player in playerManager.players)
+        {
+            if (player != null && player.playerId == playerId)
+            {
+                return player;
+            }
+        }
+
+        return null;
     }
 }
