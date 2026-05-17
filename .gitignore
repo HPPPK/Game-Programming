@@ -4,6 +4,10 @@
 # Local template workspace
 template/
 
+# Local presentation exports
+Post/Unity_EventDriven_Code_Lab_Editable_English.pptx
+Post/Unity_EventDriven_Pages04_13_Editable_Replica.pptx
+
 # Unity generated files
 FinalGame/CanalTD/Library/
 FinalGame/CanalTD/Temp/

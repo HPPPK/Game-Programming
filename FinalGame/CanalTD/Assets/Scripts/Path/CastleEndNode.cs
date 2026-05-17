@@ -34,7 +34,15 @@ public class CastleEndNode : PathNode
     {
         if (targetCastle != null)
         {
-            targetCastle.TakeDamage(damagePerEnemy);
+            int damage = damagePerEnemy;
+            EnemyMover enemyMover = enemy != null ? enemy.GetComponent<EnemyMover>() : null;
+
+            if (enemyMover != null)
+            {
+                damage = enemyMover.castleDamage;
+            }
+
+            targetCastle.TakeDamage(damage);
         }
         else
         {

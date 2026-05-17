@@ -25,11 +25,15 @@ public class CastleBase : MonoBehaviour
     public string playerName = "Player";
     public int maxHP = 20;
     public int currentHP = 20;
+    public int ownerPlayerId = 0;
+    public PlayerResource ownerResource;
+    public PlayerStatusPanelUI statusPanel;
 
     void Start()
     {
         currentHP = maxHP;
-        Debug.Log(playerName + " base ready. HP = " + currentHP);
+        SyncPlayerNameFromOwner();
+        Debug.Log(GetDisplayName() + " base ready. HP = " + currentHP);
     }
 
     public void TakeDamage(int damage)
@@ -41,18 +45,46 @@ public class CastleBase : MonoBehaviour
             currentHP = 0;
         }
 
-        Debug.Log(playerName + " base took " + damage + " damage. HP = " + currentHP);
+        Debug.Log(GetDisplayName() + " base took " + damage + " damage. HP = " + currentHP);
+
+        if (ownerResource != null)
+        {
+            ownerResource.AddScore(-damage);
+        }
+
+        if (statusPanel != null)
+        {
+            statusPanel.Refresh();
+        }
 
         if (currentHP <= 0)
         {
-            Debug.Log(playerName + " GAME OVER");
+            Debug.Log(GetDisplayName() + " GAME OVER");
             OnGameOver();
+        }
+    }
+
+    public string GetDisplayName()
+    {
+        if (ownerResource != null)
+        {
+            return ownerResource.GetDisplayName();
+        }
+
+        return playerName;
+    }
+
+    public void SyncPlayerNameFromOwner()
+    {
+        if (ownerResource != null)
+        {
+            playerName = ownerResource.GetDisplayName();
         }
     }
 
     void OnGameOver()
     {
-        Debug.Log(">>> " + playerName + " LOSE <<<");
+        Debug.Log(">>> " + GetDisplayName() + " LOSE <<<");
 
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
         if (sr != null)

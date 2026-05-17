@@ -51,6 +51,17 @@ public class GateTargetingManager : MonoBehaviour
     public GameObject hammerButton;
     public CanvasGroup normalGameplayUI;
 
+    [Header("Gate Ownership")]
+    public int currentPlayerId = 0;
+    public GateOwnershipManager gateOwnershipManager;
+    public PlayerManager playerManager;
+
+    [Header("Turn")]
+    public TurnManager turnManager;
+
+    [Header("Phase Manager")]
+    public GamePhaseManager gamePhaseManager;
+
     [Header("Colors")]
     public Color normalMapColor = Color.white;
     public Color dimMapColor = new Color(0.45f, 0.45f, 0.45f, 1f);
@@ -86,9 +97,21 @@ public class GateTargetingManager : MonoBehaviour
 
     public bool EnterGateTargetMode(GateActionType actionType)
     {
+        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        {
+            ShowToast("You cannot control gates during enemy wave.");
+            return false;
+        }
+
         if (actionType == GateActionType.None)
         {
             Debug.LogWarning("Cannot enter gate targeting mode without a gate action.");
+            return false;
+        }
+
+        if (gateOwnershipManager == null)
+        {
+            ShowToast("Gate ownership manager is missing.");
             return false;
         }
 
@@ -185,7 +208,7 @@ public class GateTargetingManager : MonoBehaviour
                 valid = gate.CanOpen();
             }
 
-            if (valid)
+            if (valid && CanCurrentPlayerControlGate(gate))
             {
                 results.Add(gate);
             }
@@ -211,7 +234,7 @@ public class GateTargetingManager : MonoBehaviour
 
         if (!IsValidTarget(gate))
         {
-            ShowToast("Invalid target");
+            ShowGateBlockToast(GetGateBlockReason(gate));
             return;
         }
 
@@ -229,6 +252,43 @@ public class GateTargetingManager : MonoBehaviour
     public bool IsValidTarget(GateFrameAnimation gate)
     {
         return gate != null && validTargets != null && validTargets.Contains(gate);
+    }
+
+    private bool CanCurrentPlayerControlGate(GateFrameAnimation gate)
+    {
+        if (gateOwnershipManager == null)
+        {
+            return false;
+        }
+
+        return gate != null &&
+            gateOwnershipManager.CanPlayerControlGate(GetCurrentPlayerId(), gate.gameObject);
+    }
+
+    private string GetGateBlockReason(GateFrameAnimation gate)
+    {
+        if (gateOwnershipManager == null)
+        {
+            return "Gate ownership manager is missing.";
+        }
+
+        string reason = gateOwnershipManager.GetGateBlockReason(
+            GetCurrentPlayerId(),
+            gate != null ? gate.gameObject : null
+        );
+
+        return string.IsNullOrEmpty(reason) ? "Invalid target" : reason;
+    }
+
+    private void ShowGateBlockToast(string message)
+    {
+        if (gateOwnershipManager != null)
+        {
+            gateOwnershipManager.ShowToast(message);
+            return;
+        }
+
+        ShowToast(message);
     }
 
     public void PreviewGate(GateFrameAnimation gate, bool hovering)
@@ -259,9 +319,35 @@ public class GateTargetingManager : MonoBehaviour
     {
         if (!isTargetingGate) return;
 
+        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        {
+            ShowToast("You cannot control gates during enemy wave.");
+            return;
+        }
+
         if (selectedGate == null)
         {
             Debug.Log("No gate selected.");
+            return;
+        }
+
+        if (!CanSelectedGateStillChange())
+        {
+            ShowToast("Invalid target");
+            return;
+        }
+
+        TurnManager manager = GetTurnManager();
+
+        if (manager != null && !manager.CanPlayCard())
+        {
+            manager.TryConsumePlayCard();
+            return;
+        }
+
+        if (manager != null && !manager.CanChangeGate())
+        {
+            manager.TryConsumeGateChange();
             return;
         }
 
@@ -279,6 +365,11 @@ public class GateTargetingManager : MonoBehaviour
         if (!actionSucceeded)
         {
             Debug.LogWarning("Gate action failed: " + currentActionType);
+            return;
+        }
+
+        if (manager != null && !manager.TryConsumeGateChange())
+        {
             return;
         }
 
@@ -501,6 +592,50 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         Debug.LogWarning("No cursor controller found.");
+    }
+
+    private bool CanSelectedGateStillChange()
+    {
+        if (selectedGate == null)
+        {
+            return false;
+        }
+
+        if (currentActionType == GateActionType.OpenGate)
+        {
+            return selectedGate.CanOpen();
+        }
+
+        if (currentActionType == GateActionType.LockGate)
+        {
+            return !selectedGate.IsLocked() &&
+                !selectedGate.IsPlaying() &&
+                !selectedGate.IsBlocking();
+        }
+
+        return false;
+    }
+
+    private TurnManager GetTurnManager()
+    {
+        return turnManager != null ? turnManager : TurnManager.Instance;
+    }
+
+    private int GetCurrentPlayerId()
+    {
+        if (playerManager != null)
+        {
+            return playerManager.GetCurrentPlayerId();
+        }
+
+        TurnManager manager = GetTurnManager();
+
+        if (manager != null)
+        {
+            return manager.currentPlayerId;
+        }
+
+        return currentPlayerId;
     }
 
     public void ShowToast(string message)

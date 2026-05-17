@@ -16,6 +16,7 @@ public class TowerBuildArea : MonoBehaviour
     public int ownerPlayerId = -1;
     public bool isOwned = false;
     public int landPurchaseCost = 18;
+    public PlayerManager playerManager;
 
     [Header("Gate Links")]
     public List<GameObject> linkedGates = new List<GameObject>();
@@ -27,9 +28,13 @@ public class TowerBuildArea : MonoBehaviour
 
     [Header("Visual")]
     public SpriteRenderer highlightRenderer;
+    public SpriteRenderer areaVisualRenderer;
     public Color normalColor = Color.white;
     public Color availableColor = Color.green;
     public Color unavailableColor = Color.red;
+
+    private Color neutralAreaColor = Color.white;
+    private Sprite neutralAreaSprite;
 
     private void Awake()
     {
@@ -38,7 +43,19 @@ public class TowerBuildArea : MonoBehaviour
             towerSpawnPoint = transform;
         }
 
+        if (playerManager == null)
+        {
+            playerManager = FindObjectOfType<PlayerManager>();
+        }
+
+        if (areaVisualRenderer != null)
+        {
+            neutralAreaColor = areaVisualRenderer.color;
+            neutralAreaSprite = areaVisualRenderer.sprite;
+        }
+
         HideHighlight();
+        RefreshOwnershipVisual(playerManager);
     }
 
     public bool CanBuildTower(int playerId)
@@ -118,14 +135,52 @@ public class TowerBuildArea : MonoBehaviour
 
     public void ClaimArea(int playerId)
     {
+        SetOwner(playerId, playerManager);
+    }
+
+    public void SetOwner(int playerId, PlayerManager visualPlayerManager)
+    {
         isOwned = true;
         ownerPlayerId = playerId;
+        RefreshOwnershipVisual(visualPlayerManager);
     }
 
     public void ClearOwner()
     {
         isOwned = false;
         ownerPlayerId = -1;
+        RefreshOwnershipVisual(playerManager);
+    }
+
+    public void RefreshOwnershipVisual(PlayerManager visualPlayerManager)
+    {
+        if (areaVisualRenderer == null)
+        {
+            return;
+        }
+
+        if (areaType == BuildAreaType.Public || !isOwned || ownerPlayerId < 0)
+        {
+            areaVisualRenderer.color = neutralAreaColor;
+            areaVisualRenderer.sprite = neutralAreaSprite;
+            return;
+        }
+
+        PlayerManager manager = visualPlayerManager != null ? visualPlayerManager : playerManager;
+
+        if (manager == null)
+        {
+            return;
+        }
+
+        Sprite ownerSprite = manager.GetOwnedLandSprite(ownerPlayerId);
+
+        if (ownerSprite != null)
+        {
+            areaVisualRenderer.sprite = ownerSprite;
+        }
+
+        areaVisualRenderer.color = manager.GetOwnedLandColor(ownerPlayerId);
     }
 
     public void SetTower(GameObject tower)
