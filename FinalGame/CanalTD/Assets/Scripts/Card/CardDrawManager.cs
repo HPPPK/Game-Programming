@@ -59,16 +59,41 @@ public class CardDrawManager : MonoBehaviour
     [Header("Number UI")]
     public PresentTheNumberUI presentTheNumberUI;
 
+    [Header("Turn")]
+    public TurnManager turnManager;
+
+    [Header("Phase Manager")]
+    public GamePhaseManager gamePhaseManager;
+
+    [Header("Player Manager")]
+    public PlayerManager playerManager;
+
     private List<GameObject> deck = new List<GameObject>();
     private bool isBusy = false;
     private CardInstanceSelectable selectedCard;
     private CardInstanceSelectable pendingPlayedCard;
 
+    private void OnEnable()
+    {
+        if (playerManager != null)
+        {
+            playerManager.OnCurrentPlayerChanged += HandleCurrentPlayerChanged;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (playerManager != null)
+        {
+            playerManager.OnCurrentPlayerChanged -= HandleCurrentPlayerChanged;
+        }
+    }
+
     void Start()
     {
         BuildDeck();
         ShuffleDeck();
-        RefreshPresentNumberUI();
+        RenderCurrentPlayerHand();
         Debug.Log("Deck ready. Total cards = " + deck.Count);
     }
 
@@ -101,17 +126,15 @@ public class CardDrawManager : MonoBehaviour
 
     public void DrawCard()
     {
-        if (isBusy) return;
-
-        if (TurnManager.Instance != null && !TurnManager.Instance.CanDrawCard())
+        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            StartCoroutine(ShowWarning("Cannot draw this turn."));
+            StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
             return;
         }
 
-        int emptySlotIndex = FindEmptySlot();
+        if (isBusy) return;
 
-        if (emptySlotIndex == -1)
+        if (IsCurrentHandFull())
         {
             StartCoroutine(ShowWarning("Hand is full!"));
             return;
@@ -123,7 +146,14 @@ public class CardDrawManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(DrawCardRoutine(emptySlotIndex));
+        TurnManager manager = GetTurnManager();
+
+        if (manager != null && !manager.TryConsumeDraw())
+        {
+            return;
+        }
+
+        StartCoroutine(DrawCardRoutine());
     }
 
     int FindEmptySlot()
@@ -139,7 +169,7 @@ public class CardDrawManager : MonoBehaviour
         return -1;
     }
 
-    IEnumerator DrawCardRoutine(int slotIndex)
+    IEnumerator DrawCardRoutine()
     {
         isBusy = true;
 
@@ -153,19 +183,22 @@ public class CardDrawManager : MonoBehaviour
         GameObject cardPrefab = deck[0];
         deck.RemoveAt(0);
 
-        GameObject newCard = Instantiate(cardPrefab, cardSlots[slotIndex]);
-        newCard.name = "CardView";
+        PlayerHand currentHand = GetCurrentPlayerHand();
 
-        ResetCardRect(newCard.GetComponent<RectTransform>());
-
-        CardInstanceSelectable selectable = newCard.GetComponent<CardInstanceSelectable>();
-
-        if (selectable == null)
+        if (currentHand != null)
         {
-            selectable = newCard.AddComponent<CardInstanceSelectable>();
+            currentHand.AddCard(cardPrefab);
+            SyncCurrentPlayerCardCount();
         }
+        else
+        {
+            int emptySlotIndex = FindEmptySlot();
 
-        selectable.Init(this, cardPrefab, selectedMoveUpDistance);
+            if (emptySlotIndex >= 0)
+            {
+                CreateCardView(cardPrefab, cardSlots[emptySlotIndex]);
+            }
+        }
 
         if (drawPileVisual != null)
         {
@@ -173,13 +206,7 @@ public class CardDrawManager : MonoBehaviour
         }
 
         Debug.Log("Drew card: " + cardPrefab.name + ". Cards left in deck = " + deck.Count);
-        RefreshPresentNumberUI();
-
-        if (TurnManager.Instance != null)
-        {
-            TurnManager.Instance.SpendAP(1);
-            TurnManager.Instance.OnCardDrawn();
-        }
+        RenderCurrentPlayerHand();
 
         isBusy = false;
     }
@@ -191,6 +218,13 @@ public class CardDrawManager : MonoBehaviour
 
     public int GetHandCardCount()
     {
+        PlayerHand currentHand = GetCurrentPlayerHand();
+
+        if (currentHand != null)
+        {
+            return currentHand.GetCardCount();
+        }
+
         if (cardSlots == null)
         {
             return 0;
@@ -241,6 +275,12 @@ public class CardDrawManager : MonoBehaviour
 
     public void DiscardSelectedCard()
     {
+        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        {
+            StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
+            return;
+        }
+
         if (isBusy) return;
         if (pendingPlayedCard != null) return;
 
@@ -250,33 +290,46 @@ public class CardDrawManager : MonoBehaviour
             return;
         }
 
+        TurnManager manager = GetTurnManager();
+
+        if (manager != null && !manager.TryConsumeDiscard())
+        {
+            return;
+        }
+
         GameObject returnedPrefab = selectedCard.sourcePrefab;
 
         if (returnedPrefab != null)
         {
+            PlayerHand currentHand = GetCurrentPlayerHand();
+
+            if (currentHand != null)
+            {
+                currentHand.RemoveCard(returnedPrefab);
+                SyncCurrentPlayerCardCount();
+            }
+
             deck.Add(returnedPrefab);
             ShuffleDeck();
         }
 
-        Debug.Log("Discarded card and returned to deck: " + returnedPrefab.name + ". Cards in deck = " + deck.Count);
+        Debug.Log("Discarded card and returned to deck: " + (returnedPrefab != null ? returnedPrefab.name : "Unknown") + ". Cards in deck = " + deck.Count);
 
-        GameObject cardObject = selectedCard.gameObject;
         selectedCard = null;
 
-        Destroy(cardObject);
-        StartCoroutine(RefreshPresentNumberUINextFrame());
+        RenderCurrentPlayerHand();
     }
 
     public void PlaySelectedCard()
     {
-        if (isBusy) return;
-        if (pendingPlayedCard != null) return;
-
-        if (TurnManager.Instance != null && !TurnManager.Instance.CanPlayCard())
+        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            StartCoroutine(ShowWarning("Cannot play a card this turn."));
+            StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
             return;
         }
+
+        if (isBusy) return;
+        if (pendingPlayedCard != null) return;
 
         if (selectedCard == null)
         {
@@ -291,6 +344,14 @@ public class CardDrawManager : MonoBehaviour
              !GateTargetingManager.Instance.HasValidGateTargets(gateActionType)))
         {
             StartCoroutine(ShowWarning("No valid gates."));
+            return;
+        }
+
+        TurnManager manager = GetTurnManager();
+
+        if (manager != null && !manager.CanPlayCard())
+        {
+            manager.TryConsumePlayCard();
             return;
         }
 
@@ -384,14 +445,20 @@ public class CardDrawManager : MonoBehaviour
             yield break;
         }
 
-        selectedCard = null;
-        Destroy(card.gameObject);
-        StartCoroutine(RefreshPresentNumberUINextFrame());
+        TurnManager manager = GetTurnManager();
 
-        if (TurnManager.Instance != null)
+        if (manager != null && !manager.TryConsumePlayCard())
         {
-            TurnManager.Instance.OnCardConfirmed();
+            ResetCardRect(cardRect);
+            card.SetSelected(true);
+            isBusy = false;
+            yield break;
         }
+
+        selectedCard = null;
+        RemoveCardFromCurrentHand(card.sourcePrefab);
+        Destroy(card.gameObject);
+        RenderCurrentPlayerHand();
 
         isBusy = false;
     }
@@ -400,14 +467,17 @@ public class CardDrawManager : MonoBehaviour
     {
         if (pendingPlayedCard == null) return;
 
+        TurnManager manager = GetTurnManager();
+
+        if (manager != null && !manager.TryConsumePlayCard())
+        {
+            return;
+        }
+
+        RemoveCardFromCurrentHand(pendingPlayedCard.sourcePrefab);
         Destroy(pendingPlayedCard.gameObject);
         pendingPlayedCard = null;
-        StartCoroutine(RefreshPresentNumberUINextFrame());
-
-        if (TurnManager.Instance != null)
-        {
-            TurnManager.Instance.OnCardConfirmed();
-        }
+        RenderCurrentPlayerHand();
 
         Debug.Log("Pending card confirmed and consumed.");
     }
@@ -423,12 +493,7 @@ public class CardDrawManager : MonoBehaviour
         ResetCardRect(cardRect);
 
         pendingPlayedCard = null;
-        RefreshPresentNumberUI();
-
-        if (TurnManager.Instance != null)
-        {
-            TurnManager.Instance.OnCardCanceled();
-        }
+        RenderCurrentPlayerHand();
 
         Debug.Log("Pending card cancelled and returned to hand.");
     }
@@ -484,6 +549,7 @@ public class CardDrawManager : MonoBehaviour
             }
 
             warningText.text = message;
+            warningText.fontSize = GetWarningFontSize(message);
         }
 
         yield return new WaitForSeconds(warningTime);
@@ -504,11 +570,46 @@ public class CardDrawManager : MonoBehaviour
         StartCoroutine(ShowWarning(message));
     }
 
+    private float GetWarningFontSize(string message)
+    {
+        if (string.IsNullOrEmpty(message))
+        {
+            return 4f;
+        }
+
+        if (message.Length > 33)
+        {
+            return 2f;
+        }
+
+        if (message.Length >= 20)
+        {
+            return 3f;
+        }
+
+        return 4f;
+    }
+
     private void RefreshPresentNumberUI()
     {
+        int handCount = GetHandCardCount();
+
+        if (playerManager != null)
+        {
+            PlayerResource currentPlayer = playerManager.GetCurrentPlayerResource();
+
+            if (currentPlayer != null)
+            {
+                currentPlayer.SetCardCount(handCount);
+            }
+
+            playerManager.RefreshCurrentPlayerUI();
+            return;
+        }
+
         if (presentTheNumberUI != null)
         {
-            presentTheNumberUI.SetCardCount(GetHandCardCount());
+            presentTheNumberUI.SetCardCount(handCount);
         }
     }
 
@@ -516,5 +617,145 @@ public class CardDrawManager : MonoBehaviour
     {
         yield return null;
         RefreshPresentNumberUI();
+    }
+
+    private TurnManager GetTurnManager()
+    {
+        return turnManager != null ? turnManager : TurnManager.Instance;
+    }
+
+    private void HandleCurrentPlayerChanged(int playerId)
+    {
+        if (pendingPlayedCard != null)
+        {
+            CancelPendingCard();
+        }
+
+        RenderCurrentPlayerHand();
+    }
+
+    public void RenderCurrentPlayerHand()
+    {
+        selectedCard = null;
+        ClearVisibleHand();
+
+        PlayerResource currentPlayer = GetCurrentPlayerResource();
+
+        if (currentPlayer == null)
+        {
+            RefreshPresentNumberUI();
+            return;
+        }
+
+        PlayerHand currentHand = GetCurrentPlayerHand();
+
+        if (currentHand == null)
+        {
+            RefreshPresentNumberUI();
+            return;
+        }
+
+        List<GameObject> handCards = currentHand.GetCards();
+        int visibleCount = Mathf.Min(handCards.Count, cardSlots != null ? cardSlots.Length : 0);
+
+        for (int i = 0; i < visibleCount; i++)
+        {
+            CreateCardView(handCards[i], cardSlots[i]);
+        }
+
+        currentPlayer.SetCardCount(currentHand.GetCardCount());
+        RefreshPresentNumberUI();
+    }
+
+    private void ClearVisibleHand()
+    {
+        if (cardSlots == null)
+        {
+            return;
+        }
+
+        foreach (Transform slot in cardSlots)
+        {
+            if (slot == null)
+            {
+                continue;
+            }
+
+            for (int i = slot.childCount - 1; i >= 0; i--)
+            {
+                Transform child = slot.GetChild(i);
+
+                if (child != null && child.name == "CardView")
+                {
+                    Destroy(child.gameObject);
+                }
+            }
+        }
+    }
+
+    private GameObject CreateCardView(GameObject cardPrefab, Transform slot)
+    {
+        if (cardPrefab == null || slot == null)
+        {
+            return null;
+        }
+
+        GameObject newCard = Instantiate(cardPrefab, slot);
+        newCard.name = "CardView";
+
+        ResetCardRect(newCard.GetComponent<RectTransform>());
+
+        CardInstanceSelectable selectable = newCard.GetComponent<CardInstanceSelectable>();
+
+        if (selectable == null)
+        {
+            selectable = newCard.AddComponent<CardInstanceSelectable>();
+        }
+
+        selectable.Init(this, cardPrefab, selectedMoveUpDistance);
+        return newCard;
+    }
+
+    private PlayerResource GetCurrentPlayerResource()
+    {
+        return playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
+    }
+
+    private PlayerHand GetCurrentPlayerHand()
+    {
+        if (playerManager != null)
+        {
+            return playerManager.GetCurrentPlayerHand();
+        }
+
+        PlayerResource currentPlayer = GetCurrentPlayerResource();
+        return currentPlayer != null ? currentPlayer.GetPlayerHand() : null;
+    }
+
+    private bool IsCurrentHandFull()
+    {
+        int maxCards = cardSlots != null ? cardSlots.Length : 0;
+        return maxCards > 0 && GetHandCardCount() >= maxCards;
+    }
+
+    private void RemoveCardFromCurrentHand(GameObject cardPrefab)
+    {
+        PlayerHand currentHand = GetCurrentPlayerHand();
+
+        if (currentHand != null)
+        {
+            currentHand.RemoveCard(cardPrefab);
+            SyncCurrentPlayerCardCount();
+        }
+    }
+
+    private void SyncCurrentPlayerCardCount()
+    {
+        PlayerResource currentPlayer = GetCurrentPlayerResource();
+
+        if (currentPlayer != null)
+        {
+            currentPlayer.SyncCardCountFromHand();
+        }
     }
 }
