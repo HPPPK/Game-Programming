@@ -26,12 +26,12 @@ public class ResultSceneManager : MonoBehaviour
 
         if (restartButton != null)
         {
-            restartButton.onClick.AddListener(RestartGame);
+            restartButton.onClick.AddListener(NewGame);
         }
 
         if (quitButton != null)
         {
-            quitButton.onClick.AddListener(QuitGame);
+            quitButton.onClick.AddListener(BackToHome);
         }
     }
 
@@ -68,14 +68,24 @@ public class ResultSceneManager : MonoBehaviour
         }
     }
 
-    private void RestartGame()
+    public void NewGame()
     {
         GameResultData.Clear();
         SceneManager.LoadScene(gameSceneName);
     }
 
-    private void QuitGame()
+    public void BackToHome()
     {
-        Application.Quit();
+        Debug.Log("HomeScene is not implemented yet.");
+    }
+
+    public void RestartGame()
+    {
+        NewGame();
+    }
+
+    public void QuitGame()
+    {
+        BackToHome();
     }
 }
