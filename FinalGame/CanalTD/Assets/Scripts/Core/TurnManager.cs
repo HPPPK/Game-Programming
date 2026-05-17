@@ -1,51 +1,33 @@
-/*
- * File: TurnManager.cs
- *
- * Purpose:
- * This script controls the current single-player sandbox turn state. It gives
- * the player a small AP budget each turn and limits basic card actions so the
- * project has a playable planning -> enemy wave -> next turn loop.
- *
- * Current rules:
- * - There is only one human player.
- * - Each turn starts with maxAP.
- * - Drawing a card costs 1 AP immediately after the draw succeeds.
- * - Playing a card costs 1 AP only after the card action is confirmed.
- * - Canceling a targeting card restores the card and does not spend AP.
- * - EndTurn() can trigger the current WaveManager, waits for the wave to finish,
- *   then starts the next turn.
- *
- * Inspector setup:
- * - maxAP controls how much AP each turn starts with.
- * - waveManager is optional. If assigned, EndTurn() starts a wave.
- */
+using System.Reflection;
 using UnityEngine;
-using System.Collections;
 
 public class TurnManager : MonoBehaviour
 {
     public static TurnManager Instance;
 
+    [Header("Player")]
+    public int currentPlayerId = 0;
+
     [Header("Action Points")]
     public int maxAP = 2;
-    public int currentAP;
+    public int currentAP = 2;
 
     [Header("Turn Limits")]
-    public bool hasDrawnThisTurn;
-    public bool hasPlayedCardThisTurn;
-    public bool hasEndedThisTurn;
+    public bool hasDrawnCard = false;
+    public bool hasPlayedCard = false;
+    public bool hasChangedGate = false;
+    public bool hasDiscardedCard = false;
 
-    [Header("Optional Wave")]
-    public WaveManager waveManager;
+    [Header("UI")]
+    public MonoBehaviour toastMessage;
+    public PresentTheNumberUI presentTheNumberUI;
 
-    private bool isResolvingTurn = false;
-
-    void Awake()
+    private void Awake()
     {
         Instance = this;
     }
 
-    void Start()
+    private void Start()
     {
         StartTurn();
     }
@@ -53,94 +35,152 @@ public class TurnManager : MonoBehaviour
     public void StartTurn()
     {
         currentAP = maxAP;
-        hasDrawnThisTurn = false;
-        hasPlayedCardThisTurn = false;
-        hasEndedThisTurn = false;
+        hasDrawnCard = false;
+        hasPlayedCard = false;
+        hasChangedGate = false;
+        hasDiscardedCard = false;
 
-        Debug.Log("Start Turn. AP = " + currentAP + " / " + maxAP);
+        Debug.Log("Start turn. AP = " + currentAP + " / " + maxAP);
     }
 
     public void EndTurn()
     {
-        if (hasEndedThisTurn || isResolvingTurn)
-        {
-            Debug.Log("End Turn already used this turn.");
-            return;
-        }
-
-        hasEndedThisTurn = true;
-        isResolvingTurn = true;
-        Debug.Log("End Turn.");
-
-        StartCoroutine(EndTurnRoutine());
-    }
-
-    IEnumerator EndTurnRoutine()
-    {
-        if (waveManager != null)
-        {
-            waveManager.StartWave();
-
-            while (waveManager.IsSpawning)
-            {
-                yield return null;
-            }
-        }
-
-        isResolvingTurn = false;
         StartTurn();
     }
 
     public bool CanDrawCard()
     {
-        return currentAP > 0 && !hasDrawnThisTurn && !hasEndedThisTurn && !isResolvingTurn;
+        return !hasDrawnCard;
+    }
+
+    public bool TryConsumeDraw()
+    {
+        if (hasDrawnCard)
+        {
+            ShowToast("You already drew a card this turn.");
+            return false;
+        }
+
+        hasDrawnCard = true;
+        return true;
     }
 
     public bool CanPlayCard()
     {
-        return currentAP > 0 && !hasPlayedCardThisTurn && !hasEndedThisTurn && !isResolvingTurn;
+        return !hasPlayedCard && HasEnoughAP(1);
     }
 
-    public bool SpendAP(int amount)
+    public bool TryConsumePlayCard()
     {
-        if (amount <= 0)
+        if (hasPlayedCard)
         {
-            return true;
-        }
-
-        if (currentAP < amount)
-        {
-            Debug.LogWarning("Not enough AP. Current AP = " + currentAP + ", required AP = " + amount);
+            ShowToast("You can only play one card per turn.");
             return false;
         }
 
-        currentAP -= amount;
-        Debug.Log("Spent " + amount + " AP. AP = " + currentAP + " / " + maxAP);
+        if (!HasEnoughAP(1))
+        {
+            ShowToast("Not enough AP.");
+            return false;
+        }
+
+        currentAP -= 1;
+        hasPlayedCard = true;
         return true;
     }
 
-    public void OnCardDrawn()
+    public bool CanChangeGate()
     {
-        hasDrawnThisTurn = true;
+        return !hasChangedGate;
     }
 
-    public void OnCardConfirmed()
+    public bool TryConsumeGateChange()
     {
-        if (hasPlayedCardThisTurn)
+        if (hasChangedGate)
+        {
+            ShowToast("You already changed a gate this turn.");
+            return false;
+        }
+
+        hasChangedGate = true;
+        return true;
+    }
+
+    public bool CanDiscardCard()
+    {
+        return !hasDiscardedCard;
+    }
+
+    public bool TryConsumeDiscard()
+    {
+        if (hasDiscardedCard)
+        {
+            ShowToast("You already discarded this turn.");
+            return false;
+        }
+
+        hasDiscardedCard = true;
+        return true;
+    }
+
+    public bool HasEnoughAP(int cost)
+    {
+        return currentAP >= cost;
+    }
+
+    private void ShowToast(string message)
+    {
+        if (TryCallToastMethod(message))
         {
             return;
         }
 
-        if (!SpendAP(1))
+        CardDrawManager cardManager = FindObjectOfType<CardDrawManager>();
+
+        if (cardManager != null)
         {
+            cardManager.ShowWarningMessage(message);
             return;
         }
 
-        hasPlayedCardThisTurn = true;
+        Debug.Log(message);
     }
 
-    public void OnCardCanceled()
+    private bool TryCallToastMethod(string message)
     {
-        Debug.Log("Card action canceled. AP unchanged.");
+        if (toastMessage == null)
+        {
+            return false;
+        }
+
+        string[] methodNames =
+        {
+            "ShowMessage",
+            "Show",
+            "ShowToast",
+            "Display",
+            "ShowWarningMessage"
+        };
+
+        foreach (string methodName in methodNames)
+        {
+            MethodInfo method = toastMessage.GetType().GetMethod(
+                methodName,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(string) },
+                null
+            );
+
+            if (method == null)
+            {
+                continue;
+            }
+
+            method.Invoke(toastMessage, new object[] { message });
+            return true;
+        }
+
+        return false;
     }
 }
