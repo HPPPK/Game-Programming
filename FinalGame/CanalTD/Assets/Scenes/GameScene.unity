@@ -3446,8 +3446,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   areaType: 1
-  ownerPlayerId: 1
-  isOwned: 1
+  ownerPlayerId: -1
+  isOwned: 0
   landPurchaseCost: 10
   playerManager: {fileID: 535938592}
   inactiveForPlayerId: -1
@@ -66619,23 +66619,23 @@ MonoBehaviour:
   - {fileID: 6102372162773221512, guid: dd8d20efc59ff46a4befe7e649f214e9, type: 3}
   deckEntries:
   - cardPrefab: {fileID: 8458070141724709175, guid: bd0915fc14df441b58a81c99d959bdd5, type: 3}
-    copies: 0
+    copies: 3
   - cardPrefab: {fileID: 3204670459045031880, guid: 6060639011d74403e8e71a42962fe62d, type: 3}
-    copies: 0
+    copies: 3
   - cardPrefab: {fileID: 309758310112713740, guid: 7ec724f25addc469baddf26fef55b44b, type: 3}
-    copies: 28
+    copies: 3
   - cardPrefab: {fileID: 130448104166710368, guid: 1e827c45815384266a201438a232248a, type: 3}
-    copies: 0
+    copies: 2
   - cardPrefab: {fileID: 6102372162773221512, guid: dd8d20efc59ff46a4befe7e649f214e9, type: 3}
-    copies: 0
+    copies: 4
   - cardPrefab: {fileID: 2034789762873890459, guid: 21a9157e9c8bd4d04a4adf75dc24bad3, type: 3}
-    copies: 0
+    copies: 3
   - cardPrefab: {fileID: 7674102033572812371, guid: 1dbff84d9835142ce816d8271f8bcefc, type: 3}
-    copies: 0
+    copies: 3
   - cardPrefab: {fileID: 5200428458405979403, guid: 6515cb6c1bce54a43aad4366a9279d67, type: 3}
-    copies: 0
+    copies: 4
   - cardPrefab: {fileID: 1578849451067440632, guid: 3d1ca082f93814fed8b1bb9c6f668eb0, type: 3}
-    copies: 0
+    copies: 3
   copiesPerCardType: 4
   initialCardsPerPlayer: 2
   rebuildDeckWhenEmpty: 1
