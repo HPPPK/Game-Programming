@@ -22,12 +22,18 @@ public class GamePhaseManager : MonoBehaviour
     public PlayerManager playerManager;
     public TurnManager turnManager;
     public WaveManager waveManager;
+    public CardDrawManager cardDrawManager;
     public MonoBehaviour toastMessage;
 
+    [Header("Card Start Rules")]
+    public int initialCardsPerPlayer = 2;
+
     private bool playerTurnToastAlreadyShown = false;
+    private bool initialHandsDealt = false;
 
     private void Start()
     {
+        DealInitialHandsOnce();
         StartPlayerPhase();
     }
 
@@ -55,6 +61,8 @@ public class GamePhaseManager : MonoBehaviour
             turnManager.StartTurn();
         }
 
+        ActivatePendingTakeoverLand();
+
         if (playerManager != null)
         {
             if (playerTurnToastAlreadyShown)
@@ -73,6 +81,7 @@ public class GamePhaseManager : MonoBehaviour
             int activePlayerId = turnManager != null ? turnManager.currentPlayerId : 0;
             ShowToast("Player " + activePlayerId + " turn started.");
         }
+
     }
 
     public void StartWavePhase()
@@ -283,5 +292,50 @@ public class GamePhaseManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void DealInitialHandsOnce()
+    {
+        if (initialHandsDealt)
+        {
+            return;
+        }
+
+        CardDrawManager manager = GetCardDrawManager();
+
+        if (manager != null)
+        {
+            manager.DealInitialHands(initialCardsPerPlayer);
+            initialHandsDealt = true;
+        }
+    }
+
+    private CardDrawManager GetCardDrawManager()
+    {
+        if (cardDrawManager == null)
+        {
+            cardDrawManager = FindObjectOfType<CardDrawManager>();
+        }
+
+        return cardDrawManager;
+    }
+
+    private void ActivatePendingTakeoverLand()
+    {
+        if (playerManager == null)
+        {
+            return;
+        }
+
+        int activePlayerId = playerManager.GetCurrentPlayerId();
+        TowerBuildArea[] buildAreas = FindObjectsOfType<TowerBuildArea>();
+
+        foreach (TowerBuildArea buildArea in buildAreas)
+        {
+            if (buildArea != null)
+            {
+                buildArea.ActivateForPlayerIfPending(activePlayerId);
+            }
+        }
     }
 }

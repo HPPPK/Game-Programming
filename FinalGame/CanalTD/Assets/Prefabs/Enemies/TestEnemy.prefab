@@ -51,6 +51,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 2
   reachDistance: 0.05
+  castleDamage: 1
 --- !u!212 &3060428782611538948
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -91,7 +92,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 199
   m_Sprite: {fileID: 972992672, guid: 808869e7ca4504d0c8581db6c156425c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -263,7 +264,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10000
+  m_SortingOrder: 200
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.60784316, g: 0.7254902, b: 0.30588236, a: 1}
   m_FlipX: 0
@@ -347,7 +348,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 9999
+  m_SortingOrder: 199
   m_Sprite: {fileID: 21300000, guid: 221a5ea0668ae41d28311aa489cd8bf3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

@@ -7,13 +7,19 @@ public class PlayerHand : MonoBehaviour
     public int playerId = 0;
 
     [Header("Cards")]
+    public int maxHandSize = 5;
     public List<GameObject> handCardPrefabs = new List<GameObject>();
 
-    public void AddCard(GameObject cardPrefab)
+    public bool CanAddCard()
+    {
+        return GetCardCount() < maxHandSize;
+    }
+
+    public bool AddCard(GameObject cardPrefab)
     {
         if (cardPrefab == null)
         {
-            return;
+            return false;
         }
 
         if (handCardPrefabs == null)
@@ -21,7 +27,13 @@ public class PlayerHand : MonoBehaviour
             handCardPrefabs = new List<GameObject>();
         }
 
+        if (!CanAddCard())
+        {
+            return false;
+        }
+
         handCardPrefabs.Add(cardPrefab);
+        return true;
     }
 
     public bool RemoveCard(GameObject cardPrefab)
