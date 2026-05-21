@@ -16,6 +16,9 @@ public class PlayerResource : MonoBehaviour
     public PlayerHand playerHand;
     public List<GameObject> handCards = new List<GameObject>();
 
+    [Header("Status Effects")]
+    public bool disruptedNextTurn = false;
+
     [Header("UI")]
     public PresentTheNumberUI presentTheNumberUI;
     public PlayerManager playerManager;

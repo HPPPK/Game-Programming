@@ -17,6 +17,7 @@ public class TurnManager : MonoBehaviour
     public bool hasPlayedCard = false;
     public bool hasChangedGate = false;
     public bool hasDiscardedCard = false;
+    public bool cardActionsBlockedThisTurn = false;
 
     [Header("UI")]
     public MonoBehaviour toastMessage;
@@ -37,7 +38,25 @@ public class TurnManager : MonoBehaviour
 
     public void StartTurn()
     {
+        StartTurn(false);
+    }
+
+    public void StartTurn(bool disruptedThisTurn)
+    {
         currentAP = maxAP;
+        cardActionsBlockedThisTurn = disruptedThisTurn;
+
+        if (disruptedThisTurn)
+        {
+            maxAP = 1;
+            currentAP = 1;
+        }
+        else
+        {
+            maxAP = 2;
+            currentAP = maxAP;
+        }
+
         hasDrawnCard = false;
         hasPlayedCard = false;
         hasChangedGate = false;
@@ -53,11 +72,17 @@ public class TurnManager : MonoBehaviour
 
     public bool CanDrawCard()
     {
-        return !hasDrawnCard;
+        return !cardActionsBlockedThisTurn && !hasDrawnCard;
     }
 
     public bool TryConsumeDraw()
     {
+        if (cardActionsBlockedThisTurn)
+        {
+            ShowToast("You cannot use cards while disrupted.");
+            return false;
+        }
+
         if (hasDrawnCard)
         {
             ShowToast("You already drew this turn.");
@@ -70,11 +95,17 @@ public class TurnManager : MonoBehaviour
 
     public bool CanPlayCard()
     {
-        return !hasPlayedCard && HasEnoughAP(1);
+        return !cardActionsBlockedThisTurn && !hasPlayedCard && HasEnoughAP(1);
     }
 
     public bool TryConsumePlayCard()
     {
+        if (cardActionsBlockedThisTurn)
+        {
+            ShowToast("You cannot use cards while disrupted.");
+            return false;
+        }
+
         if (hasPlayedCard)
         {
             ShowToast("You can only play one card per turn.");
@@ -111,11 +142,17 @@ public class TurnManager : MonoBehaviour
 
     public bool CanDiscardCard()
     {
-        return !hasDiscardedCard;
+        return !cardActionsBlockedThisTurn && !hasDiscardedCard;
     }
 
     public bool TryConsumeDiscard()
     {
+        if (cardActionsBlockedThisTurn)
+        {
+            ShowToast("You cannot use cards while disrupted.");
+            return false;
+        }
+
         if (hasDiscardedCard)
         {
             ShowToast("You already discarded this turn.");
@@ -129,6 +166,11 @@ public class TurnManager : MonoBehaviour
     public bool HasEnoughAP(int cost)
     {
         return currentAP >= cost;
+    }
+
+    public bool IsCardActionsBlockedThisTurn()
+    {
+        return cardActionsBlockedThisTurn;
     }
 
     private void ShowToast(string message)

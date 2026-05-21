@@ -81,6 +81,15 @@ public class CardDrawManager : MonoBehaviour
     [Header("Tile Targeting")]
     public TileTargetingManager tileTargetingManager;
 
+    [Header("Player Targeting")]
+    public PlayerTargetingManager playerTargetingManager;
+
+    [Header("Tower Targeting")]
+    public TowerTargetingManager towerTargetingManager;
+
+    [Header("Shock Trap Targeting")]
+    public ShockTrapTargetingManager shockTrapTargetingManager;
+
     private List<GameObject> runtimeDeck = new List<GameObject>();
     private bool deckInitialized = false;
     private bool initialHandsDealt = false;
@@ -197,6 +206,12 @@ public class CardDrawManager : MonoBehaviour
 
     public void DrawCard()
     {
+        if (IsDisruptedThisTurn())
+        {
+            StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
+            return;
+        }
+
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
@@ -499,6 +514,12 @@ public class CardDrawManager : MonoBehaviour
 
     public void DiscardSelectedCard()
     {
+        if (IsDisruptedThisTurn())
+        {
+            StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
+            return;
+        }
+
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
@@ -545,6 +566,12 @@ public class CardDrawManager : MonoBehaviour
 
     public void PlaySelectedCard()
     {
+        if (IsDisruptedThisTurn())
+        {
+            StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
+            return;
+        }
+
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
@@ -570,9 +597,27 @@ public class CardDrawManager : MonoBehaviour
             return;
         }
 
-        if (IsTakeOverCard(selectedCard.sourcePrefab.name) && tileTargetingManager == null)
+        if (IsTileTargetingCard(selectedCard.sourcePrefab.name) && tileTargetingManager == null)
         {
             StartCoroutine(ShowWarning("Tile targeting manager is missing."));
+            return;
+        }
+
+        if (IsPlayerTargetingCard(selectedCard.sourcePrefab.name) && playerTargetingManager == null)
+        {
+            StartCoroutine(ShowWarning("Player targeting manager is missing."));
+            return;
+        }
+
+        if (IsTowerTargetingCard(selectedCard.sourcePrefab.name) && towerTargetingManager == null)
+        {
+            StartCoroutine(ShowWarning("Tower targeting manager is missing."));
+            return;
+        }
+
+        if (IsShockTrapCard(selectedCard.sourcePrefab.name) && shockTrapTargetingManager == null)
+        {
+            StartCoroutine(ShowWarning("Shock Trap targeting manager is missing."));
             return;
         }
 
@@ -692,6 +737,116 @@ public class CardDrawManager : MonoBehaviour
             yield break;
         }
 
+        if (IsFreezeClaimCard(playedCardName))
+        {
+            if (tileTargetingManager == null ||
+                !tileTargetingManager.BeginFreezeClaimTargeting())
+            {
+                ResetCardRect(cardRect);
+                card.SetSelected(true);
+                isBusy = false;
+                yield break;
+            }
+
+            pendingPlayedCard = card;
+            selectedCard = null;
+            card.gameObject.SetActive(false);
+            isBusy = false;
+            yield break;
+        }
+
+        if (IsStealCard(playedCardName))
+        {
+            if (playerTargetingManager == null ||
+                !playerTargetingManager.BeginStealCardTargeting())
+            {
+                ResetCardRect(cardRect);
+                card.SetSelected(true);
+                isBusy = false;
+                yield break;
+            }
+
+            pendingPlayedCard = card;
+            selectedCard = null;
+            card.gameObject.SetActive(false);
+            isBusy = false;
+            yield break;
+        }
+
+        if (IsTradeHandsCard(playedCardName))
+        {
+            if (playerTargetingManager == null ||
+                !playerTargetingManager.BeginTradeHandsTargeting())
+            {
+                ResetCardRect(cardRect);
+                card.SetSelected(true);
+                isBusy = false;
+                yield break;
+            }
+
+            pendingPlayedCard = card;
+            selectedCard = null;
+            card.gameObject.SetActive(false);
+            isBusy = false;
+            yield break;
+        }
+
+        if (IsDisruptCard(playedCardName))
+        {
+            if (playerTargetingManager == null ||
+                !playerTargetingManager.BeginDisruptTargeting())
+            {
+                ResetCardRect(cardRect);
+                card.SetSelected(true);
+                isBusy = false;
+                yield break;
+            }
+
+            pendingPlayedCard = card;
+            selectedCard = null;
+            card.gameObject.SetActive(false);
+            isBusy = false;
+            yield break;
+        }
+
+        if (IsPowerBoostCard(playedCardName))
+        {
+            if (towerTargetingManager == null ||
+                !towerTargetingManager.BeginPowerBoostTargeting())
+            {
+                ResetCardRect(cardRect);
+                card.SetSelected(true);
+                isBusy = false;
+                yield break;
+            }
+
+            pendingPlayedCard = card;
+            selectedCard = null;
+            card.gameObject.SetActive(false);
+            isBusy = false;
+            yield break;
+        }
+
+        if (IsShockTrapCard(playedCardName))
+        {
+            Debug.Log("Starting Shock Trap targeting.");
+
+            if (shockTrapTargetingManager == null ||
+                !shockTrapTargetingManager.BeginShockTrapTargeting())
+            {
+                ResetCardRect(cardRect);
+                card.SetSelected(true);
+                isBusy = false;
+                yield break;
+            }
+
+            pendingPlayedCard = card;
+            selectedCard = null;
+            card.gameObject.SetActive(false);
+            isBusy = false;
+            yield break;
+        }
+
         TurnManager manager = GetTurnManager();
 
         if (manager != null && !manager.TryConsumePlayCard())
@@ -757,6 +912,22 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    public bool CanConsumeSelectedCardAfterSuccessfulTargeting()
+    {
+        if (pendingPlayedCard == null)
+        {
+            return false;
+        }
+
+        TurnManager manager = GetTurnManager();
+        return manager == null || manager.CanPlayCard();
+    }
+
+    public GameObject GetPendingCardPrefabForTargeting()
+    {
+        return pendingPlayedCard != null ? pendingPlayedCard.sourcePrefab : null;
+    }
+
     public void CancelPendingCard()
     {
         if (pendingPlayedCard == null) return;
@@ -764,6 +935,21 @@ public class CardDrawManager : MonoBehaviour
         if (tileTargetingManager != null && tileTargetingManager.IsTargeting())
         {
             tileTargetingManager.ExitWithoutConsumingCard();
+        }
+
+        if (playerTargetingManager != null && playerTargetingManager.IsTargeting())
+        {
+            playerTargetingManager.ExitWithoutConsumingCard();
+        }
+
+        if (towerTargetingManager != null && towerTargetingManager.IsTargeting())
+        {
+            towerTargetingManager.ExitWithoutConsumingCard();
+        }
+
+        if (shockTrapTargetingManager != null && shockTrapTargetingManager.IsTargeting())
+        {
+            shockTrapTargetingManager.ExitWithoutConsumingCard();
         }
 
         GameObject cardObject = pendingPlayedCard.gameObject;
@@ -792,7 +978,7 @@ public class CardDrawManager : MonoBehaviour
 
     GateActionType GetGateActionType(string cardName)
     {
-        cardName = cardName.Trim();
+        cardName = NormalizeCardName(cardName);
 
         if (cardName == "Open Gate")
         {
@@ -819,8 +1005,69 @@ public class CardDrawManager : MonoBehaviour
 
     private bool IsTakeOverCard(string cardName)
     {
-        cardName = cardName.Trim();
-        return cardName == "TakeOver" || cardName == "Take Over";
+        cardName = NormalizeCardName(cardName);
+        return cardName == "takeover" || cardName == "take over";
+    }
+
+    private bool IsFreezeClaimCard(string cardName)
+    {
+        cardName = NormalizeCardName(cardName);
+        return cardName == "freezeclaim" || cardName == "freeze claim";
+    }
+
+    private bool IsStealCard(string cardName)
+    {
+        cardName = NormalizeCardName(cardName);
+        return cardName == "stealcard" || cardName == "steal card";
+    }
+
+    private bool IsTradeHandsCard(string cardName)
+    {
+        cardName = NormalizeCardName(cardName);
+        return cardName == "tradehands" || cardName == "trade hands";
+    }
+
+    private bool IsDisruptCard(string cardName)
+    {
+        cardName = NormalizeCardName(cardName);
+        return cardName == "disrupt";
+    }
+
+    private bool IsPowerBoostCard(string cardName)
+    {
+        cardName = NormalizeCardName(cardName);
+        return cardName == "powerboost" || cardName == "power boost";
+    }
+
+    private bool IsShockTrapCard(string cardName)
+    {
+        cardName = NormalizeCardName(cardName);
+        return cardName == "shocktrap" || cardName == "shock trap";
+    }
+
+    private bool IsTileTargetingCard(string cardName)
+    {
+        return IsTakeOverCard(cardName) || IsFreezeClaimCard(cardName);
+    }
+
+    private bool IsPlayerTargetingCard(string cardName)
+    {
+        return IsStealCard(cardName) || IsTradeHandsCard(cardName) || IsDisruptCard(cardName);
+    }
+
+    private bool IsTowerTargetingCard(string cardName)
+    {
+        return IsPowerBoostCard(cardName);
+    }
+
+    private string NormalizeCardName(string cardName)
+    {
+        if (string.IsNullOrWhiteSpace(cardName))
+        {
+            return string.Empty;
+        }
+
+        return cardName.Replace("(Clone)", "").Trim().ToLowerInvariant();
     }
 
     IEnumerator ShowWarning(string message)
@@ -908,6 +1155,12 @@ public class CardDrawManager : MonoBehaviour
     private TurnManager GetTurnManager()
     {
         return turnManager != null ? turnManager : TurnManager.Instance;
+    }
+
+    private bool IsDisruptedThisTurn()
+    {
+        TurnManager manager = GetTurnManager();
+        return manager != null && manager.IsCardActionsBlockedThisTurn();
     }
 
     private void HandleCurrentPlayerChanged(int playerId)
