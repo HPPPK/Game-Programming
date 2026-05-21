@@ -91,6 +91,26 @@ public class PlayerManager : MonoBehaviour
         return null;
     }
 
+    public List<PlayerResource> GetOtherPlayers(int currentPlayerId)
+    {
+        List<PlayerResource> otherPlayers = new List<PlayerResource>();
+
+        if (players == null)
+        {
+            return otherPlayers;
+        }
+
+        foreach (PlayerResource player in players)
+        {
+            if (player != null && player.playerId != currentPlayerId)
+            {
+                otherPlayers.Add(player);
+            }
+        }
+
+        return otherPlayers;
+    }
+
     public void SetCurrentPlayer(int playerId)
     {
         currentPlayerId = playerId;

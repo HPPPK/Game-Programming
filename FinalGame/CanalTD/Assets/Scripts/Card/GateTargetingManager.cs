@@ -34,6 +34,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public class GateTargetingManager : MonoBehaviour
 {
@@ -395,6 +396,7 @@ public class GateTargetingManager : MonoBehaviour
         if (darkOverlay != null)
         {
             darkOverlay.SetActive(false);
+            SetOverlayRaycastBlocking(false);
         }
 
         if (hammerButton != null)
@@ -423,11 +425,14 @@ public class GateTargetingManager : MonoBehaviour
         if (darkOverlay != null)
         {
             darkOverlay.SetActive(true);
+            SetOverlayRaycastBlocking(true);
+            darkOverlay.transform.SetAsLastSibling();
         }
 
         if (targetingUI != null)
         {
             targetingUI.SetActive(true);
+            targetingUI.transform.SetAsLastSibling();
         }
         else
         {
@@ -467,6 +472,7 @@ public class GateTargetingManager : MonoBehaviour
         if (darkOverlay != null)
         {
             darkOverlay.SetActive(false);
+            SetOverlayRaycastBlocking(false);
         }
 
         if (targetingUI != null)
@@ -496,6 +502,21 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         ExitHammerTool();
+    }
+
+    void SetOverlayRaycastBlocking(bool blocking)
+    {
+        if (darkOverlay == null)
+        {
+            return;
+        }
+
+        Image overlayImage = darkOverlay.GetComponent<Image>();
+
+        if (overlayImage != null)
+        {
+            overlayImage.raycastTarget = blocking;
+        }
     }
 
     void ResolveHammerButton()
