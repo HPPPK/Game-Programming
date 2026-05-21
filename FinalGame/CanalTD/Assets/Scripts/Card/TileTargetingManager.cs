@@ -10,7 +10,8 @@ public class TileTargetingManager : MonoBehaviour
     public enum TileTargetingMode
     {
         None,
-        TakeOver
+        TakeOver,
+        FreezeClaim
     }
 
     [Header("Managers")]
@@ -22,6 +23,7 @@ public class TileTargetingManager : MonoBehaviour
     [Header("UI")]
     public GameObject darkOverlay;
     public GameObject targetingUI;
+    public CanvasGroup normalGameplayUI;
     public Button confirmButton;
     public Button cancelButton;
 
@@ -33,12 +35,15 @@ public class TileTargetingManager : MonoBehaviour
 
     [Header("Build Areas")]
     public Transform buildAreasParent;
-    public Color validHighlightColor = new Color(1f, 0.85f, 0.15f, 0.65f);
-    public Color selectedColor = new Color(0.25f, 1f, 0.45f, 1f);
-    public Color unavailableColor = Color.red;
+    public Color validHighlightColor = new Color(0.4f, 1f, 0.4f, 1f);
+    public Color selectedColor = new Color(1f, 0.9f, 0.1f, 1f);
+    public int validHighlightSortingOrder = 900;
+    public int selectedSortingOrder = 1000;
 
     private readonly List<TowerBuildArea> highlightedAreas = new List<TowerBuildArea>();
     private readonly List<TowerBuildArea> validTargets = new List<TowerBuildArea>();
+    private readonly Dictionary<TowerBuildArea, Color> originalColors = new Dictionary<TowerBuildArea, Color>();
+    private readonly Dictionary<TowerBuildArea, int> originalSortingOrders = new Dictionary<TowerBuildArea, int>();
     private TowerBuildArea selectedTile;
     private TileTargetingMode currentMode = TileTargetingMode.None;
     private bool isTargeting = false;
@@ -97,18 +102,29 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool BeginTakeOverTargeting()
     {
-        currentMode = TileTargetingMode.TakeOver;
+        return BeginTargeting(TileTargetingMode.TakeOver, "No land available to take over.");
+    }
+
+    public bool BeginFreezeClaimTargeting()
+    {
+        return BeginTargeting(TileTargetingMode.FreezeClaim, "No land available to freeze.");
+    }
+
+    private bool BeginTargeting(TileTargetingMode mode, string noTargetMessage)
+    {
+        currentMode = mode;
         selectedTile = null;
         highlightedAreas.Clear();
         validTargets.Clear();
+        originalColors.Clear();
+        originalSortingOrders.Clear();
 
         List<TowerBuildArea> allAreas = GetBuildAreas();
         int currentPlayerId = GetCurrentPlayerId();
-        PlayerResource currentPlayer = GetCurrentPlayerResource();
 
         foreach (TowerBuildArea buildArea in allAreas)
         {
-            if (IsValidTakeOverTarget(buildArea, currentPlayerId))
+            if (IsValidTargetForMode(buildArea, currentPlayerId, mode))
             {
                 validTargets.Add(buildArea);
             }
@@ -116,25 +132,7 @@ public class TileTargetingManager : MonoBehaviour
 
         if (validTargets.Count == 0)
         {
-            ShowToast("No land available to take over.");
-            currentMode = TileTargetingMode.None;
-            return false;
-        }
-
-        bool hasAffordableTarget = false;
-
-        foreach (TowerBuildArea target in validTargets)
-        {
-            if (target != null && currentPlayer != null && currentPlayer.CanAfford(GetTakeOverCost(target)))
-            {
-                hasAffordableTarget = true;
-                break;
-            }
-        }
-
-        if (!hasAffordableTarget)
-        {
-            ShowToast("Not enough gold to take over any land.");
+            ShowToast(noTargetMessage);
             currentMode = TileTargetingMode.None;
             return false;
         }
@@ -142,7 +140,7 @@ public class TileTargetingManager : MonoBehaviour
         isTargeting = true;
         SetTargetingVisuals(true);
 
-        foreach (TowerBuildArea buildArea in allAreas)
+        foreach (TowerBuildArea buildArea in validTargets)
         {
             if (buildArea == null)
             {
@@ -150,7 +148,8 @@ public class TileTargetingManager : MonoBehaviour
             }
 
             highlightedAreas.Add(buildArea);
-            buildArea.ShowHighlight(validTargets.Contains(buildArea) ? validHighlightColor : unavailableColor);
+            StoreOriginalVisual(buildArea);
+            ApplyTileVisual(buildArea, validHighlightColor, validHighlightSortingOrder, false);
         }
 
         return true;
@@ -166,6 +165,10 @@ public class TileTargetingManager : MonoBehaviour
         if (currentMode == TileTargetingMode.TakeOver)
         {
             ConfirmTakeOver();
+        }
+        else if (currentMode == TileTargetingMode.FreezeClaim)
+        {
+            ConfirmFreezeClaim();
         }
     }
 
@@ -204,6 +207,12 @@ public class TileTargetingManager : MonoBehaviour
 
         int currentPlayerId = GetCurrentPlayerId();
 
+        if (selectedTile.isFrozenOrSealed)
+        {
+            ShowToast("This land is frozen.");
+            return;
+        }
+
         if (!IsValidTakeOverTarget(selectedTile, currentPlayerId))
         {
             ShowToast("Choose an opponent-owned land.");
@@ -232,7 +241,7 @@ public class TileTargetingManager : MonoBehaviour
             return;
         }
 
-        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+        if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
         {
             ShowToast("Could not play this card.");
             return;
@@ -241,6 +250,12 @@ public class TileTargetingManager : MonoBehaviour
         if (!currentPlayer.SpendMoney(takeOverCost))
         {
             ShowToast("Not enough gold to take over this land.");
+            return;
+        }
+
+        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+        {
+            ShowToast("Could not play this card.");
             return;
         }
 
@@ -260,28 +275,90 @@ public class TileTargetingManager : MonoBehaviour
         ExitTargetingMode();
     }
 
+    private void ConfirmFreezeClaim()
+    {
+        if (selectedTile == null)
+        {
+            ShowToast("Choose a land first.");
+            return;
+        }
+
+        int currentPlayerId = GetCurrentPlayerId();
+
+        if (!IsValidFreezeClaimTarget(selectedTile))
+        {
+            if (selectedTile != null && selectedTile.isFrozenOrSealed)
+            {
+                ShowToast("This land is already frozen.");
+            }
+            else
+            {
+                ShowToast("Choose a valid land.");
+            }
+
+            return;
+        }
+
+        if (cardDrawManager == null)
+        {
+            ShowToast("Card manager is missing.");
+            return;
+        }
+
+        if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
+        {
+            ShowToast("Could not play this card.");
+            return;
+        }
+
+        selectedTile.FreezeForPlayer(currentPlayerId);
+
+        if (playerManager != null)
+        {
+            playerManager.RefreshCurrentPlayerUI();
+        }
+
+        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+        {
+            selectedTile.ClearFreeze();
+            ShowToast("Could not play this card.");
+            return;
+        }
+
+        ShowToast("Land frozen.");
+        ExitTargetingMode();
+    }
+
     private void TrySelectTileAtMouse()
     {
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        if (IsPointerOverTargetingControls())
         {
             return;
         }
 
         TowerBuildArea clickedTile = GetTileUnderMouse();
 
+        if (clickedTile != null && clickedTile.isFrozenOrSealed)
+        {
+            ShowToast(currentMode == TileTargetingMode.FreezeClaim ? "This land is already frozen." : "This land is frozen.");
+            return;
+        }
+
         if (clickedTile == null || !validTargets.Contains(clickedTile))
         {
-            ShowToast("Choose an opponent-owned land.");
+            ShowToast(currentMode == TileTargetingMode.FreezeClaim ? "Choose a valid land." : "Choose an opponent-owned land.");
             return;
         }
 
         if (selectedTile != null)
         {
-            selectedTile.ShowHighlight(validTargets.Contains(selectedTile) ? validHighlightColor : unavailableColor);
+            ApplyTileVisual(selectedTile, validHighlightColor, validHighlightSortingOrder, false);
         }
 
         selectedTile = clickedTile;
-        selectedTile.ShowHighlight(selectedColor);
+        ApplyTileVisual(selectedTile, selectedColor, selectedSortingOrder, true);
+
+        Debug.Log($"Selected tile: {selectedTile.name}");
     }
 
     private TowerBuildArea GetTileUnderMouse()
@@ -349,7 +426,27 @@ public class TileTargetingManager : MonoBehaviour
             buildArea.areaType == BuildAreaType.Claimable &&
             buildArea.isOwned &&
             buildArea.ownerPlayerId != currentPlayerId &&
-            !buildArea.isFrozenOrSealed;
+            buildArea.CanUseForLandOrTowerAction();
+    }
+
+    private bool IsValidFreezeClaimTarget(TowerBuildArea buildArea)
+    {
+        return buildArea != null && buildArea.CanBeFrozen();
+    }
+
+    private bool IsValidTargetForMode(TowerBuildArea buildArea, int currentPlayerId, TileTargetingMode mode)
+    {
+        if (mode == TileTargetingMode.TakeOver)
+        {
+            return IsValidTakeOverTarget(buildArea, currentPlayerId);
+        }
+
+        if (mode == TileTargetingMode.FreezeClaim)
+        {
+            return IsValidFreezeClaimTarget(buildArea);
+        }
+
+        return false;
     }
 
     private int GetTakeOverCost(TowerBuildArea buildArea)
@@ -375,14 +472,27 @@ public class TileTargetingManager : MonoBehaviour
 
     private void SetTargetingVisuals(bool active)
     {
+        SetNormalGameplayUIEnabled(!active);
+
         if (darkOverlay != null)
         {
             darkOverlay.SetActive(active);
+            SetOverlayRaycastBlocking(active);
+
+            if (active)
+            {
+                darkOverlay.transform.SetAsLastSibling();
+            }
         }
 
         if (targetingUI != null)
         {
             targetingUI.SetActive(active);
+
+            if (active)
+            {
+                targetingUI.transform.SetAsLastSibling();
+            }
         }
 
         foreach (Tilemap tilemap in tilemapsToDim)
@@ -398,6 +508,83 @@ public class TileTargetingManager : MonoBehaviour
             if (spriteRenderer != null)
             {
                 spriteRenderer.color = active ? dimColor : normalColor;
+            }
+        }
+    }
+
+    private void SetNormalGameplayUIEnabled(bool enabled)
+    {
+        ResolveNormalGameplayUI();
+
+        if (normalGameplayUI == null)
+        {
+            return;
+        }
+
+        normalGameplayUI.interactable = enabled;
+        normalGameplayUI.blocksRaycasts = enabled;
+    }
+
+    private void SetOverlayRaycastBlocking(bool blocking)
+    {
+        if (darkOverlay == null)
+        {
+            return;
+        }
+
+        Image overlayImage = darkOverlay.GetComponent<Image>();
+
+        if (overlayImage != null)
+        {
+            overlayImage.raycastTarget = blocking;
+        }
+    }
+
+    private bool IsPointerOverTargetingControls()
+    {
+        return IsPointerOverButton(confirmButton) || IsPointerOverButton(cancelButton);
+    }
+
+    private bool IsPointerOverButton(Button button)
+    {
+        if (button == null)
+        {
+            return false;
+        }
+
+        RectTransform rectTransform = button.GetComponent<RectTransform>();
+
+        if (rectTransform == null)
+        {
+            return false;
+        }
+
+        Camera uiCamera = null;
+        Canvas canvas = button.GetComponentInParent<Canvas>();
+
+        if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+        {
+            uiCamera = canvas.worldCamera;
+        }
+
+        return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, uiCamera);
+    }
+
+    private void ResolveNormalGameplayUI()
+    {
+        if (normalGameplayUI != null)
+        {
+            return;
+        }
+
+        CanvasGroup[] canvasGroups = FindObjectsOfType<CanvasGroup>(true);
+
+        foreach (CanvasGroup canvasGroup in canvasGroups)
+        {
+            if (canvasGroup != null && canvasGroup.name == "NormalGameplayUI")
+            {
+                normalGameplayUI = canvasGroup;
+                return;
             }
         }
     }
@@ -418,11 +605,80 @@ public class TileTargetingManager : MonoBehaviour
             if (target != null)
             {
                 target.HideHighlight();
+                RestoreTileVisual(target);
             }
         }
 
         highlightedAreas.Clear();
         validTargets.Clear();
+        originalColors.Clear();
+        originalSortingOrders.Clear();
+    }
+
+    private void StoreOriginalVisual(TowerBuildArea buildArea)
+    {
+        if (buildArea == null || buildArea.areaVisualRenderer == null)
+        {
+            return;
+        }
+
+        if (!originalColors.ContainsKey(buildArea))
+        {
+            originalColors.Add(buildArea, buildArea.areaVisualRenderer.color);
+        }
+
+        if (!originalSortingOrders.ContainsKey(buildArea))
+        {
+            originalSortingOrders.Add(buildArea, buildArea.areaVisualRenderer.sortingOrder);
+        }
+    }
+
+    private void ApplyTileVisual(TowerBuildArea buildArea, Color color, int sortingOrder, bool isSelected)
+    {
+        if (buildArea == null)
+        {
+            return;
+        }
+
+        if (buildArea.areaVisualRenderer == null)
+        {
+            if (isSelected)
+            {
+                Debug.LogWarning("Selected tile has no areaVisualRenderer.");
+            }
+
+            buildArea.ShowHighlight(color);
+            return;
+        }
+
+        Color visibleColor = color;
+        visibleColor.a = 1f;
+        buildArea.areaVisualRenderer.color = visibleColor;
+        buildArea.areaVisualRenderer.sortingOrder = sortingOrder;
+    }
+
+    private void RestoreTileVisual(TowerBuildArea buildArea)
+    {
+        if (buildArea == null || buildArea.areaVisualRenderer == null)
+        {
+            return;
+        }
+
+        if (originalColors.TryGetValue(buildArea, out Color originalColor))
+        {
+            buildArea.areaVisualRenderer.color = originalColor;
+        }
+        else
+        {
+            buildArea.RefreshOwnershipVisual(playerManager);
+        }
+
+        buildArea.RefreshOwnershipVisual(playerManager);
+
+        if (originalSortingOrders.TryGetValue(buildArea, out int originalSortingOrder))
+        {
+            buildArea.areaVisualRenderer.sortingOrder = originalSortingOrder;
+        }
     }
 
     private void ShowToast(string message)
