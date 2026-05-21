@@ -46,6 +46,19 @@ public class PlayerHand : MonoBehaviour
         return handCardPrefabs.Remove(cardPrefab);
     }
 
+    public GameObject RemoveRandomCard()
+    {
+        if (handCardPrefabs == null || handCardPrefabs.Count == 0)
+        {
+            return null;
+        }
+
+        int randomIndex = Random.Range(0, handCardPrefabs.Count);
+        GameObject cardPrefab = handCardPrefabs[randomIndex];
+        handCardPrefabs.RemoveAt(randomIndex);
+        return cardPrefab;
+    }
+
     public int GetCardCount()
     {
         return handCardPrefabs != null ? handCardPrefabs.Count : 0;
