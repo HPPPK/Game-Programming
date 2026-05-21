@@ -75,6 +75,7 @@
     <Compile Include="Assets/Scripts/Path/PathGraphState.cs" />
     <Compile Include="Assets/Scripts/Core/TurnManager.cs" />
     <Compile Include="Assets/Scripts/Path/PathEdge.cs" />
+    <Compile Include="Assets/Scripts/Card/ShockTrapTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemySpawner.cs" />
     <Compile Include="Assets/Scripts/Map/doorChange.cs" />
     <Compile Include="Assets/Scripts/Card/CardDrawManager.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Assets/Scripts/Path/PathNode.cs" />
     <Compile Include="Assets/Scripts/UI/EnemyHealthBarSprite.cs" />
     <Compile Include="Assets/Scripts/Core/cursor.cs" />
+    <Compile Include="Assets/Scripts/Card/ShockTrapPoint.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyPathAssignmentManager.cs" />
     <Compile Include="Assets/Scripts/UI/ManualUIButtonDebug.cs" />
     <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />
@@ -94,7 +96,9 @@
     <Compile Include="Assets/Scripts/UI/CursorVisualFollower.cs" />
     <Compile Include="Assets/Scripts/Card/TileTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Path/CastleEndNode.cs" />
+    <Compile Include="Assets/Scripts/Card/ShockTrap.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyMover.cs" />
+    <Compile Include="Assets/Scripts/Card/TowerTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Path/PathfinderTester.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerBuildArea.cs" />
@@ -113,6 +117,7 @@
     <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
     <Compile Include="Assets/Scripts/UI/PresentTheNumberUI.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerResource.cs" />
+    <Compile Include="Assets/Scripts/Card/PlayerTargetingManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />

@@ -42,6 +42,7 @@ GameObject:
   - component: {fileID: 6935944441615096425}
   - component: {fileID: 4629363257706310568}
   - component: {fileID: 1449029083322658814}
+  - component: {fileID: -1970834342140172645}
   m_Layer: 0
   m_Name: CannonTower
   m_TagString: Untagged
@@ -137,3 +138,50 @@ MonoBehaviour:
   damage: 1
   projectilePrefab: {fileID: 8903494610328624728, guid: 2021f442cd0f74e0eb14edb5bc91941a, type: 3}
   firePoint: {fileID: 373234444202403387}
+  boostPendingForNextWave: 0
+  boostActive: 0
+--- !u!61 &-1970834342140172645
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9178881288609307550}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0.985}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: -0.13548388}
+    oldSize: {x: 1.46, y: 1.55}
+    newSize: {x: 1.46, y: 1.55}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1.46, y: 1.55}
+  m_EdgeRadius: 0

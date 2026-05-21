@@ -5,6 +5,7 @@ public class EnemyHealthBarSprite : MonoBehaviour
 {
     [Header("Bar Parts")]
     public Transform fillTransform;
+    
     public SpriteRenderer fillRenderer;
 
     [Header("Color")]

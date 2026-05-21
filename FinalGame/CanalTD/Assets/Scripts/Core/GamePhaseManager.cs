@@ -56,9 +56,18 @@ public class GamePhaseManager : MonoBehaviour
             turnManager.currentPlayerId = playerManager.GetCurrentPlayerId();
         }
 
+        PlayerResource activePlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
+        bool disruptedThisTurn = activePlayer != null && activePlayer.disruptedNextTurn;
+
         if (turnManager != null)
         {
-            turnManager.StartTurn();
+            turnManager.StartTurn(disruptedThisTurn);
+        }
+
+        if (disruptedThisTurn && activePlayer != null)
+        {
+            activePlayer.disruptedNextTurn = false;
+            ShowToast(activePlayer.GetDisplayName() + " is disrupted this turn.");
         }
 
         ActivatePendingTakeoverLand();
@@ -89,6 +98,8 @@ public class GamePhaseManager : MonoBehaviour
         currentPhase = GamePhase.WavePhase;
 
         ShowToast("Wave " + currentWaveIndex + " incoming!");
+        NotifyTowersWaveStarted();
+        NotifyShockTrapsWaveStarted();
 
         if (waveManager != null)
         {
@@ -117,6 +128,9 @@ public class GamePhaseManager : MonoBehaviour
 
     public void OnWaveFinished()
     {
+        NotifyTowersWaveEnded();
+        NotifyShockTrapsWaveEnded();
+
         if (currentWaveIndex >= maxWaves)
         {
             EndGame();
@@ -335,6 +349,59 @@ public class GamePhaseManager : MonoBehaviour
             if (buildArea != null)
             {
                 buildArea.ActivateForPlayerIfPending(activePlayerId);
+                buildArea.ClearFreezeIfPendingForPlayer(activePlayerId);
+            }
+        }
+    }
+
+    private void NotifyTowersWaveStarted()
+    {
+        CannonTower[] towers = FindObjectsOfType<CannonTower>();
+
+        foreach (CannonTower tower in towers)
+        {
+            if (tower != null)
+            {
+                tower.OnWaveStarted();
+            }
+        }
+    }
+
+    private void NotifyTowersWaveEnded()
+    {
+        CannonTower[] towers = FindObjectsOfType<CannonTower>();
+
+        foreach (CannonTower tower in towers)
+        {
+            if (tower != null)
+            {
+                tower.OnWaveEnded();
+            }
+        }
+    }
+
+    private void NotifyShockTrapsWaveStarted()
+    {
+        ShockTrap[] traps = FindObjectsOfType<ShockTrap>();
+
+        foreach (ShockTrap trap in traps)
+        {
+            if (trap != null)
+            {
+                trap.OnWaveStarted();
+            }
+        }
+    }
+
+    private void NotifyShockTrapsWaveEnded()
+    {
+        ShockTrap[] traps = FindObjectsOfType<ShockTrap>();
+
+        foreach (ShockTrap trap in traps)
+        {
+            if (trap != null)
+            {
+                trap.OnWaveEnded();
             }
         }
     }

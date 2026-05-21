@@ -14,6 +14,7 @@ public class BuildTowerManager : MonoBehaviour
     [Header("Tower")]
     public GameObject cannonTowerPrefab;
     public int cannonTowerCost = 6;
+    public Transform towersParent;
 
     [Header("Phase Manager")]
     public GamePhaseManager gamePhaseManager;
@@ -55,6 +56,27 @@ public class BuildTowerManager : MonoBehaviour
         TileTargetingManager tileTargetingManager = FindObjectOfType<TileTargetingManager>();
 
         if (tileTargetingManager != null && tileTargetingManager.IsTargeting())
+        {
+            return;
+        }
+
+        PlayerTargetingManager playerTargetingManager = FindObjectOfType<PlayerTargetingManager>();
+
+        if (playerTargetingManager != null && playerTargetingManager.IsTargeting())
+        {
+            return;
+        }
+
+        TowerTargetingManager towerTargetingManager = FindObjectOfType<TowerTargetingManager>();
+
+        if (towerTargetingManager != null && towerTargetingManager.IsTargeting())
+        {
+            return;
+        }
+
+        ShockTrapTargetingManager shockTrapTargetingManager = FindObjectOfType<ShockTrapTargetingManager>();
+
+        if (shockTrapTargetingManager != null && shockTrapTargetingManager.IsTargeting())
         {
             return;
         }
@@ -135,6 +157,12 @@ public class BuildTowerManager : MonoBehaviour
             return;
         }
 
+        if (buildArea.IsFrozen())
+        {
+            ShowToast("This land is frozen.");
+            return;
+        }
+
         if (buildArea.IsClaimable() && buildArea.IsUnowned())
         {
             TryPurchaseLand(buildArea);
@@ -158,6 +186,12 @@ public class BuildTowerManager : MonoBehaviour
         if (activePlayerResource == null)
         {
             ShowToast("Player resource is missing.");
+            return;
+        }
+
+        if (buildArea.IsFrozen())
+        {
+            ShowToast("This land is frozen.");
             return;
         }
 
@@ -186,6 +220,12 @@ public class BuildTowerManager : MonoBehaviour
         if (activePlayerResource == null)
         {
             ShowToast("Player resource is missing.");
+            return;
+        }
+
+        if (buildArea.IsFrozen())
+        {
+            ShowToast("This land is frozen.");
             return;
         }
 
@@ -226,13 +266,14 @@ public class BuildTowerManager : MonoBehaviour
             ? buildArea.towerSpawnPoint
             : buildArea.transform;
 
-        GameObject tower = Instantiate(
-            towerPrefab,
-            spawnPoint.position,
-            Quaternion.identity
-        );
+        GameObject tower = towersParent != null
+            ? Instantiate(towerPrefab, spawnPoint.position, Quaternion.identity, towersParent)
+            : Instantiate(towerPrefab, spawnPoint.position, Quaternion.identity);
+
+        Debug.Log("Tower built under parent: " + (tower.transform.parent != null ? tower.transform.parent.name : "None"));
 
         ForceTowerAlphaOpaque(tower);
+        EnsureTowerCollider(tower);
 
         CannonTower cannonTower = tower.GetComponent<CannonTower>();
 
@@ -327,6 +368,24 @@ public class BuildTowerManager : MonoBehaviour
         Color color = spriteRenderer.color;
         color.a = 1f;
         spriteRenderer.color = color;
+    }
+
+    private void EnsureTowerCollider(GameObject tower)
+    {
+        if (tower == null)
+        {
+            return;
+        }
+
+        Collider2D collider = tower.GetComponentInChildren<Collider2D>();
+
+        if (collider != null)
+        {
+            return;
+        }
+
+        BoxCollider2D boxCollider = tower.AddComponent<BoxCollider2D>();
+        boxCollider.isTrigger = true;
     }
 
     private void RefreshCurrentPlayerUI()

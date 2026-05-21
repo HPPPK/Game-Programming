@@ -22,6 +22,9 @@ public class TowerBuildArea : MonoBehaviour
 
     [Header("Take Over")]
     public bool isFrozenOrSealed = false;
+    public int frozenByPlayerId = -1;
+    public bool frozenUntilPlayerNextTurn = false;
+    public GameObject freezeIcon;
 
     [Header("Gate Links")]
     public List<GameObject> linkedGates = new List<GameObject>();
@@ -60,11 +63,17 @@ public class TowerBuildArea : MonoBehaviour
         }
 
         HideHighlight();
+        SetFrozenVisual(isFrozenOrSealed);
         RefreshOwnershipVisual(playerManager);
     }
 
     public bool CanBuildTower(int playerId)
     {
+        if (!CanUseForLandOrTowerAction())
+        {
+            return false;
+        }
+
         if (isOccupied)
         {
             return false;
@@ -150,6 +159,11 @@ public class TowerBuildArea : MonoBehaviour
 
     public void SetOwner(int playerId, PlayerManager visualPlayerManager)
     {
+        if (!CanUseForLandOrTowerAction())
+        {
+            return;
+        }
+
         isOwned = true;
         ownerPlayerId = playerId;
         RefreshOwnershipVisual(visualPlayerManager);
@@ -169,7 +183,17 @@ public class TowerBuildArea : MonoBehaviour
             isOwned &&
             ownerPlayerId >= 0 &&
             ownerPlayerId != playerId &&
-            !isFrozenOrSealed;
+            CanUseForLandOrTowerAction();
+    }
+
+    public bool IsFrozen()
+    {
+        return isFrozenOrSealed;
+    }
+
+    public bool CanUseForLandOrTowerAction()
+    {
+        return !isFrozenOrSealed;
     }
 
     public int GetNormalTakeoverCost()
@@ -180,6 +204,55 @@ public class TowerBuildArea : MonoBehaviour
     public int GetTakeOverCardCost()
     {
         return Mathf.CeilToInt(GetNormalTakeoverCost() / 2f);
+    }
+
+    public bool CanBeFrozen()
+    {
+        return areaType == BuildAreaType.Claimable && !isFrozenOrSealed;
+    }
+
+    public void FreezeForPlayer(int playerId)
+    {
+        isFrozenOrSealed = true;
+        frozenByPlayerId = playerId;
+        frozenUntilPlayerNextTurn = true;
+        SetFrozenVisual(true);
+    }
+
+    public void ClearFreeze()
+    {
+        isFrozenOrSealed = false;
+        frozenByPlayerId = -1;
+        frozenUntilPlayerNextTurn = false;
+        SetFrozenVisual(false);
+    }
+
+    public void SetFrozenVisual(bool frozen)
+    {
+        if (freezeIcon != null)
+        {
+            freezeIcon.SetActive(frozen);
+        }
+
+        CannonTower cannonTower = currentTower != null ? currentTower.GetComponent<CannonTower>() : null;
+
+        if (cannonTower == null && currentTower != null)
+        {
+            cannonTower = currentTower.GetComponentInChildren<CannonTower>();
+        }
+
+        if (cannonTower != null)
+        {
+            cannonTower.SetDisabledByFreeze(frozen);
+        }
+    }
+
+    public void ClearFreezeIfPendingForPlayer(int playerId)
+    {
+        if (isFrozenOrSealed && frozenByPlayerId == playerId)
+        {
+            ClearFreeze();
+        }
     }
 
     public void MarkInactiveUntilNextTurn(int playerId)
@@ -253,6 +326,7 @@ public class TowerBuildArea : MonoBehaviour
     {
         currentTower = tower;
         isOccupied = tower != null;
+        SetFrozenVisual(isFrozenOrSealed);
     }
 
     public void ShowAvailable(bool available)

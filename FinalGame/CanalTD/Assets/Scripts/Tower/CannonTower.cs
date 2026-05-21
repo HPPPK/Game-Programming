@@ -11,12 +11,22 @@ public class CannonTower : MonoBehaviour
     public float attackRange = 3f;
     public float attackInterval = 0.6f;
     public int damage = 1;
+    public float baseDamage = 1f;
+    public float boostedDamage = 2f;
 
     [Header("Projectile")]
     public GameObject projectilePrefab;
     public Transform firePoint;
 
+    [Header("Power Boost")]
+    public bool boostPendingForNextWave = false;
+    public bool boostActive = false;
+    public Color boostActiveTint = new Color(1f, 0.8f, 0.25f, 1f);
+    public GameObject boostIcon;
+
     private float attackTimer = 0f;
+    private bool disabledByFreeze = false;
+    private Color normalTowerColor = Color.white;
 
     private void Awake()
     {
@@ -24,10 +34,22 @@ public class CannonTower : MonoBehaviour
         {
             towerSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
         }
+
+        if (towerSpriteRenderer != null)
+        {
+            normalTowerColor = towerSpriteRenderer.color;
+        }
+
+        SetBoostVisual(false);
     }
 
     private void Update()
     {
+        if (disabledByFreeze)
+        {
+            return;
+        }
+
         attackTimer -= Time.deltaTime;
 
         if (attackTimer <= 0f)
@@ -94,8 +116,15 @@ public class CannonTower : MonoBehaviour
 
         if (projectile != null)
         {
-            projectile.Initialize(target, damage, ownerResource);
+            float currentDamage = GetCurrentDamage();
+            Debug.Log("Current tower damage = " + currentDamage);
+            projectile.Initialize(target, Mathf.RoundToInt(currentDamage), ownerResource);
         }
+    }
+
+    public float GetCurrentDamage()
+    {
+        return boostActive ? boostedDamage : baseDamage;
     }
 
     public void ApplyOwnerVisual(PlayerManager playerManager, int playerId)
@@ -128,6 +157,70 @@ public class CannonTower : MonoBehaviour
         Color color = towerSpriteRenderer.color;
         color.a = 1f;
         towerSpriteRenderer.color = color;
+        normalTowerColor = color;
+
+        if (boostActive)
+        {
+            SetBoostVisual(true);
+        }
+    }
+
+    public void SetDisabledByFreeze(bool disabled)
+    {
+        disabledByFreeze = disabled;
+    }
+
+    public bool IsDisabledByFreeze()
+    {
+        return disabledByFreeze;
+    }
+
+    public void ApplyPowerBoostForNextWave()
+    {
+        if (boostPendingForNextWave || boostActive)
+        {
+            return;
+        }
+
+        boostPendingForNextWave = true;
+    }
+
+    public void OnWaveStarted()
+    {
+        if (boostPendingForNextWave)
+        {
+            boostPendingForNextWave = false;
+            boostActive = true;
+            SetBoostVisual(true);
+            Debug.Log("Power Boost activated on tower");
+        }
+    }
+
+    public void OnWaveEnded()
+    {
+        if (boostActive || boostPendingForNextWave)
+        {
+            Debug.Log("Power Boost ended");
+        }
+
+        boostPendingForNextWave = false;
+        boostActive = false;
+        SetBoostVisual(false);
+    }
+
+    private void SetBoostVisual(bool active)
+    {
+        if (towerSpriteRenderer != null)
+        {
+            Color color = active ? boostActiveTint : normalTowerColor;
+            color.a = 1f;
+            towerSpriteRenderer.color = color;
+        }
+
+        if (boostIcon != null)
+        {
+            boostIcon.SetActive(active);
+        }
     }
 
     private void OnDrawGizmosSelected()
