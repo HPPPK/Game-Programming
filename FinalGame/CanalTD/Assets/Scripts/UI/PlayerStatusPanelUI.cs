@@ -92,7 +92,7 @@ public class PlayerStatusPanelUI : MonoBehaviour
         if (scoreText != null)
         {
             int score = linkedResource != null ? linkedResource.score : 0;
-            scoreText.text = score.ToString();
+            scoreText.text = linkedResource != null && linkedResource.isEliminated ? "已淘汰" : score.ToString();
         }
     }
 

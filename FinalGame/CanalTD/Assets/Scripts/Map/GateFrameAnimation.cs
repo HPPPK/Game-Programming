@@ -89,13 +89,6 @@ public class GateFrameAnimation : MonoBehaviour
             return;
         }
 
-        if (!GateTargetingManager.Instance.IsHammerToolActive())
-        {
-            Debug.Log(name + " clicked, but gate targeting cursor is OFF.");
-            GateTargetingManager.Instance.ShowToast("Select the hammer tool first.");
-            return;
-        }
-
         if (!GateTargetingManager.Instance.IsTargetingGate())
         {
             Debug.Log(name + " clicked, but not in gate targeting mode.");

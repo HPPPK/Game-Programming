@@ -501,7 +501,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &36643317
 Transform:
   m_ObjectHideFlags: 0
@@ -654,7 +654,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9150943, g: 0.8966583, b: 0.85898006, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3288,7 +3288,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &83345148
 Transform:
   m_ObjectHideFlags: 0
@@ -3626,7 +3626,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &102326030
 Transform:
   m_ObjectHideFlags: 0
@@ -3710,7 +3710,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &114167663
 Transform:
   m_ObjectHideFlags: 0
@@ -4466,6 +4466,7 @@ MonoBehaviour:
   waveManager: {fileID: 476970906}
   cardDrawManager: {fileID: 0}
   toastMessage: {fileID: 848080698}
+  waveIncomingDelay: 2
   initialCardsPerPlayer: 2
 --- !u!1 &172950337
 GameObject:
@@ -4571,7 +4572,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &173836643
 Transform:
   m_ObjectHideFlags: 0
@@ -4871,7 +4872,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &207648492
 Transform:
   m_ObjectHideFlags: 0
@@ -10072,7 +10073,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &263650598
 Transform:
   m_ObjectHideFlags: 0
@@ -10354,7 +10355,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &310458161
 Transform:
   m_ObjectHideFlags: 0
@@ -49741,7 +49742,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9150943, g: 0.8966583, b: 0.85898006, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -49946,7 +49947,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &417813530
 Transform:
   m_ObjectHideFlags: 0
@@ -51093,46 +51094,55 @@ MonoBehaviour:
   - {fileID: 820064825}
   - {fileID: 966247108}
   gamePhaseManager: {fileID: 163762666}
+  toastMessage: {fileID: 848080698}
   currentWaveIndex: 1
+  currentWaveNumber: 1
   enemyCount: 20
+  enemiesPerWave: 8
+  waveEnemyHp: 3
+  waveHpMultiplier: 1
   spawnInterval: 0.3
+  isWaveRunning: 0
+  enemyCountIncreasePerWave: 4
+  enemyHpIncreasePerWave: 1
+  waveClearedDelay: 2
   waveConfigs:
   - waveIndex: 1
-    enemyCount: 20
-    enemyMaxHP: 3
-    spawnInterval: 0.8
+    enemyCount: 40
+    enemyMaxHP: 5
+    spawnInterval: 0.4
     goldReward: 1
     killerScoreReward: 2
     assistScoreReward: 1
     castleDamage: 1
   - waveIndex: 2
-    enemyCount: 30
-    enemyMaxHP: 4
-    spawnInterval: 0.75
+    enemyCount: 60
+    enemyMaxHP: 6
+    spawnInterval: 0.4
     goldReward: 1
     killerScoreReward: 2
     assistScoreReward: 1
     castleDamage: 1
   - waveIndex: 3
-    enemyCount: 40
-    enemyMaxHP: 4
-    spawnInterval: 0.7
+    enemyCount: 80
+    enemyMaxHP: 8
+    spawnInterval: 0.4
     goldReward: 1
     killerScoreReward: 2
     assistScoreReward: 1
     castleDamage: 1
   - waveIndex: 4
-    enemyCount: 50
-    enemyMaxHP: 4
-    spawnInterval: 0.65
+    enemyCount: 100
+    enemyMaxHP: 8
+    spawnInterval: 0.4
     goldReward: 1
     killerScoreReward: 2
     assistScoreReward: 1
     castleDamage: 1
   - waveIndex: 5
-    enemyCount: 50
-    enemyMaxHP: 6
-    spawnInterval: 0.6
+    enemyCount: 100
+    enemyMaxHP: 10
+    spawnInterval: 0.1
     goldReward: 1
     killerScoreReward: 2
     assistScoreReward: 1
@@ -51241,7 +51251,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &485684886
 Transform:
   m_ObjectHideFlags: 0
@@ -53682,7 +53692,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &622172080
 Transform:
   m_ObjectHideFlags: 0
@@ -54181,7 +54191,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9150943, g: 0.8966583, b: 0.85898006, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -54576,7 +54586,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &718105289
 Transform:
   m_ObjectHideFlags: 0
@@ -54944,7 +54954,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &744981780
 Transform:
   m_ObjectHideFlags: 0
@@ -55226,7 +55236,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &774655835
 Transform:
   m_ObjectHideFlags: 0
@@ -55713,7 +55723,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &786232553
 Transform:
   m_ObjectHideFlags: 0
@@ -56139,7 +56149,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &809801182
 Transform:
   m_ObjectHideFlags: 0
@@ -57887,6 +57897,7 @@ MonoBehaviour:
   playerHand: {fileID: 910001006}
   handCards: []
   disruptedNextTurn: 0
+  disruptedTurnsRemaining: 0
   presentTheNumberUI: {fileID: 1900812223}
   playerManager: {fileID: 535938592}
   statusPanel: {fileID: 2117550754}
@@ -58077,6 +58088,7 @@ MonoBehaviour:
   playerHand: {fileID: 910002006}
   handCards: []
   disruptedNextTurn: 0
+  disruptedTurnsRemaining: 0
   presentTheNumberUI: {fileID: 1900812223}
   playerManager: {fileID: 535938592}
   statusPanel: {fileID: 1118719935}
@@ -58267,6 +58279,7 @@ MonoBehaviour:
   playerHand: {fileID: 910003006}
   handCards: []
   disruptedNextTurn: 0
+  disruptedTurnsRemaining: 0
   presentTheNumberUI: {fileID: 1900812223}
   playerManager: {fileID: 535938592}
   statusPanel: {fileID: 1444230685}
@@ -58457,6 +58470,7 @@ MonoBehaviour:
   playerHand: {fileID: 910004006}
   handCards: []
   disruptedNextTurn: 0
+  disruptedTurnsRemaining: 0
   presentTheNumberUI: {fileID: 1900812223}
   playerManager: {fileID: 535938592}
   statusPanel: {fileID: 1082147775}
@@ -59313,7 +59327,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &978505649
 Transform:
   m_ObjectHideFlags: 0
@@ -59699,7 +59713,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &998781561
 Transform:
   m_ObjectHideFlags: 0
@@ -60444,7 +60458,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1055289194
 Transform:
   m_ObjectHideFlags: 0
@@ -61477,7 +61491,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1140164713
 Transform:
   m_ObjectHideFlags: 0
@@ -61837,7 +61851,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9150943, g: 0.8966583, b: 0.85898006, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -61878,7 +61892,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1175677605
 Transform:
   m_ObjectHideFlags: 0
@@ -62668,7 +62682,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1255458419
 Transform:
   m_ObjectHideFlags: 0
@@ -62752,7 +62766,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1261234413
 Transform:
   m_ObjectHideFlags: 0
@@ -62986,7 +63000,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1276280876
 Transform:
   m_ObjectHideFlags: 0
@@ -63628,7 +63642,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1351577103
 Transform:
   m_ObjectHideFlags: 0
@@ -64159,7 +64173,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1385504395
 Transform:
   m_ObjectHideFlags: 0
@@ -64917,7 +64931,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9150943, g: 0.8966583, b: 0.85898006, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -65046,7 +65060,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1470941491
 Transform:
   m_ObjectHideFlags: 0
@@ -65130,7 +65144,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1473838023
 Transform:
   m_ObjectHideFlags: 0
@@ -65626,7 +65640,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1497491352
 Transform:
   m_ObjectHideFlags: 0
@@ -65710,7 +65724,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1500295820
 Transform:
   m_ObjectHideFlags: 0
@@ -66389,7 +66403,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1532402801
 Transform:
   m_ObjectHideFlags: 0
@@ -66636,7 +66650,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1547158128
 Transform:
   m_ObjectHideFlags: 0
@@ -67482,7 +67496,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1586250675
 Transform:
   m_ObjectHideFlags: 0
@@ -68230,7 +68244,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1665834658
 Transform:
   m_ObjectHideFlags: 0
@@ -69445,7 +69459,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1759562987
 Transform:
   m_ObjectHideFlags: 0
@@ -69781,7 +69795,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1804343264
 Transform:
   m_ObjectHideFlags: 0
@@ -70015,7 +70029,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1811260253
 Transform:
   m_ObjectHideFlags: 0
@@ -70865,7 +70879,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1883744238
 Transform:
   m_ObjectHideFlags: 0
@@ -71396,7 +71410,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1925955216
 Transform:
   m_ObjectHideFlags: 0
@@ -71511,7 +71525,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1935429574
 Transform:
   m_ObjectHideFlags: 0
@@ -71729,7 +71743,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1961687969
 Transform:
   m_ObjectHideFlags: 0
@@ -71947,7 +71961,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1977137524
 Transform:
   m_ObjectHideFlags: 0
@@ -72031,7 +72045,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2017987975
 Transform:
   m_ObjectHideFlags: 0
@@ -72115,7 +72129,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2021114876
 Transform:
   m_ObjectHideFlags: 0
@@ -73650,7 +73664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.74509805, g: 0.63529414, b: 0.54509807, a: 1}
+  m_Color: {r: 0.78039217, g: 0.69411767, b: 0.5372549, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

@@ -99,6 +99,7 @@
     <Compile Include="Assets/Scripts/Card/ShockTrap.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyMover.cs" />
     <Compile Include="Assets/Scripts/Card/TowerTargetingManager.cs" />
+    <Compile Include="Assets/Scripts/UI/SimpleFrameAnimator.cs" />
     <Compile Include="Assets/Scripts/Path/PathfinderTester.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerBuildArea.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="Assets/Scripts/Card/GateTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/WaveConfig.cs" />
     <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
+    <Compile Include="Assets/Scripts/UI/HomeSceneManager.cs" />
     <Compile Include="Assets/Scripts/UI/PresentTheNumberUI.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerResource.cs" />
     <Compile Include="Assets/Scripts/Card/PlayerTargetingManager.cs" />

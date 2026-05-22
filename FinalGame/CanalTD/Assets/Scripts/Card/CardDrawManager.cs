@@ -980,22 +980,17 @@ public class CardDrawManager : MonoBehaviour
     {
         cardName = NormalizeCardName(cardName);
 
-        if (cardName == "Open Gate")
+        if (cardName == "open gate" || cardName == "opengate")
         {
             return GateActionType.OpenGate;
         }
 
-        if (cardName == "RedirectFlow")
+        if (cardName == "redirectflow" || cardName == "redirect flow")
         {
             return GateActionType.OpenGate;
         }
 
-        if (cardName == "Lock Gate")
-        {
-            return GateActionType.LockGate;
-        }
-
-        if (cardName == "LockGate")
+        if (cardName == "lock gate" || cardName == "lockgate")
         {
             return GateActionType.LockGate;
         }

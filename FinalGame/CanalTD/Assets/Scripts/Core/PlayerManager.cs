@@ -55,7 +55,7 @@ public class PlayerManager : MonoBehaviour
     {
         foreach (PlayerResource player in players)
         {
-            if (player != null && player.playerId == currentPlayerId)
+            if (player != null && player.playerId == currentPlayerId && !player.isEliminated)
             {
                 return player;
             }
@@ -113,7 +113,7 @@ public class PlayerManager : MonoBehaviour
 
         foreach (PlayerResource player in players)
         {
-            if (player != null && player.playerId != currentPlayerId)
+            if (player != null && player.playerId != currentPlayerId && !player.isEliminated)
             {
                 otherPlayers.Add(player);
             }
@@ -124,6 +124,20 @@ public class PlayerManager : MonoBehaviour
 
     public void SetCurrentPlayer(int playerId)
     {
+        PlayerResource requestedPlayer = GetPlayerResource(playerId);
+
+        if (requestedPlayer != null && requestedPlayer.isEliminated)
+        {
+            PlayerResource nextActivePlayer = GetFirstActivePlayer();
+
+            if (nextActivePlayer == null)
+            {
+                return;
+            }
+
+            playerId = nextActivePlayer.playerId;
+        }
+
         currentPlayerId = playerId;
         OnCurrentPlayerChanged?.Invoke(currentPlayerId);
         RefreshCurrentPlayerUI();
@@ -155,7 +169,7 @@ public class PlayerManager : MonoBehaviour
         {
             int wrappedIndex = (nextIndex + checkedCount) % players.Count;
 
-            if (players[wrappedIndex] != null)
+            if (players[wrappedIndex] != null && !players[wrappedIndex].isEliminated)
             {
                 SetCurrentPlayer(players[wrappedIndex].playerId);
                 return;
@@ -174,7 +188,7 @@ public class PlayerManager : MonoBehaviour
 
         for (int i = players.Count - 1; i >= 0; i--)
         {
-            if (players[i] != null)
+            if (players[i] != null && !players[i].isEliminated)
             {
                 return players[i].playerId == currentPlayerId;
             }
@@ -193,7 +207,7 @@ public class PlayerManager : MonoBehaviour
 
         foreach (PlayerResource player in players)
         {
-            if (player != null)
+            if (player != null && !player.isEliminated)
             {
                 SetCurrentPlayer(player.playerId);
                 return;
@@ -237,6 +251,28 @@ public class PlayerManager : MonoBehaviour
                 player.statusPanel.Refresh();
             }
         }
+    }
+
+    public bool IsPlayerEliminated(int playerId)
+    {
+        PlayerResource player = GetPlayerResource(playerId);
+        return player != null && player.isEliminated;
+    }
+
+    public void EliminatePlayer(int playerId)
+    {
+        PlayerResource player = GetPlayerResource(playerId);
+
+        if (player == null || player.isEliminated)
+        {
+            return;
+        }
+
+        player.MarkEliminated();
+        ClearPlayerLandAndTowers(playerId);
+        RefreshAllPlayerStatusPanels();
+        RefreshCurrentPlayerUI();
+        ShowToast(player.GetDisplayName() + " has been eliminated.");
     }
 
     public PlayerVisualConfig GetVisualConfig(int playerId)
@@ -301,7 +337,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private PlayerResource GetPlayerResource(int playerId)
+    public PlayerResource GetPlayerResource(int playerId)
     {
         foreach (PlayerResource player in players)
         {
@@ -312,6 +348,42 @@ public class PlayerManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    private PlayerResource GetFirstActivePlayer()
+    {
+        foreach (PlayerResource player in players)
+        {
+            if (player != null && !player.isEliminated)
+            {
+                return player;
+            }
+        }
+
+        return null;
+    }
+
+    private void ClearPlayerLandAndTowers(int playerId)
+    {
+        TowerBuildArea[] buildAreas = FindObjectsOfType<TowerBuildArea>();
+
+        foreach (TowerBuildArea area in buildAreas)
+        {
+            if (area != null)
+            {
+                area.ResetForEliminatedPlayer(playerId);
+            }
+        }
+
+        CannonTower[] towers = FindObjectsOfType<CannonTower>();
+
+        foreach (CannonTower tower in towers)
+        {
+            if (tower != null && tower.ownerPlayerId == playerId)
+            {
+                Destroy(tower.gameObject);
+            }
+        }
     }
 
     private void ShowToast(string message)

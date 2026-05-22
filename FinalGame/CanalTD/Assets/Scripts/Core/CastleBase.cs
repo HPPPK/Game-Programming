@@ -28,6 +28,7 @@ public class CastleBase : MonoBehaviour
     public int ownerPlayerId = 0;
     public PlayerResource ownerResource;
     public PlayerStatusPanelUI statusPanel;
+    private bool eliminationHandled = false;
 
     void Start()
     {
@@ -38,6 +39,11 @@ public class CastleBase : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (eliminationHandled || ownerResource != null && ownerResource.isEliminated)
+        {
+            return;
+        }
+
         currentHP -= damage;
 
         if (currentHP < 0)
@@ -84,12 +90,25 @@ public class CastleBase : MonoBehaviour
 
     void OnGameOver()
     {
+        if (eliminationHandled)
+        {
+            return;
+        }
+
+        eliminationHandled = true;
         Debug.Log(">>> " + GetDisplayName() + " LOSE <<<");
 
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
         if (sr != null)
         {
             sr.color = Color.gray;
+        }
+
+        PlayerManager manager = ownerResource != null ? ownerResource.playerManager : FindObjectOfType<PlayerManager>();
+
+        if (manager != null)
+        {
+            manager.EliminatePlayer(ownerPlayerId);
         }
     }
 }

@@ -2,15 +2,16 @@
  * File: ShockTrap.cs
  *
  * Purpose:
- * Runtime trap object placed by the Shock Trap card. During the next wave it
- * waits for enemies to enter its radius, damages all nearby enemies once, then
- * unregisters and destroys itself.
+ * Runtime trap object placed by the Shock Trap card. It stays on the route until
+ * an enemy enters its radius, then damages nearby enemies once, unregisters, and
+ * destroys itself after the explosion animation.
  *
  * Notes:
  * The owner resource is passed into EnemyHealth.TakeDamage so kills and assists
  * still count for the player who placed the trap.
  */
 using UnityEngine;
+using System.Collections;
 
 public class ShockTrap : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class ShockTrap : MonoBehaviour
     [Header("Trap")]
     public float damage = 2f;
     public float radius = 0.75f;
+    public float damageDelayAfterTrigger = 1f;
     public bool triggered = false;
     public LayerMask enemyLayer;
     public Transform routeNodeTransform;
@@ -73,7 +75,7 @@ public class ShockTrap : MonoBehaviour
             return;
         }
 
-        TriggerTrap(enemies);
+        TriggerTrap();
     }
 
     public void OnWaveStarted()
@@ -83,11 +85,7 @@ public class ShockTrap : MonoBehaviour
 
     public void OnWaveEnded()
     {
-        if (!triggered)
-        {
-            UnregisterTrap();
-            Destroy(gameObject);
-        }
+        activeDuringWave = false;
     }
 
     private EnemyHealth[] GetEnemiesInRadius()
@@ -139,11 +137,20 @@ public class ShockTrap : MonoBehaviour
         return enemies.ToArray();
     }
 
-    private void TriggerTrap(EnemyHealth[] enemies)
+    private void TriggerTrap()
     {
         triggered = true;
         DisableColliders();
         Debug.Log("Shock Trap triggered");
+
+        StartCoroutine(DamageAfterDelay());
+    }
+
+    private IEnumerator DamageAfterDelay()
+    {
+        yield return new WaitForSeconds(damageDelayAfterTrigger);
+
+        EnemyHealth[] enemies = GetEnemiesInRadius();
         int finalDamage = Mathf.RoundToInt(damage);
 
         foreach (EnemyHealth enemy in enemies)

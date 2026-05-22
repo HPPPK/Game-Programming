@@ -4,10 +4,6 @@
  * Purpose:
  * Builds the ResultScene ranking UI from GameResultData and handles New Game /
  * Back To Home button actions.
- *
- * Notes:
- * Back To Home currently logs a placeholder because HomeScene is planned but not
- * fully implemented yet.
  */
 using System.Collections.Generic;
 using TMPro;
@@ -30,6 +26,7 @@ public class ResultSceneManager : MonoBehaviour
 
     [Header("Scenes")]
     public string gameSceneName = "GameScene";
+    public string homeSceneName = "HomeScene";
 
     private void Start()
     {
@@ -46,6 +43,7 @@ public class ResultSceneManager : MonoBehaviour
         }
     }
 
+    // Rebuilds the final ranking rows from the static result data.
     private void BuildResultList()
     {
         List<PlayerResultEntry> results = GameResultData.Results;
@@ -79,22 +77,26 @@ public class ResultSceneManager : MonoBehaviour
         }
     }
 
+    // Starts a fresh game by clearing old result data and loading GameScene.
     public void NewGame()
     {
         GameResultData.Clear();
         SceneManager.LoadScene(gameSceneName);
     }
 
+    // Returns from the result screen to HomeScene.
     public void BackToHome()
     {
-        Debug.Log("HomeScene is not implemented yet.");
+        SceneManager.LoadScene(homeSceneName);
     }
 
+    // Kept for older button references; it now behaves the same as NewGame.
     public void RestartGame()
     {
         NewGame();
     }
 
+    // Kept for older button references; it now returns to HomeScene.
     public void QuitGame()
     {
         BackToHome();

@@ -17,14 +17,16 @@ public class PlayerResultEntry
     public int money;
     public int castleHp;
     public int rank;
+    public bool isEliminated;
 
-    public PlayerResultEntry(int playerId, string displayName, int score, int money, int castleHp)
+    public PlayerResultEntry(int playerId, string displayName, int score, int money, int castleHp, bool isEliminated = false)
     {
         this.playerId = playerId;
         this.displayName = displayName;
         this.score = score;
         this.money = money;
         this.castleHp = castleHp;
+        this.isEliminated = isEliminated;
         rank = 0;
     }
 }

@@ -10,6 +10,7 @@
  * towers, traps, build areas, and card systems when phase changes require state
  * resets.
  */
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -36,12 +37,14 @@ public class GamePhaseManager : MonoBehaviour
     public WaveManager waveManager;
     public CardDrawManager cardDrawManager;
     public MonoBehaviour toastMessage;
+    public float waveIncomingDelay = 2f;
 
     [Header("Card Start Rules")]
     public int initialCardsPerPlayer = 2;
 
     private bool playerTurnToastAlreadyShown = false;
     private bool initialHandsDealt = false;
+    private Coroutine waveStartCoroutine;
 
     private void Start()
     {
@@ -69,7 +72,7 @@ public class GamePhaseManager : MonoBehaviour
         }
 
         PlayerResource activePlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
-        bool disruptedThisTurn = activePlayer != null && activePlayer.disruptedNextTurn;
+        bool disruptedThisTurn = activePlayer != null && activePlayer.HasPendingDisrupt();
 
         if (turnManager != null)
         {
@@ -78,7 +81,7 @@ public class GamePhaseManager : MonoBehaviour
 
         if (disruptedThisTurn && activePlayer != null)
         {
-            activePlayer.disruptedNextTurn = false;
+            activePlayer.ConsumeDisruptForThisTurn();
             ShowToast(activePlayer.GetDisplayName() + " is disrupted this turn.");
         }
 
@@ -109,7 +112,27 @@ public class GamePhaseManager : MonoBehaviour
     {
         currentPhase = GamePhase.WavePhase;
 
-        ShowToast("Wave " + currentWaveIndex + " incoming!");
+        if (waveStartCoroutine != null)
+        {
+            return;
+        }
+
+        waveStartCoroutine = StartCoroutine(StartWaveAfterIncomingToast());
+    }
+
+    private IEnumerator StartWaveAfterIncomingToast()
+    {
+        if (waveManager != null)
+        {
+            waveManager.ShowWaveIncoming(currentWaveIndex);
+        }
+        else
+        {
+            ShowToast("Wave " + currentWaveIndex + " incoming!");
+        }
+
+        yield return new WaitForSeconds(waveIncomingDelay);
+
         NotifyTowersWaveStarted();
         NotifyShockTrapsWaveStarted();
 
@@ -117,6 +140,8 @@ public class GamePhaseManager : MonoBehaviour
         {
             waveManager.StartWave();
         }
+
+        waveStartCoroutine = null;
     }
 
     public void OnEndTurnButtonClicked()
@@ -202,7 +227,8 @@ public class GamePhaseManager : MonoBehaviour
                 displayName,
                 player.score,
                 player.money,
-                castleHp
+                castleHp,
+                player.isEliminated
             ));
         }
 
@@ -239,6 +265,16 @@ public class GamePhaseManager : MonoBehaviour
     {
         results.Sort((a, b) =>
         {
+            if (a.isEliminated != b.isEliminated)
+            {
+                return a.isEliminated ? 1 : -1;
+            }
+
+            if (a.isEliminated && b.isEliminated)
+            {
+                return a.playerId.CompareTo(b.playerId);
+            }
+
             int scoreCompare = b.score.CompareTo(a.score);
 
             if (scoreCompare != 0)
@@ -266,9 +302,19 @@ public class GamePhaseManager : MonoBehaviour
 
     private void AssignRanks(List<PlayerResultEntry> results)
     {
+        int activeRank = 1;
+
         for (int i = 0; i < results.Count; i++)
         {
-            results[i].rank = i + 1;
+            if (results[i].isEliminated)
+            {
+                results[i].rank = 4;
+            }
+            else
+            {
+                results[i].rank = activeRank;
+                activeRank += 1;
+            }
         }
     }
 

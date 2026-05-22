@@ -26,6 +26,7 @@
  */
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 public class WaveManager : MonoBehaviour
@@ -35,11 +36,20 @@ public class WaveManager : MonoBehaviour
 
     [Header("Phase Manager")]
     public GamePhaseManager gamePhaseManager;
+    public MonoBehaviour toastMessage;
 
     [Header("Wave Settings")]
     public int currentWaveIndex = 1;
+    public int currentWaveNumber = 1;
     public int enemyCount = 8;
+    public int enemiesPerWave = 8;
+    public int waveEnemyHp = 3;
+    public float waveHpMultiplier = 1f;
     public float spawnInterval = 0.5f;
+    public bool isWaveRunning = false;
+    public int enemyCountIncreasePerWave = 4;
+    public int enemyHpIncreasePerWave = 1;
+    public float waveClearedDelay = 2f;
     public List<WaveConfig> waveConfigs = new List<WaveConfig>
     {
         new WaveConfig(1, 12, 3, 0.8f, 1, 2, 1, 1),
@@ -95,25 +105,28 @@ public class WaveManager : MonoBehaviour
 
     public void StartWave()
     {
-        if (isSpawning) return;
+        if (isSpawning || isWaveRunning)
+        {
+            return;
+        }
+
+        isWaveRunning = true;
 
         if (spawners == null || spawners.Length == 0)
         {
             Debug.LogWarning("No spawners assigned.");
+            ShowToast("Wave " + GetCurrentWaveIndex() + " cleared.");
+            isWaveRunning = false;
             NotifyWaveFinished();
             return;
         }
 
         int waveIndex = GetCurrentWaveIndex();
         activeWaveConfig = GetWaveConfig(waveIndex);
-        currentWaveIndex = waveIndex;
-        enemyCount = activeWaveConfig.enemyCount;
+        ApplyActiveWaveTracking(activeWaveConfig);
         spawnInterval = activeWaveConfig.spawnInterval;
 
-        if (gamePhaseManager == null)
-        {
-            Debug.Log("Wave " + waveIndex + " incoming!");
-        }
+        ShowToast("Wave " + currentWaveNumber + " started.");
 
         if (EnemyPathAssignmentManager.Instance != null)
         {
@@ -121,6 +134,13 @@ public class WaveManager : MonoBehaviour
         }
 
         StartCoroutine(SpawnWaveRoutine());
+    }
+
+    public void ShowWaveIncoming(int waveNumber)
+    {
+        currentWaveNumber = Mathf.Max(1, waveNumber);
+        currentWaveIndex = currentWaveNumber;
+        ShowToast("Wave " + currentWaveNumber + " Incoming!");
     }
 
     IEnumerator SpawnWaveRoutine()
@@ -143,6 +163,14 @@ public class WaveManager : MonoBehaviour
         // Wait for all enemies to be destroyed
         yield return new WaitUntil(IsWaveFinished);
 
+        ShowToast("Wave " + currentWaveNumber + " cleared.");
+
+        if (waveClearedDelay > 0f)
+        {
+            yield return new WaitForSeconds(waveClearedDelay);
+        }
+
+        isWaveRunning = false;
         NotifyWaveFinished();
     }
 
@@ -214,12 +242,14 @@ public class WaveManager : MonoBehaviour
     {
         if (baseConfig == null)
         {
-            return new WaveConfig(waveIndex, enemyCount, 3, spawnInterval, 1, 2, 1, 1);
+            int fallbackEnemyCount = enemyCount + Mathf.Max(0, waveIndex - 1) * enemyCountIncreasePerWave;
+            int fallbackEnemyHp = 3 + Mathf.Max(0, waveIndex - 1) * enemyHpIncreasePerWave;
+            return new WaveConfig(waveIndex, fallbackEnemyCount, fallbackEnemyHp, spawnInterval, 1, 2, 1, 1);
         }
 
         int extraWaves = Mathf.Max(0, waveIndex - baseConfig.waveIndex);
-        int scaledEnemyCount = baseConfig.enemyCount + extraWaves * 4;
-        int scaledEnemyMaxHP = baseConfig.enemyMaxHP + extraWaves;
+        int scaledEnemyCount = baseConfig.enemyCount + extraWaves * enemyCountIncreasePerWave;
+        int scaledEnemyMaxHP = baseConfig.enemyMaxHP + extraWaves * enemyHpIncreasePerWave;
         float scaledSpawnInterval = Mathf.Max(0.35f, baseConfig.spawnInterval - extraWaves * 0.03f);
 
         return new WaveConfig(
@@ -251,5 +281,81 @@ public class WaveManager : MonoBehaviour
         waveConfigs.Add(new WaveConfig(3, 20, 5, 0.7f, 1, 2, 1, 1));
         waveConfigs.Add(new WaveConfig(4, 24, 6, 0.65f, 1, 2, 1, 1));
         waveConfigs.Add(new WaveConfig(5, 30, 8, 0.6f, 1, 2, 1, 1));
+    }
+
+    private void ApplyActiveWaveTracking(WaveConfig config)
+    {
+        if (config == null)
+        {
+            return;
+        }
+
+        currentWaveIndex = config.waveIndex;
+        currentWaveNumber = config.waveIndex;
+        enemyCount = config.enemyCount;
+        enemiesPerWave = config.enemyCount;
+        waveEnemyHp = config.enemyMaxHP;
+        waveHpMultiplier = Mathf.Max(1f, waveEnemyHp / 3f);
+    }
+
+    private void ShowToast(string message)
+    {
+        if (TryCallToastMethod(message))
+        {
+            return;
+        }
+
+        CardDrawManager cardManager = FindObjectOfType<CardDrawManager>();
+
+        if (cardManager != null)
+        {
+            cardManager.ShowWarningMessage(message);
+            return;
+        }
+
+        Debug.Log(message);
+    }
+
+    private bool TryCallToastMethod(string message)
+    {
+        if (toastMessage == null && gamePhaseManager != null)
+        {
+            toastMessage = gamePhaseManager.toastMessage;
+        }
+
+        if (toastMessage == null)
+        {
+            return false;
+        }
+
+        string[] methodNames =
+        {
+            "ShowMessage",
+            "Show",
+            "ShowToast",
+            "Display",
+            "ShowWarningMessage"
+        };
+
+        foreach (string methodName in methodNames)
+        {
+            MethodInfo method = toastMessage.GetType().GetMethod(
+                methodName,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                null,
+                new System.Type[] { typeof(string) },
+                null
+            );
+
+            if (method == null)
+            {
+                continue;
+            }
+
+            method.Invoke(toastMessage, new object[] { message });
+            return true;
+        }
+
+        return false;
     }
 }

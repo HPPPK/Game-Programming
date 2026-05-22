@@ -29,6 +29,8 @@ public class PlayerResource : MonoBehaviour
 
     [Header("Status Effects")]
     public bool disruptedNextTurn = false;
+    public int disruptedTurnsRemaining = 0;
+    public bool isEliminated = false;
 
     [Header("UI")]
     public PresentTheNumberUI presentTheNumberUI;
@@ -48,7 +50,7 @@ public class PlayerResource : MonoBehaviour
 
     public bool CanAfford(int cost)
     {
-        return money >= cost;
+        return !isEliminated && money >= cost;
     }
 
 
@@ -62,8 +64,40 @@ public class PlayerResource : MonoBehaviour
         return "Player " + playerId;
     }
 
+    public bool HasPendingDisrupt()
+    {
+        return disruptedNextTurn || disruptedTurnsRemaining > 0;
+    }
+
+    public void ApplyDisruptNextTurn()
+    {
+        disruptedNextTurn = true;
+        disruptedTurnsRemaining = Mathf.Max(disruptedTurnsRemaining, 1);
+    }
+
+    public void ClearPendingDisrupt()
+    {
+        disruptedNextTurn = false;
+        disruptedTurnsRemaining = 0;
+    }
+
+    public void ConsumeDisruptForThisTurn()
+    {
+        if (disruptedTurnsRemaining > 0)
+        {
+            disruptedTurnsRemaining -= 1;
+        }
+
+        disruptedNextTurn = disruptedTurnsRemaining > 0;
+    }
+
     public bool SpendMoney(int cost)
     {
+        if (isEliminated)
+        {
+            return false;
+        }
+
         if (money < cost)
         {
             return false;
@@ -76,18 +110,33 @@ public class PlayerResource : MonoBehaviour
 
     public void AddMoney(int amount)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         money += amount;
         RefreshUI();
     }
 
     public void AddScore(int amount)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         score += amount;
         RefreshUI();
     }
 
     public void SetCardCount(int count)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         cardCount = Mathf.Max(0, count);
         RefreshUI();
     }
@@ -100,6 +149,11 @@ public class PlayerResource : MonoBehaviour
 
     public void AddCardToHand(GameObject cardPrefab)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         if (cardPrefab == null)
         {
             return;
@@ -117,6 +171,11 @@ public class PlayerResource : MonoBehaviour
 
     public bool RemoveCardFromHand(GameObject cardPrefab)
     {
+        if (isEliminated)
+        {
+            return false;
+        }
+
         EnsurePlayerHand();
 
         if (playerHand == null || cardPrefab == null)
@@ -147,8 +206,20 @@ public class PlayerResource : MonoBehaviour
 
     public void AddKillReward(int goldReward, int scoreReward)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         money += goldReward;
         score += scoreReward;
+        RefreshUI();
+    }
+
+    public void MarkEliminated()
+    {
+        isEliminated = true;
+        ClearPendingDisrupt();
         RefreshUI();
     }
 
