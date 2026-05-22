@@ -1,3 +1,10 @@
+/*
+ * File: EnemyHealthBar.cs
+ *
+ * Purpose:
+ * UI Image-based enemy health bar. It updates fill amount and can briefly flash
+ * when the enemy takes damage.
+ */
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;

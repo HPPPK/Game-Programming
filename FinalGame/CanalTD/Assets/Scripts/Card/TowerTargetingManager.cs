@@ -1,3 +1,15 @@
+/*
+ * File: TowerTargetingManager.cs
+ *
+ * Purpose:
+ * Handles tower-targeting cards such as Power Boost. It finds current-player
+ * towers, highlights valid targets, records the selected tower, and applies the
+ * boost only after Confirm.
+ *
+ * Notes:
+ * The boost is stored on CannonTower and activates during the next WavePhase,
+ * then expires automatically when the wave ends.
+ */
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;

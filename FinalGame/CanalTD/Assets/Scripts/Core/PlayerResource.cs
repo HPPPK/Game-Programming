@@ -1,3 +1,14 @@
+/*
+ * File: PlayerResource.cs
+ *
+ * Purpose:
+ * Holds one player's gameplay resources: player ID, display name, gold, score,
+ * card count, PlayerHand reference, and temporary status effects.
+ *
+ * Notes:
+ * UI panels read from this component so player resource display stays tied to
+ * the actual player/castle data.
+ */
 using System.Collections.Generic;
 using UnityEngine;
 

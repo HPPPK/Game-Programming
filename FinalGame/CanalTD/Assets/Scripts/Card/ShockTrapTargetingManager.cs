@@ -1,3 +1,16 @@
+/*
+ * File: ShockTrapTargetingManager.cs
+ *
+ * Purpose:
+ * Controls the Shock Trap targeting flow. It scans RouteNodes, creates visible
+ * node highlights, previews the trap on the selected route node, and places the
+ * trap only after the player presses Confirm.
+ *
+ * Notes:
+ * This manager is separate from GateTargetingManager because Shock Trap targets
+ * path nodes instead of gates. Cancel restores visuals and does not consume the
+ * card.
+ */
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -179,6 +192,7 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
         isTargeting = true;
         SetTargetingVisuals(true);
+        SetRouteNodeVisualsActive(true);
         CreateRouteNodeHighlights();
         EnsurePreview();
         ShowToast("Choose a path position.");
@@ -798,6 +812,7 @@ public class ShockTrapTargetingManager : MonoBehaviour
             Destroy(previewTrap);
         }
 
+        SetRouteNodeVisualsActive(false);
         RestoreAllNodeHighlights();
         previewTrap = null;
         previewRenderer = null;
@@ -806,6 +821,29 @@ public class ShockTrapTargetingManager : MonoBehaviour
         routeNodes.Clear();
         isTargeting = false;
         SetTargetingVisuals(false);
+    }
+
+    private void SetRouteNodeVisualsActive(bool active)
+    {
+        if (routeNodesParent == null)
+        {
+            return;
+        }
+
+        foreach (Transform node in routeNodesParent)
+        {
+            if (node == null)
+            {
+                continue;
+            }
+
+            Transform visual = node.Find("Visual");
+
+            if (visual != null)
+            {
+                visual.gameObject.SetActive(active);
+            }
+        }
     }
 
     private void EnsurePlacedTrapVisual(GameObject trapObject)

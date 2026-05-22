@@ -1,3 +1,15 @@
+/*
+ * File: GamePhaseManager.cs
+ *
+ * Purpose:
+ * Coordinates the high-level match flow: PlayerPhase turns, WavePhase, round
+ * progression, final wave detection, and result scene loading.
+ *
+ * Notes:
+ * Other systems notify this manager when turns or waves finish. It also tells
+ * towers, traps, build areas, and card systems when phase changes require state
+ * resets.
+ */
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;

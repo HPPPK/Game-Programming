@@ -1,3 +1,11 @@
+/*
+ * File: WaveConfig.cs
+ *
+ * Purpose:
+ * Serializable data container for one wave's difficulty and reward values. It
+ * lets WaveManager configure enemy count, HP, spawn interval, rewards, and
+ * castle damage without needing multiple enemy prefabs.
+ */
 using UnityEngine;
 
 [System.Serializable]

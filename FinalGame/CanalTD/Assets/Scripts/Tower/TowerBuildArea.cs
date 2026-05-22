@@ -1,3 +1,14 @@
+/*
+ * File: TowerBuildArea.cs
+ *
+ * Purpose:
+ * Represents one land/build tile. It stores ownership, purchase cost, tower
+ * occupancy, linked gates, freeze state, and delayed activation state.
+ *
+ * Notes:
+ * Cards such as Take Over and Freeze Claim update this component so ownership
+ * visuals, gate permissions, and tower availability stay consistent.
+ */
 using System.Collections.Generic;
 using UnityEngine;
 

@@ -1,3 +1,11 @@
+/*
+ * File: GameResultData.cs
+ *
+ * Purpose:
+ * Stores final ranking data between GameScene and ResultScene. GamePhaseManager
+ * fills this static data when the match ends, and ResultSceneManager reads it to
+ * build the final ranking UI.
+ */
 using System.Collections.Generic;
 
 [System.Serializable]

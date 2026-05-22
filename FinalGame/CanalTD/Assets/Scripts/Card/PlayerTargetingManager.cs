@@ -1,3 +1,15 @@
+/*
+ * File: PlayerTargetingManager.cs
+ *
+ * Purpose:
+ * Handles player-targeting tactical cards such as Steal Card, Trade Hands, and
+ * Disrupt. It shows the shared targeting overlay, highlights valid player
+ * targets, stores the selected player, and applies the card only after Confirm.
+ *
+ * Notes:
+ * Cancel never consumes the pending card. CardDrawManager remains responsible
+ * for removing the card from the hand after a successful targeted effect.
+ */
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;

@@ -1,3 +1,14 @@
+/*
+ * File: PlayerManager.cs
+ *
+ * Purpose:
+ * Owns player lookup and current-player state. It connects player IDs to
+ * PlayerResource, PlayerHand, PlayerVisualConfig, and UI refresh behavior.
+ *
+ * Notes:
+ * Player ID is used for game logic. PlayerResource.displayName is used for
+ * visible UI text.
+ */
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;

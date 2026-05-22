@@ -1,3 +1,11 @@
+/*
+ * File: PresentTheNumberUI.cs
+ *
+ * Purpose:
+ * Displays current-player summary numbers such as gold and card count. It is
+ * refreshed when the active player changes or the current player's resources
+ * change.
+ */
 using TMPro;
 using UnityEngine;
 

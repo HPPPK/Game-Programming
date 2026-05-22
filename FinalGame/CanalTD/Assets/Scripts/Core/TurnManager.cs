@@ -1,3 +1,14 @@
+/*
+ * File: TurnManager.cs
+ *
+ * Purpose:
+ * Tracks per-turn action state such as AP, draw usage, card play usage, discard
+ * usage, and disruption restrictions.
+ *
+ * Notes:
+ * GamePhaseManager controls the larger phase order, while this script controls
+ * what the active player is allowed to do during a single turn.
+ */
 using System.Reflection;
 using UnityEngine;
 

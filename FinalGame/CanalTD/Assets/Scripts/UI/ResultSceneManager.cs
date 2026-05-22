@@ -1,3 +1,14 @@
+/*
+ * File: ResultSceneManager.cs
+ *
+ * Purpose:
+ * Builds the ResultScene ranking UI from GameResultData and handles New Game /
+ * Back To Home button actions.
+ *
+ * Notes:
+ * Back To Home currently logs a placeholder because HomeScene is planned but not
+ * fully implemented yet.
+ */
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;

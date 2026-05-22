@@ -1,3 +1,10 @@
+/*
+ * File: ResultRowUI.cs
+ *
+ * Purpose:
+ * One row in the final ranking list. ResultSceneManager fills it with rank,
+ * player display name, score, castle HP, and remaining gold.
+ */
 using TMPro;
 using UnityEngine;
 

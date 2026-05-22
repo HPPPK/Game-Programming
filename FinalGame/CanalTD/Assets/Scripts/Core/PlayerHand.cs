@@ -1,3 +1,15 @@
+/*
+ * File: PlayerHand.cs
+ *
+ * Purpose:
+ * Stores the real card hand for one player. CardDrawManager renders this data
+ * into the shared visible card slots, but the UI card objects are not the source
+ * of truth.
+ *
+ * Notes:
+ * The hand stores card prefab references, enforces max hand size, and supports
+ * random removal for cards such as Steal Card.
+ */
 using System.Collections.Generic;
 using UnityEngine;
 

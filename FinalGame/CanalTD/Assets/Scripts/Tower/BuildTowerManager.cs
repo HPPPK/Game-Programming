@@ -1,3 +1,15 @@
+/*
+ * File: BuildTowerManager.cs
+ *
+ * Purpose:
+ * Handles clicking build areas, buying land, building towers, applying player
+ * ownership, and assigning tower visuals/resources after construction.
+ *
+ * Notes:
+ * Frozen land is rejected before land or tower actions. Built towers are parented
+ * under the configured towersParent when available so targeting managers can
+ * find them reliably.
+ */
 using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;

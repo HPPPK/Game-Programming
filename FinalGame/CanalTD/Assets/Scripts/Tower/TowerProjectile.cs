@@ -1,3 +1,14 @@
+/*
+ * File: TowerProjectile.cs
+ *
+ * Purpose:
+ * Moves a projectile toward its target and applies tower-owner damage when it
+ * reaches the enemy.
+ *
+ * Notes:
+ * The owner resource is passed to EnemyHealth so kill and assist scoring can
+ * credit the player who built the tower.
+ */
 using UnityEngine;
 
 public class TowerProjectile : MonoBehaviour

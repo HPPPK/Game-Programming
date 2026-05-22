@@ -1,3 +1,15 @@
+/*
+ * File: TileTargetingManager.cs
+ *
+ * Purpose:
+ * Handles land/tile targeting cards such as Take Over and Freeze Claim. It
+ * highlights valid TowerBuildArea targets, tracks the selected tile, and applies
+ * ownership or freeze effects only after Confirm.
+ *
+ * Notes:
+ * This manager reuses the shared dark overlay and targeting UI, but it does not
+ * replace GateTargetingManager. Gate cards continue to use their own manager.
+ */
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
