@@ -192,6 +192,7 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
         isTargeting = true;
         SetTargetingVisuals(true);
+        SetRouteNodeVisualsActive(true);
         CreateRouteNodeHighlights();
         EnsurePreview();
         ShowToast("Choose a path position.");
@@ -811,6 +812,7 @@ public class ShockTrapTargetingManager : MonoBehaviour
             Destroy(previewTrap);
         }
 
+        SetRouteNodeVisualsActive(false);
         RestoreAllNodeHighlights();
         previewTrap = null;
         previewRenderer = null;
@@ -819,6 +821,29 @@ public class ShockTrapTargetingManager : MonoBehaviour
         routeNodes.Clear();
         isTargeting = false;
         SetTargetingVisuals(false);
+    }
+
+    private void SetRouteNodeVisualsActive(bool active)
+    {
+        if (routeNodesParent == null)
+        {
+            return;
+        }
+
+        foreach (Transform node in routeNodesParent)
+        {
+            if (node == null)
+            {
+                continue;
+            }
+
+            Transform visual = node.Find("Visual");
+
+            if (visual != null)
+            {
+                visual.gameObject.SetActive(active);
+            }
+        }
     }
 
     private void EnsurePlacedTrapVisual(GameObject trapObject)
