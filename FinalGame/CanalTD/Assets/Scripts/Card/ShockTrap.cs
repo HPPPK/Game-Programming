@@ -1,9 +1,24 @@
+/*
+ * File: ShockTrap.cs
+ *
+ * Purpose:
+ * Runtime trap object placed by the Shock Trap card. During the next wave it
+ * waits for enemies to enter its radius, damages all nearby enemies once, then
+ * unregisters and destroys itself.
+ *
+ * Notes:
+ * The owner resource is passed into EnemyHealth.TakeDamage so kills and assists
+ * still count for the player who placed the trap.
+ */
 using UnityEngine;
 
 public class ShockTrap : MonoBehaviour
 {
+    [Header("Owner")]
     public int ownerPlayerId = 0;
     public PlayerResource ownerResource;
+
+    [Header("Trap")]
     public float damage = 2f;
     public float radius = 0.75f;
     public bool triggered = false;
@@ -11,7 +26,20 @@ public class ShockTrap : MonoBehaviour
     public Transform routeNodeTransform;
     public bool countsAsActiveTrap = false;
 
+    [Header("Explosion Animation")]
+    public Animator animator;
+    public string explodeTriggerName = "Explode";
+    public float destroyDelayAfterExplode = 0.35f;
+
     private bool activeDuringWave = false;
+
+    private void Awake()
+    {
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
+    }
 
     public void Initialize(int playerId, PlayerResource resource)
     {
@@ -114,6 +142,7 @@ public class ShockTrap : MonoBehaviour
     private void TriggerTrap(EnemyHealth[] enemies)
     {
         triggered = true;
+        DisableColliders();
         Debug.Log("Shock Trap triggered");
         int finalDamage = Mathf.RoundToInt(damage);
 
@@ -126,6 +155,31 @@ public class ShockTrap : MonoBehaviour
         }
 
         UnregisterTrap();
+        PlayExplosionAndDestroy();
+    }
+
+    private void DisableColliders()
+    {
+        Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
+
+        foreach (Collider2D trapCollider in colliders)
+        {
+            if (trapCollider != null)
+            {
+                trapCollider.enabled = false;
+            }
+        }
+    }
+
+    private void PlayExplosionAndDestroy()
+    {
+        if (animator != null && !string.IsNullOrEmpty(explodeTriggerName))
+        {
+            animator.SetTrigger(explodeTriggerName);
+            Destroy(gameObject, destroyDelayAfterExplode);
+            return;
+        }
+
         Destroy(gameObject);
     }
 

@@ -1,3 +1,10 @@
+/*
+ * File: EnemyHealthBarSprite.cs
+ *
+ * Purpose:
+ * Sprite-based enemy health bar used for world-space enemy HP display. It scales
+ * the fill transform and can animate visual damage feedback.
+ */
 using System.Collections;
 using UnityEngine;
 

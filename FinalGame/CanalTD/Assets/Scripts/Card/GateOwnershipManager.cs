@@ -1,3 +1,15 @@
+/*
+ * File: GateOwnershipManager.cs
+ *
+ * Purpose:
+ * Validates whether the current player is allowed to control a gate. It checks
+ * linked TowerBuildArea ownership, public/claimable land rules, and temporary
+ * inactive land states caused by cards such as Take Over.
+ *
+ * Notes:
+ * This script does not animate gates directly. It only answers ownership and
+ * permission questions for gate-targeting gameplay.
+ */
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;

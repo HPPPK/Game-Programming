@@ -1,3 +1,14 @@
+/*
+ * File: cursor.cs
+ *
+ * Purpose:
+ * Displays a custom visual cursor sprite that follows the mouse. It can switch
+ * between normal and hammer visuals depending on the current tool mode.
+ *
+ * Notes:
+ * The class name is VisualCursorFollower even though the file name is cursor.cs,
+ * matching the existing project setup.
+ */
 using UnityEngine;
 
 public class VisualCursorFollower : MonoBehaviour

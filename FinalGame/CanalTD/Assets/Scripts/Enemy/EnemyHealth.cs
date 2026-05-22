@@ -1,3 +1,14 @@
+/*
+ * File: EnemyHealth.cs
+ *
+ * Purpose:
+ * Stores enemy HP, applies wave stats, receives tower/trap damage, updates the
+ * health bar, and awards gold/score when the enemy dies.
+ *
+ * Notes:
+ * Damage participants are tracked so the last hitter receives kill score and
+ * other unique contributors receive assist score.
+ */
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

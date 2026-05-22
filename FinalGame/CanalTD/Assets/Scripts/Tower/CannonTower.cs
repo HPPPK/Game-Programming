@@ -1,3 +1,14 @@
+/*
+ * File: CannonTower.cs
+ *
+ * Purpose:
+ * Finds enemies in range, fires projectiles, stores owner player data, and
+ * supports temporary card effects such as Freeze Claim and Power Boost.
+ *
+ * Notes:
+ * Power Boost changes outgoing damage only during the next wave. Freeze Claim
+ * temporarily disables attacking without destroying the tower.
+ */
 using UnityEngine;
 
 public class CannonTower : MonoBehaviour

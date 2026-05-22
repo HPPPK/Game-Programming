@@ -1,3 +1,11 @@
+/*
+ * File: ShockTrapPoint.cs
+ *
+ * Purpose:
+ * Optional visual helper for trap placement points. The current Shock Trap
+ * targeting flow uses RouteNodes, but this component remains useful for simple
+ * highlighted point markers or future fixed trap-position experiments.
+ */
 using UnityEngine;
 
 public class ShockTrapPoint : MonoBehaviour

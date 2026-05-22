@@ -1,3 +1,16 @@
+/*
+ * File: ShockTrapTargetingManager.cs
+ *
+ * Purpose:
+ * Controls the Shock Trap targeting flow. It scans RouteNodes, creates visible
+ * node highlights, previews the trap on the selected route node, and places the
+ * trap only after the player presses Confirm.
+ *
+ * Notes:
+ * This manager is separate from GateTargetingManager because Shock Trap targets
+ * path nodes instead of gates. Cancel restores visuals and does not consume the
+ * card.
+ */
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
