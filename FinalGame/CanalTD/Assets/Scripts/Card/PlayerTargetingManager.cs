@@ -381,7 +381,7 @@ public class PlayerTargetingManager : MonoBehaviour
 
     private void ConfirmDisrupt()
     {
-        if (selectedPlayer.disruptedNextTurn)
+        if (selectedPlayer.HasPendingDisrupt())
         {
             ShowToast("This player is already disrupted.");
             return;
@@ -392,11 +392,11 @@ public class PlayerTargetingManager : MonoBehaviour
             return;
         }
 
-        selectedPlayer.disruptedNextTurn = true;
+        selectedPlayer.ApplyDisruptNextTurn();
 
         if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
         {
-            selectedPlayer.disruptedNextTurn = false;
+            selectedPlayer.ClearPendingDisrupt();
             ShowToast("Could not play this card.");
             return;
         }
@@ -572,7 +572,9 @@ public class PlayerTargetingManager : MonoBehaviour
                     continue;
                 }
 
-                if (castle.ownerResource.playerId != currentPlayerId && !candidates.Contains(castle.ownerResource))
+                if (castle.ownerResource.playerId != currentPlayerId &&
+                    !castle.ownerResource.isEliminated &&
+                    !candidates.Contains(castle.ownerResource))
                 {
                     candidates.Add(castle.ownerResource);
                 }
@@ -619,7 +621,8 @@ public class PlayerTargetingManager : MonoBehaviour
     {
         return player != null &&
             playerManager != null &&
-            player.playerId != playerManager.GetCurrentPlayerId();
+            player.playerId != playerManager.GetCurrentPlayerId() &&
+            !player.isEliminated;
     }
 
     private bool IsValidTargetForMode(PlayerResource player, PlayerTargetingMode mode)
@@ -636,7 +639,7 @@ public class PlayerTargetingManager : MonoBehaviour
 
         if (mode == PlayerTargetingMode.Disrupt)
         {
-            return IsValidOtherPlayerTarget(player) && !player.disruptedNextTurn;
+            return IsValidOtherPlayerTarget(player) && !player.HasPendingDisrupt();
         }
 
         return false;
@@ -659,7 +662,7 @@ public class PlayerTargetingManager : MonoBehaviour
             return "Target has no cards.";
         }
 
-        if (currentMode == PlayerTargetingMode.Disrupt && player.disruptedNextTurn)
+        if (currentMode == PlayerTargetingMode.Disrupt && player.HasPendingDisrupt())
         {
             return "This player is already disrupted.";
         }

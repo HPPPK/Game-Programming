@@ -12,7 +12,7 @@
 using System.Reflection;
 using UnityEngine;
 
-public class TurnManager : MonoBehaviour
+public class TurnManager : MonoBehaviour, ITurnSource
 {
     public static TurnManager Instance;
 
@@ -33,6 +33,21 @@ public class TurnManager : MonoBehaviour
     [Header("UI")]
     public MonoBehaviour toastMessage;
     public PresentTheNumberUI presentTheNumberUI;
+
+    public int CurrentPlayerId
+    {
+        get { return currentPlayerId; }
+    }
+
+    public bool IsCurrentPlayerHuman
+    {
+        get { return true; }
+    }
+
+    public bool CanHumanAct
+    {
+        get { return true; }
+    }
 
     private void Awake()
     {
@@ -78,6 +93,19 @@ public class TurnManager : MonoBehaviour
 
     public void EndTurn()
     {
+        EndCurrentTurn();
+    }
+
+    public void EndCurrentTurn()
+    {
+        ITurnSource activeTurnSource = TurnSourceResolver.GetActiveTurnSource(this);
+
+        if (!object.ReferenceEquals(activeTurnSource, this))
+        {
+            activeTurnSource.EndCurrentTurn();
+            return;
+        }
+
         StartTurn();
     }
 

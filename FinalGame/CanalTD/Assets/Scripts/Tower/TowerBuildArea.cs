@@ -188,6 +188,37 @@ public class TowerBuildArea : MonoBehaviour
         RefreshOwnershipVisual(playerManager);
     }
 
+    public void ResetForEliminatedPlayer(int eliminatedPlayerId)
+    {
+        if (frozenByPlayerId == eliminatedPlayerId)
+        {
+            ClearFreeze();
+        }
+
+        if (inactiveForPlayerId == eliminatedPlayerId)
+        {
+            ClearActivationDelay();
+        }
+
+        CannonTower tower = currentTower != null ? currentTower.GetComponent<CannonTower>() : null;
+
+        if (tower == null && currentTower != null)
+        {
+            tower = currentTower.GetComponentInChildren<CannonTower>();
+        }
+
+        if (tower != null && tower.ownerPlayerId == eliminatedPlayerId)
+        {
+            RemoveCurrentTower();
+        }
+
+        if (ownerPlayerId == eliminatedPlayerId)
+        {
+            ClearFreeze();
+            ClearOwner();
+        }
+    }
+
     public bool CanBeTakenOverBy(int playerId)
     {
         return areaType == BuildAreaType.Claimable &&

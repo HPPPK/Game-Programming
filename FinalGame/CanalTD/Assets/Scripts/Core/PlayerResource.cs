@@ -17,6 +17,7 @@ public class PlayerResource : MonoBehaviour
     [Header("Player")]
     public int playerId = 0;
     public string displayName = "Player";
+    public PlayerType playerType = PlayerType.Human;
 
     [Header("Resource")]
     public int money = 12;
@@ -29,6 +30,8 @@ public class PlayerResource : MonoBehaviour
 
     [Header("Status Effects")]
     public bool disruptedNextTurn = false;
+    public int disruptedTurnsRemaining = 0;
+    public bool isEliminated = false;
 
     [Header("UI")]
     public PresentTheNumberUI presentTheNumberUI;
@@ -37,18 +40,20 @@ public class PlayerResource : MonoBehaviour
 
     private void Awake()
     {
+        LoadSetupFromPlayerPrefs();
         EnsurePlayerHand();
     }
 
     private void Start()
     {
+        LoadSetupFromPlayerPrefs();
         EnsurePlayerHand();
         RefreshUI();
     }
 
     public bool CanAfford(int cost)
     {
-        return money >= cost;
+        return !isEliminated && money >= cost;
     }
 
 
@@ -62,8 +67,77 @@ public class PlayerResource : MonoBehaviour
         return "Player " + playerId;
     }
 
+    // Loads a ModeSelectScene name and AI flag for this player, while preserving Inspector names when no saved name exists.
+    public void LoadSetupFromPlayerPrefs()
+    {
+        string key = "PlayerName_" + playerId;
+
+        if (PlayerPrefs.HasKey(key))
+        {
+            string savedName = PlayerPrefs.GetString(key);
+
+            if (!string.IsNullOrWhiteSpace(savedName))
+            {
+                displayName = savedName.Trim();
+            }
+        }
+
+        string mode = PlayerPrefs.GetString("GameMode", "");
+        bool isPrototypeMode = mode == "OnlineAIPrototype";
+
+        if (!isPrototypeMode)
+        {
+            playerType = PlayerType.Human;
+            return;
+        }
+
+        // Controller type comes only from room setup data:
+        // PlayerIsAI_i == 1 means AI, PlayerIsAI_i == 0 with a saved name means Human.
+        bool hasName = PlayerPrefs.HasKey(key) && !string.IsNullOrWhiteSpace(PlayerPrefs.GetString(key));
+        bool isAI = PlayerPrefs.GetInt("PlayerIsAI_" + playerId, 0) == 1;
+        playerType = !hasName ? PlayerType.Empty : isAI ? PlayerType.AI : PlayerType.Human;
+    }
+
+    // Kept for older callers that only need display-name loading.
+    public void LoadDisplayNameFromPlayerPrefs()
+    {
+        LoadSetupFromPlayerPrefs();
+    }
+
+    public bool HasPendingDisrupt()
+    {
+        return disruptedNextTurn || disruptedTurnsRemaining > 0;
+    }
+
+    public void ApplyDisruptNextTurn()
+    {
+        disruptedNextTurn = true;
+        disruptedTurnsRemaining = Mathf.Max(disruptedTurnsRemaining, 1);
+    }
+
+    public void ClearPendingDisrupt()
+    {
+        disruptedNextTurn = false;
+        disruptedTurnsRemaining = 0;
+    }
+
+    public void ConsumeDisruptForThisTurn()
+    {
+        if (disruptedTurnsRemaining > 0)
+        {
+            disruptedTurnsRemaining -= 1;
+        }
+
+        disruptedNextTurn = disruptedTurnsRemaining > 0;
+    }
+
     public bool SpendMoney(int cost)
     {
+        if (isEliminated)
+        {
+            return false;
+        }
+
         if (money < cost)
         {
             return false;
@@ -76,18 +150,33 @@ public class PlayerResource : MonoBehaviour
 
     public void AddMoney(int amount)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         money += amount;
         RefreshUI();
     }
 
     public void AddScore(int amount)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         score += amount;
         RefreshUI();
     }
 
     public void SetCardCount(int count)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         cardCount = Mathf.Max(0, count);
         RefreshUI();
     }
@@ -100,6 +189,11 @@ public class PlayerResource : MonoBehaviour
 
     public void AddCardToHand(GameObject cardPrefab)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         if (cardPrefab == null)
         {
             return;
@@ -117,6 +211,11 @@ public class PlayerResource : MonoBehaviour
 
     public bool RemoveCardFromHand(GameObject cardPrefab)
     {
+        if (isEliminated)
+        {
+            return false;
+        }
+
         EnsurePlayerHand();
 
         if (playerHand == null || cardPrefab == null)
@@ -147,8 +246,20 @@ public class PlayerResource : MonoBehaviour
 
     public void AddKillReward(int goldReward, int scoreReward)
     {
+        if (isEliminated)
+        {
+            return;
+        }
+
         money += goldReward;
         score += scoreReward;
+        RefreshUI();
+    }
+
+    public void MarkEliminated()
+    {
+        isEliminated = true;
+        ClearPendingDisrupt();
         RefreshUI();
     }
 

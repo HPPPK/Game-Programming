@@ -206,13 +206,19 @@ public class CardDrawManager : MonoBehaviour
 
     public void DrawCard()
     {
+        if (!CanHumanUseCardsNow())
+        {
+            StartCoroutine(ShowWarning("Wait for your turn."));
+            return;
+        }
+
         if (IsDisruptedThisTurn())
         {
             StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
             return;
         }
 
-        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
             return;
@@ -491,6 +497,11 @@ public class CardDrawManager : MonoBehaviour
 
     public void SelectCard(CardInstanceSelectable card)
     {
+        if (!CanHumanUseCardsNow())
+        {
+            return;
+        }
+
         if (isBusy) return;
         if (pendingPlayedCard != null) return;
 
@@ -514,13 +525,19 @@ public class CardDrawManager : MonoBehaviour
 
     public void DiscardSelectedCard()
     {
+        if (!CanHumanUseCardsNow())
+        {
+            StartCoroutine(ShowWarning("Wait for your turn."));
+            return;
+        }
+
         if (IsDisruptedThisTurn())
         {
             StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
             return;
         }
 
-        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
             return;
@@ -566,13 +583,19 @@ public class CardDrawManager : MonoBehaviour
 
     public void PlaySelectedCard()
     {
+        if (!CanHumanUseCardsNow())
+        {
+            StartCoroutine(ShowWarning("Wait for your turn."));
+            return;
+        }
+
         if (IsDisruptedThisTurn())
         {
             StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
             return;
         }
 
-        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
             return;
@@ -980,22 +1003,17 @@ public class CardDrawManager : MonoBehaviour
     {
         cardName = NormalizeCardName(cardName);
 
-        if (cardName == "Open Gate")
+        if (cardName == "open gate" || cardName == "opengate")
         {
             return GateActionType.OpenGate;
         }
 
-        if (cardName == "RedirectFlow")
+        if (cardName == "redirectflow" || cardName == "redirect flow")
         {
             return GateActionType.OpenGate;
         }
 
-        if (cardName == "Lock Gate")
-        {
-            return GateActionType.LockGate;
-        }
-
-        if (cardName == "LockGate")
+        if (cardName == "lock gate" || cardName == "lockgate")
         {
             return GateActionType.LockGate;
         }
@@ -1163,6 +1181,25 @@ public class CardDrawManager : MonoBehaviour
         return manager != null && manager.IsCardActionsBlockedThisTurn();
     }
 
+    // In GameScene_AIPrototype, ITurnSource is AIPrototypeTurnManager; in old GameScene it is TurnManager.
+    private bool CanHumanUseCardsNow()
+    {
+        ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource(GetTurnManager());
+
+        if (!TurnSourceResolver.IsAIPrototypeActive())
+        {
+            return true;
+        }
+
+        return turnSource != null && turnSource.CanHumanAct;
+    }
+
+    // AIPrototypeTurnManager owns phase flow in GameScene_AIPrototype, so old GamePhaseManager state is ignored there.
+    private bool ShouldUseLegacyPhaseCheck()
+    {
+        return !TurnSourceResolver.IsAIPrototypeActive();
+    }
+
     private void HandleCurrentPlayerChanged(int playerId)
     {
         if (pendingPlayedCard != null)
@@ -1268,7 +1305,8 @@ public class CardDrawManager : MonoBehaviour
         }
 
         TurnManager manager = GetTurnManager();
-        return manager != null ? manager.currentPlayerId : 0;
+        ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource(manager);
+        return turnSource != null ? turnSource.CurrentPlayerId : 0;
     }
 
     private PlayerHand GetCurrentPlayerHand()

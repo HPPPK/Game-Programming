@@ -296,6 +296,13 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         TurnManager manager = GetTurnManager();
+        ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource(manager);
+
+        if (TurnSourceResolver.IsAIPrototypeActive() && (turnSource == null || !turnSource.CanHumanAct))
+        {
+            ShowToast("Wait for your turn.");
+            return;
+        }
 
         if (manager != null && !manager.CanPlayCard())
         {
@@ -664,10 +671,11 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         TurnManager manager = GetTurnManager();
+        ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource(manager);
 
-        if (manager != null)
+        if (turnSource != null)
         {
-            return manager.currentPlayerId;
+            return turnSource.CurrentPlayerId;
         }
 
         return currentPlayerId;

@@ -30,7 +30,7 @@ public class ResultRowUI : MonoBehaviour
 
         if (playerText != null)
         {
-            playerText.text = entry.displayName;
+            playerText.text = entry.isEliminated ? entry.displayName + " - 已淘汰" : entry.displayName;
         }
 
         if (scoreText != null)

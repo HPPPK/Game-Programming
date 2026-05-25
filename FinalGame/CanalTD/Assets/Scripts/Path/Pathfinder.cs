@@ -46,6 +46,7 @@ public static class Pathfinder
 
         paths.Sort((a, b) => b.Count.CompareTo(a.Count));
         return paths[0];
+    
     }
 
     public static List<List<PathNode>> FindAllPaths(

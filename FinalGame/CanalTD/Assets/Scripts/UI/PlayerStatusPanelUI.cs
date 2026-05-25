@@ -43,13 +43,13 @@ public class PlayerStatusPanelUI : MonoBehaviour
     public int defaultCardCount = 0;
 
     [Header("Name Display")]
-    public int maxNameLength = 12;
-    public int truncatedNameLength = 10;
+    public int maxNameLength = 14;
+    public int truncatedNameLength = 12;
     public float shortNameFontSize = 3f;
-    public float mediumNameFontSize = 2f;
-    public float longNameFontSize = 1f;
-    public int mediumNameLength = 5;
-    public int longNameLength = 9;
+    public float mediumNameFontSize = 2.6f;
+    public float longNameFontSize = 2.1f;
+    public int mediumNameLength = 8;
+    public int longNameLength = 12;
 
     void Update()
     {
@@ -61,7 +61,10 @@ public class PlayerStatusPanelUI : MonoBehaviour
         if (playerNameText != null)
         {
             string displayName = GetPanelDisplayName();
-            playerNameText.enableAutoSizing = false;
+            // Keep normal names readable, then let TMP shrink slightly only if the text still needs help.
+            playerNameText.enableAutoSizing = true;
+            playerNameText.fontSizeMax = GetNameFontSize(displayName);
+            playerNameText.fontSizeMin = 1.8f;
             playerNameText.fontSize = GetNameFontSize(displayName);
             playerNameText.text = displayName;
         }
@@ -92,7 +95,7 @@ public class PlayerStatusPanelUI : MonoBehaviour
         if (scoreText != null)
         {
             int score = linkedResource != null ? linkedResource.score : 0;
-            scoreText.text = score.ToString();
+            scoreText.text = linkedResource != null && linkedResource.isEliminated ? "已淘汰" : score.ToString();
         }
     }
 
