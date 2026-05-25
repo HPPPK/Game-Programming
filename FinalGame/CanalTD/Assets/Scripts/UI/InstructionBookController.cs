@@ -32,24 +32,17 @@ public class InstructionBookController : MonoBehaviour
     [Header("Buttons")]
     public Button prevButton;
     public Button nextButton;
+    public Button closeButton;
 
     [Header("Pages")]
     public InstructionPage[] pages;
 
     private int currentPageIndex = 0;
+    private bool listenersBound;
 
     private void Awake()
     {
-        // Button listeners are registered once so UI buttons can work without extra wrapper scripts.
-        if (prevButton != null)
-        {
-            prevButton.onClick.AddListener(PreviousPage);
-        }
-
-        if (nextButton != null)
-        {
-            nextButton.onClick.AddListener(NextPage);
-        }
+        BindListenersOnce();
     }
 
     private void Start()
@@ -63,7 +56,46 @@ public class InstructionBookController : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Remove listeners to avoid duplicate calls if the object is recreated.
+        UnbindListeners();
+    }
+
+    // Button listeners are registered once so UI buttons can work without extra wrapper scripts.
+    private void BindListenersOnce()
+    {
+        if (listenersBound)
+        {
+            return;
+        }
+
+        if (prevButton != null)
+        {
+            prevButton.onClick.RemoveListener(PreviousPage);
+            prevButton.onClick.AddListener(PreviousPage);
+        }
+
+        if (nextButton != null)
+        {
+            nextButton.onClick.RemoveListener(NextPage);
+            nextButton.onClick.AddListener(NextPage);
+        }
+
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveListener(CloseBook);
+            closeButton.onClick.AddListener(CloseBook);
+        }
+
+        listenersBound = true;
+    }
+
+    // Remove listeners to avoid duplicate calls if the object is recreated.
+    private void UnbindListeners()
+    {
+        if (!listenersBound)
+        {
+            return;
+        }
+
         if (prevButton != null)
         {
             prevButton.onClick.RemoveListener(PreviousPage);
@@ -73,6 +105,19 @@ public class InstructionBookController : MonoBehaviour
         {
             nextButton.onClick.RemoveListener(NextPage);
         }
+
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveListener(CloseBook);
+        }
+
+        listenersBound = false;
+    }
+
+    // Returns whether the instruction book panel is currently open.
+    public bool IsOpen()
+    {
+        return instructionPanel != null && instructionPanel.activeSelf;
     }
 
     // Opens the instruction book and always starts from the first page.
