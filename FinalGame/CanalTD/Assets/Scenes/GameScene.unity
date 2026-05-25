@@ -51094,6 +51094,7 @@ MonoBehaviour:
   - {fileID: 820064825}
   - {fileID: 966247108}
   gamePhaseManager: {fileID: 163762666}
+  aiPrototypeTurnManager: {fileID: 0}
   toastMessage: {fileID: 848080698}
   currentWaveIndex: 1
   currentWaveNumber: 1
@@ -54487,7 +54488,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &715027506
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57756,7 +57757,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -22.96, y: 14.03, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1}
+  m_LocalScale: {x: 1.41, y: 1.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 628390171}
@@ -57891,6 +57892,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerId: 0
   displayName: Kate
+  playerType: 0
   money: 12
   score: 0
   cardCount: 0
@@ -57898,6 +57900,7 @@ MonoBehaviour:
   handCards: []
   disruptedNextTurn: 0
   disruptedTurnsRemaining: 0
+  isEliminated: 0
   presentTheNumberUI: {fileID: 1900812223}
   playerManager: {fileID: 535938592}
   statusPanel: {fileID: 2117550754}
@@ -57947,7 +57950,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 23.61, y: 14.53, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1}
+  m_LocalScale: {x: 1.41, y: 1.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1416774333}
@@ -58082,6 +58085,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerId: 1
   displayName: Tom
+  playerType: 0
   money: 12
   score: 0
   cardCount: 0
@@ -58089,6 +58093,7 @@ MonoBehaviour:
   handCards: []
   disruptedNextTurn: 0
   disruptedTurnsRemaining: 0
+  isEliminated: 0
   presentTheNumberUI: {fileID: 1900812223}
   playerManager: {fileID: 535938592}
   statusPanel: {fileID: 1118719935}
@@ -58138,7 +58143,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -22.32, y: -7.68, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1}
+  m_LocalScale: {x: 1.41, y: 1.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2032478623}
@@ -58273,6 +58278,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerId: 2
   displayName: Candy
+  playerType: 0
   money: 12
   score: 0
   cardCount: 0
@@ -58280,6 +58286,7 @@ MonoBehaviour:
   handCards: []
   disruptedNextTurn: 0
   disruptedTurnsRemaining: 0
+  isEliminated: 0
   presentTheNumberUI: {fileID: 1900812223}
   playerManager: {fileID: 535938592}
   statusPanel: {fileID: 1444230685}
@@ -58329,7 +58336,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 23.23, y: -7.59, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1}
+  m_LocalScale: {x: 1.41, y: 1.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 964248052}
@@ -58464,6 +58471,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerId: 3
   displayName: Linda
+  playerType: 0
   money: 12
   score: 0
   cardCount: 0
@@ -58471,6 +58479,7 @@ MonoBehaviour:
   handCards: []
   disruptedNextTurn: 0
   disruptedTurnsRemaining: 0
+  isEliminated: 0
   presentTheNumberUI: {fileID: 1900812223}
   playerManager: {fileID: 535938592}
   statusPanel: {fileID: 1082147775}
@@ -60554,7 +60563,7 @@ RectTransform:
   m_GameObject: {fileID: 1082147773}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 88827459}
@@ -60570,7 +60579,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 85.7, y: 48}
+  m_AnchoredPosition: {x: 82, y: 45}
   m_SizeDelta: {x: 30, y: 35}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1082147775
@@ -61304,7 +61313,7 @@ RectTransform:
   m_GameObject: {fileID: 1118719933}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 379669430}
@@ -61320,7 +61329,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 85.7, y: 68}
+  m_AnchoredPosition: {x: 82, y: 67}
   m_SizeDelta: {x: 30, y: 35}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1118719935
@@ -64794,7 +64803,7 @@ RectTransform:
   m_GameObject: {fileID: 1444230681}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 858191966}
@@ -64810,7 +64819,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 24, y: 48}
+  m_AnchoredPosition: {x: 25, y: 45}
   m_SizeDelta: {x: 30, y: 35}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1444230683
@@ -73393,7 +73402,7 @@ RectTransform:
   m_GameObject: {fileID: 2117550752}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2093720336}
@@ -73409,7 +73418,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 24, y: 68}
+  m_AnchoredPosition: {x: 25, y: 67}
   m_SizeDelta: {x: 30, y: 35}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &2117550754
