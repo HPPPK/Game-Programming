@@ -146,6 +146,14 @@ public class GamePhaseManager : MonoBehaviour
 
     public void OnEndTurnButtonClicked()
     {
+        ITurnSource activeTurnSource = TurnSourceResolver.GetActiveTurnSource(turnManager);
+
+        if (activeTurnSource != null && !object.ReferenceEquals(activeTurnSource, turnManager))
+        {
+            activeTurnSource.EndCurrentTurn();
+            return;
+        }
+
         if (!IsPlayerPhase())
         {
             ShowToast("Enemy wave is running.");

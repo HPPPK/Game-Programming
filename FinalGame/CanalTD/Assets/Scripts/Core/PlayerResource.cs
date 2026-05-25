@@ -17,6 +17,7 @@ public class PlayerResource : MonoBehaviour
     [Header("Player")]
     public int playerId = 0;
     public string displayName = "Player";
+    public PlayerType playerType = PlayerType.Human;
 
     [Header("Resource")]
     public int money = 12;
@@ -39,11 +40,13 @@ public class PlayerResource : MonoBehaviour
 
     private void Awake()
     {
+        LoadSetupFromPlayerPrefs();
         EnsurePlayerHand();
     }
 
     private void Start()
     {
+        LoadSetupFromPlayerPrefs();
         EnsurePlayerHand();
         RefreshUI();
     }
@@ -62,6 +65,43 @@ public class PlayerResource : MonoBehaviour
         }
 
         return "Player " + playerId;
+    }
+
+    // Loads a ModeSelectScene name and AI flag for this player, while preserving Inspector names when no saved name exists.
+    public void LoadSetupFromPlayerPrefs()
+    {
+        string key = "PlayerName_" + playerId;
+
+        if (PlayerPrefs.HasKey(key))
+        {
+            string savedName = PlayerPrefs.GetString(key);
+
+            if (!string.IsNullOrWhiteSpace(savedName))
+            {
+                displayName = savedName.Trim();
+            }
+        }
+
+        string mode = PlayerPrefs.GetString("GameMode", "");
+        bool isPrototypeMode = mode == "OnlineAIPrototype";
+
+        if (!isPrototypeMode)
+        {
+            playerType = PlayerType.Human;
+            return;
+        }
+
+        // Controller type comes only from room setup data:
+        // PlayerIsAI_i == 1 means AI, PlayerIsAI_i == 0 with a saved name means Human.
+        bool hasName = PlayerPrefs.HasKey(key) && !string.IsNullOrWhiteSpace(PlayerPrefs.GetString(key));
+        bool isAI = PlayerPrefs.GetInt("PlayerIsAI_" + playerId, 0) == 1;
+        playerType = !hasName ? PlayerType.Empty : isAI ? PlayerType.AI : PlayerType.Human;
+    }
+
+    // Kept for older callers that only need display-name loading.
+    public void LoadDisplayNameFromPlayerPrefs()
+    {
+        LoadSetupFromPlayerPrefs();
     }
 
     public bool HasPendingDisrupt()

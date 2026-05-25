@@ -33,6 +33,7 @@ public class CastleBase : MonoBehaviour
     void Start()
     {
         currentHP = maxHP;
+        LoadPlayerNameFromPlayerPrefs();
         SyncPlayerNameFromOwner();
         Debug.Log(GetDisplayName() + " base ready. HP = " + currentHP);
     }
@@ -85,6 +86,29 @@ public class CastleBase : MonoBehaviour
         if (ownerResource != null)
         {
             playerName = ownerResource.GetDisplayName();
+        }
+    }
+
+    // Loads a saved name only when this castle does not have a PlayerResource supplying the display name.
+    private void LoadPlayerNameFromPlayerPrefs()
+    {
+        if (ownerResource != null)
+        {
+            return;
+        }
+
+        string key = "PlayerName_" + ownerPlayerId;
+
+        if (!PlayerPrefs.HasKey(key))
+        {
+            return;
+        }
+
+        string savedName = PlayerPrefs.GetString(key);
+
+        if (!string.IsNullOrWhiteSpace(savedName))
+        {
+            playerName = savedName.Trim();
         }
     }
 

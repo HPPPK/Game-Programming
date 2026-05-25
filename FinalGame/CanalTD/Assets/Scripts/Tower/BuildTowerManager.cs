@@ -60,6 +60,13 @@ public class BuildTowerManager : MonoBehaviour
 
     private void TryBuildTowerAtMouse()
     {
+        ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource();
+
+        if (TurnSourceResolver.IsAIPrototypeActive() && (turnSource == null || !turnSource.CanHumanAct))
+        {
+            return;
+        }
+
         if (GateTargetingManager.Instance != null && GateTargetingManager.Instance.IsAnyTargetingActive())
         {
             return;
@@ -151,7 +158,7 @@ public class BuildTowerManager : MonoBehaviour
 
     private void HandleBuildAreaClick(TowerBuildArea buildArea)
     {
-        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        if (!TurnSourceResolver.IsAIPrototypeActive() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             ShowToast("You cannot build during enemy wave.");
             return;

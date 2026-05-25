@@ -36,6 +36,7 @@ public class WaveManager : MonoBehaviour
 
     [Header("Phase Manager")]
     public GamePhaseManager gamePhaseManager;
+    public AIPrototypeTurnManager aiPrototypeTurnManager;
     public MonoBehaviour toastMessage;
 
     [Header("Wave Settings")]
@@ -176,6 +177,12 @@ public class WaveManager : MonoBehaviour
 
     private void NotifyWaveFinished()
     {
+        if (aiPrototypeTurnManager != null)
+        {
+            aiPrototypeTurnManager.OnWaveFinished();
+            return;
+        }
+
         if (gamePhaseManager != null)
         {
             gamePhaseManager.OnWaveFinished();
@@ -184,6 +191,11 @@ public class WaveManager : MonoBehaviour
 
     private int GetCurrentWaveIndex()
     {
+        if (aiPrototypeTurnManager != null)
+        {
+            return Mathf.Max(1, aiPrototypeTurnManager.currentWaveIndex);
+        }
+
         if (gamePhaseManager != null)
         {
             return Mathf.Max(1, gamePhaseManager.currentWaveIndex);

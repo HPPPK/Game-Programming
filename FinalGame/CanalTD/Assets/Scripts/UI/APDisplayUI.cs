@@ -3,6 +3,8 @@
  *
  * Purpose:
  * This script displays the current AP value from TurnManager using TextMeshPro.
+ * In GameScene_AIPrototype, TurnManager is only a synced helper, but the active
+ * turn source is still resolved so the UI does not imply humans can act during AI turns.
  * It is intentionally simple and refreshes every frame so the UI stays correct
  * even when AP changes from different gameplay actions.
  *
@@ -34,12 +36,17 @@ public class APDisplayUI : MonoBehaviour
     public void Refresh()
     {
         TurnManager manager = turnManager != null ? turnManager : TurnManager.Instance;
+        ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource(manager);
 
         if (manager == null || apText == null)
         {
             return;
         }
 
-        apText.text = "AP: " + manager.currentAP + " / " + manager.maxAP;
+        string prefix = turnSource != null && !turnSource.CanHumanAct && TurnSourceResolver.IsAIPrototypeActive()
+            ? "AI AP: "
+            : "AP: ";
+
+        apText.text = prefix + manager.currentAP + " / " + manager.maxAP;
     }
 }
