@@ -73,6 +73,7 @@
     <Compile Include="Assets/Scripts/Core/AIPrototypeTurnManager.cs" />
     <Compile Include="Assets/Scripts/UI/ResultSceneManager.cs" />
     <Compile Include="Assets/Scripts/UI/APDisplayUI.cs" />
+    <Compile Include="Assets/Scripts/UI/GlobalCursorManager.cs" />
     <Compile Include="Assets/Scripts/Core/GameResultData.cs" />
     <Compile Include="Assets/Scripts/Path/PathGraphState.cs" />
     <Compile Include="Assets/Scripts/Core/TurnManager.cs" />
@@ -120,14 +121,17 @@
     <Compile Include="Assets/Scripts/UI/ResultRowUI.cs" />
     <Compile Include="Assets/Scripts/UI/CastleHealthBar.cs" />
     <Compile Include="Assets/Scripts/Card/GateOwnershipManager.cs" />
+    <Compile Include="Assets/Scripts/UI/SettingsPanelController.cs" />
     <Compile Include="Assets/Scripts/UI/ManualUIButton.cs" />
     <Compile Include="Assets/Scripts/Core/GamePhaseManager.cs" />
+    <Compile Include="Assets/Scripts/UI/GlobalUIManager.cs" />
     <Compile Include="Assets/Scripts/Card/GateTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/WaveConfig.cs" />
     <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
     <Compile Include="Assets/Scripts/UI/HomeSceneManager.cs" />
     <Compile Include="Assets/Scripts/UI/PresentTheNumberUI.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerResource.cs" />
+    <Compile Include="Assets/Scripts/UI/BootstrapSceneLoader.cs" />
     <Compile Include="Assets/Scripts/Card/PlayerTargetingManager.cs" />
   </ItemGroup>
   <ItemGroup>
