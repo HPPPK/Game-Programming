@@ -458,7 +458,7 @@ public class CardDrawManager : MonoBehaviour
 
     public bool CanSelectCards()
     {
-        return !isBusy && pendingPlayedCard == null;
+        return !isBusy && pendingPlayedCard == null && CanHumanUseCardsNow();
     }
 
     public int GetHandCardCount()
@@ -1143,24 +1143,35 @@ public class CardDrawManager : MonoBehaviour
 
     private void RefreshPresentNumberUI()
     {
-        int handCount = GetHandCardCount();
-
         if (playerManager != null)
         {
-            PlayerResource currentPlayer = playerManager.GetCurrentPlayerResource();
+            PlayerResource currentPlayer = GetVisibleHandPlayerResource();
 
             if (currentPlayer != null)
             {
-                currentPlayer.SetCardCount(handCount);
+                currentPlayer.SyncCardCountFromHand();
             }
 
-            playerManager.RefreshCurrentPlayerUI();
+            if (TurnSourceResolver.IsAIPrototypeActive() && currentPlayer != null)
+            {
+                if (presentTheNumberUI != null)
+                {
+                    presentTheNumberUI.SetNumbers(currentPlayer.money, currentPlayer.GetHandCardCount());
+                }
+
+                playerManager.RefreshPlayerUI(currentPlayer.playerId);
+            }
+            else
+            {
+                playerManager.RefreshCurrentPlayerUI();
+            }
+
             return;
         }
 
         if (presentTheNumberUI != null)
         {
-            presentTheNumberUI.SetCardCount(handCount);
+            presentTheNumberUI.SetCardCount(GetHandCardCount());
         }
     }
 
@@ -1215,7 +1226,7 @@ public class CardDrawManager : MonoBehaviour
         selectedCard = null;
         ClearVisibleHand();
 
-        PlayerResource currentPlayer = GetCurrentPlayerResource();
+        PlayerResource currentPlayer = GetVisibleHandPlayerResource();
 
         if (currentPlayer == null)
         {
@@ -1223,7 +1234,7 @@ public class CardDrawManager : MonoBehaviour
             return;
         }
 
-        PlayerHand currentHand = GetCurrentPlayerHand();
+        PlayerHand currentHand = currentPlayer.GetPlayerHand();
 
         if (currentHand == null)
         {
@@ -1241,6 +1252,32 @@ public class CardDrawManager : MonoBehaviour
 
         currentPlayer.SetCardCount(currentHand.GetCardCount());
         RefreshPresentNumberUI();
+    }
+
+    // In AIPrototype mode, the visible hand belongs to the local human player, not the AI whose turn is running.
+    private PlayerResource GetVisibleHandPlayerResource()
+    {
+        if (!TurnSourceResolver.IsAIPrototypeActive())
+        {
+            return GetCurrentPlayerResource();
+        }
+
+        if (playerManager == null || playerManager.players == null)
+        {
+            return GetCurrentPlayerResource();
+        }
+
+        foreach (PlayerResource player in playerManager.players)
+        {
+            if (player != null &&
+                player.playerType == PlayerType.Human &&
+                !player.isEliminated)
+            {
+                return player;
+            }
+        }
+
+        return null;
     }
 
     private void ClearVisibleHand()

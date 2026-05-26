@@ -132,7 +132,8 @@ public class CastleBase : MonoBehaviour
 
         if (manager != null)
         {
-            manager.EliminatePlayer(ownerPlayerId);
+            int eliminatedPlayerId = ownerResource != null ? ownerResource.playerId : ownerPlayerId;
+            manager.EliminatePlayer(eliminatedPlayerId);
         }
     }
 }

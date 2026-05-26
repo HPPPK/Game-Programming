@@ -206,7 +206,9 @@ public class TowerTargetingManager : MonoBehaviour
             return;
         }
 
-        ShowToast("Tower boosted.");
+        PlayerResource currentPlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
+        string actorName = currentPlayer != null ? currentPlayer.GetDisplayName() : "Current player";
+        ShowToast(actorName + " used Power Boost on their tower.");
         ExitTargetingMode();
     }
 

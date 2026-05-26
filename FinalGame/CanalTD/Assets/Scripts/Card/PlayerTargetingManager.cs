@@ -316,7 +316,7 @@ public class PlayerTargetingManager : MonoBehaviour
         }
 
         cardDrawManager.RenderCurrentPlayerHand();
-        ShowToast("Card stolen.");
+        ShowPublicCardToast(currentPlayer, "Steal Card", selectedPlayer);
         ExitTargetingMode();
     }
 
@@ -375,7 +375,7 @@ public class PlayerTargetingManager : MonoBehaviour
         }
 
         cardDrawManager.RenderCurrentPlayerHand();
-        ShowToast("Hands traded.");
+        ShowPublicCardToast(currentPlayer, "Trade Hands", selectedPlayer);
         ExitTargetingMode();
     }
 
@@ -407,8 +407,17 @@ public class PlayerTargetingManager : MonoBehaviour
             playerManager.RefreshCurrentPlayerUI();
         }
 
-        ShowToast("Player disrupted.");
+        PlayerResource currentPlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
+        ShowPublicCardToast(currentPlayer, "Disrupt", selectedPlayer);
         ExitTargetingMode();
+    }
+
+    // Shows a public card announcement so every player can see who used a player-targeting card.
+    private void ShowPublicCardToast(PlayerResource actor, string cardName, PlayerResource target)
+    {
+        string actorName = actor != null ? actor.GetDisplayName() : "Current player";
+        string targetName = target != null ? target.GetDisplayName() : "target player";
+        ShowToast(actorName + " used " + cardName + " on " + targetName + ".");
     }
 
     private bool CanConfirmTargetingCard()
@@ -608,7 +617,7 @@ public class PlayerTargetingManager : MonoBehaviour
             return false;
         }
 
-        if (player.playerId == playerManager.GetCurrentPlayerId())
+        if (player.playerId == playerManager.GetCurrentPlayerId() || player.isEliminated)
         {
             return false;
         }

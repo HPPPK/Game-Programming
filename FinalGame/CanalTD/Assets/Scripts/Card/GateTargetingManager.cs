@@ -63,6 +63,11 @@ public class GateTargetingManager : MonoBehaviour
     [Header("Phase Manager")]
     public GamePhaseManager gamePhaseManager;
 
+    [Header("Path Safety")]
+    public bool preventLocksThatBlockAllPaths = true;
+    public EnemySpawner[] enemySpawners;
+    public CastleEndNode[] castleEnds;
+
     [Header("Colors")]
     public Color normalMapColor = Color.white;
     public Color dimMapColor = new Color(0.45f, 0.45f, 0.45f, 1f);
@@ -159,7 +164,9 @@ public class GateTargetingManager : MonoBehaviour
 
             if (actionType == GateActionType.LockGate)
             {
-                valid = !gate.IsBlocking() && !gate.IsLocked();
+                valid = !gate.IsBlocking() &&
+                    !gate.IsLocked() &&
+                    CanLockGateWithoutRemovingAllEnemyPaths(gate);
             }
             else if (actionType == GateActionType.OpenGate)
             {
@@ -343,6 +350,10 @@ public class GateTargetingManager : MonoBehaviour
         {
             cardManager.ConfirmPendingCard();
         }
+
+        string actorName = playerManager != null ? playerManager.GetPlayerDisplayName(currentPlayerId) : "Current player";
+        string cardName = currentActionType == GateActionType.LockGate ? "Lock Gate" : "Open Gate";
+        ShowToast(actorName + " used " + cardName + ".");
     }
 
     public void CancelSelection()
@@ -650,6 +661,12 @@ public class GateTargetingManager : MonoBehaviour
 
         if (currentActionType == GateActionType.LockGate)
         {
+            if (!CanLockGateWithoutRemovingAllEnemyPaths(selectedGate))
+            {
+                ShowToast("This gate would block all enemy paths.");
+                return false;
+            }
+
             return !selectedGate.IsLocked() &&
                 !selectedGate.IsPlaying() &&
                 !selectedGate.IsBlocking();
@@ -679,6 +696,108 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         return currentPlayerId;
+    }
+
+    private bool CanLockGateWithoutRemovingAllEnemyPaths(GateFrameAnimation gate)
+    {
+        if (!preventLocksThatBlockAllPaths)
+        {
+            return true;
+        }
+
+        if (gate == null)
+        {
+            return false;
+        }
+
+        if (gate.IsBlocking())
+        {
+            return true;
+        }
+
+        EnemySpawner[] spawners = GetEnemySpawnersForPathCheck();
+        CastleEndNode[] ends = GetCastleEndsForPathCheck();
+
+        if (spawners.Length == 0 || ends.Length == 0)
+        {
+            Debug.LogWarning("Gate path safety check skipped because spawners or castle ends are missing.");
+            return true;
+        }
+
+        bool originalBlocking = gate.isBlocking;
+        gate.isBlocking = true;
+        PathGraphState.MarkDirty();
+
+        bool everySpawnerStillHasPath = EverySpawnerCanReachAnyCastle(spawners, ends);
+
+        gate.isBlocking = originalBlocking;
+        PathGraphState.MarkDirty();
+
+        return everySpawnerStillHasPath;
+    }
+
+    private bool EverySpawnerCanReachAnyCastle(EnemySpawner[] spawners, CastleEndNode[] ends)
+    {
+        foreach (EnemySpawner spawner in spawners)
+        {
+            if (spawner == null || spawner.startNode == null)
+            {
+                continue;
+            }
+
+            bool hasPath = false;
+
+            foreach (CastleEndNode castleEnd in ends)
+            {
+                if (castleEnd == null)
+                {
+                    continue;
+                }
+
+                List<PathNode> path = Pathfinder.FindPath(spawner.startNode, castleEnd);
+
+                if (path != null && path.Count > 0)
+                {
+                    hasPath = true;
+                    break;
+                }
+            }
+
+            if (!hasPath)
+            {
+                Debug.Log("Lock Gate rejected because " + spawner.name + " would have no reachable castle.");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private EnemySpawner[] GetEnemySpawnersForPathCheck()
+    {
+        if (enemySpawners != null && enemySpawners.Length > 0)
+        {
+            return enemySpawners;
+        }
+
+        return FindObjectsOfType<EnemySpawner>();
+    }
+
+    private CastleEndNode[] GetCastleEndsForPathCheck()
+    {
+        if (castleEnds != null && castleEnds.Length > 0)
+        {
+            return castleEnds;
+        }
+
+        if (EnemyPathAssignmentManager.Instance != null &&
+            EnemyPathAssignmentManager.Instance.castleEnds != null &&
+            EnemyPathAssignmentManager.Instance.castleEnds.Length > 0)
+        {
+            return EnemyPathAssignmentManager.Instance.castleEnds;
+        }
+
+        return FindObjectsOfType<CastleEndNode>();
     }
 
     public void ShowToast(string message)

@@ -214,6 +214,10 @@ public class TowerBuildArea : MonoBehaviour
 
         if (ownerPlayerId == eliminatedPlayerId)
         {
+            // When an eliminated player loses the land, the land returns to its
+            // initial empty state. Remove any tower on it even if ownership data
+            // was out of sync.
+            RemoveCurrentTower();
             ClearFreeze();
             ClearOwner();
         }
@@ -221,6 +225,11 @@ public class TowerBuildArea : MonoBehaviour
 
     public bool CanBeTakenOverBy(int playerId)
     {
+        if (playerManager != null && playerManager.IsPlayerEliminated(ownerPlayerId))
+        {
+            return false;
+        }
+
         return areaType == BuildAreaType.Claimable &&
             isOwned &&
             ownerPlayerId >= 0 &&
