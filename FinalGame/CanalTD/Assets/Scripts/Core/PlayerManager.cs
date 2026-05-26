@@ -21,6 +21,7 @@ public class PlayerVisualConfig
     public GameObject castleReference;
     public Sprite towerSprite;
     public GameObject towerPrefab;
+    public Sprite shockTrapSprite;
     public Color ownedLandColor = Color.white;
     public Sprite ownedLandSprite;
 }
@@ -304,6 +305,12 @@ public class PlayerManager : MonoBehaviour
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
         return config != null ? config.towerSprite : null;
+    }
+
+    public Sprite GetShockTrapSpriteForPlayer(int playerId)
+    {
+        PlayerVisualConfig config = GetVisualConfig(playerId);
+        return config != null ? config.shockTrapSprite : null;
     }
 
     public Color GetOwnedLandColor(int playerId)

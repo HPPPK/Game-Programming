@@ -1,0 +1,1 @@
+By Session 6, I will improve the AI prototype fairness, multi-enemy wave setup, and player-specific trap feedback, and I will show evidence by committing the script, prefab, and scene changes to GitHub.

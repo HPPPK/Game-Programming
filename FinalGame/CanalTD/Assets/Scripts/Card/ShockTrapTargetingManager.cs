@@ -253,6 +253,7 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
 
         shockTrap.Initialize(currentPlayerId, currentPlayer, selectedNode.transform);
+        shockTrap.ApplyOwnerVisual(playerManager);
         EnsurePlacedTrapVisual(trapObject);
         Debug.Log("Shock Trap placed at node: " + selectedNode.name);
 
@@ -265,7 +266,8 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
 
         Debug.Log("Active traps count after placement: " + GetActiveTrapCount());
-        ShowToast("Shock trap placed.");
+        string actorName = currentPlayer != null ? currentPlayer.GetDisplayName() : "Current player";
+        ShowToast(actorName + " used Shock Trap on the path.");
         ExitTargetingMode();
     }
 
@@ -663,7 +665,25 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
         if (previewRenderer != null)
         {
-            previewRenderer.color = color;
+            ApplyCurrentPlayerPreviewSprite();
+            Color previewColor = color;
+            previewColor.a = Mathf.Clamp01(color.a);
+            previewRenderer.color = previewColor;
+        }
+    }
+
+    private void ApplyCurrentPlayerPreviewSprite()
+    {
+        if (playerManager == null || previewRenderer == null)
+        {
+            return;
+        }
+
+        Sprite previewSprite = playerManager.GetShockTrapSpriteForPlayer(playerManager.GetCurrentPlayerId());
+
+        if (previewSprite != null)
+        {
+            previewRenderer.sprite = previewSprite;
         }
     }
 
@@ -857,9 +877,6 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
 
         renderer.sortingOrder = trapSortingOrder;
-        Color color = renderer.color;
-        color.a = 1f;
-        renderer.color = color;
     }
 
     private int GetActiveTrapCount()

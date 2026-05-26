@@ -31,7 +31,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6935944441615096425}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &9178881288609307550
+--- !u!1 &3654078656320864809
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -39,40 +39,37 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6935944441615096425}
-  - component: {fileID: 4629363257706310568}
-  - component: {fileID: 1449029083322658814}
-  - component: {fileID: -1970834342140172645}
+  - component: {fileID: 7700947842484053609}
+  - component: {fileID: 6327248821773120501}
   m_Layer: 0
-  m_Name: CannonTower
+  m_Name: visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6935944441615096425
+--- !u!4 &7700947842484053609
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9178881288609307550}
+  m_GameObject: {fileID: 3654078656320864809}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 20.3, y: -0.58, z: -0.055010322}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalPosition: {x: 0, y: -0.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 373234444202403387}
-  m_Father: {fileID: 0}
+  m_Children: []
+  m_Father: {fileID: 6935944441615096425}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &4629363257706310568
+--- !u!212 &6327248821773120501
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9178881288609307550}
+  m_GameObject: {fileID: 3654078656320864809}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -106,7 +103,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 199
+  m_SortingOrder: 200
   m_Sprite: {fileID: 9098495111528537355, guid: decc763589a9a4272a06e7eb413c1d6b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -118,6 +115,41 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &9178881288609307550
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6935944441615096425}
+  - component: {fileID: 1449029083322658814}
+  - component: {fileID: -1970834342140172645}
+  m_Layer: 0
+  m_Name: CannonTower
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6935944441615096425
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9178881288609307550}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 20.3, y: -0.58, z: -0.055010322}
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 373234444202403387}
+  - {fileID: 7700947842484053609}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1449029083322658814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,14 +164,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ownerPlayerId: 0
   ownerResource: {fileID: 0}
-  towerSpriteRenderer: {fileID: 4629363257706310568}
-  attackRange: 3
+  towerSpriteRenderer: {fileID: 0}
+  attackRange: 4
   attackInterval: 0.6
   damage: 1
+  baseDamage: 1
+  boostedDamage: 2
   projectilePrefab: {fileID: 8903494610328624728, guid: 2021f442cd0f74e0eb14edb5bc91941a, type: 3}
   firePoint: {fileID: 373234444202403387}
   boostPendingForNextWave: 0
   boostActive: 0
+  boostActiveTint: {r: 1, g: 0.8, b: 0.25, a: 1}
+  boostIcon: {fileID: 0}
 --- !u!61 &-1970834342140172645
 BoxCollider2D:
   m_ObjectHideFlags: 0

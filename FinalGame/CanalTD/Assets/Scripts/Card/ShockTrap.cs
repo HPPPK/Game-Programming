@@ -33,13 +33,24 @@ public class ShockTrap : MonoBehaviour
     public string explodeTriggerName = "Explode";
     public float destroyDelayAfterExplode = 0.35f;
 
+    [Header("Owner Visual")]
+    public SpriteRenderer trapRenderer;
+    public bool useOwnerSprite = true;
+
     private bool activeDuringWave = false;
+    private PlayerManager cachedPlayerManager;
+    private Sprite ownerIdleSprite;
 
     private void Awake()
     {
         if (animator == null)
         {
             animator = GetComponent<Animator>();
+        }
+
+        if (trapRenderer == null)
+        {
+            trapRenderer = FindTrapRenderer();
         }
     }
 
@@ -59,6 +70,106 @@ public class ShockTrap : MonoBehaviour
         {
             ShockTrapTargetingManager.RegisterTrap(routeNodeTransform, this);
         }
+    }
+
+    public void ApplyOwnerVisual(PlayerManager playerManager)
+    {
+        cachedPlayerManager = playerManager;
+
+        if (trapRenderer == null)
+        {
+            trapRenderer = FindTrapRenderer();
+        }
+
+        if (trapRenderer == null)
+        {
+            return;
+        }
+
+        if (useOwnerSprite && playerManager != null)
+        {
+            Sprite ownerSprite = playerManager.GetShockTrapSpriteForPlayer(ownerPlayerId);
+
+            if (ownerSprite != null)
+            {
+                ownerIdleSprite = ownerSprite;
+                ApplyOwnerIdleSprite();
+            }
+        }
+
+        EnsureVisibleAlpha();
+    }
+
+    private void LateUpdate()
+    {
+        if (!triggered)
+        {
+            ApplyOwnerIdleSprite();
+        }
+    }
+
+    private void ApplyOwnerIdleSprite()
+    {
+        if (!useOwnerSprite)
+        {
+            return;
+        }
+
+        if (trapRenderer == null)
+        {
+            trapRenderer = FindTrapRenderer();
+        }
+
+        if (ownerIdleSprite == null && cachedPlayerManager != null)
+        {
+            ownerIdleSprite = cachedPlayerManager.GetShockTrapSpriteForPlayer(ownerPlayerId);
+        }
+
+        if (trapRenderer != null && ownerIdleSprite != null)
+        {
+            trapRenderer.sprite = ownerIdleSprite;
+        }
+    }
+
+    private SpriteRenderer FindTrapRenderer()
+    {
+        Transform visual = transform.Find("Visual");
+
+        if (visual != null)
+        {
+            SpriteRenderer visualRenderer = visual.GetComponent<SpriteRenderer>();
+
+            if (visualRenderer != null)
+            {
+                return visualRenderer;
+            }
+
+            visualRenderer = visual.GetComponentInChildren<SpriteRenderer>(true);
+
+            if (visualRenderer != null)
+            {
+                return visualRenderer;
+            }
+        }
+
+        return GetComponentInChildren<SpriteRenderer>(true);
+    }
+
+    private void EnsureVisibleAlpha()
+    {
+        if (trapRenderer == null)
+        {
+            trapRenderer = GetComponentInChildren<SpriteRenderer>();
+        }
+
+        if (trapRenderer == null)
+        {
+            return;
+        }
+
+        Color color = trapRenderer.color;
+        color.a = 1f;
+        trapRenderer.color = color;
     }
 
     private void Update()
