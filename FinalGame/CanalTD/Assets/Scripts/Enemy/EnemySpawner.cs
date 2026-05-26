@@ -13,7 +13,8 @@
  * - It calls EnemyMover.Init(startNode) so the enemy can begin moving.
  *
  * Inspector setup:
- * - enemyPrefab should be a prefab with an EnemyMover component.
+ * - enemyPrefab is the fallback prefab used when WaveManager does not provide
+ *   a wave-specific prefab.
  * - startNode should point to the PathNode where enemies enter the map.
  *
  * Dependency notes:
@@ -37,7 +38,14 @@ public class EnemySpawner : MonoBehaviour
 
     public GameObject SpawnOne(WaveConfig config)
     {
-        if (enemyPrefab == null)
+        return SpawnOne(config, null);
+    }
+
+    public GameObject SpawnOne(WaveConfig config, GameObject waveEnemyPrefab)
+    {
+        GameObject prefabToSpawn = waveEnemyPrefab != null ? waveEnemyPrefab : enemyPrefab;
+
+        if (prefabToSpawn == null)
         {
             Debug.LogError(name + " spawn failed: enemyPrefab is missing.");
             return null;
@@ -50,7 +58,7 @@ public class EnemySpawner : MonoBehaviour
         }
 
         GameObject enemy = Instantiate(
-            enemyPrefab,
+            prefabToSpawn,
             startNode.transform.position,
             Quaternion.identity
         );

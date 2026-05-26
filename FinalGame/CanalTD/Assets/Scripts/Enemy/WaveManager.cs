@@ -16,6 +16,10 @@
  *
  * Inspector setup:
  * - spawners should include every spawn point that can produce enemies.
+ * - defaultEnemyPrefabs is the shared enemy pool used when a WaveConfig does
+ *   not define its own enemy list.
+ * - each WaveConfig can define an enemyPrefabs list. The weight values are
+ *   treated as a ratio for the whole wave, then the final spawn order is shuffled.
  * - enemyCount controls how many enemies this wave creates.
  * - spawnInterval controls the delay between spawns.
  *
@@ -33,6 +37,9 @@ public class WaveManager : MonoBehaviour
 {
     [Header("Spawners")]
     public EnemySpawner[] spawners;
+
+    [Header("Enemy Prefab Pool")]
+    public List<WaveEnemyPrefabEntry> defaultEnemyPrefabs = new List<WaveEnemyPrefabEntry>();
 
     [Header("Phase Manager")]
     public GamePhaseManager gamePhaseManager;
@@ -62,6 +69,7 @@ public class WaveManager : MonoBehaviour
 
     private bool isSpawning = false;
     private WaveConfig activeWaveConfig;
+    private List<GameObject> activeEnemySpawnPlan = new List<GameObject>();
 
     public bool IsSpawning
     {
@@ -125,6 +133,7 @@ public class WaveManager : MonoBehaviour
         int waveIndex = GetCurrentWaveIndex();
         activeWaveConfig = GetWaveConfig(waveIndex);
         ApplyActiveWaveTracking(activeWaveConfig);
+        activeEnemySpawnPlan = BuildEnemySpawnPlan(activeWaveConfig);
         spawnInterval = activeWaveConfig.spawnInterval;
 
         ShowToast("Wave " + currentWaveNumber + " started.");
@@ -154,7 +163,8 @@ public class WaveManager : MonoBehaviour
 
             if (spawners[spawnerIndex] != null)
             {
-                spawners[spawnerIndex].SpawnOne(activeWaveConfig);
+                GameObject enemyPrefab = GetEnemyPrefabForSpawn(i);
+                spawners[spawnerIndex].SpawnOne(activeWaveConfig, enemyPrefab);
             }
 
             yield return new WaitForSeconds(activeWaveConfig.spawnInterval);
@@ -273,7 +283,10 @@ public class WaveManager : MonoBehaviour
             baseConfig.killerScoreReward,
             baseConfig.assistScoreReward,
             baseConfig.castleDamage
-        );
+        )
+        {
+            enemyPrefabs = CopyEnemyPrefabEntries(baseConfig.enemyPrefabs)
+        };
     }
 
     private void EnsureDefaultWaveConfigs()
@@ -308,6 +321,214 @@ public class WaveManager : MonoBehaviour
         enemiesPerWave = config.enemyCount;
         waveEnemyHp = config.enemyMaxHP;
         waveHpMultiplier = Mathf.Max(1f, waveEnemyHp / 3f);
+    }
+
+    private GameObject GetEnemyPrefabForSpawn(int spawnIndex)
+    {
+        if (activeEnemySpawnPlan != null &&
+            spawnIndex >= 0 &&
+            spawnIndex < activeEnemySpawnPlan.Count)
+        {
+            return activeEnemySpawnPlan[spawnIndex];
+        }
+
+        return null;
+    }
+
+    private List<GameObject> BuildEnemySpawnPlan(WaveConfig config)
+    {
+        List<GameObject> spawnPlan = new List<GameObject>();
+
+        if (config == null || config.enemyCount <= 0)
+        {
+            return spawnPlan;
+        }
+
+        List<WaveEnemyPrefabEntry> pool = GetEnemyPrefabPool(config);
+
+        if (pool == null || pool.Count == 0)
+        {
+            return spawnPlan;
+        }
+
+        List<WaveEnemyPrefabEntry> validEntries = new List<WaveEnemyPrefabEntry>();
+        int totalWeight = 0;
+
+        foreach (WaveEnemyPrefabEntry entry in pool)
+        {
+            if (entry == null || entry.enemyPrefab == null)
+            {
+                continue;
+            }
+
+            int safeWeight = Mathf.Max(0, entry.weight);
+
+            if (safeWeight <= 0)
+            {
+                continue;
+            }
+
+            validEntries.Add(entry);
+            totalWeight += safeWeight;
+        }
+
+        if (totalWeight <= 0)
+        {
+            return spawnPlan;
+        }
+
+        List<float> remainders = new List<float>();
+        int assignedCount = 0;
+
+        foreach (WaveEnemyPrefabEntry entry in validEntries)
+        {
+            float exactCount = (float)config.enemyCount * Mathf.Max(0, entry.weight) / totalWeight;
+            int wholeCount = Mathf.FloorToInt(exactCount);
+
+            for (int i = 0; i < wholeCount; i++)
+            {
+                spawnPlan.Add(entry.enemyPrefab);
+            }
+
+            assignedCount += wholeCount;
+            remainders.Add(exactCount - wholeCount);
+        }
+
+        while (assignedCount < config.enemyCount)
+        {
+            int bestIndex = GetLargestRemainderIndex(remainders);
+
+            if (bestIndex < 0 || bestIndex >= validEntries.Count)
+            {
+                break;
+            }
+
+            spawnPlan.Add(validEntries[bestIndex].enemyPrefab);
+            remainders[bestIndex] = -1f;
+            assignedCount++;
+        }
+
+        ShuffleSpawnPlan(spawnPlan);
+        return spawnPlan;
+    }
+
+    private int GetLargestRemainderIndex(List<float> remainders)
+    {
+        int bestIndex = -1;
+        float bestValue = -1f;
+
+        for (int i = 0; i < remainders.Count; i++)
+        {
+            if (remainders[i] > bestValue)
+            {
+                bestValue = remainders[i];
+                bestIndex = i;
+            }
+        }
+
+        return bestIndex;
+    }
+
+    private void ShuffleSpawnPlan(List<GameObject> spawnPlan)
+    {
+        if (spawnPlan == null)
+        {
+            return;
+        }
+
+        for (int i = spawnPlan.Count - 1; i > 0; i--)
+        {
+            int swapIndex = Random.Range(0, i + 1);
+            GameObject temp = spawnPlan[i];
+            spawnPlan[i] = spawnPlan[swapIndex];
+            spawnPlan[swapIndex] = temp;
+        }
+    }
+
+    private GameObject GetWeightedRandomEnemyPrefab(WaveConfig config)
+    {
+        List<WaveEnemyPrefabEntry> pool = GetEnemyPrefabPool(config);
+
+        if (pool == null || pool.Count == 0)
+        {
+            return null;
+        }
+
+        int totalWeight = 0;
+
+        foreach (WaveEnemyPrefabEntry entry in pool)
+        {
+            if (entry != null && entry.enemyPrefab != null && entry.weight > 0)
+            {
+                totalWeight += entry.weight;
+            }
+        }
+
+        if (totalWeight <= 0)
+        {
+            return null;
+        }
+
+        int roll = Random.Range(0, totalWeight);
+        int cursor = 0;
+
+        foreach (WaveEnemyPrefabEntry entry in pool)
+        {
+            if (entry == null || entry.enemyPrefab == null)
+            {
+                continue;
+            }
+
+            if (entry.weight <= 0)
+            {
+                continue;
+            }
+
+            cursor += entry.weight;
+
+            if (roll < cursor)
+            {
+                return entry.enemyPrefab;
+            }
+        }
+
+        return null;
+    }
+
+    private List<WaveEnemyPrefabEntry> GetEnemyPrefabPool(WaveConfig config)
+    {
+        if (config != null && config.enemyPrefabs != null && config.enemyPrefabs.Count > 0)
+        {
+            return config.enemyPrefabs;
+        }
+
+        return defaultEnemyPrefabs;
+    }
+
+    private List<WaveEnemyPrefabEntry> CopyEnemyPrefabEntries(List<WaveEnemyPrefabEntry> source)
+    {
+        List<WaveEnemyPrefabEntry> copy = new List<WaveEnemyPrefabEntry>();
+
+        if (source == null)
+        {
+            return copy;
+        }
+
+        foreach (WaveEnemyPrefabEntry entry in source)
+        {
+            if (entry == null)
+            {
+                continue;
+            }
+
+            copy.Add(new WaveEnemyPrefabEntry
+            {
+                enemyPrefab = entry.enemyPrefab,
+                weight = entry.weight
+            });
+        }
+
+        return copy;
     }
 
     private void ShowToast(string message)

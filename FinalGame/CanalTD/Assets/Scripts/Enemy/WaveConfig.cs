@@ -3,10 +3,21 @@
  *
  * Purpose:
  * Serializable data container for one wave's difficulty and reward values. It
- * lets WaveManager configure enemy count, HP, spawn interval, rewards, and
- * castle damage without needing multiple enemy prefabs.
+ * lets WaveManager configure enemy count, HP, spawn interval, rewards, castle
+ * damage, and which enemy prefabs can appear in this wave.
  */
+using System.Collections.Generic;
 using UnityEngine;
+
+[System.Serializable]
+public class WaveEnemyPrefabEntry
+{
+    [Tooltip("Enemy prefab to spawn for this wave. It should have EnemyMover and EnemyHealth.")]
+    public GameObject enemyPrefab;
+
+    [Tooltip("Spawn ratio for the whole wave. Example: 3 and 1 means about 75% / 25%.")]
+    public int weight = 1;
+}
 
 [System.Serializable]
 public class WaveConfig
@@ -19,6 +30,7 @@ public class WaveConfig
     public int killerScoreReward = 2;
     public int assistScoreReward = 1;
     public int castleDamage = 1;
+    public List<WaveEnemyPrefabEntry> enemyPrefabs = new List<WaveEnemyPrefabEntry>();
 
     public WaveConfig()
     {

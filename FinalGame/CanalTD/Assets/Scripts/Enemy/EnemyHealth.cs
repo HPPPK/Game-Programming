@@ -34,6 +34,8 @@ public class EnemyHealth : MonoBehaviour
 
     [Header("Health Bar")]
     public EnemyHealthBarSprite healthBar;
+    public bool autoPositionHealthBar = true;
+    public float healthBarVerticalPadding = 0.12f;
 
     private bool isDead = false;
     private PlayerResource lastDamageOwner;
@@ -48,9 +50,19 @@ public class EnemyHealth : MonoBehaviour
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = FindEnemySpriteRenderer();
+        }
+
         if (animator == null)
         {
             animator = GetComponent<Animator>();
+        }
+
+        if (animator == null && spriteRenderer != null)
+        {
+            animator = spriteRenderer.GetComponent<Animator>();
         }
     }
 
@@ -63,8 +75,14 @@ public class EnemyHealth : MonoBehaviour
 
         if (healthBar != null)
         {
+            PositionHealthBarAboveSprite();
             healthBar.SetHealth(currentHP, maxHP);
         }
+    }
+
+    private void LateUpdate()
+    {
+        PositionHealthBarAboveSprite();
     }
 
     public void ApplyWaveStats(WaveConfig config)
@@ -87,8 +105,48 @@ public class EnemyHealth : MonoBehaviour
         if (healthBar != null)
         {
             healthBar.gameObject.SetActive(true);
+            PositionHealthBarAboveSprite();
             healthBar.SetHealth(currentHP, maxHP);
         }
+    }
+
+    private SpriteRenderer FindEnemySpriteRenderer()
+    {
+        SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>(true);
+
+        foreach (SpriteRenderer renderer in renderers)
+        {
+            if (renderer == null)
+            {
+                continue;
+            }
+
+            if (healthBar != null && renderer.transform.IsChildOf(healthBar.transform))
+            {
+                continue;
+            }
+
+            return renderer;
+        }
+
+        return null;
+    }
+
+    private void PositionHealthBarAboveSprite()
+    {
+        if (!autoPositionHealthBar || healthBar == null || spriteRenderer == null)
+        {
+            return;
+        }
+
+        Bounds bounds = spriteRenderer.bounds;
+        Vector3 worldPosition = new Vector3(
+            bounds.center.x,
+            bounds.max.y + healthBarVerticalPadding,
+            healthBar.transform.position.z
+        );
+
+        healthBar.transform.localPosition = transform.InverseTransformPoint(worldPosition);
     }
 
     public void TakeDamage(int damage, PlayerResource damageOwner)
