@@ -158,6 +158,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         currentRound += 1;
         currentWaveIndex += 1;
+        if (waveManager != null) waveManager.RefreshWaveCounterUI();
         StartRoundFromFirstActivePlayer();
     }
 

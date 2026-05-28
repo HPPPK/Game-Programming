@@ -9,6 +9,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
 
 public class WaveManager : MonoBehaviour
@@ -21,6 +22,7 @@ public class WaveManager : MonoBehaviour
 
     [Header("Round Scaling")]
     public int currentRound = 1;
+    public int maxWaveCount = 5;
     public int baseEnemyCount = 12;
     public int enemyCountIncreasePerRound = 4;
     public float hpScalePerRound = 0.12f;
@@ -37,6 +39,10 @@ public class WaveManager : MonoBehaviour
     public GamePhaseManager gamePhaseManager;
     public AIPrototypeTurnManager aiPrototypeTurnManager;
     public MonoBehaviour toastMessage;
+
+    [Header("Wave UI")]
+    [Tooltip("Optional UI text shown as Round: current/max, for example Round: 1/5.")]
+    public TMP_Text waveCounterText;
 
     private bool isSpawning = false;
     private bool isWaveRunning = false;
@@ -70,10 +76,16 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        RefreshWaveCounterUI();
+    }
+
     public void ShowWaveIncoming(int waveNumber)
     {
         activeWaveNumber = Mathf.Max(1, waveNumber);
         currentRound = activeWaveNumber;
+        RefreshWaveCounterUI();
         ShowToast("Wave " + activeWaveNumber + " Incoming!");
     }
 
@@ -86,6 +98,7 @@ public class WaveManager : MonoBehaviour
 
         activeWaveNumber = GetCurrentWaveIndex();
         currentRound = activeWaveNumber;
+        RefreshWaveCounterUI();
         activeEnemyCount = GetEnemyCountForRound(currentRound);
         activeEnemySpawnPlan = BuildEnemySpawnPlan(currentRound, activeEnemyCount);
 
@@ -137,6 +150,7 @@ public class WaveManager : MonoBehaviour
         yield return new WaitUntil(IsWaveFinished);
 
         ShowToast("Wave " + activeWaveNumber + " cleared.");
+        RefreshWaveCounterUI();
 
         if (WaveClearedDelaySeconds > 0f)
         {
@@ -185,6 +199,33 @@ public class WaveManager : MonoBehaviour
         }
 
         return Mathf.Max(1, currentRound);
+    }
+
+    // Keeps the optional round text synchronized in both local and AI prototype scenes.
+    public void RefreshWaveCounterUI()
+    {
+        if (waveCounterText == null)
+        {
+            return;
+        }
+
+        int currentWave = Mathf.Clamp(GetCurrentWaveIndex(), 1, GetMaxWaveCount());
+        waveCounterText.text = "Round: " + currentWave + "/" + GetMaxWaveCount();
+    }
+
+    private int GetMaxWaveCount()
+    {
+        if (aiPrototypeTurnManager != null)
+        {
+            return Mathf.Max(1, aiPrototypeTurnManager.maxWaves);
+        }
+
+        if (gamePhaseManager != null)
+        {
+            return Mathf.Max(1, gamePhaseManager.maxWaves);
+        }
+
+        return Mathf.Max(1, maxWaveCount);
     }
 
     private int GetEnemyCountForRound(int round)

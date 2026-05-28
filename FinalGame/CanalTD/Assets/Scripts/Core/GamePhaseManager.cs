@@ -184,6 +184,7 @@ public class GamePhaseManager : MonoBehaviour
 
         currentRound += 1;
         currentWaveIndex += 1;
+        if (waveManager != null) waveManager.RefreshWaveCounterUI();
 
         if (playerManager != null)
         {
