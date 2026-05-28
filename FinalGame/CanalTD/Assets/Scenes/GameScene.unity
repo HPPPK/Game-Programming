@@ -52195,8 +52195,8 @@ MonoBehaviour:
   - {fileID: 820064825}
   - {fileID: 966247108}
   currentRound: 1
-  baseEnemyCount: 8
-  enemyCountIncreasePerRound: 3
+  baseEnemyCount: 16
+  enemyCountIncreasePerRound: 8
   hpScalePerRound: 0.15
   speedScalePerRound: 0.03
   enemyEntries:
@@ -53409,6 +53409,8 @@ MonoBehaviour:
   upgradeCostText: {fileID: 673129592}
   sellValueText: {fileID: 838153619}
   towerInfoText: {fileID: 147615508}
+  selectedAreaPreviewColor: {r: 1, g: 0.9, b: 0.1, a: 0.8}
+  towerPreviewAlpha: 0.55
 --- !u!114 &535146067
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -139,7 +139,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyType: 0
-  baseHP: 10
+  baseHP: 6
   baseSpeed: 2
   rewardGold: 1
   scoreReward: 2

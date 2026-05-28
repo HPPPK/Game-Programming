@@ -51525,8 +51525,8 @@ MonoBehaviour:
   - {fileID: 820064825}
   - {fileID: 966247108}
   currentRound: 1
-  baseEnemyCount: 12
-  enemyCountIncreasePerRound: 4
+  baseEnemyCount: 16
+  enemyCountIncreasePerRound: 8
   hpScalePerRound: 0.12
   speedScalePerRound: 0.02
   enemyEntries:

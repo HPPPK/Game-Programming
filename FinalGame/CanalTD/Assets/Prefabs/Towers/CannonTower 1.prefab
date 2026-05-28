@@ -242,8 +242,8 @@ MonoBehaviour:
   upgradeCostLevel2: 8
   upgradeCostLevel3: 12
   totalGoldInvested: 0
-  damage: 1
-  range: 3
+  damage: 1.2
+  range: 4
   attackInterval: 0.6
   splashRadius: 0
   slowPercent: 0.35

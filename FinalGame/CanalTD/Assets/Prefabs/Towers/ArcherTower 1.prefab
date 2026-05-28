@@ -350,16 +350,16 @@ MonoBehaviour:
   ownerPlayerId: -1
   level: 1
   maxLevel: 3
-  baseCost: 6
-  upgradeCostLevel2: 8
+  baseCost: 7
+  upgradeCostLevel2: 10
   upgradeCostLevel3: 12
   totalGoldInvested: 0
-  damage: 1
-  range: 3
-  attackInterval: 0.6
+  damage: 1.2
+  range: 4
+  attackInterval: 0.35
   splashRadius: 0
   slowPercent: 0.35
   slowDuration: 1.5
   chainCount: 0
   chainRange: 1.5
-  targetPriority: 0
+  targetPriority: 3

@@ -116,7 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fallbackMaxHP: 3
-  fallbackGoldReward: 1
+  fallbackGoldReward: 2
   fallbackKillerScoreReward: 2
   assistScoreReward: 1
   spriteRenderer: {fileID: 1117761015419872606}

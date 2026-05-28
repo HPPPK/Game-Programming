@@ -238,9 +238,9 @@ MonoBehaviour:
   ownerPlayerId: -1
   level: 1
   maxLevel: 3
-  baseCost: 6
-  upgradeCostLevel2: 8
-  upgradeCostLevel3: 12
+  baseCost: 4
+  upgradeCostLevel2: 6
+  upgradeCostLevel3: 10
   totalGoldInvested: 0
   damage: 1
   range: 3

@@ -116,7 +116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fallbackMaxHP: 3
-  fallbackGoldReward: 1
+  fallbackGoldReward: 3
   fallbackKillerScoreReward: 2
   assistScoreReward: 1
   spriteRenderer: {fileID: 1117761015419872606}
@@ -139,9 +139,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyType: 1
-  baseHP: 30
+  baseHP: 16
   baseSpeed: 1.2
-  rewardGold: 3
+  rewardGold: 5
   scoreReward: 5
   armor: 2
   priority: 2

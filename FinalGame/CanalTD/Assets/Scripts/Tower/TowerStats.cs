@@ -69,7 +69,7 @@ public class TowerStats : MonoBehaviour
         level += 1;
         totalGoldInvested += upgradeCost;
 
-        damage *= 1.35f;
+        damage *= 1.5f;
         range += 0.25f;
         attackInterval = Mathf.Max(0.12f, attackInterval * 0.92f);
         splashRadius *= 1.15f;
