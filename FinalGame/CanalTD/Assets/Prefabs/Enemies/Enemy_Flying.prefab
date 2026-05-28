@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6296611149299428719}
   - component: {fileID: -1118390286176414642}
   m_Layer: 0
-  m_Name: EnemyBoom
+  m_Name: Enemy_Flying
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -138,13 +138,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 955b9e0c4b3ba4ed084380bedaa6fbc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyType: 2
-  baseHP: 6
-  baseSpeed: 3.5
-  rewardGold: 1
-  scoreReward: 2
-  armor: 0
-  priority: 1
+  enemyType: 1
+  baseHP: 30
+  baseSpeed: 1.2
+  rewardGold: 3
+  scoreReward: 5
+  armor: 2
+  priority: 2
   canSplit: 0
   splitEnemyPrefab: {fileID: 0}
   splitCount: 0
@@ -159,7 +159,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8001093518961037927}
   - component: {fileID: 1117761015419872606}
-  - component: {fileID: 2363231894267957514}
+  - component: {fileID: 1530275050886601974}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -223,7 +223,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 199
-  m_Sprite: {fileID: 2475542255786287068, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
+  m_Sprite: {fileID: 1817435365588168038, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -234,7 +234,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2363231894267957514
+--- !u!114 &1530275050886601974
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -247,14 +247,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   frames:
-  - {fileID: 2475542255786287068, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: 4618256503267108053, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -7602108529157482504, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -1479154944992724860, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: 2511738859427779754, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -5395414536057257083, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -3873812022500376383, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -5096379794781076936, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
+  - {fileID: 1817435365588168038, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
+  - {fileID: 5977598898265722323, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
+  - {fileID: 8959746076264849241, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
+  - {fileID: 8522003340004948954, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
+  - {fileID: 974216216655831428, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
+  - {fileID: -4018407413784956292, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
+  - {fileID: 8720370577886038877, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
+  - {fileID: 4867441861838090084, guid: 14f15361c11f8464a81d4a074c7d5d21, type: 3}
   framesPerSecond: 8
   loop: 1
   playOnStart: 1

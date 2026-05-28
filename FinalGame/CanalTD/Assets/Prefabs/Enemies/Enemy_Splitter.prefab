@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6296611149299428719}
   - component: {fileID: -1118390286176414642}
   m_Layer: 0
-  m_Name: EnemyBoom
+  m_Name: Enemy_Splitter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -138,16 +138,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 955b9e0c4b3ba4ed084380bedaa6fbc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyType: 2
-  baseHP: 6
-  baseSpeed: 3.5
-  rewardGold: 1
-  scoreReward: 2
+  enemyType: 3
+  baseHP: 16
+  baseSpeed: 2
+  rewardGold: 2
+  scoreReward: 4
   armor: 0
   priority: 1
   canSplit: 0
-  splitEnemyPrefab: {fileID: 0}
-  splitCount: 0
+  splitEnemyPrefab: {fileID: 263567146191764764, guid: c8e53266e438245259ecd127b8662caf, type: 3}
+  splitCount: 2
   isBoss: 0
 --- !u!1 &1547993286269647613
 GameObject:
@@ -159,7 +159,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8001093518961037927}
   - component: {fileID: 1117761015419872606}
-  - component: {fileID: 2363231894267957514}
+  - component: {fileID: 5403602109914902560}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -223,7 +223,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 199
-  m_Sprite: {fileID: 2475542255786287068, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
+  m_Sprite: {fileID: -349049881733595161, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -234,7 +234,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2363231894267957514
+--- !u!114 &5403602109914902560
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -247,14 +247,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   frames:
-  - {fileID: 2475542255786287068, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: 4618256503267108053, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -7602108529157482504, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -1479154944992724860, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: 2511738859427779754, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -5395414536057257083, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -3873812022500376383, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
-  - {fileID: -5096379794781076936, guid: ffce1cd4ac2824e79b3d2c7c7b29c7d0, type: 3}
+  - {fileID: 6017406591904412053, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
+  - {fileID: 2353390772706921893, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
+  - {fileID: -349049881733595161, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
+  - {fileID: 8149439221346211739, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
+  - {fileID: -4471007588134037184, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
+  - {fileID: -2039899576177406140, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
+  - {fileID: 2307627017416090870, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
+  - {fileID: -237102366302313994, guid: ee3887d76afcd4d9ea0d729755e7e6c1, type: 3}
   framesPerSecond: 8
   loop: 1
   playOnStart: 1
