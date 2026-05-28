@@ -149,9 +149,20 @@ public class GateTargetingManager : MonoBehaviour
 
     public List<GateFrameAnimation> GetValidGates(GateActionType actionType)
     {
+        return GetValidGatesForPlayer(actionType, GetCurrentPlayerId());
+    }
+
+    // Shared by human targeting and AI card logic so both follow the same gate ownership and path-safety rules.
+    public List<GateFrameAnimation> GetValidGatesForPlayer(GateActionType actionType, int playerId)
+    {
         List<GateFrameAnimation> results = new List<GateFrameAnimation>();
 
         if (gates == null)
+        {
+            RefreshGates();
+        }
+
+        if (gateOwnershipManager == null)
         {
             return results;
         }
@@ -173,7 +184,7 @@ public class GateTargetingManager : MonoBehaviour
                 valid = gate.CanOpen();
             }
 
-            if (valid && CanCurrentPlayerControlGate(gate))
+            if (valid && gateOwnershipManager.CanPlayerControlGate(playerId, gate.gameObject))
             {
                 results.Add(gate);
             }
@@ -716,12 +727,12 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         EnemySpawner[] spawners = GetEnemySpawnersForPathCheck();
-        CastleEndNode[] ends = GetCastleEndsForPathCheck();
+        CastleEndNode[] ends = GetActiveCastleEndsForPathCheck();
 
         if (spawners.Length == 0 || ends.Length == 0)
         {
-            Debug.LogWarning("Gate path safety check skipped because spawners or castle ends are missing.");
-            return true;
+            Debug.LogWarning("Lock Gate rejected because spawners or active castle ends are missing.");
+            return false;
         }
 
         bool originalBlocking = gate.isBlocking;
@@ -798,6 +809,49 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         return FindObjectsOfType<CastleEndNode>();
+    }
+
+    // Lock Gate safety only counts castles that still belong to non-eliminated players.
+    private CastleEndNode[] GetActiveCastleEndsForPathCheck()
+    {
+        List<CastleEndNode> activeEnds = new List<CastleEndNode>();
+
+        foreach (CastleEndNode castleEnd in GetCastleEndsForPathCheck())
+        {
+            if (IsActiveCastleEnd(castleEnd))
+            {
+                activeEnds.Add(castleEnd);
+            }
+        }
+
+        return activeEnds.ToArray();
+    }
+
+    private bool IsActiveCastleEnd(CastleEndNode castleEnd)
+    {
+        if (castleEnd == null || castleEnd.targetCastle == null)
+        {
+            return false;
+        }
+
+        CastleBase castle = castleEnd.targetCastle;
+
+        if (castle.currentHP <= 0)
+        {
+            return false;
+        }
+
+        if (castle.ownerResource != null)
+        {
+            return !castle.ownerResource.isEliminated;
+        }
+
+        if (playerManager != null)
+        {
+            return !playerManager.IsPlayerEliminated(castle.ownerPlayerId);
+        }
+
+        return true;
     }
 
     public void ShowToast(string message)

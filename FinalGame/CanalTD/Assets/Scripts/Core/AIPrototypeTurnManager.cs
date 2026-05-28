@@ -485,21 +485,26 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         yield return new WaitForSeconds(aiThinkDelay);
 
         TryAIDraw(aiPlayer);
+        RefreshAIResourceDisplays(aiPlayer);
         yield return new WaitForSeconds(aiActionMessageDelay);
 
         bool usedCard = TryAIUseCard(aiPlayer, difficulty);
-        if (!usedCard)
-        {
-            TryAIDiscardWeakCard(aiPlayer, difficulty);
-        }
-        yield return new WaitForSeconds(aiActionMessageDelay);
 
-        if (TryAIUseGate(aiPlayer, difficulty))
+        if (usedCard)
         {
             yield return new WaitForSeconds(aiActionMessageDelay);
         }
 
-        bool builtTower = TryAIBuildOneTower(aiPlayer, difficulty);
+        bool upgradedTower = TryAIUpgradeOneTower(aiPlayer, difficulty);
+
+        if (upgradedTower)
+        {
+            yield return new WaitForSeconds(aiActionMessageDelay);
+        }
+
+        bool builtTower = !upgradedTower || difficulty != AIDifficulty.Easy
+            ? TryAIBuildOneTower(aiPlayer, difficulty)
+            : false;
 
         if (builtTower)
         {
@@ -513,6 +518,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             {
                 yield return new WaitForSeconds(aiActionMessageDelay);
             }
+        }
+
+        if (!usedCard && TryAIDiscardWeakCard(aiPlayer, difficulty))
+        {
+            yield return new WaitForSeconds(aiActionMessageDelay);
         }
 
         yield return new WaitForSeconds(aiTurnEndDelay);
@@ -570,6 +580,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
+        if (bestPriority < 90 && Random.value > GetCardUseChance(difficulty))
+        {
+            return false;
+        }
+
         foreach (GameObject cardPrefab in cards)
         {
             if (cardPrefab == null)
@@ -581,7 +596,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             {
                 hand.RemoveCard(cardPrefab);
                 aiPlayer.SyncCardCountFromHand();
-                if (cardDrawManager != null) cardDrawManager.RenderCurrentPlayerHand();
+                RefreshAIResourceDisplays(aiPlayer);
                 return true;
             }
         }
@@ -635,6 +650,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         hand.RemoveCard(weakestCard);
         aiPlayer.SyncCardCountFromHand();
+        RefreshAIResourceDisplays(aiPlayer);
         ShowToast(aiPlayer.GetDisplayName() + " discarded a weak card.");
         return true;
     }
@@ -646,8 +662,10 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         if (cardName.Contains("powerboost")) return HasOwnedTower(aiPlayer.playerId) ? 90 : 5;
         if (cardName.Contains("takeover")) return HasAffordableTakeOverTarget(aiPlayer) ? 85 : 5;
+        if (cardName.Contains("lockgate")) return HasValidAIGateTarget(aiPlayer, GateActionType.LockGate) ? 82 : 5;
         if (cardName.Contains("shocktrap")) return shockTrapPrefab != null ? 75 : 5;
         if (cardName.Contains("disrupt")) return FindBalancedDisruptTarget(aiPlayer) != null ? 70 : 5;
+        if (cardName.Contains("opengate")) return HasValidAIGateTarget(aiPlayer, GateActionType.OpenGate) ? 68 : 5;
         if (cardName.Contains("stealcard")) return FindPlayerWithMostCards(aiPlayer) != null ? 60 : 5;
         if (cardName.Contains("freezeclaim")) return FindBestFreezeTarget(aiPlayer, difficulty) != null ? 55 : 5;
         if (cardName.Contains("tradehands")) return FindTradeHandsTarget(aiPlayer) != null ? 45 : 5;
@@ -670,6 +688,8 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         else if (cardName.Contains("freezeclaim")) success = TryAIFreezeClaim(aiPlayer, difficulty);
         else if (cardName.Contains("takeover")) success = TryAITakeOver(aiPlayer, difficulty);
         else if (cardName.Contains("shocktrap")) success = TryAIShockTrap(aiPlayer, difficulty);
+        else if (cardName.Contains("lockgate")) success = TryAIGateCard(aiPlayer, difficulty, GateActionType.LockGate);
+        else if (cardName.Contains("opengate")) success = TryAIGateCard(aiPlayer, difficulty, GateActionType.OpenGate);
         else if (cardName.Contains("disrupt")) success = TryAIDisrupt(aiPlayer);
         else if (cardName.Contains("stealcard")) success = TryAIStealCard(aiPlayer);
         else if (cardName.Contains("tradehands")) success = TryAITradeHands(aiPlayer);
@@ -822,6 +842,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         aiPlayer.SyncCardCountFromHand();
         target.SyncCardCountFromHand();
+        RefreshAIResourceDisplays(aiPlayer, target);
         RegisterNegativeCardTarget(target);
         ShowAICardAnnouncement(aiPlayer, "Steal Card", target.GetDisplayName());
         return true;
@@ -851,35 +872,18 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         targetHand.CopyFrom(aiCards);
         aiPlayer.SyncCardCountFromHand();
         target.SyncCardCountFromHand();
+        RefreshAIResourceDisplays(aiPlayer, target);
+        RegisterNegativeCardTarget(target);
         ShowAICardAnnouncement(aiPlayer, "Trade Hands", target.GetDisplayName());
         return true;
     }
 
-    // Uses a gate action if available. Easy is random-ish; Medium/Hard prefer useful controllable gates.
-    private bool TryAIUseGate(PlayerResource aiPlayer, AIDifficulty difficulty)
+    // Gate changes are card-only. AI uses this only after resolving an actual Open Gate or Lock Gate card.
+    private bool TryAIGateCard(PlayerResource aiPlayer, AIDifficulty difficulty, GateActionType actionType)
     {
-        if (turnManager == null || !turnManager.CanChangeGate())
-        {
-            return false;
-        }
+        List<GateFrameAnimation> validGates = GetValidAIGateTargets(aiPlayer, actionType);
 
-        GateFrameAnimation[] gates = FindObjectsOfType<GateFrameAnimation>();
-        List<GateFrameAnimation> validGates = new List<GateFrameAnimation>();
-
-        foreach (GateFrameAnimation gate in gates)
-        {
-            if (gate == null || gate.IsPlaying() || gate.IsLocked() || !CanAIControlGate(aiPlayer.playerId, gate))
-            {
-                continue;
-            }
-
-            if (gate.CanOpen() || !gate.IsBlocking())
-            {
-                validGates.Add(gate);
-            }
-        }
-
-        if (validGates.Count == 0 || !turnManager.TryConsumeGateChange())
+        if (validGates.Count == 0)
         {
             return false;
         }
@@ -888,12 +892,72 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             ? validGates[Random.Range(0, validGates.Count)]
             : GetBestGateByPosition(validGates, difficulty);
 
-        if (selectedGate.CanOpen())
+        bool changed = actionType == GateActionType.OpenGate
+            ? selectedGate.OpenGate()
+            : selectedGate.LockGate();
+
+        if (!changed)
         {
-            return selectedGate.OpenGate();
+            return false;
         }
 
-        return selectedGate.LockGate();
+        string cardName = actionType == GateActionType.LockGate ? "Lock Gate" : "Open Gate";
+        ShowAICardAnnouncement(aiPlayer, cardName, "a gate");
+        return true;
+    }
+
+    private bool HasValidAIGateTarget(PlayerResource aiPlayer, GateActionType actionType)
+    {
+        return GetValidAIGateTargets(aiPlayer, actionType).Count > 0;
+    }
+
+    private List<GateFrameAnimation> GetValidAIGateTargets(PlayerResource aiPlayer, GateActionType actionType)
+    {
+        GateTargetingManager gateTargetingManager = GateTargetingManager.Instance != null
+            ? GateTargetingManager.Instance
+            : FindObjectOfType<GateTargetingManager>();
+
+        if (aiPlayer == null || gateTargetingManager == null)
+        {
+            return new List<GateFrameAnimation>();
+        }
+
+        // Reuse the human targeting rules: public gates, owned linked land, lock path-safety, and gate state.
+        return gateTargetingManager.GetValidGatesForPlayer(actionType, aiPlayer.playerId);
+    }
+
+    // Keeps all visible resource panels correct after AI-only hand changes.
+    private void RefreshAIResourceDisplays(params PlayerResource[] changedPlayers)
+    {
+        if (changedPlayers != null)
+        {
+            foreach (PlayerResource player in changedPlayers)
+            {
+                if (player != null)
+                {
+                    player.RefreshUI();
+                }
+            }
+        }
+
+        if (playerManager != null)
+        {
+            playerManager.RefreshAllPlayerStatusPanels();
+        }
+
+        foreach (PlayerStatusPanelUI panel in FindObjectsOfType<PlayerStatusPanelUI>())
+        {
+            if (panel != null)
+            {
+                panel.Refresh();
+            }
+        }
+
+        // In AI Prototype mode this redraws the local human hand only, not AI hands.
+        if (cardDrawManager != null)
+        {
+            cardDrawManager.RenderCurrentPlayerHand();
+        }
     }
 
     // AI buys one affordable unowned claimable land, scored by difficulty.
@@ -901,6 +965,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     private bool TryAIBuyOneLand(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         List<TowerBuildArea> candidates = new List<TowerBuildArea>();
+        int minimumTowerCost = GetMinimumAffordableTowerCost(aiPlayer.playerId);
 
         foreach (TowerBuildArea area in FindObjectsOfType<TowerBuildArea>())
         {
@@ -909,7 +974,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
                 continue;
             }
 
-            bool canStillBuildAfterBuying = aiPlayer.money - area.landPurchaseCost >= cannonTowerCost;
+            bool canStillBuildAfterBuying = aiPlayer.money - area.landPurchaseCost >= minimumTowerCost;
 
             if (area.IsClaimable() &&
                 area.IsUnowned() &&
@@ -933,10 +998,76 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    // AI upgrades a strong owned tower before buying more land. Higher difficulty upgrades more deliberately.
+    private bool TryAIUpgradeOneTower(PlayerResource aiPlayer, AIDifficulty difficulty)
+    {
+        if (buildTowerManager == null)
+        {
+            return false;
+        }
+
+        List<TowerBuildArea> candidates = new List<TowerBuildArea>();
+
+        foreach (TowerBuildArea area in FindObjectsOfType<TowerBuildArea>())
+        {
+            TowerStats stats = GetTowerStatsFromArea(area);
+
+            if (area == null ||
+                stats == null ||
+                area.towerOwnerPlayerId != aiPlayer.playerId ||
+                !stats.CanUpgrade() ||
+                area.IsFrozen())
+            {
+                continue;
+            }
+
+            if (aiPlayer.CanAfford(stats.GetUpgradeCost()))
+            {
+                candidates.Add(area);
+            }
+        }
+
+        if (candidates.Count == 0)
+        {
+            return false;
+        }
+
+        if (difficulty == AIDifficulty.Easy && Random.value > 0.25f)
+        {
+            return false;
+        }
+
+        if (difficulty == AIDifficulty.Medium && Random.value > 0.65f)
+        {
+            return false;
+        }
+
+        TowerBuildArea bestArea = ChooseTowerUpgradeArea(candidates, difficulty);
+
+        if (bestArea == null)
+        {
+            return false;
+        }
+
+        bool upgraded = buildTowerManager.TryUpgradeTowerForAI(bestArea, aiPlayer.playerId);
+
+        if (upgraded)
+        {
+            ShowToast(aiPlayer.GetDisplayName() + " upgraded a tower.");
+        }
+
+        return upgraded;
+    }
+
     // AI builds one tower on an owned active empty tile using the prefab for its playerId.
     private bool TryAIBuildOneTower(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
-        if (!aiPlayer.CanAfford(cannonTowerCost))
+        if (buildTowerManager != null && GetAffordableTowerTypes(aiPlayer.playerId, aiPlayer.money).Count == 0)
+        {
+            return false;
+        }
+
+        if (buildTowerManager == null && !aiPlayer.CanAfford(cannonTowerCost))
         {
             return false;
         }
@@ -963,17 +1094,270 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         if (buildTowerManager != null)
         {
-            bool built = buildTowerManager.TryBuildTowerForAI(bestArea, TowerType.Cannon, aiPlayer.playerId);
+            TowerType selectedType = ChooseTowerTypeForArea(bestArea, aiPlayer, difficulty);
+            bool built = buildTowerManager.TryBuildTowerForAI(bestArea, selectedType, aiPlayer.playerId);
 
             if (built)
             {
-                ShowToast(aiPlayer.GetDisplayName() + " built a tower.");
+                ShowToast(aiPlayer.GetDisplayName() + " built a " + selectedType + " tower.");
             }
 
             return built;
         }
 
         return TryAIBuildOneTowerLegacy(aiPlayer, bestArea);
+    }
+
+    private TowerType ChooseTowerTypeForArea(TowerBuildArea area, PlayerResource aiPlayer, AIDifficulty difficulty)
+    {
+        List<TowerType> affordableTypes = GetAffordableTowerTypes(aiPlayer.playerId, aiPlayer.money);
+
+        if (affordableTypes.Count == 0)
+        {
+            return TowerType.Cannon;
+        }
+
+        if (difficulty == AIDifficulty.Easy)
+        {
+            return ChooseEasyTowerType(affordableTypes);
+        }
+
+        TowerType bestType = affordableTypes[0];
+        float bestScore = float.MinValue;
+
+        foreach (TowerType towerType in affordableTypes)
+        {
+            float score = ScoreTowerTypeForArea(towerType, area, difficulty, aiPlayer.playerId);
+
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestType = towerType;
+            }
+        }
+
+        return bestType;
+    }
+
+    private TowerType ChooseEasyTowerType(List<TowerType> affordableTypes)
+    {
+        if (affordableTypes == null || affordableTypes.Count == 0)
+        {
+            return TowerType.Cannon;
+        }
+
+        // Easy AI is intentionally simple but no longer builds only Cannon.
+        TowerType[] preferenceBag =
+        {
+            TowerType.Cannon,
+            TowerType.Cannon,
+            TowerType.Archer,
+            TowerType.Archer,
+            TowerType.Frost,
+            TowerType.Shock,
+            TowerType.Sniper
+        };
+
+        for (int attempt = 0; attempt < preferenceBag.Length; attempt++)
+        {
+            TowerType candidate = preferenceBag[Random.Range(0, preferenceBag.Length)];
+
+            if (affordableTypes.Contains(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return affordableTypes[Random.Range(0, affordableTypes.Count)];
+    }
+
+    private List<TowerType> GetAffordableTowerTypes(int playerId, int gold)
+    {
+        List<TowerType> affordableTypes = new List<TowerType>();
+
+        if (buildTowerManager == null)
+        {
+            if (gold >= cannonTowerCost)
+            {
+                affordableTypes.Add(TowerType.Cannon);
+            }
+
+            return affordableTypes;
+        }
+
+        TowerType[] allTypes =
+        {
+            TowerType.Cannon,
+            TowerType.Archer,
+            TowerType.Frost,
+            TowerType.Shock,
+            TowerType.Sniper
+        };
+
+        foreach (TowerType towerType in allTypes)
+        {
+            if (gold >= buildTowerManager.GetTowerCost(towerType, playerId))
+            {
+                affordableTypes.Add(towerType);
+            }
+        }
+
+        return affordableTypes;
+    }
+
+    private int GetMinimumAffordableTowerCost(int playerId)
+    {
+        if (buildTowerManager == null)
+        {
+            return cannonTowerCost;
+        }
+
+        int minCost = int.MaxValue;
+        TowerType[] allTypes =
+        {
+            TowerType.Cannon,
+            TowerType.Archer,
+            TowerType.Frost,
+            TowerType.Shock,
+            TowerType.Sniper
+        };
+
+        foreach (TowerType towerType in allTypes)
+        {
+            minCost = Mathf.Min(minCost, buildTowerManager.GetTowerCost(towerType, playerId));
+        }
+
+        return minCost == int.MaxValue ? cannonTowerCost : minCost;
+    }
+
+    private float ScoreTowerTypeForArea(TowerType towerType, TowerBuildArea area, AIDifficulty difficulty, int playerId)
+    {
+        float routeDistance = DistanceToNearestRouteNode(area != null ? area.transform.position : Vector3.zero);
+        int routeDensity = CountRouteNodesNear(area != null ? area.transform.position : Vector3.zero, 4f);
+        float score = 10f;
+
+        if (towerType == TowerType.Cannon)
+        {
+            score += routeDensity * 5f;
+            score += Mathf.Max(0f, 16f - routeDistance);
+        }
+        else if (towerType == TowerType.Archer)
+        {
+            score += 18f;
+            score += Mathf.Max(0f, 10f - routeDistance);
+        }
+        else if (towerType == TowerType.Frost)
+        {
+            score += routeDensity * 3f;
+            score += Mathf.Max(0f, 18f - routeDistance);
+        }
+        else if (towerType == TowerType.Shock)
+        {
+            score += routeDensity * 7f;
+            score += difficulty == AIDifficulty.Hard ? 12f : 0f;
+        }
+        else if (towerType == TowerType.Sniper)
+        {
+            score += CountCastlesNear(area != null ? area.transform.position : Vector3.zero, 8f) * 4f;
+            score += difficulty == AIDifficulty.Hard ? 10f : 0f;
+        }
+
+        if (difficulty == AIDifficulty.Medium && (towerType == TowerType.Shock || towerType == TowerType.Sniper))
+        {
+            score -= 12f;
+        }
+
+        score -= CountOwnedTowersOfType(towerType, playerId) * 2f;
+        return score;
+    }
+
+    private int CountOwnedTowersOfType(TowerType towerType, int playerId)
+    {
+        int count = 0;
+
+        foreach (TowerBuildArea area in FindObjectsOfType<TowerBuildArea>())
+        {
+            TowerStats stats = GetTowerStatsFromArea(area);
+
+            if (area != null && stats != null && area.towerOwnerPlayerId == playerId && stats.towerType == towerType)
+            {
+                count += 1;
+            }
+        }
+
+        return count;
+    }
+
+    private TowerBuildArea ChooseTowerUpgradeArea(List<TowerBuildArea> candidates, AIDifficulty difficulty)
+    {
+        if (candidates == null || candidates.Count == 0)
+        {
+            return null;
+        }
+
+        if (difficulty == AIDifficulty.Easy)
+        {
+            return candidates[Random.Range(0, candidates.Count)];
+        }
+
+        TowerBuildArea bestArea = null;
+        float bestScore = float.MinValue;
+
+        foreach (TowerBuildArea area in candidates)
+        {
+            float score = ScoreTowerForUpgrade(area, difficulty);
+
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestArea = area;
+            }
+        }
+
+        return bestArea;
+    }
+
+    private float ScoreTowerForUpgrade(TowerBuildArea area, AIDifficulty difficulty)
+    {
+        TowerStats stats = GetTowerStatsFromArea(area);
+
+        if (area == null || stats == null)
+        {
+            return float.MinValue;
+        }
+
+        float score = ScoreBuildArea(area, difficulty);
+        score += stats.damage * 4f;
+        score += stats.range * 2f;
+        score += stats.level * 6f;
+
+        if (stats.towerType == TowerType.Cannon || stats.towerType == TowerType.Shock)
+        {
+            score += CountRouteNodesNear(area.transform.position, 4f) * 4f;
+        }
+
+        if (stats.towerType == TowerType.Frost)
+        {
+            score += Mathf.Max(0f, 18f - DistanceToNearestRouteNode(area.transform.position));
+        }
+
+        if (difficulty == AIDifficulty.Hard)
+        {
+            score += CountRouteNodesNear(area.transform.position, 5f) * 3f;
+        }
+
+        return score;
+    }
+
+    private TowerStats GetTowerStatsFromArea(TowerBuildArea area)
+    {
+        if (area == null || area.currentTower == null)
+        {
+            return null;
+        }
+
+        TowerStats stats = area.currentTower.GetComponent<TowerStats>();
+        return stats != null ? stats : area.currentTower.GetComponentInChildren<TowerStats>();
     }
 
     private bool TryAIBuildOneTowerLegacy(PlayerResource aiPlayer, TowerBuildArea bestArea)
@@ -1057,7 +1441,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         {
             float score = ScoreBuildArea(area, difficulty);
 
-            if (buyingLand && aiGold <= area.landPurchaseCost + cannonTowerCost)
+            if (buyingLand && aiGold <= area.landPurchaseCost + GetMinimumAffordableTowerCost(actingPlayer != null ? actingPlayer.playerId : CurrentPlayerId))
             {
                 score -= area.landPurchaseCost * 0.5f;
             }
@@ -1252,6 +1636,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         int aiCards = aiPlayer.GetHandCardCount();
         PlayerResource bestTarget = null;
         int bestGain = 0;
+        int bestPressure = int.MaxValue;
 
         foreach (PlayerResource player in activePlayers)
         {
@@ -1261,9 +1646,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             }
 
             int gain = player.GetHandCardCount() - aiCards;
+            int pressure = GetNegativeCardTargetCount(player.playerId);
 
-            if (gain > bestGain)
+            if (gain > 0 && (pressure < bestPressure || pressure == bestPressure && gain > bestGain))
             {
+                bestPressure = pressure;
                 bestGain = gain;
                 bestTarget = player;
             }
@@ -1473,6 +1860,13 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         if (difficulty == AIDifficulty.Hard) return 25;
         if (difficulty == AIDifficulty.Medium) return 45;
         return 60;
+    }
+
+    private float GetCardUseChance(AIDifficulty difficulty)
+    {
+        if (difficulty == AIDifficulty.Hard) return hardCardUseChance;
+        if (difficulty == AIDifficulty.Medium) return mediumCardUseChance;
+        return easyCardUseChance;
     }
 
     // Maximum card score the AI is willing to discard when its hand is full.

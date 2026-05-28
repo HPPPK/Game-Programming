@@ -125,6 +125,11 @@ public class GateOwnershipManager : MonoBehaviour
 
     private int GetEffectivePlayerId(int fallbackPlayerId)
     {
+        if (fallbackPlayerId >= 0)
+        {
+            return fallbackPlayerId;
+        }
+
         if (playerManager != null)
         {
             return playerManager.GetCurrentPlayerId();

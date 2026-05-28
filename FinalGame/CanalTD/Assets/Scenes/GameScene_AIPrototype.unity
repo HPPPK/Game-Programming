@@ -63160,6 +63160,8 @@ MonoBehaviour:
   upgradeCostText: {fileID: 533005974}
   sellValueText: {fileID: 1605540673}
   towerInfoText: {fileID: 0}
+  selectedAreaPreviewColor: {r: 1, g: 0.9, b: 0.1, a: 0.8}
+  towerPreviewAlpha: 0.55
 --- !u!114 &1087226076
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -66254,9 +66256,9 @@ MonoBehaviour:
   buildTowerManager: {fileID: 936414243}
   toastMessage: {fileID: 848080698}
   aiDifficultiesByPlayerId: 00000000000000000000000000000000
-  easyCardUseChance: 0.2
-  mediumCardUseChance: 0.55
-  hardCardUseChance: 0.85
+  easyCardUseChance: 0.35
+  mediumCardUseChance: 0.65
+  hardCardUseChance: 0.95
   aiThinkDelay: 0.5
   aiActionMessageDelay: 1
   aiTurnEndDelay: 1.2
