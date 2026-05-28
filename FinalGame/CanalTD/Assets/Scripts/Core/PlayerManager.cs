@@ -295,12 +295,16 @@ public class PlayerManager : MonoBehaviour
         return config != null ? config.playerColor : Color.white;
     }
 
+    // Existing color source for tower prefabs. BuildTowerManager uses this as
+    // the fallback for every tower type until type-specific colored prefabs exist.
     public GameObject GetTowerPrefabForPlayer(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
         return config != null ? config.towerPrefab : null;
     }
 
+    // Optional sprite fallback for generic tower prefabs that are not already
+    // colored per player.
     public Sprite GetTowerSpriteForPlayer(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);

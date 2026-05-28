@@ -30,6 +30,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     public WaveManager waveManager;
     public GamePhaseManager legacyGamePhaseManager;
     public GateOwnershipManager gateOwnershipManager;
+    public BuildTowerManager buildTowerManager;
     public MonoBehaviour toastMessage;
 
     [Header("AI Difficulty")]
@@ -310,6 +311,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         if (waveManager == null) waveManager = FindObjectOfType<WaveManager>();
         if (legacyGamePhaseManager == null) legacyGamePhaseManager = FindObjectOfType<GamePhaseManager>();
         if (gateOwnershipManager == null) gateOwnershipManager = FindObjectOfType<GateOwnershipManager>();
+        if (buildTowerManager == null) buildTowerManager = FindObjectOfType<BuildTowerManager>();
     }
 
     // Prevents the original GamePhaseManager from also running turns in the AI prototype scene.
@@ -959,6 +961,23 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
+        if (buildTowerManager != null)
+        {
+            bool built = buildTowerManager.TryBuildTowerForAI(bestArea, TowerType.Cannon, aiPlayer.playerId);
+
+            if (built)
+            {
+                ShowToast(aiPlayer.GetDisplayName() + " built a tower.");
+            }
+
+            return built;
+        }
+
+        return TryAIBuildOneTowerLegacy(aiPlayer, bestArea);
+    }
+
+    private bool TryAIBuildOneTowerLegacy(PlayerResource aiPlayer, TowerBuildArea bestArea)
+    {
         GameObject towerPrefab = GetTowerPrefabForPlayerId(aiPlayer.playerId);
 
         if (towerPrefab == null || !aiPlayer.SpendMoney(cannonTowerCost))
@@ -1545,8 +1564,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         if (waveManager != null)
         {
-            waveManager.currentWaveIndex = currentWaveIndex;
-            waveManager.currentWaveNumber = currentWaveIndex;
+            waveManager.currentRound = currentWaveIndex;
             waveManager.StartWave();
         }
     }

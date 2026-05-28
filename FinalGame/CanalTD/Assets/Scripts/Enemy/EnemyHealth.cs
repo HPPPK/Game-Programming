@@ -2,8 +2,8 @@
  * File: EnemyHealth.cs
  *
  * Purpose:
- * Stores enemy HP, applies wave stats, receives tower/trap damage, updates the
- * health bar, and awards gold/score when the enemy dies.
+ * Stores runtime enemy HP, reads base stats from EnemyStats, receives tower/trap
+ * damage, updates the health bar, and awards gold/score when the enemy dies.
  *
  * Notes:
  * Damage participants are tracked so the last hitter receives kill score and
@@ -16,19 +16,22 @@ using UnityEngine.Serialization;
 
 public class EnemyHealth : MonoBehaviour
 {
-    [Header("Health")]
-    public int maxHP = 3;
-    public int currentHP;
+    [Header("Fallback Health")]
+    [Tooltip("Used only when this enemy prefab has no EnemyStats component.")]
+    public int fallbackMaxHP = 3;
 
-    [Header("Reward")]
-    public int goldReward = 1;
+    [Header("Fallback Reward")]
+    [Tooltip("Used only when this enemy prefab has no EnemyStats component.")]
+    public int fallbackGoldReward = 1;
     [FormerlySerializedAs("scoreReward")]
-    public int killerScoreReward = 2;
+    [Tooltip("Used only when this enemy prefab has no EnemyStats component.")]
+    public int fallbackKillerScoreReward = 2;
     public int assistScoreReward = 1;
 
-    [Header("Death Visual")]
+    [Header("Optional Death Visual")]
     public SpriteRenderer spriteRenderer;
     public Sprite deathSprite;
+    [Tooltip("Optional. Only assign this if a legacy enemy prefab still uses Animator-based death animation.")]
     public Animator animator;
     public float destroyDelay = 0.5f;
 
@@ -38,11 +41,31 @@ public class EnemyHealth : MonoBehaviour
     public float healthBarVerticalPadding = 0.12f;
 
     private bool isDead = false;
+    private int maxHP = 3;
+    private int currentHP = 3;
+    private int goldReward = 1;
+    private int killerScoreReward = 2;
     private PlayerResource lastDamageOwner;
     private HashSet<PlayerResource> damageParticipants = new HashSet<PlayerResource>();
+    private EnemyStats enemyStats;
+    private int appliedRound = 1;
+    private float appliedHpScalePerRound = 0f;
+    private float appliedSpeedScalePerRound = 0f;
+
+    public int CurrentHP
+    {
+        get { return currentHP; }
+    }
+
+    public int MaxHP
+    {
+        get { return maxHP; }
+    }
 
     private void Awake()
     {
+        enemyStats = GetComponent<EnemyStats>();
+        maxHP = Mathf.Max(1, fallbackMaxHP);
         currentHP = maxHP;
 
         if (spriteRenderer == null)
@@ -55,15 +78,9 @@ public class EnemyHealth : MonoBehaviour
             spriteRenderer = FindEnemySpriteRenderer();
         }
 
-        if (animator == null)
-        {
-            animator = GetComponent<Animator>();
-        }
-
-        if (animator == null && spriteRenderer != null)
-        {
-            animator = spriteRenderer.GetComponent<Animator>();
-        }
+        // Animator is optional. Most enemy prefabs can use SimpleFrameAnimator on
+        // the Visual object and leave this field empty.
+        ResolveOptionalAnimator();
     }
 
     private void Start()
@@ -85,18 +102,32 @@ public class EnemyHealth : MonoBehaviour
         PositionHealthBarAboveSprite();
     }
 
-    public void ApplyWaveStats(WaveConfig config)
+    public void InitializeFromStats(int round)
     {
-        if (config == null)
-        {
-            return;
-        }
+        InitializeFromStats(round, appliedHpScalePerRound, appliedSpeedScalePerRound);
+    }
 
-        maxHP = Mathf.Max(1, config.enemyMaxHP);
-        currentHP = maxHP;
-        goldReward = config.goldReward;
-        killerScoreReward = config.killerScoreReward;
-        assistScoreReward = config.assistScoreReward;
+    public void InitializeFromStats(int round, float hpScalePerRound, float speedScalePerRound)
+    {
+        enemyStats = GetComponent<EnemyStats>();
+        appliedRound = Mathf.Max(1, round);
+        appliedHpScalePerRound = hpScalePerRound;
+        appliedSpeedScalePerRound = speedScalePerRound;
+
+        if (enemyStats != null)
+        {
+            maxHP = enemyStats.GetFinalHP(appliedRound, appliedHpScalePerRound);
+            currentHP = maxHP;
+            goldReward = enemyStats.GetFinalReward(appliedRound);
+            killerScoreReward = enemyStats.GetFinalScoreReward(appliedRound);
+        }
+        else
+        {
+            maxHP = Mathf.Max(1, fallbackMaxHP);
+            currentHP = maxHP;
+            goldReward = fallbackGoldReward;
+            killerScoreReward = fallbackKillerScoreReward;
+        }
 
         isDead = false;
         lastDamageOwner = null;
@@ -156,7 +187,8 @@ public class EnemyHealth : MonoBehaviour
             return;
         }
 
-        currentHP -= damage;
+        int finalDamage = enemyStats != null ? enemyStats.GetFinalDamage(damage) : Mathf.Max(1, damage);
+        currentHP -= finalDamage;
 
         if (damageOwner != null)
         {
@@ -231,7 +263,68 @@ public class EnemyHealth : MonoBehaviour
             healthBar.gameObject.SetActive(false);
         }
 
+        SpawnSplitEnemies();
         StartCoroutine(DestroyAfterDelay());
+    }
+
+    private void ResolveOptionalAnimator()
+    {
+        if (animator != null)
+        {
+            return;
+        }
+
+        animator = GetComponent<Animator>();
+
+        if (animator == null && spriteRenderer != null)
+        {
+            animator = spriteRenderer.GetComponent<Animator>();
+        }
+    }
+
+    private void SpawnSplitEnemies()
+    {
+        if (enemyStats == null ||
+            !enemyStats.canSplit ||
+            enemyStats.splitEnemyPrefab == null ||
+            enemyStats.splitCount <= 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < enemyStats.splitCount; i++)
+        {
+            Vector3 offset = Random.insideUnitCircle * 0.2f;
+            Vector3 spawnPosition = transform.position + offset;
+            GameObject splitEnemy = Instantiate(
+                enemyStats.splitEnemyPrefab,
+                spawnPosition,
+                Quaternion.identity
+            );
+
+            EnemyMover parentMover = GetComponent<EnemyMover>();
+            EnemyMover splitMover = splitEnemy.GetComponent<EnemyMover>();
+            EnemyHealth splitHealth = splitEnemy.GetComponent<EnemyHealth>();
+
+            if (splitHealth != null)
+            {
+                splitHealth.InitializeFromStats(
+                    appliedRound,
+                    appliedHpScalePerRound,
+                    appliedSpeedScalePerRound
+                );
+            }
+
+            if (splitMover != null)
+            {
+                splitMover.ApplyStatsSpeed(appliedRound, appliedSpeedScalePerRound);
+            }
+
+            if (parentMover != null && splitMover != null)
+            {
+                splitMover.CopyPathProgressFrom(parentMover, spawnPosition);
+            }
+        }
     }
 
     private IEnumerator DestroyAfterDelay()

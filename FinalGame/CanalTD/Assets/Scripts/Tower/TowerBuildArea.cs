@@ -11,6 +11,7 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public enum BuildAreaType
 {
@@ -18,10 +19,11 @@ public enum BuildAreaType
     Claimable
 }
 
-public class TowerBuildArea : MonoBehaviour
+public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
 {
     [Header("Area Type")]
     public BuildAreaType areaType = BuildAreaType.Public;
+    public bool isPublicBuildArea = true;
 
     [Header("Ownership")]
     public int ownerPlayerId = -1;
@@ -44,6 +46,7 @@ public class TowerBuildArea : MonoBehaviour
     public bool isOccupied = false;
     public Transform towerSpawnPoint;
     public GameObject currentTower;
+    public int towerOwnerPlayerId = -1;
 
     [Header("Visual")]
     public SpriteRenderer highlightRenderer;
@@ -51,6 +54,9 @@ public class TowerBuildArea : MonoBehaviour
     public Color normalColor = Color.white;
     public Color availableColor = Color.green;
     public Color unavailableColor = Color.red;
+
+    [Header("Click Routing")]
+    public BuildTowerManager buildTowerManager;
 
     private Color neutralAreaColor = Color.white;
     private Sprite neutralAreaSprite;
@@ -62,9 +68,16 @@ public class TowerBuildArea : MonoBehaviour
             towerSpawnPoint = transform;
         }
 
+        isPublicBuildArea = areaType == BuildAreaType.Public;
+
         if (playerManager == null)
         {
             playerManager = FindObjectOfType<PlayerManager>();
+        }
+
+        if (buildTowerManager == null)
+        {
+            buildTowerManager = FindObjectOfType<BuildTowerManager>();
         }
 
         if (areaVisualRenderer != null)
@@ -76,6 +89,34 @@ public class TowerBuildArea : MonoBehaviour
         HideHighlight();
         SetFrozenVisual(isFrozenOrSealed);
         RefreshOwnershipVisual(playerManager);
+    }
+
+    private void OnMouseDown()
+    {
+        ReportBuildAreaClicked();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        ReportBuildAreaClicked();
+    }
+
+    private void ReportBuildAreaClicked()
+    {
+        Debug.Log("BuildArea clicked: " + name);
+
+        if (buildTowerManager == null)
+        {
+            buildTowerManager = FindObjectOfType<BuildTowerManager>();
+        }
+
+        if (buildTowerManager == null)
+        {
+            Debug.LogWarning(name + " cannot report click because BuildTowerManager is missing.");
+            return;
+        }
+
+        buildTowerManager.HandleBuildAreaClicked(this);
     }
 
     public bool CanBuildTower(int playerId)
@@ -90,7 +131,7 @@ public class TowerBuildArea : MonoBehaviour
             return false;
         }
 
-        if (areaType == BuildAreaType.Public)
+        if (areaType == BuildAreaType.Public || isPublicBuildArea)
         {
             return true;
         }
@@ -105,7 +146,7 @@ public class TowerBuildArea : MonoBehaviour
 
     public bool IsPublic()
     {
-        return areaType == BuildAreaType.Public;
+        return areaType == BuildAreaType.Public || isPublicBuildArea;
     }
 
     public bool IsClaimable()
@@ -340,6 +381,7 @@ public class TowerBuildArea : MonoBehaviour
 
         currentTower = null;
         isOccupied = false;
+        towerOwnerPlayerId = -1;
     }
 
     public void RefreshOwnershipVisual(PlayerManager visualPlayerManager)
@@ -377,6 +419,23 @@ public class TowerBuildArea : MonoBehaviour
     {
         currentTower = tower;
         isOccupied = tower != null;
+
+        if (tower == null)
+        {
+            towerOwnerPlayerId = -1;
+        }
+        else
+        {
+            CannonTower cannonTower = tower.GetComponent<CannonTower>();
+
+            if (cannonTower == null)
+            {
+                cannonTower = tower.GetComponentInChildren<CannonTower>();
+            }
+
+            towerOwnerPlayerId = cannonTower != null ? cannonTower.ownerPlayerId : ownerPlayerId;
+        }
+
         SetFrozenVisual(isFrozenOrSealed);
     }
 

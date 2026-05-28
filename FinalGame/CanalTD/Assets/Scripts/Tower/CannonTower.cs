@@ -38,9 +38,17 @@ public class CannonTower : MonoBehaviour
     private float attackTimer = 0f;
     private bool disabledByFreeze = false;
     private Color normalTowerColor = Color.white;
+    private TowerStats towerStats;
 
     private void Awake()
     {
+        towerStats = GetComponent<TowerStats>();
+
+        if (towerStats == null)
+        {
+            towerStats = GetComponentInChildren<TowerStats>();
+        }
+
         if (towerSpriteRenderer == null)
         {
             towerSpriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -65,22 +73,24 @@ public class CannonTower : MonoBehaviour
 
         if (attackTimer <= 0f)
         {
-            EnemyHealth target = FindNearestEnemy();
+            SyncAttackFieldsFromStats();
+            EnemyHealth target = FindTargetEnemy();
 
             if (target != null)
             {
-                Shoot(target);
+                AttackTarget(target);
                 attackTimer = attackInterval;
             }
         }
     }
 
-    private EnemyHealth FindNearestEnemy()
+    private EnemyHealth FindTargetEnemy()
     {
+        SyncAttackFieldsFromStats();
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange);
 
-        EnemyHealth nearestEnemy = null;
-        float nearestDistance = float.MaxValue;
+        EnemyHealth bestEnemy = null;
+        float bestScore = float.MaxValue;
 
         foreach (Collider2D hit in hits)
         {
@@ -97,21 +107,157 @@ public class CannonTower : MonoBehaviour
             }
 
             float distance = Vector2.Distance(transform.position, enemy.transform.position);
+            float score = GetTargetScore(enemy, distance);
 
-            if (distance < nearestDistance)
+            if (score < bestScore)
             {
-                nearestDistance = distance;
-                nearestEnemy = enemy;
+                bestScore = score;
+                bestEnemy = enemy;
             }
         }
 
-        return nearestEnemy;
+        return bestEnemy;
     }
 
-    private void Shoot(EnemyHealth target)
+    private float GetTargetScore(EnemyHealth enemy, float distance)
+    {
+        TargetPriority priority = towerStats != null ? towerStats.targetPriority : TargetPriority.Closest;
+
+        if (priority == TargetPriority.Strongest)
+        {
+            return -enemy.CurrentHP;
+        }
+
+        if (priority == TargetPriority.Weakest)
+        {
+            return enemy.CurrentHP;
+        }
+
+        if (priority == TargetPriority.First)
+        {
+            // V1 approximation: enemies farther from this tower are treated as farther along the route.
+            return -distance;
+        }
+
+        return distance;
+    }
+
+    private void AttackTarget(EnemyHealth target)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        TowerType towerType = towerStats != null ? towerStats.towerType : TowerType.Cannon;
+
+        if (towerType == TowerType.Cannon)
+        {
+            ApplyCannonDamage(target);
+            return;
+        }
+
+        if (towerType == TowerType.Frost)
+        {
+            ApplySingleTargetDamage(target);
+            ApplySlow(target);
+            return;
+        }
+
+        if (towerType == TowerType.Shock)
+        {
+            ApplyShockDamage(target);
+            return;
+        }
+
+        ApplySingleTargetDamage(target);
+    }
+
+    private void ApplySingleTargetDamage(EnemyHealth target)
+    {
+        ShootProjectileOrDamage(target);
+    }
+
+    private void ApplyCannonDamage(EnemyHealth target)
+    {
+        float radius = towerStats != null ? towerStats.splashRadius : 0f;
+
+        if (radius <= 0f)
+        {
+            ShootProjectileOrDamage(target);
+            return;
+        }
+
+        foreach (EnemyHealth enemy in GetEnemiesNear(target.transform.position, radius))
+        {
+            enemy.TakeDamage(Mathf.RoundToInt(GetCurrentDamage()), ownerResource);
+        }
+    }
+
+    private void ApplyShockDamage(EnemyHealth target)
+    {
+        int maxTargets = towerStats != null ? Mathf.Max(1, towerStats.chainCount + 1) : 1;
+        float radius = towerStats != null ? towerStats.chainRange : attackRange;
+        int appliedCount = 0;
+
+        foreach (EnemyHealth enemy in GetEnemiesNear(target.transform.position, radius))
+        {
+            enemy.TakeDamage(Mathf.RoundToInt(GetCurrentDamage()), ownerResource);
+            appliedCount++;
+
+            if (appliedCount >= maxTargets)
+            {
+                break;
+            }
+        }
+    }
+
+    private void ApplySlow(EnemyHealth target)
+    {
+        EnemySlowEffect slowEffect = target.GetComponent<EnemySlowEffect>();
+
+        if (slowEffect == null)
+        {
+            slowEffect = target.gameObject.AddComponent<EnemySlowEffect>();
+        }
+
+        float slowPercent = towerStats != null ? towerStats.slowPercent : 0.35f;
+        float slowDuration = towerStats != null ? towerStats.slowDuration : 1.5f;
+        slowEffect.ApplySlow(slowPercent, slowDuration);
+    }
+
+    private System.Collections.Generic.List<EnemyHealth> GetEnemiesNear(Vector3 center, float radius)
+    {
+        System.Collections.Generic.List<EnemyHealth> enemies = new System.Collections.Generic.List<EnemyHealth>();
+        Collider2D[] hits = Physics2D.OverlapCircleAll(center, radius);
+
+        foreach (Collider2D hit in hits)
+        {
+            EnemyHealth enemy = hit.GetComponent<EnemyHealth>();
+
+            if (enemy == null)
+            {
+                enemy = hit.GetComponentInParent<EnemyHealth>();
+            }
+
+            if (enemy != null && !enemies.Contains(enemy))
+            {
+                enemies.Add(enemy);
+            }
+        }
+
+        return enemies;
+    }
+
+    private void ShootProjectileOrDamage(EnemyHealth target)
     {
         if (projectilePrefab == null || target == null)
         {
+            if (target != null)
+            {
+                target.TakeDamage(Mathf.RoundToInt(GetCurrentDamage()), ownerResource);
+            }
+
             return;
         }
 
@@ -135,7 +281,26 @@ public class CannonTower : MonoBehaviour
 
     public float GetCurrentDamage()
     {
+        SyncAttackFieldsFromStats();
         return boostActive ? boostedDamage : baseDamage;
+    }
+
+    public void SyncAttackFieldsFromStats()
+    {
+        if (towerStats == null)
+        {
+            towerStats = GetComponent<TowerStats>();
+        }
+
+        if (towerStats == null)
+        {
+            return;
+        }
+
+        attackRange = towerStats.range;
+        attackInterval = towerStats.attackInterval;
+        baseDamage = towerStats.damage;
+        damage = Mathf.RoundToInt(towerStats.damage);
     }
 
     public void ApplyOwnerVisual(PlayerManager playerManager, int playerId)

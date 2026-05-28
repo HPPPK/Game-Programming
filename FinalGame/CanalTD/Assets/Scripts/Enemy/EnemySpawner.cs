@@ -14,7 +14,7 @@
  *
  * Inspector setup:
  * - enemyPrefab is the fallback prefab used when WaveManager does not provide
- *   a wave-specific prefab.
+ *   a weighted enemy entry prefab.
  * - startNode should point to the PathNode where enemies enter the map.
  *
  * Dependency notes:
@@ -33,15 +33,10 @@ public class EnemySpawner : MonoBehaviour
 
     public GameObject SpawnOne()
     {
-        return SpawnOne(null);
+        return SpawnOne(null, 1, 0f, 0f);
     }
 
-    public GameObject SpawnOne(WaveConfig config)
-    {
-        return SpawnOne(config, null);
-    }
-
-    public GameObject SpawnOne(WaveConfig config, GameObject waveEnemyPrefab)
+    public GameObject SpawnOne(GameObject waveEnemyPrefab, int round, float hpScalePerRound, float speedScalePerRound)
     {
         GameObject prefabToSpawn = waveEnemyPrefab != null ? waveEnemyPrefab : enemyPrefab;
 
@@ -72,18 +67,14 @@ public class EnemySpawner : MonoBehaviour
             return null;
         }
 
-        if (config != null)
+        EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+
+        if (enemyHealth != null)
         {
-            EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
-
-            if (enemyHealth != null)
-            {
-                enemyHealth.ApplyWaveStats(config);
-            }
-
-            mover.castleDamage = config.castleDamage;
+            enemyHealth.InitializeFromStats(round, hpScalePerRound, speedScalePerRound);
         }
 
+        mover.ApplyStatsSpeed(round, speedScalePerRound);
         mover.Init(startNode);
         return enemy;
     }

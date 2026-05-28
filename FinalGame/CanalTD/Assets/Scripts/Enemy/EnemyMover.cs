@@ -56,11 +56,15 @@ public class EnemyMover : MonoBehaviour
     private List<PathNode> path;
     private int currentPathIndex = 0;
     private SpriteRenderer spriteRenderer;
+    private EnemyStats enemyStats;
+    private int appliedRound = 1;
+    private float appliedSpeedScalePerRound = 0f;
 
     private bool initialized = false;
 
     void Awake()
     {
+        enemyStats = GetComponent<EnemyStats>();
         ResolveVisualRoot();
         ApplyVisualOffset();
         spriteRenderer = visualRoot != null
@@ -98,6 +102,30 @@ public class EnemyMover : MonoBehaviour
         // path[0] is startNode, so movement begins at path[1].
         currentPathIndex = 1;
         initialized = true;
+
+        ApplyStatsSpeed();
+    }
+
+    public void ApplyStatsSpeed(int round, float speedScalePerRound)
+    {
+        appliedRound = Mathf.Max(1, round);
+        appliedSpeedScalePerRound = speedScalePerRound;
+        ApplyStatsSpeed();
+    }
+
+    public void CopyPathProgressFrom(EnemyMover source, Vector3 spawnPosition)
+    {
+        if (source == null || source.path == null || source.path.Count == 0)
+        {
+            return;
+        }
+
+        path = source.path;
+        currentPathIndex = Mathf.Clamp(source.currentPathIndex, 1, path.Count - 1);
+        castleDamage = source.castleDamage;
+        transform.position = spawnPosition;
+        initialized = true;
+        ApplyStatsSpeed();
     }
 
     void Update()
@@ -155,6 +183,18 @@ public class EnemyMover : MonoBehaviour
 
             currentPathIndex++;
         }
+    }
+
+    private void ApplyStatsSpeed()
+    {
+        enemyStats = enemyStats != null ? enemyStats : GetComponent<EnemyStats>();
+
+        if (enemyStats == null)
+        {
+            return;
+        }
+
+        moveSpeed = enemyStats.GetFinalSpeed(appliedRound, appliedSpeedScalePerRound);
     }
 
     private void ResolveVisualRoot()
