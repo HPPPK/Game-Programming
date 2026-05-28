@@ -126,6 +126,7 @@ GameObject:
   - component: {fileID: 6935944441615096425}
   - component: {fileID: 1449029083322658814}
   - component: {fileID: 4378367588678255302}
+  - component: {fileID: -8536536955610011358}
   m_Layer: 0
   m_Name: CannonTower 1
   m_TagString: Untagged
@@ -221,3 +222,32 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.46, y: 1.55}
   m_EdgeRadius: 0
+--- !u!114 &-8536536955610011358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9178881288609307550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89ec50bce15f04d18b60a39daaffb6ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  towerType: 0
+  ownerPlayerId: -1
+  level: 1
+  maxLevel: 3
+  baseCost: 6
+  upgradeCostLevel2: 8
+  upgradeCostLevel3: 12
+  totalGoldInvested: 0
+  damage: 1
+  range: 3
+  attackInterval: 0.6
+  splashRadius: 0
+  slowPercent: 0.35
+  slowDuration: 1.5
+  chainCount: 0
+  chainRange: 1.5
+  targetPriority: 0
