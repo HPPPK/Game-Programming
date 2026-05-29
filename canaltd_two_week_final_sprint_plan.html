@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CanalTD Two-Week Final Sprint Plan</title>
+
+  <style>
+    :root {
+      --page-bg: #eef2f7;
+      --card-bg: #ffffff;
+      --text-main: #22374d;
+      --text-sub: #5f7286;
+      --line: #c9d6e4;
+      --blue: #2f80ed;
+      --green: #16a085;
+      --orange: #f39c12;
+      --purple: #8e5db7;
+      --dark: #1f3550;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(47, 128, 237, 0.12), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(142, 93, 183, 0.12), transparent 35%),
+        var(--page-bg);
+      color: var(--text-main);
+    }
+
+    .wrap {
+      width: min(1800px, 100% - 32px);
+      margin: 16px auto 28px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1f3550, #2f80ed);
+      color: white;
+      border-radius: 18px;
+      padding: 28px 32px;
+      margin-bottom: 18px;
+      box-shadow: 0 18px 40px rgba(31, 53, 80, 0.18);
+    }
+
+    .hero h1 {
+      font-size: clamp(44px, 5vw, 76px);
+      margin: 0 0 6px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: clamp(18px, 2vw, 34px);
+      opacity: 0.92;
+      font-weight: 650;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .status-column {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(31, 53, 80, 0.08);
+    }
+
+    .status-column h3 {
+      margin: 0 0 10px;
+      color: var(--dark);
+      font-size: clamp(20px, 1.4vw, 30px);
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(201, 214, 228, 0.65);
+      font-size: clamp(14px, 0.95vw, 20px);
+      font-weight: 650;
+      color: #3a526b;
+    }
+
+    .status-row:first-of-type {
+      border-top: 0;
+    }
+
+    .status-marker {
+      width: 28px;
+      text-align: center;
+      flex: 0 0 auto;
+    }
+
+    .week-section {
+      margin-top: 18px;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(201, 214, 228, 0.8);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(31, 53, 80, 0.08);
+    }
+
+    .week-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 14px;
+    }
+
+    .week-title-row h2 {
+      margin: 0;
+      font-size: clamp(28px, 2.4vw, 46px);
+      color: var(--dark);
+      font-weight: 900;
+    }
+
+    .week-title-row p {
+      margin: 4px 0 0;
+      color: var(--text-sub);
+      font-size: clamp(15px, 1vw, 22px);
+      font-weight: 650;
+    }
+
+    .week-count {
+      background: #dfe7f0;
+      color: #4e647a;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 850;
+      white-space: nowrap;
+      font-size: clamp(14px, 0.9vw, 20px);
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .day-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 360px;
+      box-shadow: 0 8px 22px rgba(31, 53, 80, 0.07);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .day-label {
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .day-header h3 {
+      margin: 2px 0 0;
+      color: var(--dark);
+      font-size: clamp(22px, 1.5vw, 34px);
+      font-weight: 900;
+    }
+
+    .badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid #c5d5e5;
+      background: #eef4fb;
+      color: #5b6f84;
+      font-weight: 900;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .goal-box {
+      background: #f5f8fc;
+      border: 1px solid #d8e1ea;
+      border-left: 5px solid var(--blue);
+      border-radius: 9px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      color: #4a6077;
+      font-size: clamp(14px, 0.92vw, 20px);
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .task-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      color: #2f4a64;
+      font-size: clamp(13px, 0.86vw, 18px);
+      line-height: 1.32;
+      font-weight: 600;
+    }
+
+    .task-dot {
+      width: 8px;
+      height: 8px;
+      margin-top: 7px;
+      border-radius: 999px;
+      background: var(--green);
+      flex: 0 0 auto;
+    }
+
+    .footer {
+      margin-top: 16px;
+      background: #dfe7f0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: center;
+      font-size: clamp(16px, 1vw, 24px);
+      color: #4e647a;
+      font-weight: 750;
+    }
+
+    @media (max-width: 1450px) {
+      .week-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1050px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .week-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .week-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .week-title-row {
+        flex-direction: column;
+      }
+
+      .day-card {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>CanalTD</h1>
+      <p>Two-Week Final Sprint Plan · Online Prototype · UI Polish · Guided Tutorial · Audio · Presentation</p>
+    </section>
+
+    <section class="summary-grid">
+      <div class="status-column">
+      <h3>Completed</h3>
+      <div class="status-row">
+          <span class="status-marker">✅</span>
+          <span>Core Gameplay Complete</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">✅</span>
+          <span>AI Mode Complete</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">✅</span>
+          <span>Card System Complete</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">✅</span>
+          <span>Tower System Complete</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">✅</span>
+          <span>Enemy System Complete</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">✅</span>
+          <span>Radial Workflow Complete</span>
+        </div>
+    </div>
+      <div class="status-column">
+      <h3>In Progress</h3>
+      <div class="status-row">
+          <span class="status-marker">🟨</span>
+          <span>Online Multiplayer Prototype</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">🟨</span>
+          <span>Instruction Book</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">🟨</span>
+          <span>UI Polish</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">🟨</span>
+          <span>Guided Tutorial</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">🟨</span>
+          <span>Asset Organization</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">🟨</span>
+          <span>Sound Effects</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">🟨</span>
+          <span>Presentation</span>
+        </div>
+    </div>
+      <div class="status-column">
+      <h3>Future Work</h3>
+      <div class="status-row">
+          <span class="status-marker">⬜</span>
+          <span>More Maps</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">⬜</span>
+          <span>More Cards</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">⬜</span>
+          <span>Advanced Online Matchmaking</span>
+        </div>
+<div class="status-row">
+          <span class="status-marker">⬜</span>
+          <span>Dedicated Server Support</span>
+        </div>
+    </div>
+    </section>
+
+    <section class="week-section">
+      <div class="week-title-row">
+        <div>
+          <h2>Week 1: Documentation, Online Prototype, and UI Cleanup</h2>
+          <p>Finish the guide quickly, then focus on a realistic online prototype and UI stability.</p>
+        </div>
+        <div class="week-count">7 days</div>
+      </div>
+
+      <div class="week-grid">
+        <article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 1</div>
+          <h3>May 29</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: finish the core guide structure and prepare for online prototype work.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Complete the final Instruction Book structure</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Finish concise rule pages for objective, turn flow, land, gates, towers, enemies, and cards</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Capture missing screenshots for guide pages</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Review page readability and reduce long text</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prepare the game for the online prototype phase</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 2</div>
+          <h3>May 30</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: complete Instruction Book content and lock it for polish only.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Finish Tower, Enemy, and Card reference pages</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Add short descriptions and screenshots for each section</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Verify Instruction Book navigation and page order</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Fix any unreadable text or image layout issues</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Lock Instruction Book content for final polish only</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 3</div>
+          <h3>May 31</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: define a realistic online multiplayer prototype scope.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Start online multiplayer prototype investigation</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Choose the practical networking approach for the course demo</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Create a minimal online room flow plan</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Define host / client responsibilities</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>List which actions must sync first: ready, turn, build, gate, card</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 4</div>
+          <h3>June 1</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: create the first online room / lobby prototype.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Implement online lobby prototype</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Support host / join room flow if feasible</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Sync player name, ready state, and player slot status</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Keep AI and local modes unaffected</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Document online prototype limitations clearly</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 5</div>
+          <h3>June 2</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: synchronize basic turn flow between players.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Prototype online turn synchronization</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Sync current player turn</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Sync End Turn action</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prevent non-current players from acting</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Test simple two-player online turn flow</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 6</div>
+          <h3>June 3</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: synchronize a small set of core gameplay actions.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Prototype online gameplay action synchronization</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Sync tower build action</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Sync land ownership update</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Sync basic gate action if time allows</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Keep card sync limited to safe demo actions</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 7</div>
+          <h3>June 4</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: polish UI and clean scene hierarchy.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>UI polish pass</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Improve menu layout consistency</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Polish RadialTowerMenu visuals</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Organize scene UI hierarchy</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Clean up unused UI/debug objects</span>
+        </li>
+      </ul>
+    </article>
+      </div>
+    </section>
+
+    <section class="week-section">
+      <div class="week-title-row">
+        <div>
+          <h2>Week 2: Audio, Playtesting, Presentation, and Submission</h2>
+          <p>Polish the player experience, record the demo, and prepare final delivery.</p>
+        </div>
+        <div class="week-count">8 days</div>
+      </div>
+
+      <div class="week-grid">
+        <article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 8</div>
+          <h3>June 5</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: organize assets and add guided tutorial support.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Asset organization and guided tutorial work</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Organize screenshots, icons, audio, and prefabs</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Add guided tutorial hints or first-time player prompts</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Review global toast messages</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prepare a clean demo route for presentation</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 9</div>
+          <h3>June 6</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: integrate sound effects across the main gameplay loop.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Sound effects integration</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Add button click audio</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Add build, upgrade, sell, and card play audio</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Add tower attack and enemy death audio</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Balance audio volume</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 10</div>
+          <h3>June 7</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: run full playtests and fix critical bugs.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Full playtesting and bug fixing</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Test Local Mode</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Test AI Mode</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Test online prototype if stable</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Record bugs and fix critical issues only</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 11</div>
+          <h3>June 8</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: create presentation materials.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Create presentation slides</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prepare project motivation and game concept slides</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prepare core mechanics slides</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prepare tower, enemy, card, and AI slides</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prepare online prototype / future work slide</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 12</div>
+          <h3>June 9</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: record gameplay footage.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Record demo footage</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Record build / upgrade / sell flow</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Record enemy wave gameplay</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Record AI gameplay</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Record online prototype only if stable</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 13</div>
+          <h3>June 10</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: finalize slides, diagrams, and demo script.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Finalize presentation assets</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Insert screenshots and short video clips</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Clean up architecture diagrams</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Review slide timing</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prepare final demo script</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 14</div>
+          <h3>June 11</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: rehearse and prepare final submission.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Final rehearsal and submission preparation</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Rehearse presentation several times</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Verify build stability</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Verify scenes and Instruction Book</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Prepare final submission package</span>
+        </li>
+      </ul>
+    </article>
+<article class="day-card">
+      <div class="day-header">
+        <div>
+          <div class="day-label">Day 15</div>
+          <h3>June 12</h3>
+        </div>
+        <div class="badge">J</div>
+      </div>
+
+      <div class="goal-box">Goal: submit the final project successfully.</div>
+
+      <ul class="task-list">
+        <li>
+          <span class="task-dot"></span>
+          <span>Final submission</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Submit source code</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Submit build</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Submit report</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Submit presentation</span>
+        </li>
+<li>
+          <span class="task-dot"></span>
+          <span>Submit demo video or screenshots if required</span>
+        </li>
+      </ul>
+    </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Responsible worker: J = Jingyu Pan | Current priority: build a stable online prototype while preserving the completed local and AI gameplay loop.
+    </footer>
+  </main>
+</body>
+</html>
