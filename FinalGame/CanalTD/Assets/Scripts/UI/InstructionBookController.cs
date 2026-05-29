@@ -44,7 +44,6 @@ public class InstructionBookController : MonoBehaviour
     {
         BindListenersOnce();
     }
-
     private void Start()
     {
         // Keep the book hidden until the Instruction button opens it.
