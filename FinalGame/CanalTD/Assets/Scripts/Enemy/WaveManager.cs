@@ -2,88 +2,72 @@
  * File: WaveManager.cs
  *
  * Purpose:
- * This script starts and controls enemy waves. A wave is a timed sequence of
- * enemy spawns distributed across the assigned EnemySpawner objects.
- *
- * Runtime behavior:
- * - Pressing Space calls StartWave() for quick testing.
- * - StartWave() refuses to start a second wave while one is already running.
- * - At the beginning of a wave, EnemyPathAssignmentManager resets its assignment
- *   counts so this wave can rebalance castle targets from a clean state.
- * - SpawnWaveRoutine() spawns enemyCount enemies with spawnInterval seconds
- *   between each spawn.
- * - Spawners are used in round-robin order.
- *
- * Inspector setup:
- * - spawners should include every spawn point that can produce enemies.
- * - enemyCount controls how many enemies this wave creates.
- * - spawnInterval controls the delay between spawns.
- *
- * Dependency notes:
- * - EnemySpawner creates actual enemy GameObjects.
- * - EnemyPathAssignmentManager is reset before each wave so target balancing
- *   starts fresh.
+ * Controls enemy wave spawning with the new EnemyStats-driven architecture.
+ * WaveManager only decides how many enemies spawn and which prefabs are chosen.
+ * HP, speed, reward, armor, split behavior, and boss stats live on EnemyStats.
  */
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
 
 public class WaveManager : MonoBehaviour
 {
+    private const float SpawnIntervalSeconds = 0.5f;
+    private const float WaveClearedDelaySeconds = 2f;
+
     [Header("Spawners")]
     public EnemySpawner[] spawners;
+
+    [Header("Round Scaling")]
+    public int currentRound = 1;
+    public int maxWaveCount = 10;
+    public int baseEnemyCount = 16;
+    public int enemyCountIncreasePerRound = 8;
+    public float hpScalePerRound = 0.12f;
+    public float speedScalePerRound = 0.02f;
+
+    [Header("Spawn Director")]
+    [Tooltip("Weighted enemy entries. EnemyStats on each prefab supplies HP, speed, rewards, armor, and special behavior.")]
+    public List<WaveEnemyEntry> enemyEntries = new List<WaveEnemyEntry>();
+    public bool logWaveSpawnPlan = true;
+
+    [Header("Boss Settings")]
+    public bool spawnBossEveryTenRounds = true;
 
     [Header("Phase Manager")]
     public GamePhaseManager gamePhaseManager;
     public AIPrototypeTurnManager aiPrototypeTurnManager;
     public MonoBehaviour toastMessage;
 
-    [Header("Wave Settings")]
-    public int currentWaveIndex = 1;
-    public int currentWaveNumber = 1;
-    public int enemyCount = 8;
-    public int enemiesPerWave = 8;
-    public int waveEnemyHp = 3;
-    public float waveHpMultiplier = 1f;
-    public float spawnInterval = 0.5f;
-    public bool isWaveRunning = false;
-    public int enemyCountIncreasePerWave = 4;
-    public int enemyHpIncreasePerWave = 1;
-    public float waveClearedDelay = 2f;
-    public List<WaveConfig> waveConfigs = new List<WaveConfig>
-    {
-        new WaveConfig(1, 12, 3, 0.8f, 1, 2, 1, 1),
-        new WaveConfig(2, 16, 4, 0.75f, 1, 2, 1, 1),
-        new WaveConfig(3, 20, 5, 0.7f, 1, 2, 1, 1),
-        new WaveConfig(4, 24, 6, 0.65f, 1, 2, 1, 1),
-        new WaveConfig(5, 30, 8, 0.6f, 1, 2, 1, 1)
-    };
+    [Header("Wave UI")]
+    [Tooltip("Optional UI text shown as Round: current/max, for example Round: 1/10.")]
+    public TMP_Text waveCounterText;
 
     private bool isSpawning = false;
-    private WaveConfig activeWaveConfig;
+    private bool isWaveRunning = false;
+    private int activeEnemyCount = 0;
+    private int activeWaveNumber = 1;
+    private List<GameObject> activeEnemySpawnPlan = new List<GameObject>();
 
     public bool IsSpawning
     {
         get { return isSpawning; }
     }
 
-    private void Awake()
+    public bool IsWaveRunning
     {
-        EnsureDefaultWaveConfigs();
+        get { return isWaveRunning; }
     }
 
-    private void Reset()
-    {
-        EnsureDefaultWaveConfigs();
-    }
-
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (gamePhaseManager != null)
             {
+            
                 gamePhaseManager.OnEndTurnButtonClicked();
             }
             else
@@ -91,6 +75,92 @@ public class WaveManager : MonoBehaviour
                 StartWave();
             }
         }
+    }
+
+    private void Start()
+    {
+        RefreshWaveCounterUI();
+    }
+
+    public void ShowWaveIncoming(int waveNumber)
+    {
+        activeWaveNumber = Mathf.Max(1, waveNumber);
+        currentRound = activeWaveNumber;
+        RefreshWaveCounterUI();
+        ShowToast("Wave " + activeWaveNumber + " Incoming!");
+    }
+
+    public void StartWave()
+    {
+        if (isSpawning || isWaveRunning)
+        {
+            return;
+        }
+
+        activeWaveNumber = GetCurrentWaveIndex();
+        currentRound = activeWaveNumber;
+        RefreshWaveCounterUI();
+        activeEnemyCount = GetEnemyCountForRound(currentRound);
+        activeEnemySpawnPlan = BuildEnemySpawnPlan(currentRound, activeEnemyCount);
+
+        isWaveRunning = true;
+
+        if (spawners == null || spawners.Length == 0)
+        {
+            Debug.LogWarning("No spawners assigned.");
+            ShowToast("Wave " + activeWaveNumber + " cleared.");
+            isWaveRunning = false;
+            NotifyWaveFinished();
+            return;
+        }
+
+        ShowToast("Wave " + activeWaveNumber + " started.");
+        Debug.Log("Wave round = " + currentRound + ", enemy count = " + activeEnemyCount);
+        LogEnemyTypeCounts(activeEnemySpawnPlan, currentRound);
+        LogWaveSpawnPlan(activeEnemySpawnPlan, currentRound);
+
+        if (EnemyPathAssignmentManager.Instance != null)
+        {
+            EnemyPathAssignmentManager.Instance.ResetAssignmentsForWave(activeEnemyCount, spawners);
+        }
+
+        StartCoroutine(SpawnWaveRoutine());
+    }
+
+    private IEnumerator SpawnWaveRoutine()
+    {
+        isSpawning = true;
+
+        for (int i = 0; i < activeEnemyCount; i++)
+        {
+            int spawnerIndex = i % spawners.Length;
+
+            if (spawners[spawnerIndex] != null)
+            {
+                spawners[spawnerIndex].SpawnOne(
+                    GetEnemyPrefabForSpawn(i),
+                    currentRound,
+                    hpScalePerRound,
+                    speedScalePerRound
+                );
+            }
+
+            yield return new WaitForSeconds(SpawnIntervalSeconds);
+        }
+
+        isSpawning = false;
+        yield return new WaitUntil(IsWaveFinished);
+
+        ShowToast("Wave " + activeWaveNumber + " cleared.");
+        RefreshWaveCounterUI();
+
+        if (WaveClearedDelaySeconds > 0f)
+        {
+            yield return new WaitForSeconds(WaveClearedDelaySeconds);
+        }
+
+        isWaveRunning = false;
+        NotifyWaveFinished();
     }
 
     private bool IsWaveFinished()
@@ -102,77 +172,6 @@ public class WaveManager : MonoBehaviour
 
         EnemyHealth[] enemies = FindObjectsOfType<EnemyHealth>();
         return enemies.Length == 0;
-    }
-
-    public void StartWave()
-    {
-        if (isSpawning || isWaveRunning)
-        {
-            return;
-        }
-
-        isWaveRunning = true;
-
-        if (spawners == null || spawners.Length == 0)
-        {
-            Debug.LogWarning("No spawners assigned.");
-            ShowToast("Wave " + GetCurrentWaveIndex() + " cleared.");
-            isWaveRunning = false;
-            NotifyWaveFinished();
-            return;
-        }
-
-        int waveIndex = GetCurrentWaveIndex();
-        activeWaveConfig = GetWaveConfig(waveIndex);
-        ApplyActiveWaveTracking(activeWaveConfig);
-        spawnInterval = activeWaveConfig.spawnInterval;
-
-        ShowToast("Wave " + currentWaveNumber + " started.");
-
-        if (EnemyPathAssignmentManager.Instance != null)
-        {
-            EnemyPathAssignmentManager.Instance.ResetAssignmentsForWave(activeWaveConfig.enemyCount, spawners);
-        }
-
-        StartCoroutine(SpawnWaveRoutine());
-    }
-
-    public void ShowWaveIncoming(int waveNumber)
-    {
-        currentWaveNumber = Mathf.Max(1, waveNumber);
-        currentWaveIndex = currentWaveNumber;
-        ShowToast("Wave " + currentWaveNumber + " Incoming!");
-    }
-
-    IEnumerator SpawnWaveRoutine()
-    {
-        isSpawning = true;
-
-        for (int i = 0; i < activeWaveConfig.enemyCount; i++)
-        {
-            int spawnerIndex = i % spawners.Length;
-
-            if (spawners[spawnerIndex] != null)
-            {
-                spawners[spawnerIndex].SpawnOne(activeWaveConfig);
-            }
-
-            yield return new WaitForSeconds(activeWaveConfig.spawnInterval);
-        }
-
-        isSpawning = false;
-        // Wait for all enemies to be destroyed
-        yield return new WaitUntil(IsWaveFinished);
-
-        ShowToast("Wave " + currentWaveNumber + " cleared.");
-
-        if (waveClearedDelay > 0f)
-        {
-            yield return new WaitForSeconds(waveClearedDelay);
-        }
-
-        isWaveRunning = false;
-        NotifyWaveFinished();
     }
 
     private void NotifyWaveFinished()
@@ -201,113 +200,307 @@ public class WaveManager : MonoBehaviour
             return Mathf.Max(1, gamePhaseManager.currentWaveIndex);
         }
 
-        return Mathf.Max(1, currentWaveIndex);
+        return Mathf.Max(1, currentRound);
     }
 
-    private WaveConfig GetWaveConfig(int waveIndex)
+    // Keeps the optional round text synchronized in both local and AI prototype scenes.
+    public void RefreshWaveCounterUI()
     {
-        if (waveConfigs == null)
+        if (waveCounterText == null)
         {
-            waveConfigs = new List<WaveConfig>();
+            return;
         }
 
-        EnsureDefaultWaveConfigs();
+        int currentWave = Mathf.Clamp(GetCurrentWaveIndex(), 1, GetMaxWaveCount());
+        waveCounterText.text = "Round: " + currentWave + "/" + GetMaxWaveCount();
+    }
 
-        foreach (WaveConfig config in waveConfigs)
+    private int GetMaxWaveCount()
+    {
+        if (aiPrototypeTurnManager != null)
         {
-            if (config != null && config.waveIndex == waveIndex)
+            return Mathf.Max(1, aiPrototypeTurnManager.maxWaves);
+        }
+
+        if (gamePhaseManager != null)
+        {
+            return Mathf.Max(1, gamePhaseManager.maxWaves);
+        }
+
+        return Mathf.Max(1, maxWaveCount);
+    }
+
+    private int GetEnemyCountForRound(int round)
+    {
+        int safeRound = Mathf.Max(1, round);
+        return Mathf.Max(1, baseEnemyCount + (safeRound - 1) * Mathf.Max(0, enemyCountIncreasePerRound));
+    }
+
+    private GameObject GetEnemyPrefabForSpawn(int spawnIndex)
+    {
+        if (activeEnemySpawnPlan != null &&
+            spawnIndex >= 0 &&
+            spawnIndex < activeEnemySpawnPlan.Count)
+        {
+            return activeEnemySpawnPlan[spawnIndex];
+        }
+
+        return null;
+    }
+
+    private List<GameObject> BuildEnemySpawnPlan(int round, int enemyCount)
+    {
+        List<GameObject> spawnPlan = new List<GameObject>();
+        List<WaveEnemyEntry> validEntries = GetValidEnemyEntries(round, false);
+        bool bossWave = IsBossRound(round);
+        WaveEnemyEntry bossEntry = bossWave ? GetBossEntry(round) : null;
+
+        if (bossWave)
+        {
+            Debug.Log("Boss wave detected for round " + round + ". Boss entry found = " + (bossEntry != null));
+        }
+
+        if (bossEntry != null)
+        {
+            spawnPlan.Add(bossEntry.enemyPrefab);
+        }
+
+        if (validEntries.Count == 0)
+        {
+            Debug.LogWarning("No valid Enemy Entries for round " + round + ". EnemySpawner fallback prefab will be used.");
+        }
+
+        while (spawnPlan.Count < enemyCount)
+        {
+            GameObject selectedPrefab = validEntries.Count > 0
+                ? GetWeightedEnemyPrefab(validEntries, round)
+                : null;
+
+            spawnPlan.Add(selectedPrefab);
+        }
+
+        ShuffleSpawnPlan(spawnPlan);
+        return spawnPlan;
+    }
+
+    private List<WaveEnemyEntry> GetValidEnemyEntries(int round, bool bossOnly)
+    {
+        List<WaveEnemyEntry> validEntries = new List<WaveEnemyEntry>();
+
+        if (enemyEntries == null)
+        {
+            return validEntries;
+        }
+
+        foreach (WaveEnemyEntry entry in enemyEntries)
+        {
+            if (IsValidEnemyEntry(entry, round, bossOnly))
             {
-                return config;
+                validEntries.Add(entry);
             }
         }
 
-        if (waveConfigs.Count == 0)
-        {
-            return GenerateFallbackConfig(waveIndex, null);
-        }
-
-        WaveConfig lastConfig = GetLastValidConfig();
-        return GenerateFallbackConfig(waveIndex, lastConfig);
+        return validEntries;
     }
 
-    private WaveConfig GetLastValidConfig()
+    private bool IsValidEnemyEntry(WaveEnemyEntry entry, int round, bool bossOnly)
     {
-        WaveConfig lastConfig = null;
-
-        foreach (WaveConfig config in waveConfigs)
+        if (entry == null || entry.enemyPrefab == null || entry.weight <= 0f)
         {
-            if (config == null)
+            return false;
+        }
+
+        int safeMinRound = Mathf.Max(1, entry.minRound);
+
+        if (round < safeMinRound)
+        {
+            return false;
+        }
+
+        if (entry.maxRound > 0 && round > entry.maxRound)
+        {
+            return false;
+        }
+
+        bool isBossEntry = entry.isBossEntry || entry.enemyType == EnemyType.Boss;
+
+        if (bossOnly)
+        {
+            return isBossEntry && IsBossRound(round);
+        }
+
+        if (isBossEntry)
+        {
+            return false;
+        }
+
+        // Round gates keep early waves readable even if advanced entries are already assigned.
+        if (round <= 3)
+        {
+            return entry.enemyType == EnemyType.Normal;
+        }
+
+        if (round <= 6)
+        {
+            return entry.enemyType == EnemyType.Normal ||
+                entry.enemyType == EnemyType.Fast;
+        }
+
+        if (round <= 9)
+        {
+            return entry.enemyType == EnemyType.Normal ||
+                entry.enemyType == EnemyType.Fast ||
+                entry.enemyType == EnemyType.Tank;
+        }
+
+        return true;
+    }
+
+    private bool IsBossRound(int round)
+    {
+        return spawnBossEveryTenRounds && round > 0 && round % 10 == 0;
+    }
+
+    private WaveEnemyEntry GetBossEntry(int round)
+    {
+        List<WaveEnemyEntry> bossEntries = GetValidEnemyEntries(round, true);
+
+        if (bossEntries.Count == 0)
+        {
+            return null;
+        }
+
+        return bossEntries[Random.Range(0, bossEntries.Count)];
+    }
+
+    private GameObject GetWeightedEnemyPrefab(List<WaveEnemyEntry> validEntries, int round)
+    {
+        float totalWeight = 0f;
+
+        foreach (WaveEnemyEntry entry in validEntries)
+        {
+            totalWeight += GetEffectiveWeight(entry, round);
+        }
+
+        if (totalWeight <= 0f)
+        {
+            return null;
+        }
+
+        float roll = Random.Range(0f, totalWeight);
+        float cursor = 0f;
+
+        foreach (WaveEnemyEntry entry in validEntries)
+        {
+            cursor += GetEffectiveWeight(entry, round);
+
+            if (roll <= cursor)
             {
+                return entry.enemyPrefab;
+            }
+        }
+
+        return validEntries[validEntries.Count - 1].enemyPrefab;
+    }
+
+    private float GetEffectiveWeight(WaveEnemyEntry entry, int round)
+    {
+        if (entry == null)
+        {
+            return 0f;
+        }
+
+        int roundsSinceUnlock = Mathf.Max(0, round - Mathf.Max(1, entry.minRound));
+        float bonus = Mathf.Max(0, entry.countBonusPerRound) * roundsSinceUnlock;
+        return Mathf.Max(0f, entry.weight + bonus);
+    }
+
+    private void LogEnemyTypeCounts(List<GameObject> spawnPlan, int round)
+    {
+        Dictionary<EnemyType, int> typeCounts = new Dictionary<EnemyType, int>();
+        int fallbackCount = 0;
+
+        foreach (GameObject prefab in spawnPlan)
+        {
+            if (prefab == null)
+            {
+                fallbackCount++;
                 continue;
             }
 
-            if (lastConfig == null || config.waveIndex > lastConfig.waveIndex)
+            EnemyType type = GetEnemyTypeFromPrefab(prefab);
+
+            if (!typeCounts.ContainsKey(type))
             {
-                lastConfig = config;
+                typeCounts[type] = 0;
             }
+
+            typeCounts[type]++;
         }
 
-        return lastConfig;
+        foreach (KeyValuePair<EnemyType, int> pair in typeCounts)
+        {
+            Debug.Log("Round " + round + " spawns " + pair.Value + " " + pair.Key + " enemies.");
+        }
+
+        if (fallbackCount > 0)
+        {
+            Debug.Log("Round " + round + " uses EnemySpawner fallback prefab for " + fallbackCount + " enemies.");
+        }
     }
 
-    private WaveConfig GenerateFallbackConfig(int waveIndex, WaveConfig baseConfig)
+    private void LogWaveSpawnPlan(List<GameObject> spawnPlan, int round)
     {
-        if (baseConfig == null)
-        {
-            int fallbackEnemyCount = enemyCount + Mathf.Max(0, waveIndex - 1) * enemyCountIncreasePerWave;
-            int fallbackEnemyHp = 3 + Mathf.Max(0, waveIndex - 1) * enemyHpIncreasePerWave;
-            return new WaveConfig(waveIndex, fallbackEnemyCount, fallbackEnemyHp, spawnInterval, 1, 2, 1, 1);
-        }
-
-        int extraWaves = Mathf.Max(0, waveIndex - baseConfig.waveIndex);
-        int scaledEnemyCount = baseConfig.enemyCount + extraWaves * enemyCountIncreasePerWave;
-        int scaledEnemyMaxHP = baseConfig.enemyMaxHP + extraWaves * enemyHpIncreasePerWave;
-        float scaledSpawnInterval = Mathf.Max(0.35f, baseConfig.spawnInterval - extraWaves * 0.03f);
-
-        return new WaveConfig(
-            waveIndex,
-            scaledEnemyCount,
-            scaledEnemyMaxHP,
-            scaledSpawnInterval,
-            baseConfig.goldReward,
-            baseConfig.killerScoreReward,
-            baseConfig.assistScoreReward,
-            baseConfig.castleDamage
-        );
-    }
-
-    private void EnsureDefaultWaveConfigs()
-    {
-        if (waveConfigs == null)
-        {
-            waveConfigs = new List<WaveConfig>();
-        }
-
-        if (waveConfigs.Count > 0)
+        if (!logWaveSpawnPlan || spawnPlan == null)
         {
             return;
         }
 
-        waveConfigs.Add(new WaveConfig(1, 12, 3, 0.8f, 1, 2, 1, 1));
-        waveConfigs.Add(new WaveConfig(2, 16, 4, 0.75f, 1, 2, 1, 1));
-        waveConfigs.Add(new WaveConfig(3, 20, 5, 0.7f, 1, 2, 1, 1));
-        waveConfigs.Add(new WaveConfig(4, 24, 6, 0.65f, 1, 2, 1, 1));
-        waveConfigs.Add(new WaveConfig(5, 30, 8, 0.6f, 1, 2, 1, 1));
+        int spawnerCount = spawners != null ? spawners.Length : 0;
+        Debug.Log("WavePlan round=" + round + " enemyCount=" + spawnPlan.Count + " spawnerCount=" + spawnerCount);
+
+        for (int i = 0; i < spawnPlan.Count; i++)
+        {
+            GameObject prefab = spawnPlan[i];
+            int spawnerIndex = spawnerCount > 0 ? i % spawnerCount : -1;
+            string prefabName = prefab != null ? prefab.name : "EnemySpawnerFallback";
+            EnemyType enemyType = GetEnemyTypeFromPrefab(prefab);
+
+            Debug.Log(
+                "WavePlan round=" + round +
+                " index=" + i +
+                " spawnerIndex=" + spawnerIndex +
+                " prefab=" + prefabName +
+                " type=" + enemyType
+            );
+        }
     }
 
-    private void ApplyActiveWaveTracking(WaveConfig config)
+    private EnemyType GetEnemyTypeFromPrefab(GameObject prefab)
     {
-        if (config == null)
+        if (prefab == null)
+        {
+            return EnemyType.Normal;
+        }
+
+        EnemyStats stats = prefab.GetComponent<EnemyStats>();
+        return stats != null ? stats.enemyType : EnemyType.Normal;
+    }
+
+    private void ShuffleSpawnPlan(List<GameObject> spawnPlan)
+    {
+        if (spawnPlan == null)
         {
             return;
         }
 
-        currentWaveIndex = config.waveIndex;
-        currentWaveNumber = config.waveIndex;
-        enemyCount = config.enemyCount;
-        enemiesPerWave = config.enemyCount;
-        waveEnemyHp = config.enemyMaxHP;
-        waveHpMultiplier = Mathf.Max(1f, waveEnemyHp / 3f);
+        for (int i = spawnPlan.Count - 1; i > 0; i--)
+        {
+            int swapIndex = Random.Range(0, i + 1);
+            GameObject temp = spawnPlan[i];
+            spawnPlan[i] = spawnPlan[swapIndex];
+            spawnPlan[swapIndex] = temp;
+        }
     }
 
     private void ShowToast(string message)

@@ -271,6 +271,9 @@ public class TileTargetingManager : MonoBehaviour
             return;
         }
 
+        int previousOwnerId = selectedTile.ownerPlayerId;
+        string previousOwnerName = playerManager != null ? playerManager.GetPlayerDisplayName(previousOwnerId) : "opponent";
+
         selectedTile.RemoveCurrentTower();
         selectedTile.ownerPlayerId = currentPlayerId;
         selectedTile.isOwned = true;
@@ -283,7 +286,7 @@ public class TileTargetingManager : MonoBehaviour
             playerManager.RefreshCurrentPlayerUI();
         }
 
-        ShowToast("Land taken over.");
+        ShowToast(currentPlayer.GetDisplayName() + " used Take Over on " + previousOwnerName + "'s land.");
         ExitTargetingMode();
     }
 
@@ -337,7 +340,9 @@ public class TileTargetingManager : MonoBehaviour
             return;
         }
 
-        ShowToast("Land frozen.");
+        PlayerResource currentPlayer = GetCurrentPlayerResource();
+        string actorName = currentPlayer != null ? currentPlayer.GetDisplayName() : "Current player";
+        ShowToast(actorName + " used Freeze Claim on a land tile.");
         ExitTargetingMode();
     }
 
@@ -434,11 +439,7 @@ public class TileTargetingManager : MonoBehaviour
 
     private bool IsValidTakeOverTarget(TowerBuildArea buildArea, int currentPlayerId)
     {
-        return buildArea != null &&
-            buildArea.areaType == BuildAreaType.Claimable &&
-            buildArea.isOwned &&
-            buildArea.ownerPlayerId != currentPlayerId &&
-            buildArea.CanUseForLandOrTowerAction();
+        return buildArea != null && buildArea.CanBeTakenOverBy(currentPlayerId);
     }
 
     private bool IsValidFreezeClaimTarget(TowerBuildArea buildArea)

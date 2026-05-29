@@ -18,6 +18,8 @@ using System.Reflection;
 
 public class BuildTowerManager : MonoBehaviour
 {
+    public static BuildTowerManager Instance { get; private set; }
+
     [Header("Player")]
     public int currentPlayerId = 0;
     public PlayerResource currentPlayerResource;
@@ -27,6 +29,23 @@ public class BuildTowerManager : MonoBehaviour
     public GameObject cannonTowerPrefab;
     public int cannonTowerCost = 6;
     public Transform towersParent;
+
+    [Header("Tower Type Prefabs")]
+    public GameObject defaultCannonPrefab;
+    public GameObject defaultArcherPrefab;
+    public GameObject defaultFrostPrefab;
+    public GameObject defaultShockPrefab;
+    public GameObject defaultSniperPrefab;
+
+    [Header("Player Tower Prefabs")]
+    public GameObject[] cannonPrefabsByPlayerId = new GameObject[4];
+    public GameObject[] archerPrefabsByPlayerId = new GameObject[4];
+    public GameObject[] frostPrefabsByPlayerId = new GameObject[4];
+    public GameObject[] shockPrefabsByPlayerId = new GameObject[4];
+    public GameObject[] sniperPrefabsByPlayerId = new GameObject[4];
+
+    [Header("Radial Menu")]
+    public RadialTowerMenu radialTowerMenu;
 
     [Header("Phase Manager")]
     public GamePhaseManager gamePhaseManager;
@@ -41,12 +60,26 @@ public class BuildTowerManager : MonoBehaviour
     public float toastDuration = 1.2f;
 
     private Coroutine toastCoroutine;
+    private TowerBuildArea lastClickedArea;
+    private int lastClickedFrame = -1;
 
     private void Awake()
     {
+        Instance = this;
+
+        if (playerManager == null)
+        {
+            playerManager = FindObjectOfType<PlayerManager>();
+        }
+
         if (targetCamera == null)
         {
             targetCamera = Camera.main;
+        }
+
+        if (radialTowerMenu != null)
+        {
+            radialTowerMenu.Initialize(this);
         }
     }
 
@@ -153,11 +186,24 @@ public class BuildTowerManager : MonoBehaviour
             return;
         }
 
-        HandleBuildAreaClick(buildArea);
+        HandleBuildAreaClicked(buildArea);
     }
 
-    private void HandleBuildAreaClick(TowerBuildArea buildArea)
+    public void HandleBuildAreaClicked(TowerBuildArea buildArea)
     {
+        if (buildArea != null && lastClickedArea == buildArea && lastClickedFrame == Time.frameCount)
+        {
+            return;
+        }
+
+        lastClickedArea = buildArea;
+        lastClickedFrame = Time.frameCount;
+
+        if (buildArea != null)
+        {
+            Debug.Log("BuildTowerManager received clicked area: " + buildArea.name);
+        }
+
         if (!TurnSourceResolver.IsAIPrototypeActive() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             ShowToast("You cannot build during enemy wave.");
@@ -182,9 +228,23 @@ public class BuildTowerManager : MonoBehaviour
             return;
         }
 
+        if (buildArea.isOccupied)
+        {
+            HandleOccupiedBuildAreaClick(buildArea);
+            return;
+        }
+
         if (buildArea.IsClaimable() && buildArea.IsUnowned())
         {
-            TryPurchaseLand(buildArea);
+            if (radialTowerMenu != null)
+            {
+                radialTowerMenu.ShowBuyLandConfirm(buildArea, buildArea.landPurchaseCost);
+            }
+            else if (TryPurchaseLand(buildArea))
+            {
+                ShowBuildMenuOrFallback(buildArea);
+            }
+
             return;
         }
 
@@ -194,10 +254,34 @@ public class BuildTowerManager : MonoBehaviour
             return;
         }
 
-        TryBuildTower(buildArea);
+        ShowBuildMenuOrFallback(buildArea);
     }
 
-    private void TryPurchaseLand(TowerBuildArea buildArea)
+    private void HandleOccupiedBuildAreaClick(TowerBuildArea buildArea)
+    {
+        int activePlayerId = GetCurrentPlayerId();
+
+        if (buildArea.towerOwnerPlayerId >= 0 && buildArea.towerOwnerPlayerId != activePlayerId)
+        {
+            ShowToast("This tower belongs to another player.");
+            return;
+        }
+
+        TowerStats stats = GetTowerStatsFromArea(buildArea);
+
+        if (stats == null)
+        {
+            ShowToast("Tower stats are missing.");
+            return;
+        }
+
+        if (radialTowerMenu != null)
+        {
+            radialTowerMenu.ShowTowerManagement(buildArea);
+        }
+    }
+
+    private bool TryPurchaseLand(TowerBuildArea buildArea)
     {
         int activePlayerId = GetCurrentPlayerId();
         PlayerResource activePlayerResource = GetCurrentPlayerResource();
@@ -205,80 +289,90 @@ public class BuildTowerManager : MonoBehaviour
         if (activePlayerResource == null)
         {
             ShowToast("Player resource is missing.");
-            return;
+            return false;
         }
 
         if (buildArea.IsFrozen())
         {
             ShowToast("This land is frozen.");
-            return;
+            return false;
         }
 
         if (!activePlayerResource.CanAfford(buildArea.landPurchaseCost))
         {
             ShowToast("Not enough gold to buy this land.");
-            return;
+            return false;
         }
 
         if (!activePlayerResource.SpendMoney(buildArea.landPurchaseCost))
         {
             ShowToast("Not enough gold to buy this land.");
-            return;
+            return false;
         }
 
         buildArea.SetOwner(activePlayerId, playerManager);
         RefreshCurrentPlayerUI();
         ShowToast("Land purchased.");
+        return true;
     }
 
     private void TryBuildTower(TowerBuildArea buildArea)
     {
-        int activePlayerId = GetCurrentPlayerId();
-        PlayerResource activePlayerResource = GetCurrentPlayerResource();
+        TryBuildTower(buildArea, TowerType.Cannon, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+    }
 
+    private bool TryBuildTower(
+        TowerBuildArea buildArea,
+        TowerType towerType,
+        int activePlayerId,
+        PlayerResource activePlayerResource,
+        bool showMessages)
+    {
         if (activePlayerResource == null)
         {
-            ShowToast("Player resource is missing.");
-            return;
+            if (showMessages) ShowToast("Player resource is missing.");
+            return false;
         }
 
         if (buildArea.IsFrozen())
         {
-            ShowToast("This land is frozen.");
-            return;
+            if (showMessages) ShowToast("This land is frozen.");
+            return false;
         }
 
-        bool usesPlayerSpecificTowerPrefab = HasPlayerSpecificTowerPrefab(activePlayerId);
-        GameObject towerPrefab = GetTowerPrefabForPlayer(activePlayerId);
+        bool usesPlayerSpecificTowerPrefab = HasPlayerSpecificTowerPrefab(towerType, activePlayerId);
+        GameObject towerPrefab = ResolveTowerPrefab(towerType, activePlayerId);
 
         if (towerPrefab == null)
         {
-            ShowToast("Tower prefab is missing.");
-            return;
+            if (showMessages) ShowToast("Tower prefab is missing.");
+            return false;
         }
 
         if (buildArea.isOccupied)
         {
-            ShowToast("A tower is already built here.");
-            return;
+            if (showMessages) ShowToast("A tower is already built here.");
+            return false;
         }
 
         if (!buildArea.CanBuildTower(activePlayerId))
         {
-            ShowToast("This land belongs to another player.");
-            return;
+            if (showMessages) ShowToast("This land belongs to another player.");
+            return false;
         }
 
-        if (!activePlayerResource.CanAfford(cannonTowerCost))
+        int towerCost = GetTowerCost(towerType, activePlayerId);
+
+        if (!activePlayerResource.CanAfford(towerCost))
         {
-            ShowToast("Not enough gold to build a tower.");
-            return;
+            if (showMessages) ShowToast("Not enough gold to build a tower.");
+            return false;
         }
 
-        if (!activePlayerResource.SpendMoney(cannonTowerCost))
+        if (!activePlayerResource.SpendMoney(towerCost))
         {
-            ShowToast("Not enough gold to build a tower.");
-            return;
+            if (showMessages) ShowToast("Not enough gold to build a tower.");
+            return false;
         }
 
         Transform spawnPoint = buildArea.towerSpawnPoint != null
@@ -289,11 +383,13 @@ public class BuildTowerManager : MonoBehaviour
             ? Instantiate(towerPrefab, spawnPoint.position, Quaternion.identity, towersParent)
             : Instantiate(towerPrefab, spawnPoint.position, Quaternion.identity);
 
+        Debug.Log("Building " + towerType + " for Player " + activePlayerId + " using prefab " + towerPrefab.name);
         Debug.Log("Tower built under parent: " + (tower.transform.parent != null ? tower.transform.parent.name : "None"));
 
         ForceTowerAlphaOpaque(tower);
         EnsureTowerCollider(tower);
 
+        TowerStats towerStats = EnsureTowerStats(tower, towerType, towerCost, activePlayerId);
         CannonTower cannonTower = tower.GetComponent<CannonTower>();
 
         if (cannonTower != null)
@@ -301,6 +397,7 @@ public class BuildTowerManager : MonoBehaviour
             cannonTower.ownerPlayerId = activePlayerId;
             cannonTower.ownerResource = activePlayerResource;
             cannonTower.ApplyOwnerVisual(playerManager, activePlayerId, !usesPlayerSpecificTowerPrefab);
+            cannonTower.SyncAttackFieldsFromStats();
         }
         else if (!usesPlayerSpecificTowerPrefab)
         {
@@ -310,8 +407,262 @@ public class BuildTowerManager : MonoBehaviour
         ForceTowerAlphaOpaque(tower);
 
         buildArea.SetTower(tower);
+        buildArea.towerOwnerPlayerId = activePlayerId;
         RefreshCurrentPlayerUI();
-        ShowToast("Tower built.");
+        if (showMessages) ShowToast(towerStats.towerType + " tower built.");
+        return true;
+    }
+
+    public void TryBuildTowerFromMenu(TowerBuildArea buildArea, TowerType towerType)
+    {
+        TryBuildTower(buildArea, towerType);
+    }
+
+    public void TryUpgradeTowerFromMenu(TowerBuildArea buildArea)
+    {
+        TryUpgradeTower(buildArea);
+    }
+
+    public void TrySellTowerFromMenu(TowerBuildArea buildArea)
+    {
+        TrySellTower(buildArea);
+    }
+
+    public bool TryBuildTower(TowerBuildArea buildArea, TowerType towerType)
+    {
+        return TryBuildTower(buildArea, towerType, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+    }
+
+    public bool ConfirmBuyLand(TowerBuildArea buildArea)
+    {
+        return TryPurchaseLand(buildArea);
+    }
+
+    public bool ConfirmBuildTower(TowerBuildArea buildArea, TowerType towerType)
+    {
+        return TryBuildTower(buildArea, towerType, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+    }
+
+    public bool ConfirmUpgradeTower(TowerBuildArea buildArea)
+    {
+        return TryUpgradeTower(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+    }
+
+    public bool ConfirmSellTower(TowerBuildArea buildArea)
+    {
+        return TrySellTower(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+    }
+
+    public bool TryUpgradeTower(TowerBuildArea buildArea)
+    {
+        return TryUpgradeTower(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+    }
+
+    public bool TrySellTower(TowerBuildArea buildArea)
+    {
+        return TrySellTower(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+    }
+
+    public bool TryBuildTowerForAI(TowerBuildArea buildArea, TowerType type, int playerId)
+    {
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        return TryBuildTower(buildArea, type, playerId, playerResource, false);
+    }
+
+    public bool TryUpgradeTowerForAI(TowerBuildArea buildArea, int playerId)
+    {
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        return TryUpgradeTower(buildArea, playerId, playerResource, false);
+    }
+
+    public bool TrySellTowerForAI(TowerBuildArea buildArea, int playerId)
+    {
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        return TrySellTower(buildArea, playerId, playerResource, false);
+    }
+
+    public int GetTowerCost(TowerType towerType)
+    {
+        return GetTowerCost(towerType, GetCurrentPlayerId());
+    }
+
+    // Used by RadialTowerMenu previews so the ghost tower matches the real build prefab.
+    public GameObject GetTowerPreviewPrefab(TowerType towerType)
+    {
+        return ResolveTowerPrefab(towerType, GetCurrentPlayerId());
+    }
+
+    public int GetTowerCost(TowerType towerType, int playerId)
+    {
+        GameObject prefab = ResolveTowerPrefab(towerType, playerId);
+        TowerStats stats = prefab != null ? prefab.GetComponent<TowerStats>() : null;
+
+        if (stats == null && prefab != null)
+        {
+            stats = prefab.GetComponentInChildren<TowerStats>();
+        }
+
+        if (stats != null && stats.baseCost > 0)
+        {
+            return stats.baseCost;
+        }
+
+        return cannonTowerCost;
+    }
+
+    private bool TryUpgradeTower(
+        TowerBuildArea buildArea,
+        int playerId,
+        PlayerResource playerResource,
+        bool showMessages)
+    {
+        TowerStats stats = GetTowerStatsFromArea(buildArea);
+
+        if (stats == null)
+        {
+            if (showMessages) ShowToast("Tower stats are missing.");
+            return false;
+        }
+
+        if (buildArea.towerOwnerPlayerId != playerId)
+        {
+            if (showMessages) ShowToast("This tower belongs to another player.");
+            return false;
+        }
+
+        if (!stats.CanUpgrade())
+        {
+            if (showMessages) ShowToast("Max Level.");
+            return false;
+        }
+
+        int upgradeCost = stats.GetUpgradeCost();
+
+        if (playerResource == null || !playerResource.SpendMoney(upgradeCost))
+        {
+            if (showMessages) ShowToast("Not enough gold to upgrade.");
+            return false;
+        }
+
+        stats.Upgrade();
+        CannonTower tower = buildArea.currentTower != null ? buildArea.currentTower.GetComponent<CannonTower>() : null;
+
+        if (tower == null && buildArea.currentTower != null)
+        {
+            tower = buildArea.currentTower.GetComponentInChildren<CannonTower>();
+        }
+
+        if (tower != null)
+        {
+            tower.SyncAttackFieldsFromStats();
+        }
+
+        RefreshCurrentPlayerUI();
+        if (showMessages) ShowToast("Tower upgraded.");
+        return true;
+    }
+
+    private bool TrySellTower(
+        TowerBuildArea buildArea,
+        int playerId,
+        PlayerResource playerResource,
+        bool showMessages)
+    {
+        TowerStats stats = GetTowerStatsFromArea(buildArea);
+
+        if (buildArea == null || buildArea.currentTower == null || stats == null)
+        {
+            if (showMessages) ShowToast("No tower to sell.");
+            return false;
+        }
+
+        if (buildArea.towerOwnerPlayerId != playerId)
+        {
+            if (showMessages) ShowToast("This tower belongs to another player.");
+            return false;
+        }
+
+        if (playerResource != null)
+        {
+            playerResource.AddMoney(stats.GetSellValue());
+        }
+
+        buildArea.RemoveCurrentTower();
+        buildArea.towerOwnerPlayerId = -1;
+        RefreshCurrentPlayerUI();
+        if (showMessages) ShowToast("Tower sold.");
+        return true;
+    }
+
+    private void ShowBuildMenuOrFallback(TowerBuildArea buildArea)
+    {
+        if (buildArea != null)
+        {
+            Debug.Log("Showing build menu for " + buildArea.name);
+        }
+
+        if (radialTowerMenu != null)
+        {
+            radialTowerMenu.ShowBuildSelection(buildArea);
+            return;
+        }
+
+        TryBuildTower(buildArea);
+    }
+
+    private Vector3 GetAreaMenuPosition(TowerBuildArea buildArea)
+    {
+        if (buildArea == null)
+        {
+            return Vector3.zero;
+        }
+
+        Transform spawnPoint = buildArea.towerSpawnPoint != null ? buildArea.towerSpawnPoint : buildArea.transform;
+        return spawnPoint.position;
+    }
+
+    private TowerStats GetTowerStatsFromArea(TowerBuildArea buildArea)
+    {
+        if (buildArea == null || buildArea.currentTower == null)
+        {
+            return null;
+        }
+
+        TowerStats stats = buildArea.currentTower.GetComponent<TowerStats>();
+        return stats != null ? stats : buildArea.currentTower.GetComponentInChildren<TowerStats>();
+    }
+
+    private TowerStats EnsureTowerStats(GameObject tower, TowerType towerType, int baseCost, int ownerPlayerId)
+    {
+        TowerStats stats = tower != null ? tower.GetComponent<TowerStats>() : null;
+
+        if (stats == null && tower != null)
+        {
+            stats = tower.GetComponentInChildren<TowerStats>();
+        }
+
+        if (stats == null && tower != null)
+        {
+            stats = tower.AddComponent<TowerStats>();
+        }
+
+        if (stats != null)
+        {
+            stats.towerType = towerType;
+            stats.ownerPlayerId = ownerPlayerId;
+
+            if (stats.baseCost <= 0)
+            {
+                stats.baseCost = baseCost;
+            }
+
+            if (stats.totalGoldInvested <= 0)
+            {
+                stats.totalGoldInvested = baseCost;
+            }
+        }
+
+        return stats;
     }
 
     private int GetCurrentPlayerId()
@@ -324,7 +675,7 @@ public class BuildTowerManager : MonoBehaviour
         return playerManager != null ? playerManager.GetCurrentPlayerResource() : currentPlayerResource;
     }
 
-    private GameObject GetTowerPrefabForPlayer(int playerId)
+    private GameObject GetPlayerManagerTowerPrefab(int playerId)
     {
         if (playerManager != null)
         {
@@ -336,12 +687,75 @@ public class BuildTowerManager : MonoBehaviour
             }
         }
 
+        return null;
+    }
+
+    private GameObject ResolveTowerPrefab(TowerType towerType, int playerId)
+    {
+        GameObject typedPlayerPrefab = GetPlayerTypedTowerPrefab(towerType, playerId);
+
+        if (typedPlayerPrefab != null)
+        {
+            return typedPlayerPrefab;
+        }
+
+        // Current art setup stores the four colored CannonTower prefabs on
+        // PlayerManager. Use that as the color fallback for every tower type.
+        GameObject visualConfigPrefab = GetPlayerManagerTowerPrefab(playerId);
+
+        if (visualConfigPrefab != null)
+        {
+            return visualConfigPrefab;
+        }
+
+        GameObject defaultPrefab = GetDefaultTowerPrefab(towerType);
+
+        if (defaultPrefab != null)
+        {
+            return defaultPrefab;
+        }
+
         return cannonTowerPrefab;
     }
 
     private bool HasPlayerSpecificTowerPrefab(int playerId)
     {
         return playerManager != null && playerManager.GetTowerPrefabForPlayer(playerId) != null;
+    }
+
+    private bool HasPlayerSpecificTowerPrefab(TowerType towerType, int playerId)
+    {
+        return GetPlayerTypedTowerPrefab(towerType, playerId) != null || HasPlayerSpecificTowerPrefab(playerId);
+    }
+
+    private GameObject GetPlayerTypedTowerPrefab(TowerType towerType, int playerId)
+    {
+        GameObject[] prefabs = GetTypedPrefabArray(towerType);
+
+        if (prefabs == null || playerId < 0 || playerId >= prefabs.Length)
+        {
+            return null;
+        }
+
+        return prefabs[playerId];
+    }
+
+    private GameObject[] GetTypedPrefabArray(TowerType towerType)
+    {
+        if (towerType == TowerType.Archer) return archerPrefabsByPlayerId;
+        if (towerType == TowerType.Frost) return frostPrefabsByPlayerId;
+        if (towerType == TowerType.Shock) return shockPrefabsByPlayerId;
+        if (towerType == TowerType.Sniper) return sniperPrefabsByPlayerId;
+        return cannonPrefabsByPlayerId;
+    }
+
+    private GameObject GetDefaultTowerPrefab(TowerType towerType)
+    {
+        if (towerType == TowerType.Archer) return defaultArcherPrefab;
+        if (towerType == TowerType.Frost) return defaultFrostPrefab;
+        if (towerType == TowerType.Shock) return defaultShockPrefab;
+        if (towerType == TowerType.Sniper) return defaultSniperPrefab;
+        return defaultCannonPrefab != null ? defaultCannonPrefab : cannonTowerPrefab;
     }
 
     private void ApplyOwnerVisualToGenericTower(GameObject tower, int playerId)

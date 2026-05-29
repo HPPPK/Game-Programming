@@ -17,7 +17,14 @@
  * Inspector setup:
  * - moveSpeed controls movement speed in world units per second.
  * - reachDistance controls how close the enemy must be to count as arrived.
- * - The enemy prefab should have a SpriteRenderer if horizontal flipping is desired.
+ * - visualRoot is the child object that contains the enemy SpriteRenderer.
+ * - visualLocalOffset moves only the sprite/animation, not the path-following
+ *   root position. Use this when a sprite's pivot makes the enemy look too high
+ *   or too low on the path.
+ * - alignSpriteCenterToPathCenter forces the visible sprite bounds center to sit
+ *   on the enemy root/path center. This is useful for sprites with bad pivots.
+ * - pathWorldOffset moves the whole enemy along the path. Use this when the
+ *   prefab should walk slightly above/below the route itself.
  *
  * Dependency notes:
  * - EnemyPathAssignmentManager chooses the path and balances targets.
@@ -36,15 +43,33 @@ public class EnemyMover : MonoBehaviour
     [Header("Castle Damage")]
     public int castleDamage = 1;
 
+    [Header("Visual Alignment")]
+    public Transform visualRoot;
+    public Vector3 visualLocalOffset = Vector3.zero;
+    public bool enforceVisualOffsetEveryFrame = true;
+    public bool alignSpriteCenterToPathCenter = false;
+    public Vector3 spriteCenterWorldOffset = Vector3.zero;
+
+    [Header("Path Alignment")]
+    public Vector3 pathWorldOffset = Vector3.zero;
+
     private List<PathNode> path;
     private int currentPathIndex = 0;
     private SpriteRenderer spriteRenderer;
+    private EnemyStats enemyStats;
+    private int appliedRound = 1;
+    private float appliedSpeedScalePerRound = 0f;
 
     private bool initialized = false;
 
     void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        enemyStats = GetComponent<EnemyStats>();
+        ResolveVisualRoot();
+        ApplyVisualOffset();
+        spriteRenderer = visualRoot != null
+            ? visualRoot.GetComponent<SpriteRenderer>()
+            : GetComponent<SpriteRenderer>();
     }
 
     public void Init(PathNode startNode)
@@ -72,11 +97,35 @@ public class EnemyMover : MonoBehaviour
             return;
         }
 
-        transform.position = startNode.transform.position;
+        transform.position = GetNodePosition(startNode);
 
         // path[0] is startNode, so movement begins at path[1].
         currentPathIndex = 1;
         initialized = true;
+
+        ApplyStatsSpeed();
+    }
+
+    public void ApplyStatsSpeed(int round, float speedScalePerRound)
+    {
+        appliedRound = Mathf.Max(1, round);
+        appliedSpeedScalePerRound = speedScalePerRound;
+        ApplyStatsSpeed();
+    }
+
+    public void CopyPathProgressFrom(EnemyMover source, Vector3 spawnPosition)
+    {
+        if (source == null || source.path == null || source.path.Count == 0)
+        {
+            return;
+        }
+
+        path = source.path;
+        currentPathIndex = Mathf.Clamp(source.currentPathIndex, 1, path.Count - 1);
+        castleDamage = source.castleDamage;
+        transform.position = spawnPosition;
+        initialized = true;
+        ApplyStatsSpeed();
     }
 
     void Update()
@@ -87,10 +136,21 @@ public class EnemyMover : MonoBehaviour
         MoveAlongPath();
     }
 
+    void LateUpdate()
+    {
+        if (!enforceVisualOffsetEveryFrame)
+        {
+            return;
+        }
+
+        ResolveVisualRoot();
+        ApplyVisualOffset();
+    }
+
     void MoveAlongPath()
     {
         PathNode targetNode = path[currentPathIndex];
-        Vector3 targetPosition = targetNode.transform.position;
+        Vector3 targetPosition = GetNodePosition(targetNode);
         Vector3 direction = targetPosition - transform.position;
 
         if (spriteRenderer != null)
@@ -123,5 +183,88 @@ public class EnemyMover : MonoBehaviour
 
             currentPathIndex++;
         }
+    }
+
+    private void ApplyStatsSpeed()
+    {
+        enemyStats = enemyStats != null ? enemyStats : GetComponent<EnemyStats>();
+
+        if (enemyStats == null)
+        {
+            return;
+        }
+
+        moveSpeed = enemyStats.GetFinalSpeed(appliedRound, appliedSpeedScalePerRound);
+    }
+
+    private void ResolveVisualRoot()
+    {
+        if (visualRoot != null)
+        {
+            return;
+        }
+
+        Transform namedVisual = transform.Find("Visual");
+
+        if (namedVisual != null)
+        {
+            visualRoot = namedVisual;
+            return;
+        }
+
+        SpriteRenderer childSpriteRenderer = GetComponentInChildren<SpriteRenderer>(true);
+
+        if (childSpriteRenderer != null && childSpriteRenderer.transform != transform)
+        {
+            visualRoot = childSpriteRenderer.transform;
+        }
+    }
+
+    private void ApplyVisualOffset()
+    {
+        if (visualRoot == null)
+        {
+            return;
+        }
+
+        visualRoot.localPosition = visualLocalOffset;
+
+        if (alignSpriteCenterToPathCenter)
+        {
+            AlignSpriteCenterToPathCenter();
+        }
+    }
+
+    private void AlignSpriteCenterToPathCenter()
+    {
+        if (visualRoot == null)
+        {
+            return;
+        }
+
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = visualRoot.GetComponent<SpriteRenderer>();
+        }
+
+        if (spriteRenderer == null)
+        {
+            return;
+        }
+
+        Vector3 desiredCenter = transform.position + spriteCenterWorldOffset;
+        Vector3 currentCenter = spriteRenderer.bounds.center;
+        Vector3 correction = desiredCenter - currentCenter;
+        visualRoot.position += correction;
+    }
+
+    private Vector3 GetNodePosition(PathNode node)
+    {
+        if (node == null)
+        {
+            return transform.position;
+        }
+
+        return node.transform.position + pathWorldOffset;
     }
 }

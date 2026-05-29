@@ -21,6 +21,7 @@ public class PlayerVisualConfig
     public GameObject castleReference;
     public Sprite towerSprite;
     public GameObject towerPrefab;
+    public Sprite shockTrapSprite;
     public Color ownedLandColor = Color.white;
     public Sprite ownedLandSprite;
 }
@@ -294,16 +295,26 @@ public class PlayerManager : MonoBehaviour
         return config != null ? config.playerColor : Color.white;
     }
 
+    // Existing color source for tower prefabs. BuildTowerManager uses this as
+    // the fallback for every tower type until type-specific colored prefabs exist.
     public GameObject GetTowerPrefabForPlayer(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
         return config != null ? config.towerPrefab : null;
     }
 
+    // Optional sprite fallback for generic tower prefabs that are not already
+    // colored per player.
     public Sprite GetTowerSpriteForPlayer(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
         return config != null ? config.towerSprite : null;
+    }
+
+    public Sprite GetShockTrapSpriteForPlayer(int playerId)
+    {
+        PlayerVisualConfig config = GetVisualConfig(playerId);
+        return config != null ? config.shockTrapSprite : null;
     }
 
     public Color GetOwnedLandColor(int playerId)

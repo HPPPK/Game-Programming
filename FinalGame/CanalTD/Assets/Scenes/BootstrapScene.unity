@@ -778,7 +778,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 35, y: 0}
+  m_AnchoredPosition: {x: 41.30005, y: 0}
   m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &282171877
@@ -1295,7 +1295,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -90, y: -45}
+  m_AnchoredPosition: {x: -81, y: -35}
   m_SizeDelta: {x: 160, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &727353777
@@ -1443,15 +1443,152 @@ MonoBehaviour:
   nextButton: {fileID: 1370460927}
   closeButton: {fileID: 1566076837}
   pages:
-  - title: Game Basics
-    body: Use gold to build towers, control gates, and survive enemy waves.
+  - title: Win the Match
+    body: 'Use your strategy cards and tower to protect your castle.
+
+
+      Defeat
+      enemies to earn score.
+
+
+      The player with the highest score wins.'
     image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
-  - title: Towers
-    body: Towers attack enemies automatically. Build them on owned land.
-    image: {fileID: 9098495111528537355, guid: decc763589a9a4272a06e7eb413c1d6b, type: 3}
-  - title: Enemies
-    body: Different enemies have different speed, health, and rewards.
-    image: {fileID: 21300000, guid: cc3533145cea3445dbf1da78c37e1d5b, type: 3}
+  - title: Round Flow
+    body: 'Players take turns first.
+
+
+      After all turns are finished,
+
+      the
+      enemy wave begins.'
+    image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
+  - title: Trade Hands
+    body: "Effect: Swap your entire hand with another player\u2019s hand.\nDuration:
+      Instant effect.\nNotes: Can be used even if one player has zero cards."
+    image: {fileID: 21300000, guid: 8c9348675a600403e937bd112c50c238, type: 3}
+  - title: Your Turn
+    body: 'Build Towers
+
+
+      Upgrade Towers
+
+
+      Play Cards
+
+
+      Control
+      Gates
+
+
+      End Turn'
+    image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
+  - title: Player HUD
+    body: 'Health
+
+      Protect your castle.
+
+
+      Gold
+
+      Build and upgrade.
+
+
+      Cards
+
+      Your
+      tactical options.
+
+
+      Score
+
+      Determines the winner.'
+    image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
+  - title: Building Areas
+    body: 'Claimable Land (Blue point)
+
+      Buy first, then build.
+
+
+      Public
+      Area (Red point)
+
+      Build immediately.'
+    image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
+  - title: Control Routes
+    body: 'Gates change enemy paths.
+
+
+      Protect yourself.
+
+
+      Redirect enemies
+      toward opponents.'
+    image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
+  - title: Build Tower
+    body: 'Choose a tower.
+
+
+      Confirm your purchase.
+
+
+      Upgrade existing
+      towers.
+
+
+      Sell towers for partial refund.'
+    image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
+  - title: Enemy Waves
+    body: 'Enemies become stronger over time.
+
+
+      Different enemy types require
+      different defenses.
+
+
+      Prepare before the next wave arrives.'
+    image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
+  - title: Mode Select
+    body: 'Local mode: play with your four friends in turn in one computer.
+
+
+      AI
+      mode: add the AI player in your game room and be ready to play.
+
+
+      Network
+      Matching: click the matching button and match the human players to play together.'
+    image: {fileID: 21300000, guid: e6a922eee25a64a578fefd5cc5ff89ce, type: 3}
+  - title: AI Player Mode
+    body: "Click \"add AI Player\" to add the AI, and adjust the ability of AI in
+      the selection box in the upper right corner\u3002\n\nAnd click ready button
+      for your own, than , start the game."
+    image: {fileID: 21300000, guid: e6a922eee25a64a578fefd5cc5ff89ce, type: 3}
+  - title: Local mode
+    body: 'Input all of your name here. (Optional)
+
+
+      Click start game button.'
+    image: {fileID: 21300000, guid: e6a922eee25a64a578fefd5cc5ff89ce, type: 3}
+  - title: Network Matching
+    body: Click "start matching" button to match the human player, and click your
+      "Ready" button before click start game.
+    image: {fileID: 21300000, guid: e6a922eee25a64a578fefd5cc5ff89ce, type: 3}
+  - title: Cards
+    body: 'Cards provide special actions.
+
+
+      Control gates.
+
+
+      Claim land.
+
+
+      Strengthen
+      towers.
+
+
+      Disrupt opponents.'
+    image: {fileID: 21300000, guid: 62bf77a78e90f40dbb3a409f1a8c1103, type: 3}
   - title: Open Gate
     body: "Effect: Change one valid gate\u2019s direction or open path state to redirect
       enemy movement.\nDuration: Stays active until another valid gate effect changes
@@ -1503,16 +1640,67 @@ MonoBehaviour:
       Instant effect.\nNotes: Cannot target yourself. Target must have at least one
       card, and your hand must not be full."
     image: {fileID: 21300000, guid: 324aabb81867f4221a0622ed2623fdb5, type: 3}
-  - title: Trade Hands
-    body: "Effect: Swap your entire hand with another player\u2019s hand.\nDuration:
-      Instant effect.\nNotes: Can be used even if one player has zero cards."
-    image: {fileID: 21300000, guid: 8c9348675a600403e937bd112c50c238, type: 3}
   - title: Disrupt
     body: "Effect: Target player gets only 1 AP on their next turn and cannot draw,
       play, or discard cards during that turn.\nDuration: Target player\u2019s next
       turn only.\nNotes: Does not block gold actions such as buying land or building
       towers."
     image: {fileID: 21300000, guid: 7b165e11e6fed41198c5cdf9ecd12d60, type: 3}
+  - title: Towers
+    body: Towers attack enemies automatically. Build them on owned land.
+    image: {fileID: 9098495111528537355, guid: decc763589a9a4272a06e7eb413c1d6b, type: 3}
+  - title: Archer Tower
+    body: "Role\n\nFast attack speed and excellent sustained damage.\n\nStrengths\n\n\u2713
+      Highest attack speed\n\n\u2713 Great against large enemy groups\n\n\u2713 Efficient
+      for its cost\n\nWeaknesses\n\n\u2717 Low damage per shot\n\n\u2717 Struggles
+      against high-health enemies"
+    image: {fileID: 21300000, guid: af760266c38374f3087d3bc347e141b9, type: 3}
+  - title: Cannon Tower
+    body: "Role\n\nBalanced tower with reliable damage and range.\n\nStrengths\n\n\u2713
+      Cheap to build\n\n\u2713 Good all-around performance\n\n\u2713 Flexible placement
+      options\n\nWeaknesses\n\n\u2717 No special effects\n\n\u2717 Outperformed by
+      specialized towers later"
+    image: {fileID: 8065531598386256854, guid: decc763589a9a4272a06e7eb413c1d6b, type: 3}
+  - title: Frost Tower
+    body: "Role\n\nSlows enemies and helps nearby towers deal more damage.\n\nStrengths\n\n\u2713
+      Slows enemy movement\n\n\u2713 Improves overall defense efficiency\n\n\u2713
+      Low construction cost\n\nWeaknesses\n\n\u2717 Low direct damage\n\n\u2717 Cannot
+      stop enemies alone"
+    image: {fileID: 21300000, guid: b944aeaefc8c940f39e732b56e02906e, type: 3}
+  - title: Shock Tower
+    body: "Role\n\nDeals splash damage to clustered enemies.\n\nStrengths\n\n\u2713
+      Hits multiple enemies\n\n\u2713 Strong against dense waves\n\n\u2713 High burst
+      potential\n\nWeaknesses\n\n\u2717 Expensive\n\n\u2717 Slow attack speed"
+    image: {fileID: -965518118754593934, guid: bdb0f320674034cddb4c7aa14f4cc00e, type: 3}
+  - title: Sniper Tower
+    body: "Role\n\nTargets dangerous enemies from a distance.\n\nStrengths\n\n\u2713
+      Longest range\n\n\u2713 Highest single-target damage\n\n\u2713 Excellent against
+      elite enemies\n\nWeaknesses\n\n\u2717 Slow attack speed\n\n\u2717 Overkill
+      against weak enemies"
+    image: {fileID: 21300000, guid: 274cfd7f7302c401ea5879d4c33e542c, type: 3}
+  - title: Enemies
+    body: Different enemies have different speed, health, and rewards.
+    image: {fileID: 21300000, guid: cc3533145cea3445dbf1da78c37e1d5b, type: 3}
+  - title: Normal Enemy
+    body: "Balanced enemy unit.\n\nHP: 6\nSpeed: Medium\n\nThreat: \u2605\u2606\u2606\u2606\u2606\n\nAppears
+      in most waves."
+    image: {fileID: 21300000, guid: cc3533145cea3445dbf1da78c37e1d5b, type: 3}
+  - title: Fast Enemy
+    body: "Moves very quickly but has low HP.\n\nHP: 6\nSpeed: Very Fast\n\nThreat:
+      \u2605\u2605\u2606\u2606\u2606\n\nCan slip past slow towers."
+    image: {fileID: 21300000, guid: cc3533145cea3445dbf1da78c37e1d5b, type: 3}
+  - title: Tank Enemy
+    body: "High HP and armor.\n\nHP: 16\nArmor: 2\n\nThreat: \u2605\u2605\u2605\u2606\u2606\n\nRequires
+      sustained damage."
+    image: {fileID: 21300000, guid: cc3533145cea3445dbf1da78c37e1d5b, type: 3}
+  - title: Splitter Enemy
+    body: "Splits into 2 enemies on death.\n\nHP: 12\nSplit Count: 2\n\nThreat: \u2605\u2605\u2605\u2605\u2606\n\nCan
+      overwhelm weak defenses."
+    image: {fileID: 21300000, guid: cc3533145cea3445dbf1da78c37e1d5b, type: 3}
+  - title: Boss Enemy
+    body: "Extremely durable enemy.\n\nHP: 60\nArmor: 4\n\nThreat: \u2605\u2605\u2605\u2605\u2605\n\nHighest-priority
+      target."
+    image: {fileID: 21300000, guid: cc3533145cea3445dbf1da78c37e1d5b, type: 3}
 --- !u!1 &833311273
 GameObject:
   m_ObjectHideFlags: 0
@@ -3677,7 +3865,18 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 'Protect your castle, earn score, and outplay the other players.
+
+
+    Each
+    player controls one castle and competes for the highest score. You can buy land,
+    build towers, upgrade defenses, control gates, and use cards to influence the
+    battlefield.
+
+
+    The game is not only about survival. You also need to manage
+    resources, redirect enemy routes, and interfere with other players at the right
+    time.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a6399fd5c718742949cddf4f6d0cf575, type: 2}
   m_sharedMaterial: {fileID: 4995261464645257919, guid: a6399fd5c718742949cddf4f6d0cf575, type: 2}
@@ -3704,8 +3903,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 28
+  m_fontSizeBase: 28
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4921,7 +5120,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -35, y: 0}
+  m_AnchoredPosition: {x: -28.7, y: 0}
   m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2082381844

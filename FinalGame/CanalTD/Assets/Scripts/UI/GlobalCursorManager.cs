@@ -25,6 +25,12 @@ public class GlobalCursorManager : MonoBehaviour
         }
 
         Instance = this;
+
+        if (transform.parent != null)
+        {
+            Debug.LogWarning("GlobalCursorManager should be placed on a root GameObject before DontDestroyOnLoad.");
+        }
+
         DontDestroyOnLoad(gameObject);
     }
 

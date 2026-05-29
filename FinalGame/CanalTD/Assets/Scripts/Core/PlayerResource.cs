@@ -56,6 +56,25 @@ public class PlayerResource : MonoBehaviour
         return !isEliminated && money >= cost;
     }
 
+    public int GetMoney()
+    {
+        return money;
+    }
+
+    public int GetScore()
+    {
+        return score;
+    }
+
+    public int GetCardCount()
+    {
+        return GetHandCardCount();
+    }
+
+    public bool IsEliminated()
+    {
+        return isEliminated;
+    }
 
     public string GetDisplayName()
     {
