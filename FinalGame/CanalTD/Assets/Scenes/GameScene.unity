@@ -52195,7 +52195,7 @@ MonoBehaviour:
   - {fileID: 820064825}
   - {fileID: 966247108}
   currentRound: 1
-  maxWaveCount: 5
+  maxWaveCount: 10
   baseEnemyCount: 16
   enemyCountIncreasePerRound: 8
   hpScalePerRound: 0.15
@@ -52236,6 +52236,7 @@ MonoBehaviour:
     weight: 1
     countBonusPerRound: 0
     isBossEntry: 1
+  logWaveSpawnPlan: 1
   spawnBossEveryTenRounds: 1
   gamePhaseManager: {fileID: 163762666}
   aiPrototypeTurnManager: {fileID: 0}

@@ -51659,7 +51659,7 @@ MonoBehaviour:
   - {fileID: 820064825}
   - {fileID: 966247108}
   currentRound: 1
-  maxWaveCount: 5
+  maxWaveCount: 10
   baseEnemyCount: 16
   enemyCountIncreasePerRound: 8
   hpScalePerRound: 0.12
@@ -51700,11 +51700,12 @@ MonoBehaviour:
     weight: 1
     countBonusPerRound: 0
     isBossEntry: 1
+  logWaveSpawnPlan: 1
   spawnBossEveryTenRounds: 1
   gamePhaseManager: {fileID: 163762666}
   aiPrototypeTurnManager: {fileID: 1332236540}
   toastMessage: {fileID: 848080698}
-  waveCounterText: {fileID: 0}
+  waveCounterText: {fileID: 284296949}
 --- !u!1 &477912826
 GameObject:
   m_ObjectHideFlags: 0
@@ -66410,7 +66411,7 @@ MonoBehaviour:
   normalGameplayUI: {fileID: 1274524793}
   currentRound: 1
   currentWaveIndex: 1
-  maxWaves: 5
+  maxWaves: 10
   resultSceneName: ResultScene
 --- !u!1 &1333207190
 GameObject:

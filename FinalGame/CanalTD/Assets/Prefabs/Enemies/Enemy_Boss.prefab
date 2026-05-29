@@ -138,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 955b9e0c4b3ba4ed084380bedaa6fbc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyType: 0
+  enemyType: 4
   baseHP: 60
   baseSpeed: 0.8
   rewardGold: 10

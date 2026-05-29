@@ -38,6 +38,21 @@ public class CastleBase : MonoBehaviour
         Debug.Log(GetDisplayName() + " base ready. HP = " + currentHP);
     }
 
+    public int GetCurrentHP()
+    {
+        return currentHP;
+    }
+
+    public int GetMaxHP()
+    {
+        return maxHP;
+    }
+
+    public int GetOwnerPlayerId()
+    {
+        return ownerResource != null ? ownerResource.playerId : ownerPlayerId;
+    }
+
     public void TakeDamage(int damage)
     {
         if (eliminationHandled || ownerResource != null && ownerResource.isEliminated)

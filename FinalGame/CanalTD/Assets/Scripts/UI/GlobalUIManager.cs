@@ -34,6 +34,12 @@ public class GlobalUIManager : MonoBehaviour
         }
 
         Instance = this;
+
+        if (transform.parent != null)
+        {
+            Debug.LogWarning("GlobalUIManager should be placed on a root GameObject before DontDestroyOnLoad.");
+        }
+
         DontDestroyOnLoad(gameObject);
     }
 

@@ -28,7 +28,7 @@ public class GamePhaseManager : MonoBehaviour
     public GamePhase currentPhase = GamePhase.PlayerPhase;
     public int currentRound = 1;
     public int currentWaveIndex = 1;
-    public int maxWaves = 5;
+    public int maxWaves = 10;
     public string resultSceneName = "ResultScene";
 
     [Header("Managers")]

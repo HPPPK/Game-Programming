@@ -238,7 +238,6 @@ GameObject:
   - component: {fileID: 1449029083322658814}
   - component: {fileID: -1970834342140172645}
   - component: {fileID: 6108619621646782294}
-  - component: {fileID: 4618855109425621680}
   m_Layer: 0
   m_Name: ArcherTower
   m_TagString: Untagged
@@ -364,32 +363,3 @@ MonoBehaviour:
   chainCount: 0
   chainRange: 1.5
   targetPriority: 3
---- !u!114 &4618855109425621680
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9178881288609307550}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 89ec50bce15f04d18b60a39daaffb6ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  towerType: 0
-  ownerPlayerId: -1
-  level: 1
-  maxLevel: 3
-  baseCost: 6
-  upgradeCostLevel2: 8
-  upgradeCostLevel3: 12
-  totalGoldInvested: 0
-  damage: 1
-  range: 3
-  attackInterval: 0.6
-  splashRadius: 0
-  slowPercent: 0.35
-  slowDuration: 1.5
-  chainCount: 0
-  chainRange: 1.5
-  targetPriority: 0

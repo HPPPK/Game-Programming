@@ -22,15 +22,16 @@ public class WaveManager : MonoBehaviour
 
     [Header("Round Scaling")]
     public int currentRound = 1;
-    public int maxWaveCount = 5;
-    public int baseEnemyCount = 12;
-    public int enemyCountIncreasePerRound = 4;
+    public int maxWaveCount = 10;
+    public int baseEnemyCount = 16;
+    public int enemyCountIncreasePerRound = 8;
     public float hpScalePerRound = 0.12f;
     public float speedScalePerRound = 0.02f;
 
     [Header("Spawn Director")]
     [Tooltip("Weighted enemy entries. EnemyStats on each prefab supplies HP, speed, rewards, armor, and special behavior.")]
     public List<WaveEnemyEntry> enemyEntries = new List<WaveEnemyEntry>();
+    public bool logWaveSpawnPlan = true;
 
     [Header("Boss Settings")]
     public bool spawnBossEveryTenRounds = true;
@@ -41,7 +42,7 @@ public class WaveManager : MonoBehaviour
     public MonoBehaviour toastMessage;
 
     [Header("Wave UI")]
-    [Tooltip("Optional UI text shown as Round: current/max, for example Round: 1/5.")]
+    [Tooltip("Optional UI text shown as Round: current/max, for example Round: 1/10.")]
     public TMP_Text waveCounterText;
 
     private bool isSpawning = false;
@@ -116,6 +117,7 @@ public class WaveManager : MonoBehaviour
         ShowToast("Wave " + activeWaveNumber + " started.");
         Debug.Log("Wave round = " + currentRound + ", enemy count = " + activeEnemyCount);
         LogEnemyTypeCounts(activeEnemySpawnPlan, currentRound);
+        LogWaveSpawnPlan(activeEnemySpawnPlan, currentRound);
 
         if (EnemyPathAssignmentManager.Instance != null)
         {
@@ -444,6 +446,33 @@ public class WaveManager : MonoBehaviour
         if (fallbackCount > 0)
         {
             Debug.Log("Round " + round + " uses EnemySpawner fallback prefab for " + fallbackCount + " enemies.");
+        }
+    }
+
+    private void LogWaveSpawnPlan(List<GameObject> spawnPlan, int round)
+    {
+        if (!logWaveSpawnPlan || spawnPlan == null)
+        {
+            return;
+        }
+
+        int spawnerCount = spawners != null ? spawners.Length : 0;
+        Debug.Log("WavePlan round=" + round + " enemyCount=" + spawnPlan.Count + " spawnerCount=" + spawnerCount);
+
+        for (int i = 0; i < spawnPlan.Count; i++)
+        {
+            GameObject prefab = spawnPlan[i];
+            int spawnerIndex = spawnerCount > 0 ? i % spawnerCount : -1;
+            string prefabName = prefab != null ? prefab.name : "EnemySpawnerFallback";
+            EnemyType enemyType = GetEnemyTypeFromPrefab(prefab);
+
+            Debug.Log(
+                "WavePlan round=" + round +
+                " index=" + i +
+                " spawnerIndex=" + spawnerIndex +
+                " prefab=" + prefabName +
+                " type=" + enemyType
+            );
         }
     }
 

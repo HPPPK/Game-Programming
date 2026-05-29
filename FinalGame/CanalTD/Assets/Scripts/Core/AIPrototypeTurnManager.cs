@@ -59,7 +59,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     [Header("Wave")]
     public int currentRound = 1;
     public int currentWaveIndex = 1;
-    public int maxWaves = 5;
+    public int maxWaves = 10;
     public string resultSceneName = "ResultScene";
 
     private bool isHumanTurnWaiting = false;
@@ -677,7 +677,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     // Applies supported AI card effects directly, without using visual targeting UI.
     private bool TryResolveAICard(PlayerResource aiPlayer, GameObject cardPrefab, AIDifficulty difficulty)
     {
-        if (turnManager == null || !turnManager.TryConsumePlayCard())
+        if (turnManager == null || !turnManager.CanPlayCard())
         {
             return false;
         }
@@ -695,7 +695,12 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         else if (cardName.Contains("stealcard")) success = TryAIStealCard(aiPlayer);
         else if (cardName.Contains("tradehands")) success = TryAITradeHands(aiPlayer);
 
-        return success;
+        if (!success)
+        {
+            return false;
+        }
+
+        return turnManager.TryConsumePlayCard();
     }
 
     // Power Boost targets the best owned tower and boosts it for the next wave.
