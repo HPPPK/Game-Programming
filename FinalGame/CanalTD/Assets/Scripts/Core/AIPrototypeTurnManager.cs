@@ -700,7 +700,12 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        return turnManager.TryConsumePlayCard();
+        bool consumed = turnManager.TryConsumePlayCard();
+        if (consumed)
+        {
+            AudioManager.Instance?.PlayCardPlay();
+        }
+        return consumed;
     }
 
     // Power Boost targets the best owned tower and boosts it for the next wave.

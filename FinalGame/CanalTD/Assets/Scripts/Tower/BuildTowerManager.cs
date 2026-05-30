@@ -410,6 +410,7 @@ public class BuildTowerManager : MonoBehaviour
         buildArea.towerOwnerPlayerId = activePlayerId;
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast(towerStats.towerType + " tower built.");
+        AudioManager.Instance?.PlayBuild();
         return true;
     }
 

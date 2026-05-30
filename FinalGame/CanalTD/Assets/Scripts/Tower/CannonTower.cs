@@ -188,6 +188,8 @@ public class CannonTower : MonoBehaviour
             return;
         }
 
+        AudioManager.Instance?.PlayTowerShoot();
+
         foreach (EnemyHealth enemy in GetEnemiesNear(target.transform.position, radius))
         {
             enemy.TakeDamage(Mathf.RoundToInt(GetCurrentDamage()), ownerResource);
@@ -199,6 +201,8 @@ public class CannonTower : MonoBehaviour
         int maxTargets = towerStats != null ? Mathf.Max(1, towerStats.chainCount + 1) : 1;
         float radius = towerStats != null ? towerStats.chainRange : attackRange;
         int appliedCount = 0;
+
+        AudioManager.Instance?.PlayTowerShoot();
 
         foreach (EnemyHealth enemy in GetEnemiesNear(target.transform.position, radius))
         {
@@ -256,6 +260,7 @@ public class CannonTower : MonoBehaviour
             if (target != null)
             {
                 target.TakeDamage(Mathf.RoundToInt(GetCurrentDamage()), ownerResource);
+                AudioManager.Instance?.PlayTowerShoot();
             }
 
             return;
@@ -268,6 +273,8 @@ public class CannonTower : MonoBehaviour
             spawnPosition,
             Quaternion.identity
         );
+
+        AudioManager.Instance?.PlayTowerShoot();
 
         TowerProjectile projectile = projectileObject.GetComponent<TowerProjectile>();
 

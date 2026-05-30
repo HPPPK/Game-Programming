@@ -880,6 +880,8 @@ public class CardDrawManager : MonoBehaviour
             yield break;
         }
 
+        AudioManager.Instance?.PlayCardPlay();
+
         selectedCard = null;
         RemoveCardFromCurrentHand(card.sourcePrefab);
         Destroy(card.gameObject);
@@ -904,6 +906,8 @@ public class CardDrawManager : MonoBehaviour
             return;
         }
 
+        AudioManager.Instance?.PlayCardPlay();
+
         RemoveCardFromCurrentHand(pendingPlayedCard.sourcePrefab);
         Destroy(pendingPlayedCard.gameObject);
         pendingPlayedCard = null;
@@ -925,6 +929,8 @@ public class CardDrawManager : MonoBehaviour
         {
             return false;
         }
+
+        AudioManager.Instance?.PlayCardPlay();
 
         RemoveCardFromCurrentHand(pendingPlayedCard.sourcePrefab);
         Destroy(pendingPlayedCard.gameObject);

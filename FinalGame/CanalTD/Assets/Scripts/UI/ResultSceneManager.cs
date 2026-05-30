@@ -31,6 +31,7 @@ public class ResultSceneManager : MonoBehaviour
     private void Start()
     {
         BuildResultList();
+        AudioManager.Instance?.PlayVictory();
 
         if (restartButton != null)
         {
