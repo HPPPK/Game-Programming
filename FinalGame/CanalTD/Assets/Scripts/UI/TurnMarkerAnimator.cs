@@ -17,11 +17,18 @@ public class TurnMarkerAnimator : MonoBehaviour
     private Vector3 originalPosition;
     private Vector3 originalScale;
     private bool isAnimating = false;
+    private SpriteRenderer spriteRenderer;
+    private Color originalColor;
 
     private void Awake()
     {
         originalPosition = transform.localPosition;
         originalScale = transform.localScale;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            originalColor = spriteRenderer.color;
+        }
         Debug.Log($"originalPosition: {originalPosition}");
         Debug.Log($"originalScale: {originalScale}");
     }
@@ -49,5 +56,21 @@ public class TurnMarkerAnimator : MonoBehaviour
     {
         isAnimating = false;
         gameObject.SetActive(false);
+    }
+
+    public void SetMarkerColor(Color color)
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = color;
+        }
+    }
+
+    public void ResetMarkerColor()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = originalColor;
+        }
     }
 }

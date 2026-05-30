@@ -53,13 +53,56 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         UpdateRoundText();
     }
 
-    private void HideAllMarkers()
+    public void HideAllMarkers()
     {
         if (turnMarkers == null) return;
         foreach (TurnMarkerAnimator marker in turnMarkers)
         {
             if (marker != null) marker.Hide();
         }
+    }
+
+    public void ShowActionMarkers(int[] targetPlayerIds, Color actionColor)
+    {
+        if (turnMarkers == null) return;
+
+        for (int i = 0; i < turnMarkers.Length; i++)
+        {
+            TurnMarkerAnimator marker = turnMarkers[i];
+            if (marker == null) continue;
+
+            int markerPlayerId = (turnMarkerPlayerIds != null && i < turnMarkerPlayerIds.Length)
+                ? turnMarkerPlayerIds[i]
+                : i;
+
+            bool isTarget = System.Array.Exists(targetPlayerIds, element => element == markerPlayerId);
+
+            if (isTarget)
+            {
+                marker.SetMarkerColor(actionColor);
+                marker.Show();
+            }
+            else
+            {
+                marker.Hide();
+            }
+        }
+    }
+
+    public void ResetMarkersToTurnIndicator()
+    {
+        if (turnMarkers == null) return;
+
+        for (int i = 0; i < turnMarkers.Length; i++)
+        {
+            TurnMarkerAnimator marker = turnMarkers[i];
+            if (marker != null)
+            {
+                marker.ResetMarkerColor();
+            }
+        }
+
+        UpdateCurrentTurnIndicator(currentPlayerId);
     }
 
     private void UpdateTurnMarkers(int playerId)
@@ -70,7 +113,7 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"=== Updating Turn Markers for Player {playerId} ===");
+        Debug.Log($"=== Updating Turn Markers for Plagyer {playerId} ===");
 
         for (int i = 0; i < turnMarkers.Length; i++)
         {
