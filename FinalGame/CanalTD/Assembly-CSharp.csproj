@@ -118,6 +118,7 @@
     <Compile Include="Assets/Scripts/Path/PathfinderTester.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemySlowEffect.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerManager.cs" />
+    <Compile Include="Assets/Scripts/UI/CurrentTurnIndicatorManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerBuildArea.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerProjectile.cs" />
     <Compile Include="Assets/Scripts/Core/ITurnSource.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Assets/Scripts/Core/GamePhaseManager.cs" />
     <Compile Include="Assets/Scripts/UI/GlobalUIManager.cs" />
     <Compile Include="Assets/Scripts/Card/GateTargetingManager.cs" />
+    <Compile Include="Assets/Scripts/UI/TurnMarkerAnimator.cs" />
     <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
     <Compile Include="Assets/Scripts/UI/HomeSceneManager.cs" />
     <Compile Include="Assets/Scripts/UI/PresentTheNumberUI.cs" />

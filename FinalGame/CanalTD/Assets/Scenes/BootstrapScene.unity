@@ -1216,8 +1216,8 @@ MonoBehaviour:
   victoryPitch: 1
   cardPlayPitch: 1
   uiClickVolume: 1
-  towerShootVolume: 0.7
-  enemyDeathVolume: 0.7
+  towerShootVolume: 0.5
+  enemyDeathVolume: 0.5
   buildVolume: 1
   victoryVolume: 1
   cardPlayVolume: 1

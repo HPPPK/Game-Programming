@@ -200,7 +200,7 @@ public class ModeSelectSceneManager : MonoBehaviour
             int aiNumber = CountAIPlayers() + 1;
             roomPlayers[playerId] = new PlayerSetupData(
                 playerId,
-                "AI Player " + aiNumber,
+                "Player " + aiNumber,
                 true,
                 globalAIDifficulty
             );
@@ -571,7 +571,7 @@ public class ModeSelectSceneManager : MonoBehaviour
 
             roomPlayers[playerId] = new PlayerSetupData(
                 playerId,
-                "AI Player " + aiNumber,
+                "Player " + aiNumber,
                 true,
                 globalAIDifficulty
             );

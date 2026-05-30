@@ -106,6 +106,16 @@ public class GamePhaseManager : MonoBehaviour
             ShowToast("Player " + activePlayerId + " turn started.");
         }
 
+        UpdateTurnIndicator();
+    }
+
+    private void UpdateTurnIndicator()
+    {
+        if (CurrentTurnIndicatorManager.Instance != null)
+        {
+            int currentPlayerId = turnManager != null ? turnManager.currentPlayerId : 0;
+            CurrentTurnIndicatorManager.Instance.UpdateCurrentTurnIndicator(currentPlayerId);
+        }
     }
 
     public void StartWavePhase()

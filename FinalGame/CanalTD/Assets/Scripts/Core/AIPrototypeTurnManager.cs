@@ -86,6 +86,15 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         get { return isHumanTurnWaiting && !isWaveRunning && IsCurrentPlayerHuman; }
     }
 
+    private void UpdateTurnIndicator(int playerId)
+    {
+        if (CurrentTurnIndicatorManager.Instance != null)
+        {
+            CurrentTurnIndicatorManager.Instance.UpdateCurrentTurnIndicator(playerId);
+        }
+        
+    }
+
     private void OnEnable()
     {
         ActiveInstance = this;
@@ -460,6 +469,8 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             player.ConsumeDisruptForThisTurn();
             ShowToast(player.GetDisplayName() + " is disrupted this turn.");
         }
+
+        UpdateTurnIndicator(player.playerId);
 
         if (player.playerType == PlayerType.AI)
         {

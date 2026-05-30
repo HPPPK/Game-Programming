@@ -393,13 +393,7 @@ public class CannonTower : MonoBehaviour
 
     private void SetBoostVisual(bool active)
     {
-        if (towerSpriteRenderer != null)
-        {
-            Color color = active ? boostActiveTint : normalTowerColor;
-            color.a = 1f;
-            towerSpriteRenderer.color = color;
-        }
-
+        // 只控制 boost icon 的显示/隐藏，不再改变塔的颜色
         if (boostIcon != null)
         {
             boostIcon.SetActive(active);
