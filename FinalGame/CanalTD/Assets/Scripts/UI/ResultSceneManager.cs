@@ -2,7 +2,7 @@
  * File: ResultSceneManager.cs
  *
  * Purpose:
- * Builds the ResultScene ranking UI from GameResultData and handles New Game /
+ * Builds the ResultScene ranking UI from GameResultData and handles Play Again /
  * Back To Home button actions.
  */
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ public class ResultSceneManager : MonoBehaviour
     public Button quitButton;
 
     [Header("Scenes")]
-    public string gameSceneName = "GameScene";
+    public string modeSelectSceneName = "ModeSelectScene";
     public string homeSceneName = "HomeScene";
 
     private void Start()
@@ -35,7 +35,7 @@ public class ResultSceneManager : MonoBehaviour
 
         if (restartButton != null)
         {
-            restartButton.onClick.AddListener(NewGame);
+            restartButton.onClick.AddListener(PlayAgain);
         }
 
         if (quitButton != null)
@@ -78,11 +78,17 @@ public class ResultSceneManager : MonoBehaviour
         }
     }
 
-    // Starts a fresh game by clearing old result data and loading GameScene.
-    public void NewGame()
+    // Returns to ModeSelectScene so the player can configure and start another match.
+    public void PlayAgain()
     {
         GameResultData.Clear();
-        SceneManager.LoadScene(gameSceneName);
+        SceneManager.LoadScene(modeSelectSceneName);
+    }
+
+    // Kept for older button references; it now behaves the same as PlayAgain.
+    public void NewGame()
+    {
+        PlayAgain();
     }
 
     // Returns from the result screen to HomeScene.
@@ -91,10 +97,10 @@ public class ResultSceneManager : MonoBehaviour
         SceneManager.LoadScene(homeSceneName);
     }
 
-    // Kept for older button references; it now behaves the same as NewGame.
+    // Kept for older button references; it now behaves the same as PlayAgain.
     public void RestartGame()
     {
-        NewGame();
+        PlayAgain();
     }
 
     // Kept for older button references; it now returns to HomeScene.

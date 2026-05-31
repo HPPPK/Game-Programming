@@ -240,7 +240,7 @@ public class BuildTowerManager : MonoBehaviour
             {
                 radialTowerMenu.ShowBuyLandConfirm(buildArea, buildArea.landPurchaseCost);
             }
-            else if (TryPurchaseLand(buildArea))
+            else if (TryBuyLand(buildArea))
             {
                 ShowBuildMenuOrFallback(buildArea);
             }
@@ -281,39 +281,76 @@ public class BuildTowerManager : MonoBehaviour
         }
     }
 
-    private bool TryPurchaseLand(TowerBuildArea buildArea)
+    public void HideBuildInteractionUI()
     {
-        int activePlayerId = GetCurrentPlayerId();
-        PlayerResource activePlayerResource = GetCurrentPlayerResource();
-
-        if (activePlayerResource == null)
+        if (radialTowerMenu != null)
         {
-            ShowToast("Player resource is missing.");
+            radialTowerMenu.Hide();
+        }
+    }
+
+    public bool TryBuyLand(TowerBuildArea buildArea)
+    {
+        return TryBuyLandForPlayer(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+    }
+
+    public bool TryBuyLandForPlayer(TowerBuildArea buildArea, int playerId)
+    {
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        return TryBuyLandForPlayer(buildArea, playerId, playerResource, false);
+    }
+
+    private bool TryBuyLandForPlayer(
+        TowerBuildArea buildArea,
+        int playerId,
+        PlayerResource playerResource,
+        bool showMessages)
+    {
+        if (buildArea == null)
+        {
+            if (showMessages) ShowToast("Land tile is missing.");
+            return false;
+        }
+
+        if (playerResource == null)
+        {
+            if (showMessages) ShowToast("Player resource is missing.");
             return false;
         }
 
         if (buildArea.IsFrozen())
         {
-            ShowToast("This land is frozen.");
+            if (showMessages) ShowToast("This land is frozen.");
             return false;
         }
 
-        if (!activePlayerResource.CanAfford(buildArea.landPurchaseCost))
+        if (!buildArea.IsClaimable() || !buildArea.IsUnowned())
         {
-            ShowToast("Not enough gold to buy this land.");
+            if (showMessages) ShowToast("This land cannot be purchased.");
             return false;
         }
 
-        if (!activePlayerResource.SpendMoney(buildArea.landPurchaseCost))
+        if (!playerResource.CanAfford(buildArea.landPurchaseCost))
         {
-            ShowToast("Not enough gold to buy this land.");
+            if (showMessages) ShowToast("Not enough gold to buy this land.");
             return false;
         }
 
-        buildArea.SetOwner(activePlayerId, playerManager);
+        if (!playerResource.SpendMoney(buildArea.landPurchaseCost))
+        {
+            if (showMessages) ShowToast("Not enough gold to buy this land.");
+            return false;
+        }
+
+        buildArea.SetOwner(playerId, playerManager);
         RefreshCurrentPlayerUI();
-        ShowToast("Land purchased.");
+        if (showMessages) ShowToast("Land purchased.");
         return true;
+    }
+
+    private bool TryPurchaseLand(TowerBuildArea buildArea)
+    {
+        return TryBuyLand(buildArea);
     }
 
     private void TryBuildTower(TowerBuildArea buildArea)
@@ -431,55 +468,85 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TryBuildTower(TowerBuildArea buildArea, TowerType towerType)
     {
-        return TryBuildTower(buildArea, towerType, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+        return TryBuildTowerForPlayer(buildArea, towerType, GetCurrentPlayerId(), true);
+    }
+
+    public bool TryBuildTowerForPlayer(TowerBuildArea buildArea, TowerType towerType, int playerId)
+    {
+        return TryBuildTowerForPlayer(buildArea, towerType, playerId, false);
+    }
+
+    public bool TryBuildTowerForPlayer(TowerBuildArea buildArea, TowerType towerType, int playerId, bool showMessages)
+    {
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        return TryBuildTower(buildArea, towerType, playerId, playerResource, showMessages);
     }
 
     public bool ConfirmBuyLand(TowerBuildArea buildArea)
     {
-        return TryPurchaseLand(buildArea);
+        return TryBuyLand(buildArea);
     }
 
     public bool ConfirmBuildTower(TowerBuildArea buildArea, TowerType towerType)
     {
-        return TryBuildTower(buildArea, towerType, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+        return TryBuildTower(buildArea, towerType);
     }
 
     public bool ConfirmUpgradeTower(TowerBuildArea buildArea)
     {
-        return TryUpgradeTower(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+        return TryUpgradeTower(buildArea);
     }
 
     public bool ConfirmSellTower(TowerBuildArea buildArea)
     {
-        return TrySellTower(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+        return TrySellTower(buildArea);
     }
 
     public bool TryUpgradeTower(TowerBuildArea buildArea)
     {
-        return TryUpgradeTower(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+        return TryUpgradeTowerForPlayer(buildArea, GetCurrentPlayerId(), true);
+    }
+
+    public bool TryUpgradeTowerForPlayer(TowerBuildArea buildArea, int playerId)
+    {
+        return TryUpgradeTowerForPlayer(buildArea, playerId, false);
+    }
+
+    public bool TryUpgradeTowerForPlayer(TowerBuildArea buildArea, int playerId, bool showMessages)
+    {
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        return TryUpgradeTower(buildArea, playerId, playerResource, showMessages);
     }
 
     public bool TrySellTower(TowerBuildArea buildArea)
     {
-        return TrySellTower(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
+        return TrySellTowerForPlayer(buildArea, GetCurrentPlayerId(), true);
+    }
+
+    public bool TrySellTowerForPlayer(TowerBuildArea buildArea, int playerId)
+    {
+        return TrySellTowerForPlayer(buildArea, playerId, false);
+    }
+
+    public bool TrySellTowerForPlayer(TowerBuildArea buildArea, int playerId, bool showMessages)
+    {
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        return TrySellTower(buildArea, playerId, playerResource, showMessages);
     }
 
     public bool TryBuildTowerForAI(TowerBuildArea buildArea, TowerType type, int playerId)
     {
-        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
-        return TryBuildTower(buildArea, type, playerId, playerResource, false);
+        return TryBuildTowerForPlayer(buildArea, type, playerId, false);
     }
 
     public bool TryUpgradeTowerForAI(TowerBuildArea buildArea, int playerId)
     {
-        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
-        return TryUpgradeTower(buildArea, playerId, playerResource, false);
+        return TryUpgradeTowerForPlayer(buildArea, playerId, false);
     }
 
     public bool TrySellTowerForAI(TowerBuildArea buildArea, int playerId)
     {
-        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
-        return TrySellTower(buildArea, playerId, playerResource, false);
+        return TrySellTowerForPlayer(buildArea, playerId, false);
     }
 
     public int GetTowerCost(TowerType towerType)

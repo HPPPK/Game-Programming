@@ -865,7 +865,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1088436774}
         m_TargetAssemblyTypeName: ResultSceneManager, Assembly-CSharp
-        m_MethodName: RestartGame
+        m_MethodName: NewGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1454,7 +1454,7 @@ MonoBehaviour:
   winnerText: {fileID: 0}
   restartButton: {fileID: 463152385}
   quitButton: {fileID: 859334104}
-  gameSceneName: GameScene
+  modeSelectSceneName: ModeSelectScene
   homeSceneName: HomeScene
 --- !u!4 &1088436775
 Transform:

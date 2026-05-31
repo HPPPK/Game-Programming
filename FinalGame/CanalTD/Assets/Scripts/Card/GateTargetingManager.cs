@@ -322,28 +322,9 @@ public class GateTargetingManager : MonoBehaviour
             return;
         }
 
-        if (manager != null && !manager.CanPlayCard())
-        {
-            manager.TryConsumePlayCard();
-            return;
-        }
-
-        if (manager != null && !manager.CanChangeGate())
-        {
-            manager.TryConsumeGateChange();
-            return;
-        }
-
-        bool actionSucceeded = false;
-
-        if (currentActionType == GateActionType.OpenGate)
-        {
-            actionSucceeded = selectedGate.OpenGate();
-        }
-        else if (currentActionType == GateActionType.LockGate)
-        {
-            actionSucceeded = selectedGate.LockGate();
-        }
+        bool actionSucceeded = currentActionType == GateActionType.OpenGate
+            ? TryOpenGateForPlayer(GetCurrentPlayerId(), selectedGate, true, true)
+            : TryLockGateForPlayer(GetCurrentPlayerId(), selectedGate, true, true);
 
         if (!actionSucceeded)
         {
@@ -351,20 +332,29 @@ public class GateTargetingManager : MonoBehaviour
             return;
         }
 
-        if (manager != null && !manager.TryConsumeGateChange())
-        {
-            return;
-        }
-
-        CardDrawManager cardManager = FindObjectOfType<CardDrawManager>();
-        if (cardManager != null)
-        {
-            cardManager.ConfirmPendingCard();
-        }
-
-        string actorName = playerManager != null ? playerManager.GetPlayerDisplayName(currentPlayerId) : "Current player";
+        string actorName = playerManager != null ? playerManager.GetPlayerDisplayName(GetCurrentPlayerId()) : "Current player";
         string cardName = currentActionType == GateActionType.LockGate ? "Lock Gate" : "Open Gate";
         ShowToast(actorName + " used " + cardName + ".");
+    }
+
+    public bool TryOpenGateForPlayer(int playerId, GateFrameAnimation gate)
+    {
+        return TryOpenGateForPlayer(playerId, gate, true, false);
+    }
+
+    public bool TryLockGateForPlayer(int playerId, GateFrameAnimation gate)
+    {
+        return TryLockGateForPlayer(playerId, gate, true, false);
+    }
+
+    public bool TryOpenGateForPlayer(int playerId, GateFrameAnimation gate, bool consumeTurnResources, bool consumePendingCard)
+    {
+        return TryExecuteGateActionForPlayer(playerId, gate, GateActionType.OpenGate, consumeTurnResources, consumePendingCard);
+    }
+
+    public bool TryLockGateForPlayer(int playerId, GateFrameAnimation gate, bool consumeTurnResources, bool consumePendingCard)
+    {
+        return TryExecuteGateActionForPlayer(playerId, gate, GateActionType.LockGate, consumeTurnResources, consumePendingCard);
     }
 
     public void CancelSelection()
@@ -444,6 +434,11 @@ public class GateTargetingManager : MonoBehaviour
     {
         EnterHammerTool();
         ResolveHammerButton();
+
+        if (BuildTowerManager.Instance != null)
+        {
+            BuildTowerManager.Instance.HideBuildInteractionUI();
+        }
 
         if (normalGameplayUI != null)
         {
@@ -686,6 +681,108 @@ public class GateTargetingManager : MonoBehaviour
         return false;
     }
 
+    private bool TryExecuteGateActionForPlayer(
+        int playerId,
+        GateFrameAnimation gate,
+        GateActionType actionType,
+        bool consumeTurnResources,
+        bool consumePendingCard)
+    {
+        if (actionType == GateActionType.None || gate == null)
+        {
+            return false;
+        }
+
+        if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        {
+            ShowToast("You cannot control gates during enemy wave.");
+            return false;
+        }
+
+        if (gateOwnershipManager == null)
+        {
+            ShowToast("Gate ownership manager is missing.");
+            return false;
+        }
+
+        if (!gateOwnershipManager.CanPlayerControlGate(playerId, gate.gameObject))
+        {
+            ShowGateBlockToast(gateOwnershipManager.GetGateBlockReason(playerId, gate.gameObject));
+            return false;
+        }
+
+        if (actionType == GateActionType.OpenGate)
+        {
+            if (!gate.CanOpen())
+            {
+                ShowToast("Invalid target");
+                return false;
+            }
+        }
+        else
+        {
+            if (!CanLockGateWithoutRemovingAllEnemyPaths(gate))
+            {
+                ShowToast("This gate would block all enemy paths.");
+                return false;
+            }
+
+            if (gate.IsLocked() || gate.IsPlaying() || gate.IsBlocking())
+            {
+                ShowToast("Invalid target");
+                return false;
+            }
+        }
+
+        TurnManager manager = GetTurnManager();
+
+        if (consumeTurnResources && manager != null)
+        {
+            if (!manager.CanPlayCard())
+            {
+                manager.TryConsumePlayCard();
+                return false;
+            }
+
+            if (!manager.CanChangeGate())
+            {
+                manager.TryConsumeGateChange();
+                return false;
+            }
+        }
+
+        bool actionSucceeded = actionType == GateActionType.OpenGate
+            ? gate.OpenGate()
+            : gate.LockGate();
+
+        if (!actionSucceeded)
+        {
+            return false;
+        }
+
+        if (consumeTurnResources && manager != null && !manager.TryConsumePlayCard())
+        {
+            return false;
+        }
+
+        if (consumeTurnResources && manager != null && !manager.TryConsumeGateChange())
+        {
+            return false;
+        }
+
+        if (consumePendingCard)
+        {
+            CardDrawManager cardManager = GetCardDrawManager();
+
+            if (cardManager != null && !cardManager.ConfirmCardConsumeAfterSuccessfulResolution(false))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private TurnManager GetTurnManager()
     {
         return turnManager != null ? turnManager : TurnManager.Instance;
@@ -856,7 +953,7 @@ public class GateTargetingManager : MonoBehaviour
 
     public void ShowToast(string message)
     {
-        CardDrawManager cardManager = FindObjectOfType<CardDrawManager>();
+        CardDrawManager cardManager = GetCardDrawManager();
 
         if (cardManager != null)
         {
@@ -865,5 +962,10 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         Debug.Log(message);
+    }
+
+    private CardDrawManager GetCardDrawManager()
+    {
+        return FindObjectOfType<CardDrawManager>();
     }
 }

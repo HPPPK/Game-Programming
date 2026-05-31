@@ -72,6 +72,7 @@
     <Compile Include="Assets/Scripts/Path/GatePathBlocker.cs" />
     <Compile Include="Assets/Scripts/Core/AIPrototypeTurnManager.cs" />
     <Compile Include="Assets/Scripts/UI/ResultSceneManager.cs" />
+    <Compile Include="Assets/Scripts/UI/UIRaycastDebugger.cs" />
     <Compile Include="Assets/Scripts/UI/APDisplayUI.cs" />
     <Compile Include="Assets/Scripts/UI/GlobalCursorManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyType.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />
     <Compile Include="Assets/Scripts/Tower/BuildTowerManager.cs" />
     <Compile Include="Assets/Scripts/UI/InstructionBookController.cs" />
+    <Compile Include="Assets/Scripts/Core/PlayerExitManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TargetPriority.cs" />
     <Compile Include="Assets/Scripts/UI/UIButtonSoundBinder.cs" />
     <Compile Include="Assets/Scripts/UI/CursorVisualFollower.cs" />

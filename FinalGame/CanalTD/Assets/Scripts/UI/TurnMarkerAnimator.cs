@@ -29,8 +29,6 @@ public class TurnMarkerAnimator : MonoBehaviour
         {
             originalColor = spriteRenderer.color;
         }
-        Debug.Log($"originalPosition: {originalPosition}");
-        Debug.Log($"originalScale: {originalScale}");
     }
 
     private void Update()

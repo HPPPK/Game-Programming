@@ -135,6 +135,44 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         EndHumanTurn();
     }
 
+    // Lets external systems remove a player slot mid-match without rewriting the prototype turn loop.
+    public void HandlePlayerExit(int playerId)
+    {
+        Debug.Log("AIPrototypeTurnManager handling player exit for player " + playerId + ".");
+
+        bool exitingCurrentPlayer = CurrentPlayerId == playerId;
+        BuildActivePlayerList();
+
+        if (activePlayers.Count == 0)
+        {
+            Debug.Log("AIPrototypeTurnManager has no active players after exit cleanup.");
+            isHumanTurnWaiting = false;
+            SetHumanControlsEnabled(false);
+            return;
+        }
+
+        if (!exitingCurrentPlayer)
+        {
+            if (currentActivePlayerIndex >= activePlayers.Count)
+            {
+                currentActivePlayerIndex = Mathf.Clamp(currentActivePlayerIndex, 0, activePlayers.Count - 1);
+            }
+
+            return;
+        }
+
+        currentActivePlayerIndex = Mathf.Clamp(currentActivePlayerIndex, 0, activePlayers.Count - 1);
+        StopAllCoroutines();
+        isHumanTurnWaiting = false;
+        StartCurrentPlayerTurn();
+    }
+
+    public bool AreAllPlayersInactiveOrEliminated()
+    {
+        BuildActivePlayerList();
+        return activePlayers.Count == 0;
+    }
+
     // Scene-safe end-turn method for UI buttons in GameScene_AIPrototype.
     public void EndHumanTurn()
     {
@@ -711,17 +749,20 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        bool consumed = turnManager.TryConsumePlayCard();
-        if (consumed)
-        {
-            AudioManager.Instance?.PlayCardPlay();
-        }
-        return consumed;
+        bool gateActionCard = cardName.Contains("lockgate") || cardName.Contains("opengate");
+        return ConsumeAICardAfterResolution(aiPlayer, cardPrefab, !gateActionCard);
     }
 
     // Power Boost targets the best owned tower and boosts it for the next wave.
     private bool TryAIPowerBoost(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
+        TowerTargetingManager towerTargetingManager = FindObjectOfType<TowerTargetingManager>();
+
+        if (towerTargetingManager == null)
+        {
+            return false;
+        }
+
         CannonTower bestTower = null;
         float bestScore = float.MinValue;
 
@@ -749,7 +790,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        bestTower.ApplyPowerBoostForNextWave();
+        if (!towerTargetingManager.ResolvePowerBoost(aiPlayer.playerId, bestTower))
+        {
+            return false;
+        }
+
         ShowAICardAnnouncement(aiPlayer, "Power Boost", "their tower");
         return true;
     }
@@ -757,6 +802,13 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     // Freeze Claim blocks a valuable claimable tile until the AI's next turn.
     private bool TryAIFreezeClaim(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
+        TileTargetingManager tileTargetingManager = FindObjectOfType<TileTargetingManager>();
+
+        if (tileTargetingManager == null)
+        {
+            return false;
+        }
+
         TowerBuildArea target = FindBestFreezeTarget(aiPlayer, difficulty);
 
         if (target == null)
@@ -764,7 +816,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        target.FreezeForPlayer(aiPlayer.playerId);
+        if (!tileTargetingManager.ResolveFreezeClaim(aiPlayer.playerId, target))
+        {
+            return false;
+        }
+
         RegisterLandNegativeTarget(aiPlayer, target);
         ShowAICardAnnouncement(aiPlayer, "Freeze Claim", "a land tile");
         return true;
@@ -773,6 +829,13 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     // Take Over buys an opponent land at the card discount and removes its tower.
     private bool TryAITakeOver(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
+        TileTargetingManager tileTargetingManager = FindObjectOfType<TileTargetingManager>();
+
+        if (tileTargetingManager == null)
+        {
+            return false;
+        }
+
         TowerBuildArea target = FindBestTakeOverTarget(aiPlayer, difficulty);
 
         if (target == null)
@@ -780,19 +843,12 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        int cost = target.GetTakeOverCardCost();
-
-        if (!aiPlayer.CanAfford(cost) || !aiPlayer.SpendMoney(cost))
+        if (!tileTargetingManager.ResolveTakeOver(aiPlayer.playerId, target))
         {
             return false;
         }
 
-        target.RemoveCurrentTower();
         RegisterLandNegativeTarget(aiPlayer, target);
-        target.ownerPlayerId = aiPlayer.playerId;
-        target.isOwned = true;
-        target.MarkInactiveUntilNextTurn(aiPlayer.playerId);
-        target.RefreshOwnershipVisual(playerManager);
         ShowAICardAnnouncement(aiPlayer, "Take Over", "an opponent's land");
         return true;
     }
@@ -800,9 +856,10 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     // Shock Trap places a trap on a strong route node so it can trigger in a future wave.
     private bool TryAIShockTrap(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
-        if (shockTrapPrefab == null)
+        ShockTrapTargetingManager shockTrapTargetingManager = FindObjectOfType<ShockTrapTargetingManager>();
+
+        if (shockTrapTargetingManager == null)
         {
-            Debug.LogWarning("AI cannot use Shock Trap because shockTrapPrefab is missing.");
             return false;
         }
 
@@ -813,16 +870,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        GameObject trapObject = Instantiate(shockTrapPrefab, node.transform.position, Quaternion.identity);
-        ShockTrap trap = trapObject.GetComponent<ShockTrap>();
-
-        if (trap == null)
+        if (!shockTrapTargetingManager.ResolveShockTrapPlacement(aiPlayer.playerId, node))
         {
-            trap = trapObject.AddComponent<ShockTrap>();
+            return false;
         }
 
-        trap.Initialize(aiPlayer.playerId, aiPlayer, node.transform);
-        trap.ApplyOwnerVisual(playerManager);
         ShowAICardAnnouncement(aiPlayer, "Shock Trap", "the path");
         return true;
     }
@@ -830,6 +882,13 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     // Disrupt targets a valid opponent while avoiding repeated focus on the same player.
     private bool TryAIDisrupt(PlayerResource aiPlayer)
     {
+        PlayerTargetingManager playerTargetingManager = FindObjectOfType<PlayerTargetingManager>();
+
+        if (playerTargetingManager == null)
+        {
+            return false;
+        }
+
         PlayerResource target = FindBalancedDisruptTarget(aiPlayer);
 
         if (target == null || target.HasPendingDisrupt())
@@ -837,7 +896,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        target.ApplyDisruptNextTurn();
+        if (!playerTargetingManager.ResolveDisrupt(aiPlayer.playerId, target.playerId))
+        {
+            return false;
+        }
+
         RegisterNegativeCardTarget(target);
         ShowAICardAnnouncement(aiPlayer, "Disrupt", target.GetDisplayName());
         return true;
@@ -846,25 +909,26 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     // Steal Card takes one random card from the opponent with the largest hand.
     private bool TryAIStealCard(PlayerResource aiPlayer)
     {
+        PlayerTargetingManager playerTargetingManager = FindObjectOfType<PlayerTargetingManager>();
+
+        if (playerTargetingManager == null)
+        {
+            return false;
+        }
+
         PlayerResource target = FindPlayerWithMostCards(aiPlayer);
         PlayerHand aiHand = aiPlayer.GetPlayerHand();
-        PlayerHand targetHand = target != null ? target.GetPlayerHand() : null;
 
-        if (target == null || aiHand == null || targetHand == null || !aiHand.CanAddCard())
+        if (target == null || aiHand == null || !aiHand.CanAddCard())
         {
             return false;
         }
 
-        GameObject stolenCard = targetHand.RemoveRandomCard();
-
-        if (stolenCard == null || !aiHand.AddCard(stolenCard))
+        if (!playerTargetingManager.ResolveStealCard(aiPlayer.playerId, target.playerId))
         {
             return false;
         }
 
-        aiPlayer.SyncCardCountFromHand();
-        target.SyncCardCountFromHand();
-        RefreshAIResourceDisplays(aiPlayer, target);
         RegisterNegativeCardTarget(target);
         ShowAICardAnnouncement(aiPlayer, "Steal Card", target.GetDisplayName());
         return true;
@@ -873,6 +937,13 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     // Trade Hands swaps with a target only when the AI has fewer cards.
     private bool TryAITradeHands(PlayerResource aiPlayer)
     {
+        PlayerTargetingManager playerTargetingManager = FindObjectOfType<PlayerTargetingManager>();
+
+        if (playerTargetingManager == null)
+        {
+            return false;
+        }
+
         PlayerResource target = FindTradeHandsTarget(aiPlayer);
 
         if (target == null)
@@ -880,21 +951,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        PlayerHand aiHand = aiPlayer.GetPlayerHand();
-        PlayerHand targetHand = target.GetPlayerHand();
-
-        if (aiHand == null || targetHand == null)
+        if (!playerTargetingManager.ResolveTradeHands(aiPlayer.playerId, target.playerId))
         {
             return false;
         }
 
-        List<GameObject> aiCards = new List<GameObject>(aiHand.GetCards());
-        List<GameObject> targetCards = new List<GameObject>(targetHand.GetCards());
-        aiHand.CopyFrom(targetCards);
-        targetHand.CopyFrom(aiCards);
-        aiPlayer.SyncCardCountFromHand();
-        target.SyncCardCountFromHand();
-        RefreshAIResourceDisplays(aiPlayer, target);
         RegisterNegativeCardTarget(target);
         ShowAICardAnnouncement(aiPlayer, "Trade Hands", target.GetDisplayName());
         return true;
@@ -914,9 +975,18 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             ? validGates[Random.Range(0, validGates.Count)]
             : GetBestGateByPosition(validGates, difficulty);
 
+        GateTargetingManager gateTargetingManager = GateTargetingManager.Instance != null
+            ? GateTargetingManager.Instance
+            : FindObjectOfType<GateTargetingManager>();
+
+        if (gateTargetingManager == null)
+        {
+            return false;
+        }
+
         bool changed = actionType == GateActionType.OpenGate
-            ? selectedGate.OpenGate()
-            : selectedGate.LockGate();
+            ? gateTargetingManager.TryOpenGateForPlayer(aiPlayer.playerId, selectedGate, true, false)
+            : gateTargetingManager.TryLockGateForPlayer(aiPlayer.playerId, selectedGate, true, false);
 
         if (!changed)
         {
@@ -986,6 +1056,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     // It reserves tower gold whenever possible because building towers is higher priority than buying land.
     private bool TryAIBuyOneLand(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
+        if (buildTowerManager == null)
+        {
+            return false;
+        }
+
         List<TowerBuildArea> candidates = new List<TowerBuildArea>();
         int minimumTowerCost = GetMinimumAffordableTowerCost(aiPlayer.playerId);
 
@@ -1010,12 +1085,10 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         TowerBuildArea bestArea = ChooseBuildArea(candidates, difficulty, aiPlayer.money, true);
 
-        if (bestArea == null || !aiPlayer.SpendMoney(bestArea.landPurchaseCost))
+        if (bestArea == null || !buildTowerManager.TryBuyLandForPlayer(bestArea, aiPlayer.playerId))
         {
             return false;
         }
-
-        bestArea.SetOwner(aiPlayer.playerId, playerManager);
         ShowToast(aiPlayer.GetDisplayName() + " bought land.");
         return true;
     }
@@ -1413,6 +1486,23 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         bestArea.SetTower(towerObject);
         ShowToast(aiPlayer.GetDisplayName() + " built a tower.");
         return true;
+    }
+
+    private bool ConsumeAICardAfterResolution(PlayerResource aiPlayer, GameObject cardPrefab, bool consumePlayAction)
+    {
+        if (cardDrawManager == null || aiPlayer == null || cardPrefab == null)
+        {
+            return false;
+        }
+
+        bool consumed = cardDrawManager.TryConsumeDirectPlayedCard(aiPlayer.playerId, cardPrefab, consumePlayAction);
+
+        if (consumed)
+        {
+            RefreshAIResourceDisplays(aiPlayer);
+        }
+
+        return consumed;
     }
 
     // Checks whether the AI has an existing valid place to build before spending gold on more land.

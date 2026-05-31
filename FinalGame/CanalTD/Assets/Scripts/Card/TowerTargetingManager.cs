@@ -179,37 +179,56 @@ public class TowerTargetingManager : MonoBehaviour
             return;
         }
 
-        if (!IsValidPowerBoostTarget(selectedTower, playerManager != null ? playerManager.GetCurrentPlayerId() : 0))
+        ResolvePowerBoost(playerManager != null ? playerManager.GetCurrentPlayerId() : 0, selectedTower, true);
+    }
+
+    public bool ResolvePowerBoost(int playerId, CannonTower tower)
+    {
+        return ResolvePowerBoost(playerId, tower, false);
+    }
+
+    public bool ResolvePowerBoost(int playerId, CannonTower tower, bool consumePendingCard)
+    {
+        if (!IsValidPowerBoostTarget(tower, playerId))
         {
             ShowToast("Choose one of your towers.");
-            return;
+            return false;
         }
 
-        if (cardDrawManager == null)
+        if (consumePendingCard)
         {
-            ShowToast("Card manager is missing.");
-            return;
+            if (cardDrawManager == null)
+            {
+                ShowToast("Card manager is missing.");
+                return false;
+            }
+
+            if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
+            {
+                ShowToast("Could not play this card.");
+                return false;
+            }
         }
 
-        if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
+        tower.ApplyPowerBoostForNextWave();
+
+        if (consumePendingCard && !cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
         {
+            tower.boostPendingForNextWave = false;
             ShowToast("Could not play this card.");
-            return;
+            return false;
         }
 
-        selectedTower.ApplyPowerBoostForNextWave();
-
-        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
-        {
-            selectedTower.boostPendingForNextWave = false;
-            ShowToast("Could not play this card.");
-            return;
-        }
-
-        PlayerResource currentPlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
+        PlayerResource currentPlayer = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
         string actorName = currentPlayer != null ? currentPlayer.GetDisplayName() : "Current player";
         ShowToast(actorName + " used Power Boost on their tower.");
-        ExitTargetingMode();
+
+        if (consumePendingCard)
+        {
+            ExitTargetingMode();
+        }
+
+        return true;
     }
 
     public void CancelSelection()
@@ -428,6 +447,11 @@ public class TowerTargetingManager : MonoBehaviour
 
     private void SetTargetingVisuals(bool active)
     {
+        if (active && BuildTowerManager.Instance != null)
+        {
+            BuildTowerManager.Instance.HideBuildInteractionUI();
+        }
+
         SetNormalGameplayUIEnabled(!active);
 
         if (darkOverlay != null)

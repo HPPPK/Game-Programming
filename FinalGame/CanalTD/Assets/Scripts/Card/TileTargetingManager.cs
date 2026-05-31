@@ -217,77 +217,7 @@ public class TileTargetingManager : MonoBehaviour
             return;
         }
 
-        int currentPlayerId = GetCurrentPlayerId();
-
-        if (selectedTile.isFrozenOrSealed)
-        {
-            ShowToast("This land is frozen.");
-            return;
-        }
-
-        if (!IsValidTakeOverTarget(selectedTile, currentPlayerId))
-        {
-            ShowToast("Choose an opponent-owned land.");
-            return;
-        }
-
-        PlayerResource currentPlayer = GetCurrentPlayerResource();
-
-        if (currentPlayer == null)
-        {
-            ShowToast("Player resource is missing.");
-            return;
-        }
-
-        int takeOverCost = GetTakeOverCost(selectedTile);
-
-        if (!currentPlayer.CanAfford(takeOverCost))
-        {
-            ShowToast("Not enough gold to take over this land.");
-            return;
-        }
-
-        if (cardDrawManager == null)
-        {
-            ShowToast("Card manager is missing.");
-            return;
-        }
-
-        if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
-        {
-            ShowToast("Could not play this card.");
-            return;
-        }
-
-        if (!currentPlayer.SpendMoney(takeOverCost))
-        {
-            ShowToast("Not enough gold to take over this land.");
-            return;
-        }
-
-        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
-        {
-            ShowToast("Could not play this card.");
-            return;
-        }
-
-        int previousOwnerId = selectedTile.ownerPlayerId;
-        string previousOwnerName = playerManager != null ? playerManager.GetPlayerDisplayName(previousOwnerId) : "opponent";
-
-        selectedTile.RemoveCurrentTower();
-        selectedTile.ownerPlayerId = currentPlayerId;
-        selectedTile.isOwned = true;
-        selectedTile.inactiveForPlayerId = currentPlayerId;
-        selectedTile.activatesNextTurn = true;
-        selectedTile.RefreshOwnershipVisual(playerManager);
-
-        if (playerManager != null)
-        {
-            playerManager.RefreshCurrentPlayerUI();
-        }
-
-        ShowToast(currentPlayer.GetDisplayName() + " used Take Over on " + previousOwnerName + "'s land.");
-        ExitTargetingMode();
+        ResolveTakeOver(GetCurrentPlayerId(), selectedTile, true);
     }
 
     private void ConfirmFreezeClaim()
@@ -298,11 +228,98 @@ public class TileTargetingManager : MonoBehaviour
             return;
         }
 
-        int currentPlayerId = GetCurrentPlayerId();
+        ResolveFreezeClaim(GetCurrentPlayerId(), selectedTile, true);
+    }
 
-        if (!IsValidFreezeClaimTarget(selectedTile))
+    public bool ResolveTakeOver(int playerId, TowerBuildArea buildArea)
+    {
+        return ResolveTakeOver(playerId, buildArea, false);
+    }
+
+    public bool ResolveTakeOver(int playerId, TowerBuildArea buildArea, bool consumePendingCard)
+    {
+        if (buildArea == null)
         {
-            if (selectedTile != null && selectedTile.isFrozenOrSealed)
+            ShowToast("Choose a land first.");
+            return false;
+        }
+
+        if (buildArea.isFrozenOrSealed)
+        {
+            ShowToast("This land is frozen.");
+            return false;
+        }
+
+        if (!IsValidTakeOverTarget(buildArea, playerId))
+        {
+            ShowToast("Choose an opponent-owned land.");
+            return false;
+        }
+
+        PlayerResource currentPlayer = GetPlayerResource(playerId);
+
+        if (currentPlayer == null)
+        {
+            ShowToast("Player resource is missing.");
+            return false;
+        }
+
+        int takeOverCost = GetTakeOverCost(buildArea);
+
+        if (!currentPlayer.CanAfford(takeOverCost) || !currentPlayer.SpendMoney(takeOverCost))
+        {
+            ShowToast("Not enough gold to take over this land.");
+            return false;
+        }
+
+        if (consumePendingCard)
+        {
+            if (cardDrawManager == null || !cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
+            {
+                currentPlayer.AddMoney(takeOverCost);
+                ShowToast("Could not play this card.");
+                return false;
+            }
+        }
+
+        int previousOwnerId = buildArea.ownerPlayerId;
+        string previousOwnerName = playerManager != null ? playerManager.GetPlayerDisplayName(previousOwnerId) : "opponent";
+
+        if (consumePendingCard && !cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+        {
+            currentPlayer.AddMoney(takeOverCost);
+            ShowToast("Could not play this card.");
+            return false;
+        }
+
+        buildArea.RemoveCurrentTower();
+        buildArea.ownerPlayerId = playerId;
+        buildArea.isOwned = true;
+        buildArea.inactiveForPlayerId = playerId;
+        buildArea.activatesNextTurn = true;
+        buildArea.RefreshOwnershipVisual(playerManager);
+
+        RefreshPlayerUI(playerId);
+        ShowToast(currentPlayer.GetDisplayName() + " used Take Over on " + previousOwnerName + "'s land.");
+
+        if (consumePendingCard)
+        {
+            ExitTargetingMode();
+        }
+
+        return true;
+    }
+
+    public bool ResolveFreezeClaim(int playerId, TowerBuildArea buildArea)
+    {
+        return ResolveFreezeClaim(playerId, buildArea, false);
+    }
+
+    public bool ResolveFreezeClaim(int playerId, TowerBuildArea buildArea, bool consumePendingCard)
+    {
+        if (!IsValidFreezeClaimTarget(buildArea))
+        {
+            if (buildArea != null && buildArea.isFrozenOrSealed)
             {
                 ShowToast("This land is already frozen.");
             }
@@ -311,39 +328,39 @@ public class TileTargetingManager : MonoBehaviour
                 ShowToast("Choose a valid land.");
             }
 
-            return;
+            return false;
         }
 
-        if (cardDrawManager == null)
+        buildArea.FreezeForPlayer(playerId);
+
+        if (consumePendingCard)
         {
-            ShowToast("Card manager is missing.");
-            return;
+            if (cardDrawManager == null || !cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
+            {
+                buildArea.ClearFreeze();
+                ShowToast("Could not play this card.");
+                return false;
+            }
+
+            if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+            {
+                buildArea.ClearFreeze();
+                ShowToast("Could not play this card.");
+                return false;
+            }
         }
 
-        if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
-        {
-            ShowToast("Could not play this card.");
-            return;
-        }
-
-        selectedTile.FreezeForPlayer(currentPlayerId);
-
-        if (playerManager != null)
-        {
-            playerManager.RefreshCurrentPlayerUI();
-        }
-
-        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
-        {
-            selectedTile.ClearFreeze();
-            ShowToast("Could not play this card.");
-            return;
-        }
-
-        PlayerResource currentPlayer = GetCurrentPlayerResource();
+        RefreshPlayerUI(playerId);
+        PlayerResource currentPlayer = GetPlayerResource(playerId);
         string actorName = currentPlayer != null ? currentPlayer.GetDisplayName() : "Current player";
         ShowToast(actorName + " used Freeze Claim on a land tile.");
-        ExitTargetingMode();
+
+        if (consumePendingCard)
+        {
+            ExitTargetingMode();
+        }
+
+        return true;
     }
 
     private void TrySelectTileAtMouse()
@@ -483,8 +500,29 @@ public class TileTargetingManager : MonoBehaviour
         return playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
     }
 
+    private PlayerResource GetPlayerResource(int playerId)
+    {
+        return playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+    }
+
+    private void RefreshPlayerUI(int playerId)
+    {
+        if (playerManager == null)
+        {
+            return;
+        }
+
+        playerManager.RefreshPlayerUI(playerId);
+        playerManager.RefreshCurrentPlayerUI();
+    }
+
     private void SetTargetingVisuals(bool active)
     {
+        if (active && BuildTowerManager.Instance != null)
+        {
+            BuildTowerManager.Instance.HideBuildInteractionUI();
+        }
+
         SetNormalGameplayUIEnabled(!active);
 
         if (darkOverlay != null)
