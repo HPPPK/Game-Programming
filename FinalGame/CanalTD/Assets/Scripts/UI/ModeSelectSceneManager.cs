@@ -51,12 +51,17 @@ public class ModeSelectSceneManager : MonoBehaviour
     private readonly bool[] roomReady = new bool[LocalPlayerCount];
     private AIDifficulty globalAIDifficulty = AIDifficulty.Easy;
     private bool localReady;
+    private bool onlinePhotonFlowActive;
+    private bool hasRuntimeLocalSlotOverride;
+    private int runtimeLocalPlayerSlotIndex;
     private bool cachedReadyButtonTextColor;
     private bool readyButtonListenerBound;
     private Coroutine toastHideCoroutine;
+    private PhotonPunRoomLobbyManager photonRoomLobbyManager;
 
     private void Awake()
     {
+        photonRoomLobbyManager = FindObjectOfType<PhotonPunRoomLobbyManager>();
         ConfigureAIDifficultyDropdown();
 
         if (readyButtonText != null)
@@ -137,7 +142,16 @@ public class ModeSelectSceneManager : MonoBehaviour
     {
         SetPanelActive(onlineAIModePanel, true, "Online/AI mode panel");
         SetPanelActive(localModePanel, false, "Local mode panel");
-        ResetRoomSetup();
+
+        if (!ShouldUsePhotonOnlineFlow())
+        {
+            ResetRoomSetup();
+        }
+
+        if (photonRoomLobbyManager != null)
+        {
+            photonRoomLobbyManager.HandleOnlinePanelOpened();
+        }
     }
 
     // Hides both mode panels. This is useful when a close button should return to the clean mode choice screen.
@@ -183,6 +197,12 @@ public class ModeSelectSceneManager : MonoBehaviour
     // Adds the next available AI player into the first non-local empty slot.
     public void AddAIPlayer()
     {
+        if (ShouldUsePhotonOnlineFlow())
+        {
+            ShowLobbyMessage("AI slots are not available in the Photon room flow yet.");
+            return;
+        }
+
         RefreshLocalRoomPlayer();
 
         for (int playerId = 0; playerId < LocalPlayerCount; playerId++)
@@ -270,6 +290,16 @@ public class ModeSelectSceneManager : MonoBehaviour
     // Empty slots remain empty and are skipped by AIPrototypeTurnManager.
     public void StartOnlineAIPrototypeGame()
     {
+        if (ShouldUsePhotonOnlineFlow())
+        {
+            if (photonRoomLobbyManager != null)
+            {
+                photonRoomLobbyManager.TryStartOnlineMatch();
+            }
+
+            return;
+        }
+
         RefreshLocalRoomPlayer();
         Debug.Log("Start clicked. localReady = " + localReady);
 
@@ -301,6 +331,16 @@ public class ModeSelectSceneManager : MonoBehaviour
     // Toggles the local human ready state using localPlayerSlotIndex, not a hard-coded slot.
     public void ToggleLocalReady()
     {
+        if (ShouldUsePhotonOnlineFlow())
+        {
+            if (photonRoomLobbyManager != null)
+            {
+                photonRoomLobbyManager.ToggleReady();
+            }
+
+            return;
+        }
+
         Debug.Log("ToggleLocalReady called");
         RefreshLocalRoomPlayer();
 
@@ -422,6 +462,8 @@ public class ModeSelectSceneManager : MonoBehaviour
     {
         globalAIDifficulty = AIDifficulty.Easy;
         localReady = false;
+        onlinePhotonFlowActive = false;
+        hasRuntimeLocalSlotOverride = false;
         ConfigureAIDifficultyDropdown();
 
         for (int playerId = 0; playerId < roomPlayers.Length; playerId++)
@@ -600,10 +642,22 @@ public class ModeSelectSceneManager : MonoBehaviour
     // Enables Add AI only while an empty non-local slot exists.
     private void RefreshAddAIButton()
     {
+        if (onlinePhotonFlowActive)
+        {
+            if (addAIButton != null)
+            {
+                addAIButton.gameObject.SetActive(false);
+                addAIButton.interactable = false;
+            }
+
+            return;
+        }
+
         bool roomFull = !HasEmptyNonLocalSlot();
 
         if (addAIButton != null)
         {
+            addAIButton.gameObject.SetActive(true);
             addAIButton.interactable = !roomFull;
         }
 
@@ -647,6 +701,21 @@ public class ModeSelectSceneManager : MonoBehaviour
     // Shows the shared AI difficulty dropdown only after at least one AI has joined the room.
     private void RefreshAIDifficultyDropdownVisibility()
     {
+        if (onlinePhotonFlowActive)
+        {
+            if (aiDifficultyDropdownRoot != null)
+            {
+                aiDifficultyDropdownRoot.SetActive(false);
+            }
+
+            if (aiDifficultyDropdown != null)
+            {
+                aiDifficultyDropdown.interactable = false;
+            }
+
+            return;
+        }
+
         bool hasAI = CountAIPlayers() > 0;
 
         if (aiDifficultyDropdownRoot != null)
@@ -738,6 +807,11 @@ public class ModeSelectSceneManager : MonoBehaviour
     // Returns a safe local slot index even if the Inspector value is outside the room range.
     private int GetLocalPlayerSlotIndex()
     {
+        if (hasRuntimeLocalSlotOverride)
+        {
+            return Mathf.Clamp(runtimeLocalPlayerSlotIndex, 0, LocalPlayerCount - 1);
+        }
+
         return Mathf.Clamp(localPlayerSlotIndex, 0, LocalPlayerCount - 1);
     }
 
@@ -924,5 +998,73 @@ public class ModeSelectSceneManager : MonoBehaviour
         }
 
         panel.SetActive(active);
+    }
+
+    // Returns the local display name used by Photon room properties and lobby UI.
+    public string GetOnlineDisplayName()
+    {
+        if (usernameInput != null && !string.IsNullOrWhiteSpace(usernameInput.text))
+        {
+            return usernameInput.text.Trim();
+        }
+
+        return "Player";
+    }
+
+    // Lets the Photon lobby layer drive the existing room slot UI without changing local/AI flows.
+    public void ApplyOnlineRoomSnapshot(PlayerSetupData[] snapshot, int localSlot, bool localPlayerReady)
+    {
+        onlinePhotonFlowActive = true;
+        hasRuntimeLocalSlotOverride = true;
+        runtimeLocalPlayerSlotIndex = Mathf.Clamp(localSlot, 0, LocalPlayerCount - 1);
+        localReady = localPlayerReady;
+
+        for (int playerId = 0; playerId < LocalPlayerCount; playerId++)
+        {
+            roomPlayers[playerId] = null;
+            roomReady[playerId] = false;
+
+            if (snapshot == null || playerId >= snapshot.Length || snapshot[playerId] == null)
+            {
+                continue;
+            }
+
+            PlayerSetupData source = snapshot[playerId];
+            PlayerSetupData copiedData = new PlayerSetupData(
+                source.playerId,
+                source.displayName,
+                source.isAI,
+                source.aiDifficulty
+            );
+
+            copiedData.isReady = source.isReady;
+            roomPlayers[playerId] = copiedData;
+            roomReady[playerId] = copiedData.isReady;
+        }
+
+        RefreshRoomUI();
+    }
+
+    // Clears Photon-driven room UI state and returns this panel to its existing local prototype behavior.
+    public void ClearOnlineRoomSnapshot()
+    {
+        ResetRoomSetup();
+    }
+
+    // Shared Photon/local lobby feedback entrypoint.
+    public void ShowOnlineLobbyMessage(string message)
+    {
+        ShowLobbyMessage(message);
+    }
+
+    // Shared Photon/local placeholder text entrypoint.
+    public void ShowOnlinePlaceholderMessage(string message)
+    {
+        ShowPlaceholderMessage(message);
+    }
+
+    private bool ShouldUsePhotonOnlineFlow()
+    {
+        return onlinePhotonFlowActive && photonRoomLobbyManager != null;
     }
 }

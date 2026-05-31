@@ -84,6 +84,7 @@
     <Compile Include="Assets/Scripts/Enemy/EnemySpawner.cs" />
     <Compile Include="Assets/Scripts/UI/RoomSetupData.cs" />
     <Compile Include="Assets/Scripts/UI/UIClickProbe.cs" />
+    <Compile Include="Assets/Scripts/Networking/PhotonPunRoomLobbyManager.cs" />
     <Compile Include="Assets/Scripts/Map/doorChange.cs" />
     <Compile Include="Assets/Scripts/Card/CardDrawManager.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerHand.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="Assets/Scripts/Tower/BuildTowerManager.cs" />
     <Compile Include="Assets/Scripts/UI/InstructionBookController.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerExitManager.cs" />
+    <Compile Include="Assets/Scripts/Networking/PhotonLobbyPropertyKeys.cs" />
     <Compile Include="Assets/Scripts/Tower/TargetPriority.cs" />
     <Compile Include="Assets/Scripts/UI/UIButtonSoundBinder.cs" />
     <Compile Include="Assets/Scripts/UI/CursorVisualFollower.cs" />
