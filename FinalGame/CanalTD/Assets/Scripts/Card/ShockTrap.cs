@@ -12,6 +12,7 @@
  */
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Serialization;
 
 public class ShockTrap : MonoBehaviour
 {
@@ -21,7 +22,9 @@ public class ShockTrap : MonoBehaviour
 
     [Header("Trap")]
     public float damage = 2f;
-    public float radius = 0.75f;
+    [FormerlySerializedAs("radius")]
+    public float triggerRadius = 0.75f;
+    public float explosionRadius = 0.75f;
     public float damageDelayAfterTrigger = 1f;
     public bool triggered = false;
     public LayerMask enemyLayer;
@@ -179,7 +182,7 @@ public class ShockTrap : MonoBehaviour
             return;
         }
 
-        EnemyHealth[] enemies = GetEnemiesInRadius();
+        EnemyHealth[] enemies = GetEnemiesInRadius(triggerRadius);
 
         if (enemies.Length <= 0)
         {
@@ -199,11 +202,12 @@ public class ShockTrap : MonoBehaviour
         activeDuringWave = false;
     }
 
-    private EnemyHealth[] GetEnemiesInRadius()
+    // Shared radius query used separately for trigger detection and explosion damage.
+    private EnemyHealth[] GetEnemiesInRadius(float searchRadius)
     {
         if (enemyLayer.value != 0)
         {
-            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, radius, enemyLayer);
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, searchRadius, enemyLayer);
             return CollectEnemiesFromHits(hits);
         }
 
@@ -212,7 +216,7 @@ public class ShockTrap : MonoBehaviour
 
         foreach (EnemyHealth enemy in allEnemies)
         {
-            if (enemy != null && Vector2.Distance(transform.position, enemy.transform.position) <= radius)
+            if (enemy != null && Vector2.Distance(transform.position, enemy.transform.position) <= searchRadius)
             {
                 enemies.Add(enemy);
             }
@@ -261,7 +265,7 @@ public class ShockTrap : MonoBehaviour
     {
         yield return new WaitForSeconds(damageDelayAfterTrigger);
 
-        EnemyHealth[] enemies = GetEnemiesInRadius();
+        EnemyHealth[] enemies = GetEnemiesInRadius(explosionRadius);
         int finalDamage = Mathf.RoundToInt(damage);
 
         foreach (EnemyHealth enemy in enemies)
@@ -322,6 +326,10 @@ public class ShockTrap : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.DrawWireSphere(transform.position, radius);
+        Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.9f);
+        Gizmos.DrawWireSphere(transform.position, triggerRadius);
+
+        Gizmos.color = new Color(0.2f, 0.9f, 1f, 0.9f);
+        Gizmos.DrawWireSphere(transform.position, explosionRadius);
     }
 }
