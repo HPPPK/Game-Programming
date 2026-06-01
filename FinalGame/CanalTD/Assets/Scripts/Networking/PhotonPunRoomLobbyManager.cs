@@ -2,18 +2,19 @@
  * File: PhotonPunRoomLobbyManager.cs
  *
  * Purpose:
- * Adds the minimum Photon PUN2 room/lobby flow for CanalTD without touching
- * gameplay synchronization yet. This script handles connecting, creating/joining
- * rooms, leaving rooms, assigning stable slot-based playerIds, syncing ready
- * state, and loading GameScene through PhotonNetwork.LoadLevel.
+ * Implements the final-product Phase 2A Photon PUN2 lobby flow for the
+ * OnlineModePanel only. It automatically creates a private friend room when the
+ * panel opens, supports joining by room code, supports random matchmaking, and
+ * synchronizes the 4-slot room UI through Photon player properties.
  *
  * Notes:
- * - It intentionally synchronizes only lobby state for Phase 2A.
- * - Gameplay actions, waves, and runtime board objects are not networked here.
- * - When Photon PUN2 is not installed, this script still compiles and shows
- *   setup warnings instead of breaking the project.
+ * - This script does not synchronize gameplay yet.
+ * - It only prepares room/lobby behavior before GameScene loads.
+ * - When Photon PUN2 is missing, the script still compiles and falls back to
+ *   toast/debug warnings instead of breaking the project.
  */
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,33 +32,55 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
 {
     private const string OnlinePhotonMode = "OnlinePhotonPUN2";
-    private const string RoomNamePrefix = "CanalTD-";
+    private const string PrivateRoomKind = "private";
+    private const string MatchmakingRoomKind = "matchmaking";
 
     [Header("Scene Integration")]
     public ModeSelectSceneManager modeSelectSceneManager;
     public string onlineGameSceneName = "GameScene";
 
-    [Header("Lobby UI")]
-    public TMP_InputField roomCodeInput;
-    public TMP_Text connectionStatusText;
-    public Button createRoomButton;
+    [Header("Optional Buttons")]
     public Button joinRoomButton;
-    public Button leaveRoomButton;
+    public Button readyButton;
     public Button startMatchButton;
+    public Button matchmakingButton;
+    public Button leaveRoomButton;
+
+    [Header("Optional Debug UI")]
+    public TMP_Text connectionStatusText;
 
     [Header("Photon Settings")]
     public string gameVersion = "0.1";
     public byte maxPlayersPerRoom = 4;
     public byte minPlayersToStart = 2;
-    public bool autoConnectWhenPanelOpens = false;
 
     public bool IsOnlineRoomFlowActive { get; private set; }
 
-    private bool createRoomButtonBound;
     private bool joinRoomButtonBound;
-    private bool leaveRoomButtonBound;
-    private bool startMatchButtonBound;
+    private bool readyButtonBound;
+    private bool startButtonBound;
+    private bool matchmakingButtonBound;
+    private bool leaveButtonBound;
     private bool usernameListenerBound;
+    private bool isConnectingToPhoton;
+    private bool isCreatingOrJoiningRoom;
+    private bool isMatchmaking;
+
+#if PHOTON_UNITY_NETWORKING
+    private enum PendingLobbyAction
+    {
+        None,
+        AutoCreatePrivateRoom,
+        JoinPrivateRoomByCode,
+        JoinRandomMatchmaking
+    }
+
+    private PendingLobbyAction pendingLobbyAction = PendingLobbyAction.None;
+    private string pendingJoinRoomCode = string.Empty;
+    private string pendingPrivateRoomCode = string.Empty;
+    private bool leaveRoomWhenPanelCloses;
+    private int privateRoomCreateAttempts;
+#endif
 
     private void Awake()
     {
@@ -66,91 +89,117 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             modeSelectSceneManager = FindObjectOfType<ModeSelectSceneManager>();
         }
 
-        BindOptionalButton(ref createRoomButtonBound, createRoomButton, OnClickCreateRoom);
+#if PHOTON_UNITY_NETWORKING
+        PhotonNetwork.AutomaticallySyncScene = true;
+#endif
+
         BindOptionalButton(ref joinRoomButtonBound, joinRoomButton, OnClickJoinRoom);
-        BindOptionalButton(ref leaveRoomButtonBound, leaveRoomButton, LeaveRoom);
-        BindOptionalButton(ref startMatchButtonBound, startMatchButton, TryStartOnlineMatch);
+        BindOptionalButton(ref readyButtonBound, readyButton, ToggleReady);
+        BindOptionalButton(ref startButtonBound, startMatchButton, TryStartOnlineMatch);
+        BindOptionalButton(ref matchmakingButtonBound, matchmakingButton, StartMatchmaking);
+        BindOptionalButton(ref leaveButtonBound, leaveRoomButton, LeaveRoom);
         BindUsernameListener();
 
-        UpdateLobbyUIState();
         SetConnectionStatus("Offline");
+        UpdateLobbyUIState();
+
+        if (modeSelectSceneManager != null)
+        {
+            modeSelectSceneManager.SetOnlineRoomCodeDisplay("----");
+        }
     }
 
     private void OnDestroy()
     {
-        UnbindOptionalButton(ref createRoomButtonBound, createRoomButton, OnClickCreateRoom);
         UnbindOptionalButton(ref joinRoomButtonBound, joinRoomButton, OnClickJoinRoom);
-        UnbindOptionalButton(ref leaveRoomButtonBound, leaveRoomButton, LeaveRoom);
-        UnbindOptionalButton(ref startMatchButtonBound, startMatchButton, TryStartOnlineMatch);
+        UnbindOptionalButton(ref readyButtonBound, readyButton, ToggleReady);
+        UnbindOptionalButton(ref startButtonBound, startMatchButton, TryStartOnlineMatch);
+        UnbindOptionalButton(ref matchmakingButtonBound, matchmakingButton, StartMatchmaking);
+        UnbindOptionalButton(ref leaveButtonBound, leaveRoomButton, LeaveRoom);
         UnbindUsernameListener();
     }
 
-    // Called by ModeSelectSceneManager when the shared Online panel becomes visible.
+    // Called when OnlineModePanel is opened. The final design auto-enters a private room.
+    public void OnOnlinePanelOpened()
+    {
+        HandleOnlinePanelOpened();
+    }
+
+    // Called when OnlineModePanel is opened. The final design auto-enters a private room.
     public void HandleOnlinePanelOpened()
     {
-        UpdateLobbyUIState();
+#if PHOTON_UNITY_NETWORKING
+        IsOnlineRoomFlowActive = true;
+        leaveRoomWhenPanelCloses = false;
+        ApplyLocalDisplayName();
 
-        if (autoConnectWhenPanelOpens)
+        if (PhotonNetwork.InRoom)
         {
-            ConnectToPhoton();
+            Debug.Log("Photon already in room. Reusing current room snapshot.");
+            ClearPersistentLobbyMessage();
+            RefreshLobbySnapshot();
+            return;
         }
+
+        ShowPersistentLobbyMessage("Connecting to Photon...");
+        RequestAutoCreatePrivateRoom();
+#else
+        ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
+#endif
+    }
+
+    // Closing the online panel safely leaves any current room so the friend room does not linger.
+    public void HandleOnlinePanelClosed()
+    {
+#if PHOTON_UNITY_NETWORKING
+        IsOnlineRoomFlowActive = false;
+
+        if (PhotonNetwork.InRoom)
+        {
+            leaveRoomWhenPanelCloses = true;
+            PhotonNetwork.LeaveRoom();
+            return;
+        }
+
+        ClearOnlineLobbyUI();
+#else
+        ClearOnlineLobbyUI();
+#endif
     }
 
     public void ConnectToPhoton()
     {
 #if PHOTON_UNITY_NETWORKING
+        Debug.Log("Photon connect requested.");
         ApplyLocalDisplayName();
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.GameVersion = gameVersion;
 
         if (PhotonNetwork.IsConnected)
         {
+            Debug.Log("Photon already connected.");
+            UpdateLobbyUIState();
+
             if (!PhotonNetwork.InLobby && !PhotonNetwork.InRoom)
             {
                 PhotonNetwork.JoinLobby();
             }
 
-            SetConnectionStatus(PhotonNetwork.InRoom ? "In Room" : "Connected");
+            return;
+        }
+
+        if (isConnectingToPhoton)
+        {
+            Debug.Log("Photon already connecting.");
+            SetConnectionStatus("Connecting...");
             UpdateLobbyUIState();
             return;
         }
 
+        isConnectingToPhoton = true;
         SetConnectionStatus("Connecting...");
+        UpdateLobbyUIState();
         PhotonNetwork.ConnectUsingSettings();
-#else
-        ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
-#endif
-    }
-
-    public void OnClickCreateRoom()
-    {
-#if PHOTON_UNITY_NETWORKING
-        if (!EnsurePhotonReadyForLobbyAction())
-        {
-            return;
-        }
-
-        if (PhotonNetwork.InRoom)
-        {
-            ShowLobbyMessage("Already in a room.");
-            return;
-        }
-
-        string roomName = GetDesiredRoomCode();
-        RoomOptions options = new RoomOptions
-        {
-            MaxPlayers = maxPlayersPerRoom,
-            IsVisible = true,
-            IsOpen = true,
-            CleanupCacheOnLeave = true,
-            CustomRoomProperties = new Hashtable
-            {
-                { PhotonLobbyPropertyKeys.MatchMode, OnlinePhotonMode }
-            }
-        };
-
-        SetConnectionStatus("Creating Room...");
-        PhotonNetwork.CreateRoom(roomName, options, TypedLobby.Default);
 #else
         ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
 #endif
@@ -159,27 +208,53 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     public void OnClickJoinRoom()
     {
 #if PHOTON_UNITY_NETWORKING
-        if (!EnsurePhotonReadyForLobbyAction())
-        {
-            return;
-        }
+        string roomCode = modeSelectSceneManager != null
+            ? modeSelectSceneManager.GetOnlineJoinRoomCode()
+            : string.Empty;
 
-        if (PhotonNetwork.InRoom)
-        {
-            ShowLobbyMessage("Leave the current room before joining another one.");
-            return;
-        }
-
-        string roomName = GetDesiredRoomCode();
-
-        if (string.IsNullOrWhiteSpace(roomName))
+        if (string.IsNullOrWhiteSpace(roomCode))
         {
             ShowLobbyMessage("Enter a room code.");
             return;
         }
 
-        SetConnectionStatus("Joining Room...");
-        PhotonNetwork.JoinRoom(roomName);
+        pendingJoinRoomCode = NormalizeRoomCode(roomCode);
+        pendingLobbyAction = PendingLobbyAction.JoinPrivateRoomByCode;
+
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+            return;
+        }
+
+        EnsureConnectedAndLobbyReady();
+#else
+        ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
+#endif
+    }
+
+    public void StartMatchmaking()
+    {
+#if PHOTON_UNITY_NETWORKING
+        if (!IsLocalPlayerReady())
+        {
+            ShowLobbyMessage("Ready up before matchmaking.");
+            return;
+        }
+
+        pendingLobbyAction = PendingLobbyAction.JoinRandomMatchmaking;
+        pendingJoinRoomCode = string.Empty;
+        isMatchmaking = true;
+        ShowPersistentLobbyMessage("Matchmaking...");
+        UpdateLobbyUIState();
+
+        if (PhotonNetwork.InRoom)
+        {
+            PhotonNetwork.LeaveRoom();
+            return;
+        }
+
+        EnsureConnectedAndLobbyReady();
 #else
         ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
 #endif
@@ -188,13 +263,15 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     public void LeaveRoom()
     {
 #if PHOTON_UNITY_NETWORKING
+        ClearPendingLobbyState();
+        ClearPersistentLobbyMessage();
+
         if (!PhotonNetwork.InRoom)
         {
             ShowLobbyMessage("Not in a room.");
             return;
         }
 
-        SetConnectionStatus("Leaving Room...");
         PhotonNetwork.LeaveRoom();
 #else
         ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
@@ -218,14 +295,15 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             false
         );
 
-        Hashtable updatedProperties = new Hashtable
+        Hashtable changedProperties = new Hashtable
         {
             { PhotonLobbyPropertyKeys.Ready, !currentReady },
             { PhotonLobbyPropertyKeys.PlayerName, PhotonNetwork.NickName },
             { PhotonLobbyPropertyKeys.IsAI, false }
         };
 
-        PhotonNetwork.LocalPlayer.SetCustomProperties(updatedProperties);
+        PhotonNetwork.LocalPlayer.SetCustomProperties(changedProperties);
+        ShowLobbyMessage("Ready updated.");
 #else
         ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
 #endif
@@ -234,6 +312,10 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     public void TryStartOnlineMatch()
     {
 #if PHOTON_UNITY_NETWORKING
+        Debug.Log("Online start requested.");
+        Debug.Log("Is MasterClient = " + PhotonNetwork.IsMasterClient);
+        Debug.Log("AutomaticallySyncScene = " + PhotonNetwork.AutomaticallySyncScene);
+
         if (!PhotonNetwork.InRoom)
         {
             ShowLobbyMessage("Join a room first.");
@@ -242,55 +324,66 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
         if (!PhotonNetwork.IsMasterClient)
         {
-            ShowLobbyMessage("Only the MasterClient can start the match.");
+            ShowLobbyMessage("Only host can start.");
             return;
         }
 
-        AssignMissingSlotsToJoinedPlayers();
+        if (!IsLocalPlayerReady())
+        {
+            ShowLobbyMessage("Ready up before starting.");
+            return;
+        }
+
+        AssignSlotsAuthoritatively();
 
         if (!CanStartMatch())
         {
             return;
         }
 
+        RefreshLobbySnapshot();
         PersistCurrentRoomSnapshotToPlayerPrefs();
-
+        ShowLobbyMessage("Match starting.");
         PhotonNetwork.CurrentRoom.IsOpen = false;
-        PhotonNetwork.CurrentRoom.IsVisible = false;
-        SetConnectionStatus("Loading Match...");
+        Debug.Log("Calling PhotonNetwork.LoadLevel(" + onlineGameSceneName + ")");
         PhotonNetwork.LoadLevel(onlineGameSceneName);
 #else
         ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
 #endif
     }
 
+    public void OnClickStartMatch()
+    {
+        TryStartOnlineMatch();
+    }
+
     private void BindUsernameListener()
     {
         if (modeSelectSceneManager == null ||
-            modeSelectSceneManager.usernameInput == null ||
+            modeSelectSceneManager.onlineUsernameInput == null ||
             usernameListenerBound)
         {
             return;
         }
 
-        modeSelectSceneManager.usernameInput.onValueChanged.AddListener(OnUsernameChanged);
+        modeSelectSceneManager.onlineUsernameInput.onValueChanged.AddListener(OnOnlineUsernameChanged);
         usernameListenerBound = true;
     }
 
     private void UnbindUsernameListener()
     {
         if (modeSelectSceneManager == null ||
-            modeSelectSceneManager.usernameInput == null ||
+            modeSelectSceneManager.onlineUsernameInput == null ||
             !usernameListenerBound)
         {
             return;
         }
 
-        modeSelectSceneManager.usernameInput.onValueChanged.RemoveListener(OnUsernameChanged);
+        modeSelectSceneManager.onlineUsernameInput.onValueChanged.RemoveListener(OnOnlineUsernameChanged);
         usernameListenerBound = false;
     }
 
-    private void OnUsernameChanged(string _)
+    private void OnOnlineUsernameChanged(string _)
     {
 #if PHOTON_UNITY_NETWORKING
         ApplyLocalDisplayName();
@@ -333,28 +426,33 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     private void UpdateLobbyUIState()
     {
         bool inRoom = IsInPhotonRoom();
-        bool isMasterClient = IsPhotonMasterClient();
-
-        if (createRoomButton != null)
-        {
-            createRoomButton.interactable = !inRoom;
-        }
+        bool masterClient = IsPhotonMasterClient();
+        bool busy = isConnectingToPhoton || isCreatingOrJoiningRoom;
 
         if (joinRoomButton != null)
         {
-            joinRoomButton.interactable = !inRoom;
+            joinRoomButton.interactable = !busy;
         }
 
-        if (leaveRoomButton != null)
+        if (readyButton != null)
         {
-            leaveRoomButton.gameObject.SetActive(inRoom);
-            leaveRoomButton.interactable = inRoom;
+            readyButton.interactable = inRoom;
+        }
+
+        if (matchmakingButton != null)
+        {
+            matchmakingButton.interactable = !busy;
         }
 
         if (startMatchButton != null)
         {
-            startMatchButton.gameObject.SetActive(inRoom);
-            startMatchButton.interactable = inRoom && isMasterClient;
+            startMatchButton.interactable = inRoom && masterClient;
+        }
+
+        if (leaveRoomButton != null)
+        {
+            leaveRoomButton.gameObject.SetActive(inRoom || busy);
+            leaveRoomButton.interactable = inRoom;
         }
     }
 
@@ -378,61 +476,160 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         SetConnectionStatus(message);
     }
 
-#if PHOTON_UNITY_NETWORKING
-    public override void OnConnectedToMaster()
+    private void ShowPersistentLobbyMessage(string message)
     {
-        SetConnectionStatus("Connected");
-        PhotonNetwork.JoinLobby();
-    }
+        Debug.Log(message);
 
-    public override void OnJoinedLobby()
-    {
-        SetConnectionStatus("Lobby Ready");
-        ShowLobbyMessage("Connected to Photon.");
-        UpdateLobbyUIState();
-    }
-
-    public override void OnCreateRoomFailed(short returnCode, string message)
-    {
-        SetConnectionStatus("Create Room Failed");
-        ShowLobbyMessage("Create room failed: " + message);
-        UpdateLobbyUIState();
-    }
-
-    public override void OnJoinRoomFailed(short returnCode, string message)
-    {
-        SetConnectionStatus("Join Room Failed");
-        ShowLobbyMessage("Join room failed: " + message);
-        UpdateLobbyUIState();
-    }
-
-    public override void OnJoinedRoom()
-    {
-        IsOnlineRoomFlowActive = true;
-        ApplyLocalDisplayName();
-
-        if (PhotonNetwork.IsMasterClient)
+        if (modeSelectSceneManager != null)
         {
-            AssignMissingSlotsToJoinedPlayers();
+            modeSelectSceneManager.ShowPersistentToast(message);
+            modeSelectSceneManager.ShowOnlinePlaceholderMessage("");
         }
 
-        RefreshLobbySnapshot();
-        SetConnectionStatus("Room: " + PhotonNetwork.CurrentRoom.Name);
-        ShowLobbyMessage("Joined room: " + PhotonNetwork.CurrentRoom.Name);
+        SetConnectionStatus(message);
     }
 
-    public override void OnLeftRoom()
+    private void ClearPersistentLobbyMessage()
     {
-        IsOnlineRoomFlowActive = false;
-        SetConnectionStatus("Lobby Ready");
+        if (modeSelectSceneManager != null)
+        {
+            modeSelectSceneManager.ClearPersistentToast();
+        }
+    }
 
+    private void ClearOnlineLobbyUI()
+    {
         if (modeSelectSceneManager != null)
         {
             modeSelectSceneManager.ClearOnlineRoomSnapshot();
             modeSelectSceneManager.ShowOnlinePlaceholderMessage("");
         }
 
+        SetConnectionStatus("Offline");
         UpdateLobbyUIState();
+    }
+
+#if PHOTON_UNITY_NETWORKING
+    public override void OnConnectedToMaster()
+    {
+        Debug.Log("Connected to Master.");
+        isConnectingToPhoton = false;
+        ClearPersistentLobbyMessage();
+        SetConnectionStatus("Connected");
+        UpdateLobbyUIState();
+        PhotonNetwork.JoinLobby();
+    }
+
+    public override void OnJoinedLobby()
+    {
+        ShowLobbyMessage("Connected to Photon");
+        UpdateLobbyUIState();
+        ExecutePendingLobbyActionIfReady();
+    }
+
+    public override void OnCreateRoomFailed(short returnCode, string message)
+    {
+        if (pendingLobbyAction == PendingLobbyAction.AutoCreatePrivateRoom && privateRoomCreateAttempts < 5)
+        {
+            privateRoomCreateAttempts += 1;
+            pendingPrivateRoomCode = GenerateShortRoomCode();
+            CreatePrivateFriendRoom(pendingPrivateRoomCode);
+            return;
+        }
+
+        Debug.Log("Create room failed: " + message);
+        ClearPendingLobbyState();
+        ClearPersistentLobbyMessage();
+        ShowLobbyMessage("Create room failed: " + message);
+        UpdateLobbyUIState();
+    }
+
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        Debug.Log("Join room failed: " + message);
+        ClearPendingLobbyState();
+        ClearPersistentLobbyMessage();
+        ShowLobbyMessage("Join room failed: " + message);
+        UpdateLobbyUIState();
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        Debug.Log("Matchmaking failed: " + message);
+        ClearPendingLobbyState();
+        ClearPersistentLobbyMessage();
+        ShowLobbyMessage("Matchmaking failed: " + message);
+        UpdateLobbyUIState();
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        Debug.Log("Disconnected with cause: " + cause);
+        bool wasMatchmaking = isMatchmaking;
+        ClearPersistentLobbyMessage();
+
+        if (leaveRoomWhenPanelCloses)
+        {
+            leaveRoomWhenPanelCloses = false;
+            ClearPendingLobbyState();
+            ClearOnlineLobbyUI();
+            return;
+        }
+
+        if (IsOnlineRoomFlowActive)
+        {
+            ClearPendingLobbyState();
+            SetConnectionStatus("Disconnected");
+            ShowLobbyMessage("Photon connection failed: " + cause);
+            UpdateLobbyUIState();
+            return;
+        }
+
+        if (wasMatchmaking || pendingLobbyAction != PendingLobbyAction.None)
+        {
+            ShowLobbyMessage("Photon connection failed: " + cause);
+        }
+
+        ClearPendingLobbyState();
+        UpdateLobbyUIState();
+    }
+
+    public override void OnJoinedRoom()
+    {
+        IsOnlineRoomFlowActive = true;
+        isCreatingOrJoiningRoom = false;
+        bool joinedMatchmaking = isMatchmaking || pendingLobbyAction == PendingLobbyAction.JoinRandomMatchmaking;
+        isMatchmaking = false;
+        ClearPersistentLobbyMessage();
+        ApplyLocalDisplayName();
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            AssignSlotsAuthoritatively();
+        }
+
+        RefreshLobbySnapshot();
+        ShowLobbyMessage(joinedMatchmaking ? "Joined matchmaking room." : "Joined room " + GetCurrentRoomCode() + ".");
+        ClearPendingLobbyState();
+        UpdateLobbyUIState();
+    }
+
+    public override void OnLeftRoom()
+    {
+        if (leaveRoomWhenPanelCloses)
+        {
+            leaveRoomWhenPanelCloses = false;
+            ClearOnlineLobbyUI();
+            return;
+        }
+
+        if (pendingLobbyAction != PendingLobbyAction.None)
+        {
+            ExecutePendingLobbyActionIfReady();
+            return;
+        }
+
+        ClearOnlineLobbyUI();
         ShowLobbyMessage("Left room.");
     }
 
@@ -440,29 +637,29 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            AssignMissingSlotsToJoinedPlayers();
+            AssignSlotsAuthoritatively();
         }
 
         RefreshLobbySnapshot();
-        ShowLobbyMessage(newPlayer.NickName + " joined the room.");
+        ShowLobbyMessage(newPlayer.NickName + " joined.");
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            AssignMissingSlotsToJoinedPlayers();
+            AssignSlotsAuthoritatively();
         }
 
         RefreshLobbySnapshot();
-        ShowLobbyMessage(otherPlayer.NickName + " left the room.");
+        ShowLobbyMessage(otherPlayer.NickName + " left.");
     }
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            AssignMissingSlotsToJoinedPlayers();
+            AssignSlotsAuthoritatively();
         }
 
         RefreshLobbySnapshot();
@@ -472,32 +669,158 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            AssignMissingSlotsToJoinedPlayers();
+            AssignSlotsAuthoritatively();
         }
 
         RefreshLobbySnapshot();
-        ShowLobbyMessage("MasterClient is now " + newMasterClient.NickName + ".");
     }
 
-    private bool EnsurePhotonReadyForLobbyAction()
+    private void RequestAutoCreatePrivateRoom()
+    {
+        pendingLobbyAction = PendingLobbyAction.AutoCreatePrivateRoom;
+        pendingJoinRoomCode = string.Empty;
+        pendingPrivateRoomCode = GenerateShortRoomCode();
+        privateRoomCreateAttempts = 0;
+        UpdateLobbyUIState();
+        EnsureConnectedAndLobbyReady();
+    }
+
+    private void EnsureConnectedAndLobbyReady()
     {
         ApplyLocalDisplayName();
 
         if (!PhotonNetwork.IsConnected)
         {
             ConnectToPhoton();
-            ShowLobbyMessage("Connecting to Photon. Try again in a moment.");
-            return false;
+            return;
         }
 
-        if (!PhotonNetwork.InLobby && !PhotonNetwork.InRoom)
+        if (PhotonNetwork.InRoom)
         {
-            PhotonNetwork.JoinLobby();
-            ShowLobbyMessage("Joining Photon lobby. Try again in a moment.");
-            return false;
+            ExecutePendingLobbyActionIfReady();
+            return;
         }
 
-        return true;
+        if (!PhotonNetwork.InLobby)
+        {
+            isConnectingToPhoton = false;
+            PhotonNetwork.JoinLobby();
+            return;
+        }
+
+        ExecutePendingLobbyActionIfReady();
+    }
+
+    private void ExecutePendingLobbyActionIfReady()
+    {
+        if (!PhotonNetwork.IsConnected || (!PhotonNetwork.InLobby && !PhotonNetwork.InRoom))
+        {
+            return;
+        }
+
+        if (PhotonNetwork.InRoom)
+        {
+            RefreshLobbySnapshot();
+            return;
+        }
+
+        if (pendingLobbyAction == PendingLobbyAction.AutoCreatePrivateRoom)
+        {
+            if (string.IsNullOrWhiteSpace(pendingPrivateRoomCode))
+            {
+                pendingPrivateRoomCode = GenerateShortRoomCode();
+            }
+
+            CreatePrivateFriendRoom(pendingPrivateRoomCode);
+            return;
+        }
+
+        if (pendingLobbyAction == PendingLobbyAction.JoinPrivateRoomByCode)
+        {
+            if (string.IsNullOrWhiteSpace(pendingJoinRoomCode))
+            {
+                ShowLobbyMessage("Enter a room code.");
+                pendingLobbyAction = PendingLobbyAction.None;
+                return;
+            }
+
+            isCreatingOrJoiningRoom = true;
+            PhotonNetwork.JoinRoom(pendingJoinRoomCode);
+            return;
+        }
+
+        if (pendingLobbyAction == PendingLobbyAction.JoinRandomMatchmaking)
+        {
+            Hashtable expectedProperties = new Hashtable
+            {
+                { PhotonLobbyPropertyKeys.RoomKind, MatchmakingRoomKind },
+                { PhotonLobbyPropertyKeys.MatchMode, OnlinePhotonMode }
+            };
+
+            isCreatingOrJoiningRoom = true;
+            PhotonNetwork.JoinRandomRoom(expectedProperties, maxPlayersPerRoom);
+        }
+    }
+
+    private void CreatePrivateFriendRoom(string roomCode)
+    {
+        isCreatingOrJoiningRoom = true;
+        RoomOptions roomOptions = new RoomOptions
+        {
+            MaxPlayers = maxPlayersPerRoom,
+            IsVisible = false,
+            IsOpen = true,
+            CleanupCacheOnLeave = true,
+            CustomRoomProperties = new Hashtable
+            {
+                { PhotonLobbyPropertyKeys.MatchMode, OnlinePhotonMode },
+                { PhotonLobbyPropertyKeys.RoomKind, PrivateRoomKind },
+                { PhotonLobbyPropertyKeys.RoomCode, roomCode }
+            }
+        };
+
+        if (modeSelectSceneManager != null)
+        {
+            modeSelectSceneManager.SetOnlineRoomCodeDisplay(roomCode);
+        }
+
+        PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
+        UpdateLobbyUIState();
+    }
+
+    private void CreatePublicMatchmakingRoom()
+    {
+        isCreatingOrJoiningRoom = true;
+        string roomCode = GenerateShortRoomCode();
+
+        RoomOptions roomOptions = new RoomOptions
+        {
+            MaxPlayers = maxPlayersPerRoom,
+            IsVisible = true,
+            IsOpen = true,
+            CleanupCacheOnLeave = true,
+            CustomRoomProperties = new Hashtable
+            {
+                { PhotonLobbyPropertyKeys.MatchMode, OnlinePhotonMode },
+                { PhotonLobbyPropertyKeys.RoomKind, MatchmakingRoomKind },
+                { PhotonLobbyPropertyKeys.RoomCode, roomCode }
+            }
+        };
+
+        PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
+        UpdateLobbyUIState();
+    }
+
+    private void ClearPendingLobbyState()
+    {
+        pendingLobbyAction = PendingLobbyAction.None;
+        pendingJoinRoomCode = string.Empty;
+        pendingPrivateRoomCode = string.Empty;
+        privateRoomCreateAttempts = 0;
+        isCreatingOrJoiningRoom = false;
+        isMatchmaking = false;
+        isConnectingToPhoton = false;
+        UpdateLobbyUIState();
     }
 
     private void ApplyLocalDisplayName()
@@ -522,30 +845,58 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         PhotonNetwork.LocalPlayer.SetCustomProperties(updatedProperties);
     }
 
-    private void AssignMissingSlotsToJoinedPlayers()
+    private void AssignSlotsAuthoritatively()
     {
         if (!PhotonNetwork.InRoom || !PhotonNetwork.IsMasterClient)
         {
             return;
         }
 
+        List<Player> sortedPlayers = new List<Player>(PhotonNetwork.PlayerList);
+        sortedPlayers.Sort((left, right) => left.ActorNumber.CompareTo(right.ActorNumber));
         bool[] occupiedSlots = new bool[maxPlayersPerRoom];
+        Dictionary<int, Player> slotOwners = new Dictionary<int, Player>();
 
-        foreach (Player player in PhotonNetwork.PlayerList)
+        Debug.Log("Authoritative slot assignment started. Local actor number = " + PhotonNetwork.LocalPlayer.ActorNumber);
+
+        foreach (Player player in sortedPlayers)
         {
             int claimedSlot = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.SlotIndex, -1);
+            int claimedPlayerId = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.PlayerId, -1);
+            string displayName = GetPlayerStringProperty(
+                player,
+                PhotonLobbyPropertyKeys.PlayerName,
+                string.IsNullOrWhiteSpace(player.NickName) ? "Player" : player.NickName
+            );
 
-            if (claimedSlot >= 0 && claimedSlot < occupiedSlots.Length)
+            Debug.Log(
+                "Photon player before assignment: name=" + displayName +
+                ", nick=" + player.NickName +
+                ", actor=" + player.ActorNumber +
+                ", slotIndex=" + claimedSlot +
+                ", playerId=" + claimedPlayerId
+            );
+
+            if (claimedSlot >= 0 &&
+                claimedSlot < occupiedSlots.Length &&
+                claimedPlayerId == claimedSlot &&
+                !slotOwners.ContainsKey(claimedSlot))
             {
                 occupiedSlots[claimedSlot] = true;
+                slotOwners[claimedSlot] = player;
             }
         }
 
-        foreach (Player player in PhotonNetwork.PlayerList)
+        foreach (Player player in sortedPlayers)
         {
             int existingSlot = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.SlotIndex, -1);
+            int existingPlayerId = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.PlayerId, -1);
 
-            if (existingSlot >= 0 && existingSlot < occupiedSlots.Length)
+            if (existingSlot >= 0 &&
+                existingSlot < occupiedSlots.Length &&
+                existingPlayerId == existingSlot &&
+                slotOwners.TryGetValue(existingSlot, out Player existingOwner) &&
+                existingOwner == player)
             {
                 continue;
             }
@@ -554,11 +905,11 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
             if (freeSlot < 0)
             {
-                Debug.LogWarning("No free slot remained for Photon player " + player.ActorNumber + ".");
-                continue;
+                return;
             }
 
             occupiedSlots[freeSlot] = true;
+            slotOwners[freeSlot] = player;
 
             Hashtable updatedProperties = new Hashtable
             {
@@ -571,47 +922,40 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
             player.SetCustomProperties(updatedProperties);
         }
-    }
 
-    private int FindFirstFreeSlot(bool[] occupiedSlots)
-    {
-        if (occupiedSlots == null)
-        {
-            return -1;
-        }
-
-        for (int i = 0; i < occupiedSlots.Length; i++)
-        {
-            if (!occupiedSlots[i])
-            {
-                return i;
-            }
-        }
-
-        return -1;
+        Debug.Log(BuildSlotAssignmentDebugString(sortedPlayers));
     }
 
     private bool CanStartMatch()
     {
-        List<Player> slottedPlayers = GetSlottedPlayers();
+        List<Player> joinedPlayers = GetSlottedPlayers();
 
-        if (slottedPlayers.Count < minPlayersToStart)
+        if (joinedPlayers.Count < minPlayersToStart)
         {
-            ShowLobbyMessage("Need at least " + minPlayersToStart + " players to start.");
+            ShowLobbyMessage("Need at least " + minPlayersToStart + " players.");
             return false;
         }
 
-        foreach (Player player in slottedPlayers)
+        foreach (Player player in joinedPlayers)
         {
             if (!GetPlayerBoolProperty(player, PhotonLobbyPropertyKeys.Ready, false))
             {
-                string playerName = GetPlayerStringProperty(player, PhotonLobbyPropertyKeys.PlayerName, player.NickName);
-                ShowLobbyMessage(playerName + " is not ready.");
+                ShowLobbyMessage("Waiting for all players.");
                 return false;
             }
         }
 
         return true;
+    }
+
+    private bool IsLocalPlayerReady()
+    {
+        if (!PhotonNetwork.InRoom)
+        {
+            return false;
+        }
+
+        return GetPlayerBoolProperty(PhotonNetwork.LocalPlayer, PhotonLobbyPropertyKeys.Ready, false);
     }
 
     private List<Player> GetSlottedPlayers()
@@ -641,30 +985,43 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         PlayerSetupData[] snapshot = new PlayerSetupData[maxPlayersPerRoom];
         int localSlotIndex = 0;
         bool localPlayerReady = false;
+        List<Player> sortedPlayers = new List<Player>();
 
         if (PhotonNetwork.InRoom)
         {
-            foreach (Player player in PhotonNetwork.PlayerList)
+            sortedPlayers.AddRange(PhotonNetwork.PlayerList);
+            sortedPlayers.Sort((left, right) => left.ActorNumber.CompareTo(right.ActorNumber));
+            Debug.Log("Refreshing Photon lobby snapshot. Local actor number = " + PhotonNetwork.LocalPlayer.ActorNumber);
+
+            foreach (Player player in sortedPlayers)
             {
                 int slotIndex = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.SlotIndex, -1);
+                int playerId = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.PlayerId, -1);
+                string displayName = GetPlayerStringProperty(
+                    player,
+                    PhotonLobbyPropertyKeys.PlayerName,
+                    string.IsNullOrWhiteSpace(player.NickName) ? "Player" : player.NickName
+                );
+                bool isReady = GetPlayerBoolProperty(player, PhotonLobbyPropertyKeys.Ready, false);
+                bool isAI = GetPlayerBoolProperty(player, PhotonLobbyPropertyKeys.IsAI, false);
+
+                Debug.Log(
+                    "Photon snapshot player: name=" + displayName +
+                    ", nick=" + player.NickName +
+                    ", actor=" + player.ActorNumber +
+                    ", slotIndex=" + slotIndex +
+                    ", playerId=" + playerId +
+                    ", ready=" + isReady
+                );
 
                 if (slotIndex < 0 || slotIndex >= maxPlayersPerRoom)
                 {
                     continue;
                 }
 
-                string displayName = GetPlayerStringProperty(
-                    player,
-                    PhotonLobbyPropertyKeys.PlayerName,
-                    string.IsNullOrWhiteSpace(player.NickName) ? "Player" : player.NickName
-                );
-
-                bool isReady = GetPlayerBoolProperty(player, PhotonLobbyPropertyKeys.Ready, false);
-                bool isAI = GetPlayerBoolProperty(player, PhotonLobbyPropertyKeys.IsAI, false);
-
-                PlayerSetupData data = new PlayerSetupData(slotIndex, displayName, isAI, AIDifficulty.Easy);
-                data.isReady = isReady;
-                snapshot[slotIndex] = data;
+                PlayerSetupData snapshotData = new PlayerSetupData(slotIndex, displayName, isAI, AIDifficulty.Easy);
+                snapshotData.isReady = isReady;
+                snapshot[slotIndex] = snapshotData;
 
                 if (player == PhotonNetwork.LocalPlayer)
                 {
@@ -674,9 +1031,12 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             }
         }
 
+        Debug.Log(BuildSnapshotDebugString(snapshot));
+
         if (modeSelectSceneManager != null)
         {
             modeSelectSceneManager.ApplyOnlineRoomSnapshot(snapshot, localSlotIndex, localPlayerReady);
+            modeSelectSceneManager.SetOnlineRoomCodeDisplay(GetCurrentRoomCode());
         }
 
         PersistRoomSnapshotToPlayerPrefs(snapshot, localSlotIndex);
@@ -718,9 +1078,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
     private void PersistRoomSnapshotToPlayerPrefs(PlayerSetupData[] snapshot, int localSlotIndex)
     {
-        int slotCount = Mathf.Max(0, maxPlayersPerRoom);
-
-        for (int playerId = 0; playerId < slotCount; playerId++)
+        for (int playerId = 0; playerId < maxPlayersPerRoom; playerId++)
         {
             PlayerSetupData data = snapshot != null && playerId < snapshot.Length ? snapshot[playerId] : null;
 
@@ -741,23 +1099,57 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
         PlayerPrefs.SetString("GameMode", OnlinePhotonMode);
         PlayerPrefs.SetInt("OnlineLocalPlayerId", localSlotIndex);
-
-        if (PhotonNetwork.InRoom && PhotonNetwork.CurrentRoom != null)
-        {
-            PlayerPrefs.SetString("PhotonRoomName", PhotonNetwork.CurrentRoom.Name);
-        }
-
+        PlayerPrefs.SetString("PhotonRoomName", GetCurrentRoomCode());
         PlayerPrefs.Save();
     }
 
-    private string GetDesiredRoomCode()
+    private string GetCurrentRoomCode()
     {
-        if (roomCodeInput != null && !string.IsNullOrWhiteSpace(roomCodeInput.text))
+        if (!PhotonNetwork.InRoom || PhotonNetwork.CurrentRoom == null)
         {
-            return roomCodeInput.text.Trim();
+            return "----";
         }
 
-        return RoomNamePrefix + Random.Range(1000, 9999);
+        if (PhotonNetwork.CurrentRoom.CustomProperties != null &&
+            PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PhotonLobbyPropertyKeys.RoomCode))
+        {
+            object codeValue = PhotonNetwork.CurrentRoom.CustomProperties[PhotonLobbyPropertyKeys.RoomCode];
+
+            if (codeValue is string stringCode && !string.IsNullOrWhiteSpace(stringCode))
+            {
+                return stringCode;
+            }
+        }
+
+        return PhotonNetwork.CurrentRoom.Name;
+    }
+
+    private string NormalizeRoomCode(string roomCode)
+    {
+        return string.IsNullOrWhiteSpace(roomCode) ? string.Empty : roomCode.Trim().ToUpperInvariant();
+    }
+
+    private string GenerateShortRoomCode()
+    {
+        return Random.Range(1000, 9999).ToString();
+    }
+
+    private int FindFirstFreeSlot(bool[] occupiedSlots)
+    {
+        if (occupiedSlots == null)
+        {
+            return -1;
+        }
+
+        for (int i = 0; i < occupiedSlots.Length; i++)
+        {
+            if (!occupiedSlots[i])
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     private int GetPlayerIntProperty(Player player, string key, int fallbackValue)
@@ -779,6 +1171,16 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             return intValue;
         }
 
+        if (value is short shortValue)
+        {
+            return shortValue;
+        }
+
+        if (value is long longValue)
+        {
+            return (int)longValue;
+        }
+
         return fallbackValue;
     }
 
@@ -790,13 +1192,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
 
         object value = player.CustomProperties[key];
-
-        if (value is bool boolValue)
-        {
-            return boolValue;
-        }
-
-        return fallbackValue;
+        return value is bool boolValue ? boolValue : fallbackValue;
     }
 
     private string GetPlayerStringProperty(Player player, string key, string fallbackValue)
@@ -808,6 +1204,64 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
         object value = player.CustomProperties[key];
         return value is string stringValue ? stringValue : fallbackValue;
+    }
+
+    private string BuildSlotAssignmentDebugString(List<Player> sortedPlayers)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.Append("Photon authoritative slot state:");
+
+        for (int i = 0; i < sortedPlayers.Count; i++)
+        {
+            Player player = sortedPlayers[i];
+            string displayName = GetPlayerStringProperty(
+                player,
+                PhotonLobbyPropertyKeys.PlayerName,
+                string.IsNullOrWhiteSpace(player.NickName) ? "Player" : player.NickName
+            );
+            int slotIndex = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.SlotIndex, -1);
+            int playerId = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.PlayerId, -1);
+            builder.Append(" [actor=");
+            builder.Append(player.ActorNumber);
+            builder.Append(", name=");
+            builder.Append(displayName);
+            builder.Append(", slot=");
+            builder.Append(slotIndex);
+            builder.Append(", playerId=");
+            builder.Append(playerId);
+            builder.Append("]");
+        }
+
+        return builder.ToString();
+    }
+
+    private string BuildSnapshotDebugString(PlayerSetupData[] snapshot)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.Append("Final slot snapshot:");
+
+        for (int slotIndex = 0; slotIndex < maxPlayersPerRoom; slotIndex++)
+        {
+            PlayerSetupData data = snapshot != null && slotIndex < snapshot.Length ? snapshot[slotIndex] : null;
+            builder.Append(" [slot ");
+            builder.Append(slotIndex);
+            builder.Append(" = ");
+
+            if (data == null)
+            {
+                builder.Append("Empty");
+            }
+            else
+            {
+                builder.Append(data.displayName);
+                builder.Append(", ready=");
+                builder.Append(data.isReady);
+            }
+
+            builder.Append("]");
+        }
+
+        return builder.ToString();
     }
 #endif
 
