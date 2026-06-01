@@ -106,6 +106,16 @@ public class GamePhaseManager : MonoBehaviour
             ShowToast("Player " + activePlayerId + " turn started.");
         }
 
+        UpdateTurnIndicator();
+    }
+
+    private void UpdateTurnIndicator()
+    {
+        if (CurrentTurnIndicatorManager.Instance != null)
+        {
+            int currentPlayerId = turnManager != null ? turnManager.currentPlayerId : 0;
+            CurrentTurnIndicatorManager.Instance.UpdateCurrentTurnIndicator(currentPlayerId);
+        }
     }
 
     public void StartWavePhase()
@@ -120,29 +130,35 @@ public class GamePhaseManager : MonoBehaviour
         waveStartCoroutine = StartCoroutine(StartWaveAfterIncomingToast());
     }
 
-    private IEnumerator StartWaveAfterIncomingToast()
-    {
-        if (waveManager != null)
-        {
-            waveManager.ShowWaveIncoming(currentWaveIndex);
-        }
-        else
-        {
-            ShowToast("Wave " + currentWaveIndex + " incoming!");
-        }
+     private IEnumerator StartWaveAfterIncomingToast()
+     {
+         if (waveManager != null)
+         {
+             waveManager.ShowWaveIncoming(currentWaveIndex);
+         }
+         else
+         {
+             ShowToast("Wave " + currentWaveIndex + " incoming!");
+         }
 
-        yield return new WaitForSeconds(waveIncomingDelay);
+         yield return new WaitForSeconds(waveIncomingDelay);
 
-        NotifyTowersWaveStarted();
-        NotifyShockTrapsWaveStarted();
+         // Hide turn markers when wave starts
+         if (CurrentTurnIndicatorManager.Instance != null)
+         {
+             CurrentTurnIndicatorManager.Instance.HideAllMarkers();
+         }
 
-        if (waveManager != null)
-        {
-            waveManager.StartWave();
-        }
+         NotifyTowersWaveStarted();
+         NotifyShockTrapsWaveStarted();
 
-        waveStartCoroutine = null;
-    }
+         if (waveManager != null)
+         {
+             waveManager.StartWave();
+         }
+
+         waveStartCoroutine = null;
+     }
 
     public void OnEndTurnButtonClicked()
     {

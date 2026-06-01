@@ -32,6 +32,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 [System.Serializable]
 public class CardDeckEntry
@@ -206,46 +207,52 @@ public class CardDrawManager : MonoBehaviour
 
     public void DrawCard()
     {
+        TryDrawCardForCurrentPlayer();
+    }
+
+    public bool TryDrawCardForCurrentPlayer()
+    {
         if (!CanHumanUseCardsNow())
         {
             StartCoroutine(ShowWarning("Wait for your turn."));
-            return;
+            return false;
         }
 
         if (IsDisruptedThisTurn())
         {
             StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
-            return;
+            return false;
         }
 
         if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
-            return;
+            return false;
         }
 
-        if (isBusy) return;
+        if (isBusy) return false;
 
         if (IsCurrentHandFull())
         {
             StartCoroutine(ShowWarning("Hand limit reached."));
-            return;
+            return false;
         }
 
         if (!HasDrawableCard())
         {
             StartCoroutine(ShowWarning("Deck is empty."));
-            return;
+            return false;
         }
 
         TurnManager manager = GetTurnManager();
 
         if (manager != null && !manager.TryConsumeDraw())
         {
-            return;
+            return false;
         }
 
         StartCoroutine(DrawCardRoutine());
+        return true;
     }
 
     int FindEmptySlot()
@@ -525,38 +532,43 @@ public class CardDrawManager : MonoBehaviour
 
     public void DiscardSelectedCard()
     {
+        TryDiscardSelectedCard();
+    }
+
+    public bool TryDiscardSelectedCard()
+    {
         if (!CanHumanUseCardsNow())
         {
             StartCoroutine(ShowWarning("Wait for your turn."));
-            return;
+            return false;
         }
 
         if (IsDisruptedThisTurn())
         {
             StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
-            return;
+            return false;
         }
 
         if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
-            return;
+            return false;
         }
 
-        if (isBusy) return;
-        if (pendingPlayedCard != null) return;
+        if (isBusy) return false;
+        if (pendingPlayedCard != null) return false;
 
         if (selectedCard == null)
         {
             StartCoroutine(ShowWarning("No card selected!"));
-            return;
+            return false;
         }
 
         TurnManager manager = GetTurnManager();
 
         if (manager != null && !manager.TryConsumeDiscard())
         {
-            return;
+            return false;
         }
 
         GameObject returnedPrefab = selectedCard.sourcePrefab;
@@ -579,35 +591,41 @@ public class CardDrawManager : MonoBehaviour
         selectedCard = null;
 
         RenderCurrentPlayerHand();
+        return true;
     }
 
     public void PlaySelectedCard()
     {
+        TryBeginPlaySelectedCard();
+    }
+
+    public bool TryBeginPlaySelectedCard()
+    {
         if (!CanHumanUseCardsNow())
         {
             StartCoroutine(ShowWarning("Wait for your turn."));
-            return;
+            return false;
         }
 
         if (IsDisruptedThisTurn())
         {
             StartCoroutine(ShowWarning("You cannot use cards while disrupted."));
-            return;
+            return false;
         }
 
         if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
-            return;
+            return false;
         }
 
-        if (isBusy) return;
-        if (pendingPlayedCard != null) return;
+        if (isBusy) return false;
+        if (pendingPlayedCard != null) return false;
 
         if (selectedCard == null)
         {
             StartCoroutine(ShowWarning("No card selected!"));
-            return;
+            return false;
         }
 
         GateActionType gateActionType = GetGateActionType(selectedCard.sourcePrefab.name);
@@ -617,31 +635,31 @@ public class CardDrawManager : MonoBehaviour
              !GateTargetingManager.Instance.HasValidGateTargets(gateActionType)))
         {
             StartCoroutine(ShowWarning("No valid gates."));
-            return;
+            return false;
         }
 
         if (IsTileTargetingCard(selectedCard.sourcePrefab.name) && tileTargetingManager == null)
         {
             StartCoroutine(ShowWarning("Tile targeting manager is missing."));
-            return;
+            return false;
         }
 
         if (IsPlayerTargetingCard(selectedCard.sourcePrefab.name) && playerTargetingManager == null)
         {
             StartCoroutine(ShowWarning("Player targeting manager is missing."));
-            return;
+            return false;
         }
 
         if (IsTowerTargetingCard(selectedCard.sourcePrefab.name) && towerTargetingManager == null)
         {
             StartCoroutine(ShowWarning("Tower targeting manager is missing."));
-            return;
+            return false;
         }
 
         if (IsShockTrapCard(selectedCard.sourcePrefab.name) && shockTrapTargetingManager == null)
         {
             StartCoroutine(ShowWarning("Shock Trap targeting manager is missing."));
-            return;
+            return false;
         }
 
         TurnManager manager = GetTurnManager();
@@ -649,10 +667,11 @@ public class CardDrawManager : MonoBehaviour
         if (manager != null && !manager.CanPlayCard())
         {
             manager.TryConsumePlayCard();
-            return;
+            return false;
         }
 
         StartCoroutine(PlayCardRoutine(selectedCard));
+        return true;
     }
 
     IEnumerator PlayCardRoutine(CardInstanceSelectable card)
@@ -880,6 +899,8 @@ public class CardDrawManager : MonoBehaviour
             yield break;
         }
 
+        AudioManager.Instance?.PlayCardPlay();
+
         selectedCard = null;
         RemoveCardFromCurrentHand(card.sourcePrefab);
         Destroy(card.gameObject);
@@ -893,38 +914,33 @@ public class CardDrawManager : MonoBehaviour
         ConfirmPendingCard(true);
     }
 
+    public bool ConfirmCardConsumeAfterSuccessfulResolution()
+    {
+        return ConfirmPendingCardInternal(true);
+    }
+
+    public bool ConfirmCardConsumeAfterSuccessfulResolution(bool consumePlayAction)
+    {
+        return ConfirmPendingCardInternal(consumePlayAction);
+    }
+
     public void ConfirmPendingCard(bool consumePlayAction)
     {
-        if (pendingPlayedCard == null) return;
+        ConfirmPendingCardInternal(consumePlayAction);
+    }
+
+    public bool ConfirmPendingCardInternal(bool consumePlayAction)
+    {
+        if (pendingPlayedCard == null) return false;
 
         TurnManager manager = GetTurnManager();
 
         if (consumePlayAction && manager != null && !manager.TryConsumePlayCard())
         {
-            return;
-        }
-
-        RemoveCardFromCurrentHand(pendingPlayedCard.sourcePrefab);
-        Destroy(pendingPlayedCard.gameObject);
-        pendingPlayedCard = null;
-        RenderCurrentPlayerHand();
-
-        Debug.Log("Pending card confirmed and consumed.");
-    }
-
-    public bool ConsumeSelectedCardAfterSuccessfulTargeting()
-    {
-        if (pendingPlayedCard == null)
-        {
             return false;
         }
 
-        TurnManager manager = GetTurnManager();
-
-        if (manager != null && !manager.TryConsumePlayCard())
-        {
-            return false;
-        }
+        AudioManager.Instance?.PlayCardPlay();
 
         RemoveCardFromCurrentHand(pendingPlayedCard.sourcePrefab);
         Destroy(pendingPlayedCard.gameObject);
@@ -933,6 +949,11 @@ public class CardDrawManager : MonoBehaviour
 
         Debug.Log("Pending card confirmed and consumed.");
         return true;
+    }
+
+    public bool ConsumeSelectedCardAfterSuccessfulTargeting()
+    {
+        return ConfirmPendingCardInternal(true);
     }
 
     public bool CanConsumeSelectedCardAfterSuccessfulTargeting()
@@ -954,6 +975,13 @@ public class CardDrawManager : MonoBehaviour
     public void CancelPendingCard()
     {
         if (pendingPlayedCard == null) return;
+
+        // Gate targeting lives outside the other targeting managers, so it needs
+        // its own explicit exit path before the pending card returns to hand.
+        if (GateTargetingManager.Instance != null && GateTargetingManager.Instance.IsAnyTargetingActive())
+        {
+            GateTargetingManager.Instance.ExitGateTargetMode();
+        }
 
         if (tileTargetingManager != null && tileTargetingManager.IsTargeting())
         {
@@ -985,6 +1013,122 @@ public class CardDrawManager : MonoBehaviour
         RenderCurrentPlayerHand();
 
         Debug.Log("Pending card cancelled and returned to hand.");
+    }
+
+    public bool TryConsumeDirectPlayedCard(int playerId, GameObject cardPrefab)
+    {
+        return TryConsumeDirectPlayedCard(playerId, cardPrefab, true);
+    }
+
+    public bool TryConsumeDirectPlayedCard(int playerId, GameObject cardPrefab, bool consumePlayAction)
+    {
+        PlayerResource player = GetPlayerResource(playerId);
+
+        if (player == null || cardPrefab == null)
+        {
+            return false;
+        }
+
+        TurnManager manager = GetTurnManager();
+
+        if (consumePlayAction && manager != null && !manager.TryConsumePlayCard())
+        {
+            return false;
+        }
+
+        PlayerHand hand = player.GetPlayerHand();
+
+        if (hand == null || !hand.RemoveCard(cardPrefab))
+        {
+            return false;
+        }
+
+        player.SyncCardCountFromHand();
+
+        if (playerManager != null && playerManager.GetCurrentPlayerId() == playerId)
+        {
+            RenderCurrentPlayerHand();
+        }
+        else if (playerManager != null)
+        {
+            playerManager.RefreshPlayerUI(playerId);
+        }
+
+        AudioManager.Instance?.PlayCardPlay();
+        Debug.Log("Directly consumed played card: " + cardPrefab.name + " for player " + playerId);
+        return true;
+    }
+
+    // Returns a list of card prefabs to the runtime deck and reshuffles once.
+    public void ReturnCardsToDeck(IEnumerable<GameObject> cardPrefabs)
+    {
+        if (cardPrefabs == null)
+        {
+            return;
+        }
+
+        if (!deckInitialized)
+        {
+            InitializeDeck();
+        }
+
+        bool addedAnyCard = false;
+
+        foreach (GameObject cardPrefab in cardPrefabs)
+        {
+            if (cardPrefab == null)
+            {
+                continue;
+            }
+
+            runtimeDeck.Add(cardPrefab);
+            addedAnyCard = true;
+        }
+
+        if (addedAnyCard)
+        {
+            ShuffleRuntimeDeck();
+        }
+    }
+
+    // Returns every card in one player's hand to the runtime deck, then clears the hand.
+    public bool ReturnPlayerHandToDeck(int playerId)
+    {
+        PlayerResource player = GetPlayerResource(playerId);
+
+        if (player == null)
+        {
+            Debug.LogWarning("ReturnPlayerHandToDeck failed because player " + playerId + " was not found.");
+            return false;
+        }
+
+        PlayerHand hand = player.GetPlayerHand();
+
+        if (hand == null)
+        {
+            Debug.LogWarning("ReturnPlayerHandToDeck failed because player " + playerId + " has no PlayerHand.");
+            return false;
+        }
+
+        List<GameObject> cardsToReturn = hand.GetCards() != null
+            ? new List<GameObject>(hand.GetCards().Where(card => card != null))
+            : new List<GameObject>();
+
+        ReturnCardsToDeck(cardsToReturn);
+        hand.Clear();
+        player.SyncCardCountFromHand();
+
+        if (playerManager != null && playerManager.GetCurrentPlayerId() == playerId)
+        {
+            RenderCurrentPlayerHand();
+        }
+        else if (playerManager != null)
+        {
+            playerManager.RefreshPlayerUI(playerId);
+        }
+
+        Debug.Log("Returned " + cardsToReturn.Count + " cards from player " + playerId + " back to the deck.");
+        return true;
     }
 
     void ResetCardRect(RectTransform cardRect)

@@ -213,37 +213,55 @@ public class ShockTrapTargetingManager : MonoBehaviour
             return;
         }
 
-        bool trapAlreadyHere = IsRouteNodeOccupied(selectedNode);
+        ResolveShockTrapPlacement(playerManager != null ? playerManager.GetCurrentPlayerId() : 0, selectedNode, true);
+    }
+
+    public bool ResolveShockTrapPlacement(int playerId, PathNode node)
+    {
+        return ResolveShockTrapPlacement(playerId, node, false);
+    }
+
+    public bool ResolveShockTrapPlacement(int playerId, PathNode node, bool consumePendingCard)
+    {
+        if (node == null)
+        {
+            ShowToast("Choose a path position first.");
+            return false;
+        }
+
+        bool trapAlreadyHere = IsRouteNodeOccupied(node);
         Debug.Log("Active traps count before placement: " + GetActiveTrapCount());
         Debug.Log("Trap already here? " + trapAlreadyHere);
 
-        if (!IsValidRouteNode(selectedNode))
+        if (!IsValidRouteNode(node))
         {
             ShowToast("Trap already placed here.");
-            return;
+            return false;
         }
 
         if (shockTrapPrefab == null)
         {
             ShowToast("Shock Trap prefab is missing.");
-            return;
+            return false;
         }
 
-        if (cardDrawManager == null)
+        if (consumePendingCard)
         {
-            ShowToast("Card manager is missing.");
-            return;
+            if (cardDrawManager == null)
+            {
+                ShowToast("Card manager is missing.");
+                return false;
+            }
+
+            if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
+            {
+                ShowToast("Could not play this card.");
+                return false;
+            }
         }
 
-        if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
-        {
-            ShowToast("Could not play this card.");
-            return;
-        }
-
-        int currentPlayerId = playerManager != null ? playerManager.GetCurrentPlayerId() : 0;
-        PlayerResource currentPlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
-        Vector3 trapPosition = selectedNode.transform.position;
+        PlayerResource currentPlayer = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        Vector3 trapPosition = node.transform.position;
         GameObject trapObject = Instantiate(shockTrapPrefab, trapPosition, Quaternion.identity);
         ShockTrap shockTrap = trapObject.GetComponent<ShockTrap>();
 
@@ -252,23 +270,29 @@ public class ShockTrapTargetingManager : MonoBehaviour
             shockTrap = trapObject.AddComponent<ShockTrap>();
         }
 
-        shockTrap.Initialize(currentPlayerId, currentPlayer, selectedNode.transform);
+        shockTrap.Initialize(playerId, currentPlayer, node.transform);
         shockTrap.ApplyOwnerVisual(playerManager);
         EnsurePlacedTrapVisual(trapObject);
-        Debug.Log("Shock Trap placed at node: " + selectedNode.name);
+        Debug.Log("Shock Trap placed at node: " + node.name);
 
-        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+        if (consumePendingCard && !cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
         {
-            UnregisterTrap(selectedNode.transform, shockTrap);
+            UnregisterTrap(node.transform, shockTrap);
             Destroy(trapObject);
             ShowToast("Could not play this card.");
-            return;
+            return false;
         }
 
         Debug.Log("Active traps count after placement: " + GetActiveTrapCount());
         string actorName = currentPlayer != null ? currentPlayer.GetDisplayName() : "Current player";
         ShowToast(actorName + " used Shock Trap on the path.");
-        ExitTargetingMode();
+
+        if (consumePendingCard)
+        {
+            ExitTargetingMode();
+        }
+
+        return true;
     }
 
     public void CancelSelection()
@@ -708,6 +732,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
     private void SetTargetingVisuals(bool active)
     {
+        if (active && BuildTowerManager.Instance != null)
+        {
+            BuildTowerManager.Instance.HideBuildInteractionUI();
+        }
+
         SetNormalGameplayUIEnabled(!active);
 
         if (darkOverlay != null)

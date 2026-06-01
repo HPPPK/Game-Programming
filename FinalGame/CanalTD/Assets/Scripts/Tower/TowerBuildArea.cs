@@ -103,6 +103,12 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
 
     private void ReportBuildAreaClicked()
     {
+        // Check if any targeting mode is active - build areas should not be clickable during targeting
+        if (IsAnyTargetingModeActive())
+        {
+            return;
+        }
+
         Debug.Log("BuildArea clicked: " + name);
 
         if (buildTowerManager == null)
@@ -117,6 +123,45 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         }
 
         buildTowerManager.HandleBuildAreaClicked(this);
+    }
+
+    private bool IsAnyTargetingModeActive()
+    {
+        // Check Gate targeting
+        if (GateTargetingManager.Instance != null && GateTargetingManager.Instance.IsAnyTargetingActive())
+        {
+            return true;
+        }
+
+        // Check Tile targeting (Take Over, Freeze Claim)
+        TileTargetingManager tileTargetingManager = FindObjectOfType<TileTargetingManager>();
+        if (tileTargetingManager != null && tileTargetingManager.IsTargeting())
+        {
+            return true;
+        }
+
+        // Check Player targeting (Steal Card, Trade Hands, Disrupt)
+        PlayerTargetingManager playerTargetingManager = FindObjectOfType<PlayerTargetingManager>();
+        if (playerTargetingManager != null && playerTargetingManager.IsTargeting())
+        {
+            return true;
+        }
+
+        // Check Tower targeting
+        TowerTargetingManager towerTargetingManager = FindObjectOfType<TowerTargetingManager>();
+        if (towerTargetingManager != null && towerTargetingManager.IsTargeting())
+        {
+            return true;
+        }
+
+        // Check Shock Trap targeting
+        ShockTrapTargetingManager shockTrapTargetingManager = FindObjectOfType<ShockTrapTargetingManager>();
+        if (shockTrapTargetingManager != null && shockTrapTargetingManager.IsTargeting())
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public bool CanBuildTower(int playerId)

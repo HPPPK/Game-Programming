@@ -55,6 +55,9 @@ public class PlayerTargetingManager : MonoBehaviour
     [Header("Player Targets")]
     public List<CastleBase> playerTargets = new List<CastleBase>();
 
+    [Header("Action Marker Color")]
+    public Color actionMarkerColor = new Color(1f, 0.5f, 0.2f, 1f);
+
     private readonly List<PlayerResource> validTargets = new List<PlayerResource>();
     private readonly Dictionary<PlayerResource, SpriteRenderer> targetRenderers = new Dictionary<PlayerResource, SpriteRenderer>();
     private readonly Dictionary<SpriteRenderer, Color> originalColors = new Dictionary<SpriteRenderer, Color>();
@@ -193,6 +196,17 @@ public class PlayerTargetingManager : MonoBehaviour
         isTargeting = true;
         SetTargetingVisuals(true);
 
+        // Show action markers on valid target castles
+        if (CurrentTurnIndicatorManager.Instance != null)
+        {
+            int[] targetPlayerIds = new int[validTargets.Count];
+            for (int i = 0; i < validTargets.Count; i++)
+            {
+                targetPlayerIds[i] = validTargets[i].playerId;
+            }
+            CurrentTurnIndicatorManager.Instance.ShowActionMarkers(targetPlayerIds, actionMarkerColor);
+        }
+
         foreach (PlayerResource target in validTargets)
         {
             SpriteRenderer renderer = GetTargetRenderer(target);
@@ -240,45 +254,59 @@ public class PlayerTargetingManager : MonoBehaviour
 
     private void ConfirmStealCard()
     {
-        PlayerResource currentPlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
+        ResolveStealCard(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
+    }
+
+    private void ConfirmTradeHands()
+    {
+        ResolveTradeHands(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
+    }
+
+    private void ConfirmDisrupt()
+    {
+        ResolveDisrupt(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
+    }
+
+    public bool ResolveStealCard(int playerId, int targetPlayerId)
+    {
+        return ResolveStealCard(playerId, targetPlayerId, false);
+    }
+
+    public bool ResolveStealCard(int playerId, int targetPlayerId, bool consumePendingCard)
+    {
+        PlayerResource currentPlayer = GetPlayerResource(playerId);
+        PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
 
         if (currentPlayer == null)
         {
             ShowToast("Player resource is missing.");
-            return;
+            return false;
         }
 
         PlayerHand currentHand = currentPlayer.GetPlayerHand();
-        PlayerHand targetHand = selectedPlayer.GetPlayerHand();
+        PlayerHand targetHand = targetPlayer != null ? targetPlayer.GetPlayerHand() : null;
 
         if (currentHand == null || targetHand == null)
         {
             ShowToast("Player hand is missing.");
-            return;
+            return false;
         }
 
         if (!currentHand.CanAddCard())
         {
             ShowToast("Your hand is full.");
-            return;
+            return false;
         }
 
         if (targetHand.GetCardCount() <= 0)
         {
             ShowToast("Target has no cards.");
-            return;
+            return false;
         }
 
-        if (cardDrawManager == null)
+        if (consumePendingCard && !CanConfirmTargetingCard())
         {
-            ShowToast("Card manager is missing.");
-            return;
-        }
-
-        if (!cardDrawManager.CanConsumeSelectedCardAfterSuccessfulTargeting())
-        {
-            ShowToast("Could not play this card.");
-            return;
+            return false;
         }
 
         GameObject stolenCard = targetHand.RemoveRandomCard();
@@ -286,130 +314,146 @@ public class PlayerTargetingManager : MonoBehaviour
         if (stolenCard == null)
         {
             ShowToast("Target has no cards.");
-            return;
+            return false;
         }
 
         if (!currentHand.AddCard(stolenCard))
         {
             targetHand.AddCard(stolenCard);
             ShowToast("Your hand is full.");
-            return;
+            return false;
         }
 
-        selectedPlayer.SyncCardCountFromHand();
-        currentPlayer.SyncCardCountFromHand();
+        SyncAndRefreshPlayers(currentPlayer, targetPlayer);
 
-        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+        if (consumePendingCard && !cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
         {
             currentHand.RemoveCard(stolenCard);
             targetHand.AddCard(stolenCard);
-            selectedPlayer.SyncCardCountFromHand();
-            currentPlayer.SyncCardCountFromHand();
+            SyncAndRefreshPlayers(currentPlayer, targetPlayer);
             ShowToast("Could not play this card.");
-            return;
+            return false;
         }
 
-        if (playerManager != null)
+        cardDrawManager?.RenderCurrentPlayerHand();
+        ShowPublicCardToast(currentPlayer, "Steal Card", targetPlayer);
+
+        if (consumePendingCard)
         {
-            playerManager.RefreshPlayerUI(selectedPlayer.playerId);
-            playerManager.RefreshCurrentPlayerUI();
+            ExitTargetingMode();
         }
 
-        cardDrawManager.RenderCurrentPlayerHand();
-        ShowPublicCardToast(currentPlayer, "Steal Card", selectedPlayer);
-        ExitTargetingMode();
+        return true;
     }
 
-    private void ConfirmTradeHands()
+    public bool ResolveTradeHands(int playerId, int targetPlayerId)
     {
-        PlayerResource currentPlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
+        return ResolveTradeHands(playerId, targetPlayerId, false);
+    }
+
+    public bool ResolveTradeHands(int playerId, int targetPlayerId, bool consumePendingCard)
+    {
+        PlayerResource currentPlayer = GetPlayerResource(playerId);
+        PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
 
         if (currentPlayer == null)
         {
             ShowToast("Player resource is missing.");
-            return;
+            return false;
         }
 
-        if (!CanConfirmTargetingCard())
+        if (consumePendingCard && !CanConfirmTargetingCard())
         {
-            return;
+            return false;
         }
 
         PlayerHand currentHand = currentPlayer.GetPlayerHand();
-        PlayerHand targetHand = selectedPlayer.GetPlayerHand();
+        PlayerHand targetHand = targetPlayer != null ? targetPlayer.GetPlayerHand() : null;
 
         if (currentHand == null || targetHand == null)
         {
             ShowToast("Player hand is missing.");
-            return;
+            return false;
         }
 
         List<GameObject> currentCards = new List<GameObject>(currentHand.GetCards());
         List<GameObject> targetCards = new List<GameObject>(targetHand.GetCards());
-        GameObject playedCardPrefab = cardDrawManager.GetPendingCardPrefabForTargeting();
+        GameObject playedCardPrefab = cardDrawManager != null ? cardDrawManager.GetPendingCardPrefabForTargeting() : null;
 
-        if (playedCardPrefab != null)
+        if (consumePendingCard && playedCardPrefab != null)
         {
             currentCards.Remove(playedCardPrefab);
         }
 
         currentHand.CopyFrom(targetCards);
         targetHand.CopyFrom(currentCards);
-        currentPlayer.SyncCardCountFromHand();
-        selectedPlayer.SyncCardCountFromHand();
+        SyncAndRefreshPlayers(currentPlayer, targetPlayer);
 
-        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+        if (consumePendingCard && !cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
         {
             currentHand.CopyFrom(currentCards);
             targetHand.CopyFrom(targetCards);
-            currentPlayer.SyncCardCountFromHand();
-            selectedPlayer.SyncCardCountFromHand();
+            SyncAndRefreshPlayers(currentPlayer, targetPlayer);
             ShowToast("Could not play this card.");
-            return;
+            return false;
         }
 
-        if (playerManager != null)
+        cardDrawManager?.RenderCurrentPlayerHand();
+        ShowPublicCardToast(currentPlayer, "Trade Hands", targetPlayer);
+
+        if (consumePendingCard)
         {
-            playerManager.RefreshPlayerUI(selectedPlayer.playerId);
-            playerManager.RefreshCurrentPlayerUI();
+            ExitTargetingMode();
         }
 
-        cardDrawManager.RenderCurrentPlayerHand();
-        ShowPublicCardToast(currentPlayer, "Trade Hands", selectedPlayer);
-        ExitTargetingMode();
+        return true;
     }
 
-    private void ConfirmDisrupt()
+    public bool ResolveDisrupt(int playerId, int targetPlayerId)
     {
-        if (selectedPlayer.HasPendingDisrupt())
+        return ResolveDisrupt(playerId, targetPlayerId, false);
+    }
+
+    public bool ResolveDisrupt(int playerId, int targetPlayerId, bool consumePendingCard)
+    {
+        PlayerResource currentPlayer = GetPlayerResource(playerId);
+        PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
+
+        if (targetPlayer == null)
+        {
+            ShowToast("Choose a player first.");
+            return false;
+        }
+
+        if (targetPlayer.HasPendingDisrupt())
         {
             ShowToast("This player is already disrupted.");
-            return;
+            return false;
         }
 
-        if (!CanConfirmTargetingCard())
+        if (consumePendingCard && !CanConfirmTargetingCard())
         {
-            return;
+            return false;
         }
 
-        selectedPlayer.ApplyDisruptNextTurn();
+        targetPlayer.ApplyDisruptNextTurn();
 
-        if (!cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
+        if (consumePendingCard && !cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
         {
-            selectedPlayer.ClearPendingDisrupt();
+            targetPlayer.ClearPendingDisrupt();
             ShowToast("Could not play this card.");
-            return;
+            return false;
         }
 
-        if (playerManager != null)
+        SyncAndRefreshPlayers(currentPlayer, targetPlayer);
+        ShowPublicCardToast(currentPlayer, "Disrupt", targetPlayer);
+
+        if (consumePendingCard)
         {
-            playerManager.RefreshPlayerUI(selectedPlayer.playerId);
-            playerManager.RefreshCurrentPlayerUI();
+            ExitTargetingMode();
         }
 
-        PlayerResource currentPlayer = playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
-        ShowPublicCardToast(currentPlayer, "Disrupt", selectedPlayer);
-        ExitTargetingMode();
+        return true;
     }
 
     // Shows a public card announcement so every player can see who used a player-targeting card.
@@ -435,6 +479,43 @@ public class PlayerTargetingManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    private PlayerResource GetPlayerResource(int playerId)
+    {
+        return playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+    }
+
+    private int GetCurrentPlayerId()
+    {
+        return playerManager != null ? playerManager.GetCurrentPlayerId() : -1;
+    }
+
+    private void SyncAndRefreshPlayers(params PlayerResource[] players)
+    {
+        if (players != null)
+        {
+            foreach (PlayerResource player in players)
+            {
+                if (player != null)
+                {
+                    player.SyncCardCountFromHand();
+                }
+            }
+        }
+
+        if (playerManager != null)
+        {
+            foreach (PlayerResource player in players)
+            {
+                if (player != null)
+                {
+                    playerManager.RefreshPlayerUI(player.playerId);
+                }
+            }
+
+            playerManager.RefreshCurrentPlayerUI();
+        }
     }
 
     public void CancelSelection()
@@ -760,6 +841,11 @@ public class PlayerTargetingManager : MonoBehaviour
 
     private void SetTargetingVisuals(bool active)
     {
+        if (active && BuildTowerManager.Instance != null)
+        {
+            BuildTowerManager.Instance.HideBuildInteractionUI();
+        }
+
         SetNormalGameplayUIEnabled(!active);
 
         if (darkOverlay != null)
@@ -884,6 +970,12 @@ public class PlayerTargetingManager : MonoBehaviour
         currentMode = PlayerTargetingMode.None;
         isTargeting = false;
         SetTargetingVisuals(false);
+
+        // Restore turn markers when exiting targeting mode
+        if (CurrentTurnIndicatorManager.Instance != null)
+        {
+            CurrentTurnIndicatorManager.Instance.ResetMarkersToTurnIndicator();
+        }
     }
 
     private void RestoreTargetVisuals()

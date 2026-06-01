@@ -72,6 +72,7 @@
     <Compile Include="Assets/Scripts/Path/GatePathBlocker.cs" />
     <Compile Include="Assets/Scripts/Core/AIPrototypeTurnManager.cs" />
     <Compile Include="Assets/Scripts/UI/ResultSceneManager.cs" />
+    <Compile Include="Assets/Scripts/UI/UIRaycastDebugger.cs" />
     <Compile Include="Assets/Scripts/UI/APDisplayUI.cs" />
     <Compile Include="Assets/Scripts/UI/GlobalCursorManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyType.cs" />
@@ -99,12 +100,15 @@
     <Compile Include="Assets/Scripts/UI/EnemyHealthBarSprite.cs" />
     <Compile Include="Assets/Scripts/Core/cursor.cs" />
     <Compile Include="Assets/Scripts/Card/ShockTrapPoint.cs" />
+    <Compile Include="Assets/Scripts/Core/UIButtonSound.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyPathAssignmentManager.cs" />
     <Compile Include="Assets/Scripts/UI/ManualUIButtonDebug.cs" />
     <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />
     <Compile Include="Assets/Scripts/Tower/BuildTowerManager.cs" />
     <Compile Include="Assets/Scripts/UI/InstructionBookController.cs" />
+    <Compile Include="Assets/Scripts/Core/PlayerExitManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TargetPriority.cs" />
+    <Compile Include="Assets/Scripts/UI/UIButtonSoundBinder.cs" />
     <Compile Include="Assets/Scripts/UI/CursorVisualFollower.cs" />
     <Compile Include="Assets/Scripts/Card/TileTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/WaveEnemyEntry.cs" />
@@ -116,6 +120,7 @@
     <Compile Include="Assets/Scripts/Path/PathfinderTester.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemySlowEffect.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerManager.cs" />
+    <Compile Include="Assets/Scripts/UI/CurrentTurnIndicatorManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerBuildArea.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerProjectile.cs" />
     <Compile Include="Assets/Scripts/Core/ITurnSource.cs" />
@@ -123,6 +128,7 @@
     <Compile Include="Assets/Scripts/Enemy/EnemyStats.cs" />
     <Compile Include="Assets/Scripts/Map/GateFrameAnimation.cs" />
     <Compile Include="Assets/Scripts/UI/UIRaycastCleaner.cs" />
+    <Compile Include="Assets/Scripts/UI/AudioManager.cs" />
     <Compile Include="Assets/Scripts/Core/AIDifficulty.cs" />
     <Compile Include="Assets/Scripts/Enemy/WaveManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerType.cs" />
@@ -134,6 +140,7 @@
     <Compile Include="Assets/Scripts/Core/GamePhaseManager.cs" />
     <Compile Include="Assets/Scripts/UI/GlobalUIManager.cs" />
     <Compile Include="Assets/Scripts/Card/GateTargetingManager.cs" />
+    <Compile Include="Assets/Scripts/UI/TurnMarkerAnimator.cs" />
     <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
     <Compile Include="Assets/Scripts/UI/HomeSceneManager.cs" />
     <Compile Include="Assets/Scripts/UI/PresentTheNumberUI.cs" />

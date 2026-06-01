@@ -221,6 +221,7 @@ public class EnemyHealth : MonoBehaviour
         }
 
         isDead = true;
+        AudioManager.Instance?.PlayEnemyDeath();
 
         if (lastDamageOwner != null)
         {

@@ -4,6 +4,7 @@
  * Purpose:
  * Controls the global settings panel and stores player preferences.
  */
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,13 +42,11 @@ public class SettingsPanelController : MonoBehaviour
         UnbindListeners();
     }
 
-    // Returns whether the settings panel is currently visible.
     public bool IsOpen()
     {
         return settingsPanel != null && settingsPanel.activeSelf;
     }
 
-    // Opens the settings panel and refreshes controls from PlayerPrefs.
     public void OpenSettings()
     {
         LoadSettings();
@@ -62,7 +61,6 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
-    // Closes the settings panel without changing saved settings.
     public void CloseSettings()
     {
         if (settingsPanel != null)
@@ -71,7 +69,6 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
-    // Toggles settings visibility.
     public void ToggleSettings()
     {
         if (IsOpen())
@@ -84,7 +81,6 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
-    // Reads saved settings and applies them to Unity and the UI controls.
     public void LoadSettings()
     {
         bool musicEnabled = PlayerPrefs.GetInt(MusicEnabledKey, 1) == 1;
@@ -113,34 +109,55 @@ public class SettingsPanelController : MonoBehaviour
         }
 
         Screen.fullScreen = fullscreen;
-        AudioListener.volume = masterVolume;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetMusicEnabled(musicEnabled);
+            AudioManager.Instance.SetSfxEnabled(sfxEnabled);
+            AudioManager.Instance.SetMasterVolume(masterVolume);
+        }
+        else
+        {
+            AudioListener.volume = masterVolume;
+        }
     }
 
-    // Saves the current UI settings to PlayerPrefs.
     public void SaveSettings()
     {
-        PlayerPrefs.SetInt(MusicEnabledKey, musicToggle == null || musicToggle.isOn ? 1 : 0);
-        PlayerPrefs.SetInt(SfxEnabledKey, sfxToggle == null || sfxToggle.isOn ? 1 : 0);
-        PlayerPrefs.SetInt(FullscreenKey, fullscreenToggle != null && fullscreenToggle.isOn ? 1 : 0);
-        PlayerPrefs.SetFloat(MasterVolumeKey, masterVolumeSlider != null ? masterVolumeSlider.value : 1f);
+        bool musicEnabled = musicToggle == null || musicToggle.isOn;
+        bool sfxEnabled = sfxToggle == null || sfxToggle.isOn;
+        bool fullscreen = fullscreenToggle != null && fullscreenToggle.isOn;
+        float masterVolume = masterVolumeSlider != null ? masterVolumeSlider.value : 1f;
+
+        PlayerPrefs.SetInt(MusicEnabledKey, musicEnabled ? 1 : 0);
+        PlayerPrefs.SetInt(SfxEnabledKey, sfxEnabled ? 1 : 0);
+        PlayerPrefs.SetInt(FullscreenKey, fullscreen ? 1 : 0);
+        PlayerPrefs.SetFloat(MasterVolumeKey, masterVolume);
         PlayerPrefs.Save();
     }
 
-    // Handles the Music toggle changing.
     public void OnMusicToggleChanged(bool enabled)
     {
         PlayerPrefs.SetInt(MusicEnabledKey, enabled ? 1 : 0);
         PlayerPrefs.Save();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetMusicEnabled(enabled);
+        }
     }
 
-    // Handles the SFX toggle changing.
     public void OnSfxToggleChanged(bool enabled)
     {
         PlayerPrefs.SetInt(SfxEnabledKey, enabled ? 1 : 0);
         PlayerPrefs.Save();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetSfxEnabled(enabled);
+        }
     }
 
-    // Handles the fullscreen toggle changing.
     public void OnFullscreenToggleChanged(bool fullscreen)
     {
         Screen.fullScreen = fullscreen;
@@ -148,15 +165,21 @@ public class SettingsPanelController : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // Handles master volume slider changes.
     public void OnMasterVolumeChanged(float volume)
     {
-        AudioListener.volume = volume;
         PlayerPrefs.SetFloat(MasterVolumeKey, volume);
         PlayerPrefs.Save();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.SetMasterVolume(volume);
+        }
+        else
+        {
+            AudioListener.volume = volume;
+        }
     }
 
-    // Registers UI callbacks once so Inspector and code do not stack duplicate listeners.
     private void BindListenersOnce()
     {
         if (listenersBound)
@@ -191,7 +214,6 @@ public class SettingsPanelController : MonoBehaviour
         listenersBound = true;
     }
 
-    // Removes callbacks when this object is destroyed.
     private void UnbindListeners()
     {
         if (!listenersBound)
