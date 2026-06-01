@@ -220,6 +220,13 @@ public class PlayerManager : MonoBehaviour
 
     public void RefreshCurrentPlayerUI()
     {
+        PlayerResource presentNumberPlayer = GetPresentNumberTargetResource();
+
+        if (presentNumberPlayer != null && presentTheNumberUI != null)
+        {
+            presentTheNumberUI.SetNumbers(presentNumberPlayer.money, presentNumberPlayer.cardCount);
+        }
+
         RefreshPlayerUI(currentPlayerId);
     }
 
@@ -232,7 +239,11 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
-        if (player.playerId == currentPlayerId && presentTheNumberUI != null)
+        PlayerResource presentNumberPlayer = GetPresentNumberTargetResource();
+
+        if (presentTheNumberUI != null &&
+            presentNumberPlayer != null &&
+            player.playerId == presentNumberPlayer.playerId)
         {
             presentTheNumberUI.SetNumbers(player.money, player.cardCount);
         }
@@ -372,6 +383,43 @@ public class PlayerManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    // Local mode keeps PresentTheNumber synced with the active player, but AI
+    // mode and online mode should pin it to the local visible hand owner.
+    private PlayerResource GetPresentNumberTargetResource()
+    {
+        if (players == null || players.Count == 0)
+        {
+            return null;
+        }
+
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineGameSceneManager.Instance != null &&
+            PhotonOnlineGameSceneManager.Instance.LocalPlayerId >= 0)
+        {
+            PlayerResource onlineLocalPlayer = GetPlayerResource(PhotonOnlineGameSceneManager.Instance.LocalPlayerId);
+
+            if (onlineLocalPlayer != null && !onlineLocalPlayer.isEliminated)
+            {
+                return onlineLocalPlayer;
+            }
+        }
+
+        if (TurnSourceResolver.IsAIPrototypeActive())
+        {
+            foreach (PlayerResource player in players)
+            {
+                if (player != null &&
+                    player.playerType == PlayerType.Human &&
+                    !player.isEliminated)
+                {
+                    return player;
+                }
+            }
+        }
+
+        return GetCurrentPlayerResource();
     }
 
     private void ClearPlayerLandAndTowers(int playerId)

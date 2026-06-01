@@ -119,6 +119,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     private void Start()
     {
         LoadPlayerTypesFromPrefs();
+        RebindPlayerStatusPanels();
         BuildActivePlayerList();
 
         if (cardDrawManager != null)
@@ -127,6 +128,78 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         }
 
         StartRoundFromFirstActivePlayer();
+    }
+
+    // Rebinds every AI prototype player panel to the real PlayerResource/Castle
+    // pair after PlayerPrefs setup has loaded names and player types.
+    private void RebindPlayerStatusPanels()
+    {
+        if (playerManager == null || playerManager.players == null)
+        {
+            return;
+        }
+
+        PlayerStatusPanelUI[] statusPanels = FindObjectsOfType<PlayerStatusPanelUI>(true);
+
+        foreach (PlayerResource player in playerManager.players)
+        {
+            if (player == null)
+            {
+                continue;
+            }
+
+            CastleBase castle = GetCastleForPlayer(player);
+            PlayerStatusPanelUI resolvedPanel = player.statusPanel;
+
+            if (resolvedPanel == null && castle != null && castle.statusPanel != null)
+            {
+                resolvedPanel = castle.statusPanel;
+            }
+
+            if (resolvedPanel == null)
+            {
+                foreach (PlayerStatusPanelUI candidate in statusPanels)
+                {
+                    if (candidate == null)
+                    {
+                        continue;
+                    }
+
+                    if (candidate.linkedResource == player)
+                    {
+                        resolvedPanel = candidate;
+                        break;
+                    }
+
+                    if (castle != null && candidate.linkedCastle == castle)
+                    {
+                        resolvedPanel = candidate;
+                        break;
+                    }
+                }
+            }
+
+            if (castle != null)
+            {
+                castle.ownerPlayerId = player.playerId;
+                castle.ownerResource = player;
+                castle.SyncPlayerNameFromOwner();
+            }
+
+            if (resolvedPanel != null)
+            {
+                resolvedPanel.Bind(player, castle);
+            }
+            else
+            {
+                player.statusPanel = null;
+            }
+
+            player.RefreshUI();
+        }
+
+        playerManager.RefreshAllPlayerStatusPanels();
+        playerManager.RefreshCurrentPlayerUI();
     }
 
     // Called by the End Turn button during a human player's turn.
@@ -2059,6 +2132,8 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     {
         isWaveRunning = true;
         SetHumanControlsEnabled(false);
+        buildTowerManager?.HideBuildInteractionUI();
+        cardDrawManager?.CancelPendingCard();
 
         if (waveManager != null)
         {
@@ -2083,8 +2158,11 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return;
         }
 
-        normalGameplayUI.interactable = enabled;
-        normalGameplayUI.blocksRaycasts = enabled;
+        // Keep the overall UI raycastable so Exit remains clickable even when
+        // it is not the human player's turn. Gameplay actions are still blocked
+        // by the shared turn checks in their own entry points.
+        normalGameplayUI.interactable = true;
+        normalGameplayUI.blocksRaycasts = true;
     }
 
     // Notifies all towers that a wave started so temporary effects can activate.

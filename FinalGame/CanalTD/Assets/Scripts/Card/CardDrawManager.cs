@@ -214,7 +214,7 @@ public class CardDrawManager : MonoBehaviour
     {
         if (!CanHumanUseCardsNow())
         {
-            StartCoroutine(ShowWarning("Wait for your turn."));
+            StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
             return false;
         }
 
@@ -506,6 +506,7 @@ public class CardDrawManager : MonoBehaviour
     {
         if (!CanHumanUseCardsNow())
         {
+            ShowWarningMessage(GetBlockedTurnMessage());
             return;
         }
 
@@ -539,7 +540,7 @@ public class CardDrawManager : MonoBehaviour
     {
         if (!CanHumanUseCardsNow())
         {
-            StartCoroutine(ShowWarning("Wait for your turn."));
+            StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
             return false;
         }
 
@@ -603,7 +604,7 @@ public class CardDrawManager : MonoBehaviour
     {
         if (!CanHumanUseCardsNow())
         {
-            StartCoroutine(ShowWarning("Wait for your turn."));
+            StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
             return false;
         }
 
@@ -1339,6 +1340,11 @@ public class CardDrawManager : MonoBehaviour
     // In GameScene_AIPrototype, ITurnSource is AIPrototypeTurnManager; in old GameScene it is TurnManager.
     private bool CanHumanUseCardsNow()
     {
+        if (PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(false))
+        {
+            return false;
+        }
+
         ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource(GetTurnManager());
 
         if (!TurnSourceResolver.IsAIPrototypeActive())
@@ -1401,6 +1407,14 @@ public class CardDrawManager : MonoBehaviour
     // In AIPrototype mode, the visible hand belongs to the local human player, not the AI whose turn is running.
     private PlayerResource GetVisibleHandPlayerResource()
     {
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineGameSceneManager.Instance != null &&
+            PhotonOnlineGameSceneManager.Instance.LocalPlayerId >= 0 &&
+            playerManager != null)
+        {
+            return playerManager.GetPlayerResource(PhotonOnlineGameSceneManager.Instance.LocalPlayerId);
+        }
+
         if (!TurnSourceResolver.IsAIPrototypeActive())
         {
             return GetCurrentPlayerResource();
@@ -1476,6 +1490,13 @@ public class CardDrawManager : MonoBehaviour
     private PlayerResource GetCurrentPlayerResource()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
+    }
+
+    private string GetBlockedTurnMessage()
+    {
+        return PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext()
+            ? "Not your turn."
+            : "Wait for your turn.";
     }
 
     private int GetCurrentPlayerId()

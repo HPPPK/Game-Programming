@@ -191,22 +191,22 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
 
     private int GetCurrentRound()
     {
+        AIPrototypeTurnManager aiTurnManager = FindObjectOfType<AIPrototypeTurnManager>();
+        if (aiTurnManager != null && aiTurnManager.isActiveAndEnabled) return aiTurnManager.currentRound;
+
         GamePhaseManager phaseManager = FindObjectOfType<GamePhaseManager>();
         if (phaseManager != null) return phaseManager.currentRound;
-
-        AIPrototypeTurnManager aiTurnManager = FindObjectOfType<AIPrototypeTurnManager>();
-        if (aiTurnManager != null) return aiTurnManager.currentRound;
 
         return 1;
     }
 
     private int GetMaxWaves()
     {
+        AIPrototypeTurnManager aiTurnManager = FindObjectOfType<AIPrototypeTurnManager>();
+        if (aiTurnManager != null && aiTurnManager.isActiveAndEnabled) return aiTurnManager.maxWaves;
+
         GamePhaseManager phaseManager = FindObjectOfType<GamePhaseManager>();
         if (phaseManager != null) return phaseManager.maxWaves;
-
-        AIPrototypeTurnManager aiTurnManager = FindObjectOfType<AIPrototypeTurnManager>();
-        if (aiTurnManager != null) return aiTurnManager.maxWaves;
 
         return 10;
     }
