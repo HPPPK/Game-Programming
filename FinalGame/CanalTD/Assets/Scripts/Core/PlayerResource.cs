@@ -11,6 +11,9 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
+#if PHOTON_UNITY_NETWORKING
+using Photon.Pun;
+#endif
 
 public class PlayerResource : MonoBehaviour
 {
@@ -49,6 +52,7 @@ public class PlayerResource : MonoBehaviour
         LoadSetupFromPlayerPrefs();
         EnsurePlayerHand();
         RefreshUI();
+        LogOnlineLocalPlayerLoad();
     }
 
     public bool CanAfford(int cost)
@@ -121,6 +125,38 @@ public class PlayerResource : MonoBehaviour
     public void LoadDisplayNameFromPlayerPrefs()
     {
         LoadSetupFromPlayerPrefs();
+    }
+
+    private void LogOnlineLocalPlayerLoad()
+    {
+        string mode = PlayerPrefs.GetString("GameMode", "");
+
+        if (mode != "OnlinePhotonPUN2")
+        {
+            return;
+        }
+
+        int localOnlinePlayerId = PlayerPrefs.GetInt("OnlineLocalPlayerId", -1);
+
+        if (playerId != localOnlinePlayerId)
+        {
+            return;
+        }
+
+#if PHOTON_UNITY_NETWORKING
+        string actorNumber = PhotonNetwork.LocalPlayer != null ? PhotonNetwork.LocalPlayer.ActorNumber.ToString() : "N/A";
+        string photonName = PhotonNetwork.LocalPlayer != null ? PhotonNetwork.LocalPlayer.NickName : "N/A";
+        Debug.Log(
+            "GameScene loaded for online local player. actor=" + actorNumber +
+            ", playerId=" + playerId +
+            ", name=" + photonName
+        );
+#else
+        Debug.Log(
+            "GameScene loaded for online local player. actor=N/A, playerId=" + playerId +
+            ", name=" + displayName
+        );
+#endif
     }
 
     public bool HasPendingDisrupt()

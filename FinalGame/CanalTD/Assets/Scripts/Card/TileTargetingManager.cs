@@ -114,11 +114,21 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool BeginTakeOverTargeting()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(TileTargetingMode.TakeOver, "No land available to take over.");
     }
 
     public bool BeginFreezeClaimTargeting()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(TileTargetingMode.FreezeClaim, "No land available to freeze.");
     }
 
@@ -170,6 +180,11 @@ public class TileTargetingManager : MonoBehaviour
     public void ConfirmSelection()
     {
         if (!isTargeting)
+        {
+            return;
+        }
+
+        if (ShouldBlockOnlineAction())
         {
             return;
         }
@@ -503,6 +518,11 @@ public class TileTargetingManager : MonoBehaviour
     private PlayerResource GetPlayerResource(int playerId)
     {
         return playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
     private void RefreshPlayerUI(int playerId)

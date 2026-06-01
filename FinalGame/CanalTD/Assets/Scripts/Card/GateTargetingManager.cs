@@ -103,6 +103,11 @@ public class GateTargetingManager : MonoBehaviour
 
     public bool EnterGateTargetMode(GateActionType actionType)
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             ShowToast("You cannot control gates during enemy wave.");
@@ -295,6 +300,11 @@ public class GateTargetingManager : MonoBehaviour
     {
         if (!isTargetingGate) return;
 
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
             ShowToast("You cannot control gates during enemy wave.");
@@ -339,11 +349,21 @@ public class GateTargetingManager : MonoBehaviour
 
     public bool TryOpenGateForPlayer(int playerId, GateFrameAnimation gate)
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return TryOpenGateForPlayer(playerId, gate, true, false);
     }
 
     public bool TryLockGateForPlayer(int playerId, GateFrameAnimation gate)
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return TryLockGateForPlayer(playerId, gate, true, false);
     }
 
@@ -967,5 +987,10 @@ public class GateTargetingManager : MonoBehaviour
     private CardDrawManager GetCardDrawManager()
     {
         return FindObjectOfType<CardDrawManager>();
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 }

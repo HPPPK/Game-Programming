@@ -17,15 +17,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+#if PHOTON_UNITY_NETWORKING
+using Photon.Pun;
+#endif
 
 public class PlayerExitManager : MonoBehaviour
 {
+    private const string OnlinePhotonMode = "OnlinePhotonPUN2";
     [Header("Managers")]
     public PlayerManager playerManager;
     public TurnManager turnManager;
     public GamePhaseManager gamePhaseManager;
     public AIPrototypeTurnManager aiPrototypeTurnManager;
     public CardDrawManager cardDrawManager;
+    public PhotonOnlineGameSceneManager photonOnlineGameSceneManager;
 
     [Header("Scenes")]
     public string resultSceneName = "ResultScene";
@@ -72,6 +77,11 @@ public class PlayerExitManager : MonoBehaviour
             cardDrawManager = FindObjectOfType<CardDrawManager>();
         }
 
+        if (photonOnlineGameSceneManager == null)
+        {
+            photonOnlineGameSceneManager = FindObjectOfType<PhotonOnlineGameSceneManager>();
+        }
+
         if (confirmExitButton != null)
         {
             confirmExitButton.onClick.RemoveAllListeners();
@@ -110,6 +120,21 @@ public class PlayerExitManager : MonoBehaviour
     {
         Debug.Log("EXIT CONFIRMED");
 
+        string sceneName = SceneManager.GetActiveScene().name;
+        bool inPhotonRoom = IsInPhotonRoom();
+        bool photonOnlineActive = PhotonOnlineGameSceneManager.IsOnlinePhotonGameSceneActive();
+        PhotonOnlineGameSceneManager activeOnlineManager = GetPhotonOnlineGameSceneManager();
+        Debug.Log(
+            "ConfirmExit | scene = " + sceneName +
+            ", PhotonNetwork.InRoom = " + inPhotonRoom +
+            ", PhotonOnlineGameSceneManager.IsOnlinePhotonGameSceneActive() = " + photonOnlineActive +
+            ", saved GameMode = " + PlayerPrefs.GetString("GameMode", "") +
+            ", onlineManager exists = " + (activeOnlineManager != null) +
+            ", hasBootstrappedOnlineMatch = " + (activeOnlineManager != null && activeOnlineManager.HasEverBootstrappedOnlineMatch) +
+            ", isLocalLeavingMatch = " + (activeOnlineManager != null && activeOnlineManager.IsLocalLeavingMatch) +
+            ", hasDetachedFromOnlineMatch = " + (activeOnlineManager != null && activeOnlineManager.HasDetachedFromOnlineMatch)
+        );
+
         if (confirmExitPanel != null)
         {
             confirmExitPanel.SetActive(false);
@@ -133,31 +158,52 @@ public class PlayerExitManager : MonoBehaviour
         string sceneName = SceneManager.GetActiveScene().name;
         string savedGameMode = PlayerPrefs.GetString("GameMode", "");
         bool isAIPrototypeScene = sceneName == "GameScene_AIPrototype";
+        bool isMainGameScene = sceneName == "GameScene";
+        PhotonOnlineGameSceneManager activeOnlineManager = GetPhotonOnlineGameSceneManager();
         // Treat the current GameScene as local unless a future online flag explicitly overrides it.
         bool isLocalGameScene = sceneName == "GameScene" &&
             (string.IsNullOrEmpty(savedGameMode) || savedGameMode == LocalFourPlayerMode);
-        bool isOnlineMode = forceOnlineMode;
+        bool isOnlineMode = IsOnlineGameSceneExitPath(sceneName, activeOnlineManager);
 
         Debug.Log(
             "ExitCurrentMatch mode check | scene = " + sceneName +
             ", saved GameMode = " + savedGameMode +
-            ", forceOnlineMode = " + forceOnlineMode
+            ", PhotonNetwork.InRoom = " + IsInPhotonRoom() +
+            ", onlineManager exists = " + (activeOnlineManager != null) +
+            ", hasBootstrappedOnlineMatch = " + (activeOnlineManager != null && activeOnlineManager.HasEverBootstrappedOnlineMatch) +
+            ", isLocalLeavingMatch = " + (activeOnlineManager != null && activeOnlineManager.IsLocalLeavingMatch) +
+            ", hasDetachedFromOnlineMatch = " + (activeOnlineManager != null && activeOnlineManager.HasDetachedFromOnlineMatch) +
+            ", forceOnlineMode = " + forceOnlineMode +
+            ", photonOnlineActive = " + isOnlineMode
         );
 
         if (isOnlineMode)
         {
-            Debug.Log("Current mode: Future Online Placeholder");
-            ExitOnlinePlayer(GetLocalOnlinePlayerId());
+            Debug.Log("ConfirmExit path = Online");
+            Debug.Log("Current mode: Online Photon GameScene");
+
+            if (activeOnlineManager != null)
+            {
+                activeOnlineManager.homeSceneName = homeSceneName;
+                activeOnlineManager.RequestLocalExitToHome();
+            }
+            else
+            {
+                Debug.Log("Online exit detected but already left Photon room. Loading HomeScene.");
+                SceneManager.LoadScene(homeSceneName);
+            }
             return;
         }
 
         if (isAIPrototypeScene || isLocalGameScene || savedGameMode == OnlineAIPrototypeMode)
         {
+            Debug.Log("ConfirmExit path = LocalAI");
             Debug.Log("Current mode: Local / AI");
             ExitLocalOrAIMatch();
             return;
         }
 
+        Debug.Log("ConfirmExit path = LocalAI");
         Debug.Log("Current mode unknown. Falling back to local/AI exit flow.");
         ExitLocalOrAIMatch();
     }
@@ -183,31 +229,61 @@ public class PlayerExitManager : MonoBehaviour
     public void ExitOnlinePlayer(int playerId)
     {
         Debug.Log("Online player exited: playerId = " + playerId);
-        CleanupPlayerState(playerId);
+        PhotonOnlineGameSceneManager activeOnlineManager = GetPhotonOnlineGameSceneManager();
+        bool isMainGameScene = SceneManager.GetActiveScene().name == "GameScene";
 
-        if (AreAllPlayersInactiveOrEliminated())
+        if (isMainGameScene &&
+            activeOnlineManager != null &&
+            activeOnlineManager.HasLiveOnlineMatchSession())
         {
-            Debug.Log("All players inactive or eliminated after online exit. Loading HomeScene.");
-
-            if (string.IsNullOrEmpty(homeSceneName))
-            {
-                Debug.LogWarning("Home scene name is empty. ExitOnlinePlayer could not continue.");
-                return;
-            }
-
-            SceneManager.LoadScene(homeSceneName);
+            activeOnlineManager.homeSceneName = homeSceneName;
+            activeOnlineManager.RequestLocalExitToHome();
             return;
         }
 
-        // Placeholder online behavior: only the exiting local client goes home.
-        // Future networking should notify remaining clients instead of loading a scene here.
-        if (string.IsNullOrEmpty(homeSceneName))
+        Debug.LogWarning("ExitOnlinePlayer was called without an active local Photon online player. No ResultScene fallback will be used.");
+    }
+
+    private PhotonOnlineGameSceneManager GetPhotonOnlineGameSceneManager()
+    {
+        if (photonOnlineGameSceneManager == null)
         {
-            Debug.LogWarning("Home scene name is empty. ExitOnlinePlayer could not continue.");
-            return;
+            photonOnlineGameSceneManager = FindObjectOfType<PhotonOnlineGameSceneManager>();
         }
 
-        SceneManager.LoadScene(homeSceneName);
+        return photonOnlineGameSceneManager;
+    }
+
+    private bool IsOnlineGameSceneExitPath(string sceneName, PhotonOnlineGameSceneManager activeOnlineManager)
+    {
+        if (sceneName != "GameScene")
+        {
+            return false;
+        }
+
+        string savedGameMode = PlayerPrefs.GetString("GameMode", string.Empty);
+
+        if (savedGameMode == OnlinePhotonMode)
+        {
+            return true;
+        }
+
+        if (activeOnlineManager != null &&
+            (activeOnlineManager.WasOnlineMatchScene() || activeOnlineManager.HasLiveOnlineMatchSession()))
+        {
+            return true;
+        }
+
+        return IsInPhotonRoom();
+    }
+
+    private bool IsInPhotonRoom()
+    {
+#if PHOTON_UNITY_NETWORKING
+        return PhotonNetwork.InRoom && !PhotonNetwork.OfflineMode;
+#else
+        return false;
+#endif
     }
 
     public void CleanupPlayerState(int playerId)

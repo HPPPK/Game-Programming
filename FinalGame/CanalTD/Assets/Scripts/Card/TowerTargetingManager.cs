@@ -116,6 +116,11 @@ public class TowerTargetingManager : MonoBehaviour
 
     public bool BeginPowerBoostTargeting()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         selectedTower = null;
         validTargets.Clear();
         targetRenderers.Clear();
@@ -169,6 +174,11 @@ public class TowerTargetingManager : MonoBehaviour
     public void ConfirmSelection()
     {
         if (!isTargeting)
+        {
+            return;
+        }
+
+        if (ShouldBlockOnlineAction())
         {
             return;
         }
@@ -254,6 +264,11 @@ public class TowerTargetingManager : MonoBehaviour
     public void ExitWithoutConsumingCard()
     {
         ExitTargetingMode();
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
     private void TrySelectTowerAtMouse()

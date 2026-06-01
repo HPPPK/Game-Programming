@@ -454,7 +454,7 @@ MonoBehaviour:
   toastMessage: {fileID: 848080698}
   darkOverlay: {fileID: 236984364}
   targetingUI: {fileID: 1872220167}
-  normalGameplayUI: {fileID: 0}
+  normalGameplayUI: {fileID: 1274524793}
   confirmButton: {fileID: 792752231}
   cancelButton: {fileID: 1778146313}
   tilemapsToDim: []
@@ -17447,7 +17447,7 @@ MonoBehaviour:
   toastMessage: {fileID: 848080698}
   darkOverlay: {fileID: 236984364}
   targetingUI: {fileID: 1872220167}
-  normalGameplayUI: {fileID: 0}
+  normalGameplayUI: {fileID: 1274524793}
   confirmButton: {fileID: 792752231}
   cancelButton: {fileID: 1778146313}
   tilemapsToDim: []
@@ -62066,7 +62066,7 @@ MonoBehaviour:
   toastMessage: {fileID: 848080698}
   darkOverlay: {fileID: 236984364}
   targetingUI: {fileID: 1872220167}
-  normalGameplayUI: {fileID: 0}
+  normalGameplayUI: {fileID: 1274524793}
   confirmButton: {fileID: 792752231}
   cancelButton: {fileID: 1778146313}
   tilemapsToDim: []
@@ -69550,6 +69550,7 @@ MonoBehaviour:
   gamePhaseManager: {fileID: 163762666}
   aiPrototypeTurnManager: {fileID: 0}
   cardDrawManager: {fileID: 2056775816}
+  photonOnlineGameSceneManager: {fileID: 1583523740}
   resultSceneName: ResultScene
   homeSceneName: HomeScene
   confirmExitPanel: {fileID: 468948899}
@@ -72790,6 +72791,56 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
+--- !u!1 &1583523738
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1583523739}
+  - component: {fileID: 1583523740}
+  m_Layer: 0
+  m_Name: PhotonOnlineGameSceneManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1583523739
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583523738}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1863090657}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1583523740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583523738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66f11d58f02d4275b98f4b22fbb44d31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerManager: {fileID: 535938592}
+  turnManager: {fileID: 1559123171}
+  gamePhaseManager: {fileID: 163762666}
+  toastMessage: {fileID: 848080698}
+  minOnlinePlayersToStart: 2
+  homeSceneName: HomeScene
 --- !u!1 &1586250674
 GameObject:
   m_ObjectHideFlags: 0
@@ -75010,7 +75061,7 @@ MonoBehaviour:
   toastMessage: {fileID: 848080698}
   darkOverlay: {fileID: 236984364}
   targetingUI: {fileID: 1872220167}
-  normalGameplayUI: {fileID: 0}
+  normalGameplayUI: {fileID: 1274524793}
   confirmButton: {fileID: 792752231}
   cancelButton: {fileID: 1778146313}
   tilemapsToDim: []
@@ -76534,6 +76585,7 @@ Transform:
   - {fileID: 337143128}
   - {fileID: 938295259}
   - {fileID: 1421291063}
+  - {fileID: 1583523739}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1867806419

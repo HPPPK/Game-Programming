@@ -170,6 +170,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
     public bool BeginShockTrapTargeting()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         if (CursorToolManager.Instance != null)
         {
             CursorToolManager.Instance.ExitHammerMode();
@@ -203,6 +208,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
     public void ConfirmSelection()
     {
         if (!isTargeting)
+        {
+            return;
+        }
+
+        if (ShouldBlockOnlineAction())
         {
             return;
         }
@@ -318,6 +328,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
     public void ExitWithoutConsumingCard()
     {
         ExitTargetingMode();
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
     private void ScanRouteNodes()

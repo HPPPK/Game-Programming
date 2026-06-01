@@ -130,16 +130,31 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool BeginStealCardTargeting()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(PlayerTargetingMode.StealCard, "No player has cards to steal.");
     }
 
     public bool BeginTradeHandsTargeting()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(PlayerTargetingMode.TradeHands, "No player available to trade hands.");
     }
 
     public bool BeginDisruptTargeting()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(PlayerTargetingMode.Disrupt, "No player available to disrupt.");
     }
 
@@ -228,6 +243,11 @@ public class PlayerTargetingManager : MonoBehaviour
     public void ConfirmSelection()
     {
         if (!isTargeting)
+        {
+            return;
+        }
+
+        if (ShouldBlockOnlineAction())
         {
             return;
         }
@@ -489,6 +509,11 @@ public class PlayerTargetingManager : MonoBehaviour
     private int GetCurrentPlayerId()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerId() : -1;
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
     private void SyncAndRefreshPlayers(params PlayerResource[] players)
