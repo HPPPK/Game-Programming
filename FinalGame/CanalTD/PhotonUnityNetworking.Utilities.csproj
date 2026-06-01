@@ -19,7 +19,7 @@
     <RootNamespace></RootNamespace>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Assembly-CSharp</AssemblyName>
+    <AssemblyName>PhotonUnityNetworking.Utilities</AssemblyName>
     <TargetFramework>netstandard2.1</TargetFramework>
     <BaseDirectory>.</BaseDirectory>
   </PropertyGroup>
@@ -64,140 +64,37 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/2022.3.62f3/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets/Scripts/Map/WaypointPath.cs" />
-    <Compile Include="Assets/Photon/PhotonRealtime/Demos/DemoLoadBalancing/ConnectAndJoinRandomLb.cs" />
-    <Compile Include="Assets/Scripts/UI/RoomSlotUI.cs" />
-    <Compile Include="Assets/Scripts/Networking/PhotonOnlineGameSceneManager.cs" />
-    <Compile Include="Assets/Scripts/Enemy/EnemyTargetSelector.cs" />
-    <Compile Include="Assets/Scripts/Card/CardHoverUI.cs" />
-    <Compile Include="Assets/Scripts/Card/CardInstanceSelectable.cs" />
-    <Compile Include="Assets/Scripts/Path/GatePathBlocker.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/DestroyOnStart.cs" />
-    <Compile Include="Assets/Scripts/Core/AIPrototypeTurnManager.cs" />
-    <Compile Include="Assets/Scripts/UI/ResultSceneManager.cs" />
-    <Compile Include="Assets/Scripts/UI/UIRaycastDebugger.cs" />
-    <Compile Include="Assets/Scripts/UI/APDisplayUI.cs" />
-    <Compile Include="Assets/Scripts/UI/GlobalCursorManager.cs" />
-    <Compile Include="Assets/Scripts/Enemy/EnemyType.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChannelSelector.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/IgnoreUiRaycastWhenInactive.cs" />
-    <Compile Include="Assets/Scripts/Core/GameResultData.cs" />
-    <Compile Include="Assets/Scripts/Path/PathGraphState.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/NamePickNewGui.cs" />
-    <Compile Include="Assets/Scripts/Core/TurnManager.cs" />
-    <Compile Include="Assets/Scripts/Path/PathEdge.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/EnableOnStart.cs" />
-    <Compile Include="Assets/Scripts/Card/ShockTrapTargetingManager.cs" />
-    <Compile Include="Assets/Scripts/Enemy/EnemySpawner.cs" />
-    <Compile Include="Assets/Scripts/UI/RoomSetupData.cs" />
-    <Compile Include="Assets/Scripts/UI/UIClickProbe.cs" />
-    <Compile Include="Assets/Scripts/Networking/PhotonPunRoomLobbyManager.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChatNewGui.cs" />
-    <Compile Include="Assets/Scripts/Map/doorChange.cs" />
-    <Compile Include="Assets/Scripts/Card/CardDrawManager.cs" />
-    <Compile Include="Assets/Scripts/Core/PlayerHand.cs" />
-    <Compile Include="Assets/Scripts/Core/TurnSourceResolver.cs" />
-    <Compile Include="Assets/Scripts/Map/GateActionType.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChatSettings.cs" />
-    <Compile Include="Assets/Scripts/Enemy/EnemyHealth.cs" />
-    <Compile Include="Assets/Scripts/UI/RadialTowerMenu.cs" />
-    <Compile Include="Assets/Scripts/Tower/CannonTower.cs" />
-    <Compile Include="Assets/Scripts/Core/PlayerType.cs" />
-    <Compile Include="Assets/Scripts/Path/Pathfinder.cs" />
-    <Compile Include="Assets/Scripts/UI/PlayerStatusPanelUI.cs" />
-    <Compile Include="Assets/Scripts/UI/ModeSelectSceneManager.cs" />
-    <Compile Include="Assets/Scripts/Path/PathNode.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/TextToggleIsOnTransition.cs" />
-    <Compile Include="Assets/Scripts/UI/EnemyHealthBarSprite.cs" />
-    <Compile Include="Assets/Scripts/Core/cursor.cs" />
-    <Compile Include="Assets/Scripts/Card/ShockTrapPoint.cs" />
-    <Compile Include="Assets/Scripts/Core/UIButtonSound.cs" />
-    <Compile Include="Assets/Scripts/Enemy/EnemyPathAssignmentManager.cs" />
-    <Compile Include="Assets/Scripts/UI/ManualUIButtonDebug.cs" />
-    <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/FriendItem.cs" />
-    <Compile Include="Assets/Scripts/Tower/BuildTowerManager.cs" />
-    <Compile Include="Assets/Scripts/UI/InstructionBookController.cs" />
-    <Compile Include="Assets/Scripts/Core/PlayerExitManager.cs" />
-    <Compile Include="Assets/Scripts/Networking/PhotonLobbyPropertyKeys.cs" />
-    <Compile Include="Assets/Scripts/Tower/TargetPriority.cs" />
-    <Compile Include="Assets/Scripts/UI/UIButtonSoundBinder.cs" />
-    <Compile Include="Assets/Scripts/UI/CursorVisualFollower.cs" />
-    <Compile Include="Assets/Scripts/Card/TileTargetingManager.cs" />
-    <Compile Include="Assets/Scripts/Enemy/WaveEnemyEntry.cs" />
-    <Compile Include="Assets/Scripts/Path/CastleEndNode.cs" />
-    <Compile Include="Assets/Scripts/Card/ShockTrap.cs" />
-    <Compile Include="Assets/Scripts/Enemy/EnemyMover.cs" />
-    <Compile Include="Assets/Scripts/Card/TowerTargetingManager.cs" />
-    <Compile Include="Assets/Scripts/UI/SimpleFrameAnimator.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/TextButtonTransition.cs" />
-    <Compile Include="Assets/Scripts/Path/PathfinderTester.cs" />
-    <Compile Include="Assets/Scripts/Enemy/EnemySlowEffect.cs" />
-    <Compile Include="Assets/Scripts/Core/PlayerManager.cs" />
-    <Compile Include="Assets/Scripts/UI/CurrentTurnIndicatorManager.cs" />
-    <Compile Include="Assets/Scripts/Tower/TowerBuildArea.cs" />
-    <Compile Include="Assets/Scripts/Tower/TowerProjectile.cs" />
-    <Compile Include="Assets/Scripts/Core/ITurnSource.cs" />
-    <Compile Include="Assets/Scripts/UI/EnemyHealthBar.cs" />
-    <Compile Include="Assets/Scripts/Enemy/EnemyStats.cs" />
-    <Compile Include="Assets/Scripts/Map/GateFrameAnimation.cs" />
-    <Compile Include="Assets/Scripts/UI/UIRaycastCleaner.cs" />
-    <Compile Include="Assets/Scripts/UI/AudioManager.cs" />
-    <Compile Include="Assets/Scripts/Core/AIDifficulty.cs" />
-    <Compile Include="Assets/Scripts/Enemy/WaveManager.cs" />
-    <Compile Include="Assets/Scripts/Tower/TowerType.cs" />
-    <Compile Include="Assets/Scripts/UI/ResultRowUI.cs" />
-    <Compile Include="Assets/Scripts/UI/CastleHealthBar.cs" />
-    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/ChatIdCheckerUI.cs" />
-    <Compile Include="Assets/Scripts/Card/GateOwnershipManager.cs" />
-    <Compile Include="Assets/Scripts/UI/SettingsPanelController.cs" />
-    <Compile Include="Assets/Scripts/UI/ManualUIButton.cs" />
-    <Compile Include="Assets/Scripts/Core/GamePhaseManager.cs" />
-    <Compile Include="Assets/Scripts/UI/GlobalUIManager.cs" />
-    <Compile Include="Assets/Scripts/Card/GateTargetingManager.cs" />
-    <Compile Include="Assets/Scripts/UI/TurnMarkerAnimator.cs" />
-    <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
-    <Compile Include="Assets/Scripts/UI/HomeSceneManager.cs" />
-    <Compile Include="Assets/Scripts/UI/PresentTheNumberUI.cs" />
-    <Compile Include="Assets/Scripts/Core/PlayerResource.cs" />
-    <Compile Include="Assets/Scripts/Tower/TowerStats.cs" />
-    <Compile Include="Assets/Scripts/UI/BootstrapSceneLoader.cs" />
-    <Compile Include="Assets/Scripts/Card/PlayerTargetingManager.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/UI/TextButtonTransition.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Debugging/StatesGui.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PlayerNumbering.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PunTeams.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Debugging/PhotonLagSimulationGui.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Prototyping/OnClickInstantiate.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Culling/CullArea.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Prototyping/OnStartDelete.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PunPlayerScores.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Debugging/PhotonStatsGui.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Prototyping/OnClickRpc.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/TurnBased/PunTurnManager.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Prototyping/OnClickDestroy.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Prototyping/OnJoinedInstantiate.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Prototyping/MoveByKeys.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Prototyping/OnEscapeQuit.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Room/CountdownTimer.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Prototyping/ConnectAndJoinRandom.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/UI/TextToggleIsOnTransition.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/UI/OnPointerOverTooltip.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/UI/ButtonInsideScrollList.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/UI/GraphicToggleIsOnTransition.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/UI/TabViewManager.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonView/SmoothSyncMovement.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Culling/CullingHandler.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PhotonTeamsManager.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/Debugging/PointedAtGameObjectInfo.cs" />
+    <Compile Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/UI/EventSystemSpawner.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
-    <None Include="Assets/Photon/PhotonLibs/netstandard2.0/Photon3Unity3D.xml" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader" />
-    <None Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Resources/OpenSans/Apache License.txt" />
-    <None Include="Assets/Photon/PhotonUnityNetworking/changelog.txt" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMPro_Mobile.cginc" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF SSD.shader" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Surface.shader" />
-    <None Include="Assets/TextMesh Pro/Sprites/EmojiOne Attribution.txt" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF.shader" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader" />
-    <None Include="Assets/Photon/PhotonLibs/changes-library.txt" />
-    <None Include="Assets/TextMesh Pro/Resources/LineBreaking Leading Characters.txt" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMPro_Properties.cginc" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMPro_Surface.cginc" />
-    <None Include="Assets/Photon/PhotonUnityNetworking/readme.txt" />
-    <None Include="Assets/TextMesh Pro/Resources/Fonts &amp; Materials/Font/FONTLOG.txt" />
-    <None Include="Assets/TextMesh Pro/Resources/Fonts &amp; Materials/Font/SIL - Open Font License.txt" />
-    <None Include="Assets/Photon/PhotonLibs/netstandard2.0/Photon3Unity3D.dll" />
-    <None Include="Assets/Photon/PhotonLibs/Photon3Unity3D.dll" />
-    <None Include="Assets/TextMesh Pro/Resources/LineBreaking Following Characters.txt" />
-    <None Include="Assets/Photon/PhotonLibs/Metro/Photon3Unity3D.dll" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader" />
-    <None Include="Assets/Photon/PhotonLibs/Photon3Unity3D.xml" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF Overlay.shader" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader" />
-    <None Include="Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt" />
-    <None Include="Assets/Photon/PhotonUnityNetworking/link.xml" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader" />
-    <None Include="Assets/TextMesh Pro/Shaders/TMP_Sprite.shader" />
+    <None Include="Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonUnityNetworking.Utilities.asmdef" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -532,12 +429,56 @@
       <HintPath>/Applications/Unity/Hub/Editor/2022.3.62f3/Unity.app/Contents/Managed/UnityEngine/UnityEditor.UnityConnectModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEditor.Graphs">
+      <HintPath>/Applications/Unity/Hub/Editor/2022.3.62f3/Unity.app/Contents/Managed/UnityEditor.Graphs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEditor.OSXStandalone.Extensions">
+      <HintPath>/Applications/Unity/Hub/Editor/2022.3.62f3/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TextMateSharpPlastic">
+      <HintPath>Library/PackageCache/com.unity.collab-proxy@2.12.4/Lib/Editor/TextMateSharp/TextMateSharpPlastic.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TextMateSharpPlastic.Grammars">
+      <HintPath>Library/PackageCache/com.unity.collab-proxy@2.12.4/Lib/Editor/TextMateSharp/TextMateSharpPlastic.Grammars.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.YamlDotNet">
+      <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Editor/VisualScripting.Core/Dependencies/YamlDotNet/Unity.VisualScripting.YamlDotNet.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.Collections.LowLevel.ILSupport">
       <HintPath>Library/PackageCache/com.unity.collections@1.2.4/Unity.Collections.LowLevel.ILSupport/Unity.Collections.LowLevel.ILSupport.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Plastic.Antlr3.Runtime">
+      <HintPath>Library/PackageCache/com.unity.collab-proxy@2.12.4/Lib/Editor/Unity.Plastic.Antlr3.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="websocket-sharp">
       <HintPath>Assets/Photon/PhotonLibs/WebSocket/websocket-sharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="OnigwrapPlastic">
+      <HintPath>Library/PackageCache/com.unity.collab-proxy@2.12.4/Lib/Editor/TextMateSharp/Onigwrap/OnigwrapPlastic.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Plastic.Newtonsoft.Json">
+      <HintPath>Library/PackageCache/com.unity.collab-proxy@2.12.4/Lib/Editor/Unity.Plastic.Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="log4netPlastic">
+      <HintPath>Library/PackageCache/com.unity.collab-proxy@2.12.4/Lib/Editor/log4netPlastic.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.IonicZip">
+      <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Editor/VisualScripting.Core/Dependencies/DotNetZip/Unity.VisualScripting.IonicZip.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="unityplastic">
+      <HintPath>Library/PackageCache/com.unity.collab-proxy@2.12.4/Lib/Editor/unityplastic.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
@@ -546,6 +487,10 @@
     </Reference>
     <Reference Include="Photon3Unity3D">
       <HintPath>Assets/Photon/PhotonLibs/netstandard2.0/Photon3Unity3D.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.TextureAssets">
+      <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Editor/VisualScripting.Core/EditorAssetResources/Unity.VisualScripting.TextureAssets.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
@@ -1040,190 +985,18 @@
       <HintPath>/Applications/Unity/Hub/Editor/2022.3.62f3/Unity.app/Contents/NetStandard/compat/2.1.0/shims/netfx/mscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.2D.IK.Runtime">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.IK.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PsdPlugin">
-      <HintPath>Library/ScriptAssemblies/PsdPlugin.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Burst.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.Burst.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Burst">
-      <HintPath>Library/ScriptAssemblies/Unity.Burst.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Common.Path.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Common.Path.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Timeline.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.Shared.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.Shared.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualStudio.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualStudio.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.Core">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Animation.Runtime">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Animation.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Tilemap.Extras">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Tilemap.Extras.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.Core.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.Core.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Rider.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.PixelPerfect.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.PixelPerfect.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Aseprite.Common">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Aseprite.Common.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Sprite.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.Flow">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.Flow.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.Flow.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.Flow.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.InternalAPIEngineBridge.001">
-      <HintPath>Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.001.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Common.Runtime">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Common.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.2D.Tilemap.Extras.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Tilemap.Extras.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Timeline">
-      <HintPath>Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Mathematics.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.SettingsProvider.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.SettingsProvider.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Collections">
-      <HintPath>Library/ScriptAssemblies/Unity.Collections.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.PlasticSCM.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.PlasticSCM.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Psdimporter.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Psdimporter.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.InternalAPIEditorBridge.001">
-      <HintPath>Library/ScriptAssemblies/Unity.InternalAPIEditorBridge.001.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.SpriteShape.Runtime">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.SpriteShape.Runtime.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.State.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.State.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.PixelPerfect">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.PixelPerfect.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Mathematics">
-      <HintPath>Library/ScriptAssemblies/Unity.Mathematics.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Common.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Common.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Aseprite.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Aseprite.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.VisualScripting.State">
-      <HintPath>Library/ScriptAssemblies/Unity.VisualScripting.State.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.SpriteShape.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.SpriteShape.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Tilemap.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.Animation.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.Animation.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.2D.IK.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.2D.IK.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="PhotonUnityNetworking.Editor.csproj" />
-    <ProjectReference Include="PhotonUnityNetworking.Utilities.PhotonPlayer.Editor.csproj" />
-    <ProjectReference Include="PunDemos.DemoSlotcarEditor.csproj" />
     <ProjectReference Include="PhotonRealtime.csproj" />
-    <ProjectReference Include="PhotonChat.csproj" />
     <ProjectReference Include="PhotonUnityNetworking.csproj" />
-    <ProjectReference Include="PhotonUnityNetworking.Utilities.Culling.Editor.csproj" />
-    <ProjectReference Include="PhotonUnityNetworking.Demos.csproj" />
-    <ProjectReference Include="PhotonUnityNetworking.Utilities.csproj" />
-    <ProjectReference Include="PunDemos.DemoHubEditor.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>
