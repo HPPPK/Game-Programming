@@ -206,6 +206,11 @@ public class BuildTowerManager : MonoBehaviour
             return;
         }
 
+        if (ShouldBlockTutorialBuildAreaClick(buildArea))
+        {
+            return;
+        }
+
         if (buildArea != null && lastClickedArea == buildArea && lastClickedFrame == Time.frameCount)
         {
             return;
@@ -301,6 +306,11 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TryBuyLand(TowerBuildArea buildArea)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.BuyLand, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
         if (!CanPerformTowerOrLandAction())
         {
             return false;
@@ -365,6 +375,7 @@ public class BuildTowerManager : MonoBehaviour
         buildArea.SetOwner(playerId, playerManager);
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast("Land purchased.");
+        TutorialManager.Instance?.NotifyLandPurchased(buildArea.gameObject);
         return true;
     }
 
@@ -467,6 +478,7 @@ public class BuildTowerManager : MonoBehaviour
         buildArea.towerOwnerPlayerId = activePlayerId;
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast(towerStats.towerType + " tower built.");
+        TutorialManager.Instance?.NotifyTowerBuilt(buildArea.gameObject);
         AudioManager.Instance?.PlayBuild();
         return true;
     }
@@ -488,6 +500,11 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TryBuildTower(TowerBuildArea buildArea, TowerType towerType)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.BuildTower, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
         if (!CanPerformTowerOrLandAction())
         {
             return false;
@@ -534,6 +551,11 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TryUpgradeTower(TowerBuildArea buildArea)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.UpgradeTower, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
         if (!CanPerformTowerOrLandAction())
         {
             return false;
@@ -560,6 +582,11 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TrySellTower(TowerBuildArea buildArea)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.SellTower, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
         if (!CanPerformTowerOrLandAction())
         {
             return false;
@@ -677,6 +704,7 @@ public class BuildTowerManager : MonoBehaviour
 
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast("Tower upgraded.");
+        TutorialManager.Instance?.NotifyTowerUpgraded(buildArea.gameObject);
         return true;
     }
 
@@ -709,6 +737,7 @@ public class BuildTowerManager : MonoBehaviour
         buildArea.towerOwnerPlayerId = -1;
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast("Tower sold.");
+        TutorialManager.Instance?.NotifyTowerSold(buildArea.gameObject);
         return true;
     }
 
@@ -831,6 +860,31 @@ public class BuildTowerManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    private bool ShouldBlockTutorialBuildAreaClick(TowerBuildArea buildArea)
+    {
+        if (buildArea == null)
+        {
+            return false;
+        }
+
+        TutorialActionType actionType;
+
+        if (buildArea.isOccupied)
+        {
+            actionType = TutorialActionType.InspectTower;
+        }
+        else if (buildArea.IsClaimable() && buildArea.IsUnowned())
+        {
+            actionType = TutorialActionType.SelectLand;
+        }
+        else
+        {
+            actionType = TutorialActionType.SelectOwnedLand;
+        }
+
+        return TutorialActionGate.BlockIfNotAllowed(actionType, buildArea.gameObject);
     }
 
     private GameObject GetPlayerManagerTowerPrefab(int playerId)

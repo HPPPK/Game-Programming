@@ -103,6 +103,11 @@ public class GateTargetingManager : MonoBehaviour
 
     public bool EnterGateTargetMode(GateActionType actionType)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(GetTutorialActionType(actionType), null))
+        {
+            return false;
+        }
+
         if (ShouldBlockOnlineAction())
         {
             return false;
@@ -708,6 +713,13 @@ public class GateTargetingManager : MonoBehaviour
         bool consumeTurnResources,
         bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(
+                GetTutorialActionType(actionType),
+                gate != null ? gate.gameObject : null))
+        {
+            return false;
+        }
+
         if (actionType == GateActionType.None || gate == null)
         {
             return false;
@@ -801,6 +813,21 @@ public class GateTargetingManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    private TutorialActionType GetTutorialActionType(GateActionType actionType)
+    {
+        if (actionType == GateActionType.OpenGate)
+        {
+            return TutorialActionType.OpenGate;
+        }
+
+        if (actionType == GateActionType.LockGate)
+        {
+            return TutorialActionType.LockGate;
+        }
+
+        return TutorialActionType.PlayCard;
     }
 
     private TurnManager GetTurnManager()

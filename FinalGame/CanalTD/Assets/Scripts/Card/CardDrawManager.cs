@@ -212,6 +212,11 @@ public class CardDrawManager : MonoBehaviour
 
     public bool TryDrawCardForCurrentPlayer()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.DrawCard, null))
+        {
+            return false;
+        }
+
         if (!CanHumanUseCardsNow())
         {
             StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
@@ -316,6 +321,7 @@ public class CardDrawManager : MonoBehaviour
         }
 
         Debug.Log("Drew card: " + cardPrefab.name + ". Cards left in deck = " + GetRemainingDeckCount());
+        TutorialManager.Instance?.NotifyCardDrawn(cardPrefab);
         RenderCurrentPlayerHand();
 
         isBusy = false;
@@ -407,6 +413,7 @@ public class CardDrawManager : MonoBehaviour
         if (added)
         {
             player.SyncCardCountFromHand();
+            TutorialManager.Instance?.NotifyCardDrawn(null);
 
             if (playerManager != null && playerManager.GetCurrentPlayerId() == playerId)
             {
@@ -504,6 +511,11 @@ public class CardDrawManager : MonoBehaviour
 
     public void SelectCard(CardInstanceSelectable card)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.SelectCard, card != null ? card.gameObject : null))
+        {
+            return;
+        }
+
         if (!CanHumanUseCardsNow())
         {
             ShowWarningMessage(GetBlockedTurnMessage());
@@ -538,6 +550,11 @@ public class CardDrawManager : MonoBehaviour
 
     public bool TryDiscardSelectedCard()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.DiscardCard, selectedCard != null ? selectedCard.gameObject : null))
+        {
+            return false;
+        }
+
         if (!CanHumanUseCardsNow())
         {
             StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
@@ -592,6 +609,7 @@ public class CardDrawManager : MonoBehaviour
         selectedCard = null;
 
         RenderCurrentPlayerHand();
+        TutorialManager.Instance?.NotifyCardDiscarded(returnedPrefab);
         return true;
     }
 
@@ -602,6 +620,17 @@ public class CardDrawManager : MonoBehaviour
 
     public bool TryBeginPlaySelectedCard()
     {
+        TutorialActionType tutorialActionType = GetTutorialActionTypeForCardName(
+            selectedCard != null && selectedCard.sourcePrefab != null ? selectedCard.sourcePrefab.name : string.Empty
+        );
+
+        if (TutorialActionGate.BlockIfNotAllowed(
+                tutorialActionType,
+                selectedCard != null ? selectedCard.gameObject : null))
+        {
+            return false;
+        }
+
         if (!CanHumanUseCardsNow())
         {
             StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
@@ -944,6 +973,7 @@ public class CardDrawManager : MonoBehaviour
         AudioManager.Instance?.PlayCardPlay();
 
         RemoveCardFromCurrentHand(pendingPlayedCard.sourcePrefab);
+        NotifyTutorialCardPlayed(pendingPlayedCard.sourcePrefab);
         Destroy(pendingPlayedCard.gameObject);
         pendingPlayedCard = null;
         RenderCurrentPlayerHand();
@@ -1056,6 +1086,7 @@ public class CardDrawManager : MonoBehaviour
         }
 
         AudioManager.Instance?.PlayCardPlay();
+        NotifyTutorialCardPlayed(cardPrefab);
         Debug.Log("Directly consumed played card: " + cardPrefab.name + " for player " + playerId);
         return true;
     }
@@ -1130,6 +1161,63 @@ public class CardDrawManager : MonoBehaviour
 
         Debug.Log("Returned " + cardsToReturn.Count + " cards from player " + playerId + " back to the deck.");
         return true;
+    }
+
+    public bool ForceGiveTutorialCard(string cardId)
+    {
+        PlayerResource player = GetVisibleHandPlayerResource();
+
+        if (player == null)
+        {
+            return false;
+        }
+
+        PlayerHand hand = player.GetPlayerHand();
+        GameObject cardPrefab = FindCardPrefabById(cardId);
+
+        if (hand == null || cardPrefab == null)
+        {
+            return false;
+        }
+
+        if (hand.GetCards().Contains(cardPrefab))
+        {
+            RenderCurrentPlayerHand();
+            return true;
+        }
+
+        if (!hand.AddCard(cardPrefab))
+        {
+            return false;
+        }
+
+        player.SyncCardCountFromHand();
+        RenderCurrentPlayerHand();
+        return true;
+    }
+
+    public void ResetTutorialCardAction()
+    {
+        if (selectedCard != null)
+        {
+            selectedCard.SetSelected(false);
+            selectedCard = null;
+        }
+
+        CancelPendingCard();
+        RenderCurrentPlayerHand();
+    }
+
+    public bool PrepareTutorialCardDemo(string cardId)
+    {
+        ResetTutorialCardAction();
+
+        if (!ForceGiveTutorialCard(cardId))
+        {
+            return false;
+        }
+
+        return TrySelectVisibleCardById(cardId);
     }
 
     void ResetCardRect(RectTransform cardRect)
@@ -1607,6 +1695,108 @@ public class CardDrawManager : MonoBehaviour
         }
 
         return runtimeDeck.Count;
+    }
+
+    private void NotifyTutorialCardPlayed(GameObject cardPrefab)
+    {
+        TutorialActionType actionType = cardPrefab != null
+            ? GetTutorialActionTypeForCardName(cardPrefab.name)
+            : TutorialActionType.PlayCard;
+
+        TutorialManager.Instance?.NotifyCardPlayed(actionType, cardPrefab);
+    }
+
+    private TutorialActionType GetTutorialActionTypeForCardName(string cardName)
+    {
+        if (IsTakeOverCard(cardName)) return TutorialActionType.TakeOver;
+        if (IsFreezeClaimCard(cardName)) return TutorialActionType.FreezeClaim;
+        if (IsStealCard(cardName)) return TutorialActionType.StealCard;
+        if (IsTradeHandsCard(cardName)) return TutorialActionType.TradeHands;
+        if (IsDisruptCard(cardName)) return TutorialActionType.Disrupt;
+        if (IsPowerBoostCard(cardName)) return TutorialActionType.PowerBoost;
+        if (IsShockTrapCard(cardName)) return TutorialActionType.PlaceShockTrap;
+
+        GateActionType gateActionType = GetGateActionType(cardName);
+
+        if (gateActionType == GateActionType.OpenGate) return TutorialActionType.OpenGate;
+        if (gateActionType == GateActionType.LockGate) return TutorialActionType.LockGate;
+
+        return TutorialActionType.PlayCard;
+    }
+
+    private GameObject FindCardPrefabById(string cardId)
+    {
+        string normalizedId = NormalizeCardName(cardId);
+
+        if (string.IsNullOrEmpty(normalizedId))
+        {
+            return null;
+        }
+
+        if (deckEntries != null)
+        {
+            foreach (CardDeckEntry entry in deckEntries)
+            {
+                if (entry != null &&
+                    entry.cardPrefab != null &&
+                    NormalizeCardName(entry.cardPrefab.name) == normalizedId)
+                {
+                    return entry.cardPrefab;
+                }
+            }
+        }
+
+        if (cardTypePrefabs != null)
+        {
+            foreach (GameObject prefab in cardTypePrefabs)
+            {
+                if (prefab != null && NormalizeCardName(prefab.name) == normalizedId)
+                {
+                    return prefab;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private bool TrySelectVisibleCardById(string cardId)
+    {
+        string normalizedId = NormalizeCardName(cardId);
+
+        if (string.IsNullOrEmpty(normalizedId) || cardSlots == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < cardSlots.Length; i++)
+        {
+            if (cardSlots[i] == null)
+            {
+                continue;
+            }
+
+            CardInstanceSelectable selectable = cardSlots[i].GetComponentInChildren<CardInstanceSelectable>();
+
+            if (selectable == null || selectable.sourcePrefab == null)
+            {
+                continue;
+            }
+
+            if (NormalizeCardName(selectable.sourcePrefab.name) == normalizedId)
+            {
+                if (selectedCard != null)
+                {
+                    selectedCard.SetSelected(false);
+                }
+
+                selectedCard = selectable;
+                selectedCard.SetSelected(true);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private PlayerResource GetPlayerResource(int playerId)

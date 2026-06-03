@@ -114,6 +114,11 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool BeginTakeOverTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TakeOver, null))
+        {
+            return false;
+        }
+
         if (ShouldBlockOnlineAction())
         {
             return false;
@@ -124,6 +129,11 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool BeginFreezeClaimTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.FreezeClaim, null))
+        {
+            return false;
+        }
+
         if (ShouldBlockOnlineAction())
         {
             return false;
@@ -253,6 +263,11 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool ResolveTakeOver(int playerId, TowerBuildArea buildArea, bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TakeOver, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
         if (buildArea == null)
         {
             ShowToast("Choose a land first.");
@@ -332,6 +347,11 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool ResolveFreezeClaim(int playerId, TowerBuildArea buildArea, bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.FreezeClaim, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
         if (!IsValidFreezeClaimTarget(buildArea))
         {
             if (buildArea != null && buildArea.isFrozenOrSealed)

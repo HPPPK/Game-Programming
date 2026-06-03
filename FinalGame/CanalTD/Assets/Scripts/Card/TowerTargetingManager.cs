@@ -116,6 +116,11 @@ public class TowerTargetingManager : MonoBehaviour
 
     public bool BeginPowerBoostTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PowerBoost, null))
+        {
+            return false;
+        }
+
         if (ShouldBlockOnlineAction())
         {
             return false;
@@ -199,6 +204,11 @@ public class TowerTargetingManager : MonoBehaviour
 
     public bool ResolvePowerBoost(int playerId, CannonTower tower, bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PowerBoost, tower != null ? tower.gameObject : null))
+        {
+            return false;
+        }
+
         if (!IsValidPowerBoostTarget(tower, playerId))
         {
             ShowToast("Choose one of your towers.");

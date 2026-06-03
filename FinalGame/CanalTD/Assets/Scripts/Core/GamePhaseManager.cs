@@ -129,7 +129,13 @@ public class GamePhaseManager : MonoBehaviour
 
     public void StartWavePhase()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.WaveStarted, null))
+        {
+            return;
+        }
+
         currentPhase = GamePhase.WavePhase;
+        TutorialManager.Instance?.NotifyTutorialWaveStarted();
 
         if (waveStartCoroutine != null)
         {
@@ -177,6 +183,11 @@ public class GamePhaseManager : MonoBehaviour
 
     public void OnEndTurnButtonClicked()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.EndTurnClicked, null))
+        {
+            return;
+        }
+
         if (photonOnlineGameSceneManager == null)
         {
             photonOnlineGameSceneManager = FindObjectOfType<PhotonOnlineGameSceneManager>();
@@ -184,6 +195,7 @@ public class GamePhaseManager : MonoBehaviour
 
         if (photonOnlineGameSceneManager != null && photonOnlineGameSceneManager.IsOnlineModeActive)
         {
+            TutorialManager.Instance?.NotifyEndTurnClicked();
             photonOnlineGameSceneManager.HandleEndTurnButtonClicked();
             return;
         }
@@ -192,6 +204,7 @@ public class GamePhaseManager : MonoBehaviour
 
         if (activeTurnSource != null && !object.ReferenceEquals(activeTurnSource, turnManager))
         {
+            TutorialManager.Instance?.NotifyEndTurnClicked();
             activeTurnSource.EndCurrentTurn();
             return;
         }
@@ -204,12 +217,14 @@ public class GamePhaseManager : MonoBehaviour
 
         if (playerManager != null && !playerManager.IsLastPlayer())
         {
+            TutorialManager.Instance?.NotifyEndTurnClicked();
             playerManager.AdvanceToNextPlayer();
             playerTurnToastAlreadyShown = true;
             StartPlayerPhase();
             return;
         }
 
+        TutorialManager.Instance?.NotifyEndTurnClicked();
         StartWavePhase();
     }
 
@@ -217,6 +232,7 @@ public class GamePhaseManager : MonoBehaviour
     {
         NotifyTowersWaveEnded();
         NotifyShockTrapsWaveEnded();
+        TutorialManager.Instance?.NotifyTutorialWaveCompleted();
 
         if (currentWaveIndex >= maxWaves)
         {

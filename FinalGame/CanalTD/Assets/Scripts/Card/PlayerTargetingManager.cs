@@ -130,6 +130,11 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool BeginStealCardTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.StealCard, null))
+        {
+            return false;
+        }
+
         if (ShouldBlockOnlineAction())
         {
             return false;
@@ -140,6 +145,11 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool BeginTradeHandsTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TradeHands, null))
+        {
+            return false;
+        }
+
         if (ShouldBlockOnlineAction())
         {
             return false;
@@ -150,6 +160,11 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool BeginDisruptTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.Disrupt, null))
+        {
+            return false;
+        }
+
         if (ShouldBlockOnlineAction())
         {
             return false;
@@ -294,6 +309,13 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool ResolveStealCard(int playerId, int targetPlayerId, bool consumePendingCard)
     {
+        PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
+
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.StealCard, tutorialTarget != null ? tutorialTarget.gameObject : null))
+        {
+            return false;
+        }
+
         PlayerResource currentPlayer = GetPlayerResource(playerId);
         PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
 
@@ -373,6 +395,13 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool ResolveTradeHands(int playerId, int targetPlayerId, bool consumePendingCard)
     {
+        PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
+
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TradeHands, tutorialTarget != null ? tutorialTarget.gameObject : null))
+        {
+            return false;
+        }
+
         PlayerResource currentPlayer = GetPlayerResource(playerId);
         PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
 
@@ -436,6 +465,13 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool ResolveDisrupt(int playerId, int targetPlayerId, bool consumePendingCard)
     {
+        PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
+
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.Disrupt, tutorialTarget != null ? tutorialTarget.gameObject : null))
+        {
+            return false;
+        }
+
         PlayerResource currentPlayer = GetPlayerResource(playerId);
         PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
 

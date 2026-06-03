@@ -3541,7 +3541,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Setting
+  m_text: Guide
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a6399fd5c718742949cddf4f6d0cf575, type: 2}
   m_sharedMaterial: {fileID: 4995261464645257919, guid: a6399fd5c718742949cddf4f6d0cf575, type: 2}
@@ -4005,7 +4005,7 @@ GameObject:
   - component: {fileID: 1193469812}
   - component: {fileID: 1193469811}
   m_Layer: 5
-  m_Name: Setting
+  m_Name: Guide
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4077,7 +4077,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1500286759}
         m_TargetAssemblyTypeName: HomeSceneManager, Assembly-CSharp
-        m_MethodName: OpenSetting
+        m_MethodName: OpenGuide
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4986,6 +4986,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modeSelectSceneName: ModeSelectScene
+  guideSceneName: GuideScene
   instructionPanel: {fileID: 1740370547}
   settingPanel: {fileID: 1237249828}
 --- !u!4 &1500286760

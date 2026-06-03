@@ -170,6 +170,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
     public bool BeginShockTrapTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PlaceShockTrap, null))
+        {
+            return false;
+        }
+
         if (ShouldBlockOnlineAction())
         {
             return false;
@@ -233,6 +238,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
     public bool ResolveShockTrapPlacement(int playerId, PathNode node, bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PlaceShockTrap, node != null ? node.gameObject : null))
+        {
+            return false;
+        }
+
         if (node == null)
         {
             ShowToast("Choose a path position first.");
