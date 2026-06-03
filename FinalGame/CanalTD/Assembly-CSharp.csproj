@@ -77,6 +77,7 @@
     <Compile Include="Assets/Scripts/UI/ResultSceneManager.cs" />
     <Compile Include="Assets/Scripts/UI/UIRaycastDebugger.cs" />
     <Compile Include="Assets/Scripts/UI/APDisplayUI.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialData.cs" />
     <Compile Include="Assets/Scripts/UI/GlobalCursorManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyType.cs" />
     <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChannelSelector.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Assets/Scripts/Core/TurnSourceResolver.cs" />
     <Compile Include="Assets/Scripts/Map/GateActionType.cs" />
     <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChatSettings.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialEnemyDemoSpawner.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyHealth.cs" />
     <Compile Include="Assets/Scripts/UI/RadialTowerMenu.cs" />
     <Compile Include="Assets/Scripts/Tower/CannonTower.cs" />
@@ -107,6 +109,7 @@
     <Compile Include="Assets/Scripts/UI/PlayerStatusPanelUI.cs" />
     <Compile Include="Assets/Scripts/UI/ModeSelectSceneManager.cs" />
     <Compile Include="Assets/Scripts/Path/PathNode.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialActionGate.cs" />
     <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/TextToggleIsOnTransition.cs" />
     <Compile Include="Assets/Scripts/UI/EnemyHealthBarSprite.cs" />
     <Compile Include="Assets/Scripts/Core/cursor.cs" />
@@ -144,10 +147,13 @@
     <Compile Include="Assets/Scripts/UI/UIRaycastCleaner.cs" />
     <Compile Include="Assets/Scripts/UI/AudioManager.cs" />
     <Compile Include="Assets/Scripts/Core/AIDifficulty.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialMessageController.cs" />
     <Compile Include="Assets/Scripts/Enemy/WaveManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerType.cs" />
     <Compile Include="Assets/Scripts/UI/ResultRowUI.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialManager.cs" />
     <Compile Include="Assets/Scripts/UI/CastleHealthBar.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialHighlightController.cs" />
     <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/ChatIdCheckerUI.cs" />
     <Compile Include="Assets/Scripts/Card/GateOwnershipManager.cs" />
     <Compile Include="Assets/Scripts/UI/SettingsPanelController.cs" />

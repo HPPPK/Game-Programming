@@ -594,13 +594,14 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         {
             return;
         }
-
+        
         if (PhotonNetwork.CurrentRoom.CustomProperties != null &&
             PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PhotonLobbyPropertyKeys.CurrentTurnPlayerId) &&
             PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PhotonLobbyPropertyKeys.CurrentRound))
         {
             return;
         }
+        
 
         int firstActivePlayerId = GetFirstActiveOnlinePlayerId();
 
