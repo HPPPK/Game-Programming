@@ -93,6 +93,11 @@ public class BuildTowerManager : MonoBehaviour
 
     private void TryBuildTowerAtMouse()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource();
 
         if (TurnSourceResolver.IsAIPrototypeActive() && (turnSource == null || !turnSource.CanHumanAct))
@@ -191,6 +196,21 @@ public class BuildTowerManager : MonoBehaviour
 
     public void HandleBuildAreaClicked(TowerBuildArea buildArea)
     {
+        if (!CanInteractWithBuildAreas())
+        {
+            return;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
+        if (ShouldBlockTutorialBuildAreaClick(buildArea))
+        {
+            return;
+        }
+
         if (buildArea != null && lastClickedArea == buildArea && lastClickedFrame == Time.frameCount)
         {
             return;
@@ -204,11 +224,6 @@ public class BuildTowerManager : MonoBehaviour
             Debug.Log("BuildTowerManager received clicked area: " + buildArea.name);
         }
 
-        if (!TurnSourceResolver.IsAIPrototypeActive() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
-        {
-            ShowToast("You cannot build during enemy wave.");
-            return;
-        }
         if (buildArea == null)
         {
             return;
@@ -291,6 +306,21 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TryBuyLand(TowerBuildArea buildArea)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.BuyLand, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
+        if (!CanPerformTowerOrLandAction())
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return TryBuyLandForPlayer(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
     }
 
@@ -345,6 +375,7 @@ public class BuildTowerManager : MonoBehaviour
         buildArea.SetOwner(playerId, playerManager);
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast("Land purchased.");
+        TutorialManager.Instance?.NotifyLandPurchased(buildArea.gameObject);
         return true;
     }
 
@@ -445,8 +476,10 @@ public class BuildTowerManager : MonoBehaviour
 
         buildArea.SetTower(tower);
         buildArea.towerOwnerPlayerId = activePlayerId;
+        TutorialManager.Instance?.RegisterRuntimeBuiltTower(buildArea.gameObject, tower);
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast(towerStats.towerType + " tower built.");
+        TutorialManager.Instance?.NotifyTowerBuilt(buildArea.gameObject);
         AudioManager.Instance?.PlayBuild();
         return true;
     }
@@ -468,6 +501,21 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TryBuildTower(TowerBuildArea buildArea, TowerType towerType)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.BuildTower, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
+        if (!CanPerformTowerOrLandAction())
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return TryBuildTowerForPlayer(buildArea, towerType, GetCurrentPlayerId(), true);
     }
 
@@ -504,6 +552,21 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TryUpgradeTower(TowerBuildArea buildArea)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.UpgradeTower, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
+        if (!CanPerformTowerOrLandAction())
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return TryUpgradeTowerForPlayer(buildArea, GetCurrentPlayerId(), true);
     }
 
@@ -520,6 +583,21 @@ public class BuildTowerManager : MonoBehaviour
 
     public bool TrySellTower(TowerBuildArea buildArea)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.SellTower, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
+        if (!CanPerformTowerOrLandAction())
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return TrySellTowerForPlayer(buildArea, GetCurrentPlayerId(), true);
     }
 
@@ -627,6 +705,7 @@ public class BuildTowerManager : MonoBehaviour
 
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast("Tower upgraded.");
+        TutorialManager.Instance?.NotifyTowerUpgraded(buildArea.gameObject);
         return true;
     }
 
@@ -659,6 +738,7 @@ public class BuildTowerManager : MonoBehaviour
         buildArea.towerOwnerPlayerId = -1;
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast("Tower sold.");
+        TutorialManager.Instance?.NotifyTowerSold(buildArea.gameObject);
         return true;
     }
 
@@ -741,6 +821,77 @@ public class BuildTowerManager : MonoBehaviour
     private PlayerResource GetCurrentPlayerResource()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerResource() : currentPlayerResource;
+    }
+
+    // Phase 2B is still local-only gameplay execution, so non-turn online
+    // clients must be blocked at the shared build/tower entry points.
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
+    }
+
+    private bool CanInteractWithBuildAreas()
+    {
+        if (TurnSourceResolver.IsAIPrototypeActive())
+        {
+            ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource();
+
+            if (turnSource == null || !turnSource.CanHumanAct)
+            {
+                ShowToast("You cannot build during enemy wave.");
+                HideBuildInteractionUI();
+                return false;
+            }
+        }
+        else if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
+        {
+            ShowToast("You cannot build during enemy wave.");
+            HideBuildInteractionUI();
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool CanPerformTowerOrLandAction()
+    {
+        if (!CanInteractWithBuildAreas())
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool ShouldBlockTutorialBuildAreaClick(TowerBuildArea buildArea)
+    {
+        if (buildArea == null)
+        {
+            return false;
+        }
+
+        TutorialActionType actionType;
+
+        if (buildArea.isOccupied)
+        {
+            actionType = TutorialActionType.InspectTower;
+        }
+        else if (buildArea.IsClaimable() && buildArea.IsUnowned())
+        {
+            actionType = TutorialActionType.SelectLand;
+        }
+        else
+        {
+            actionType = TutorialActionType.SelectOwnedLand;
+        }
+
+        if (TutorialActionGate.BlockIfNotAllowed(actionType, buildArea.gameObject))
+        {
+            return true;
+        }
+
+        TutorialManager.Instance?.NotifyBuildAreaSelected(actionType, buildArea.gameObject);
+        return false;
     }
 
     private GameObject GetPlayerManagerTowerPrefab(int playerId)

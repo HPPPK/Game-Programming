@@ -114,11 +114,31 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool BeginTakeOverTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TakeOver, null))
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(TileTargetingMode.TakeOver, "No land available to take over.");
     }
 
     public bool BeginFreezeClaimTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.FreezeClaim, null))
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(TileTargetingMode.FreezeClaim, "No land available to freeze.");
     }
 
@@ -170,6 +190,11 @@ public class TileTargetingManager : MonoBehaviour
     public void ConfirmSelection()
     {
         if (!isTargeting)
+        {
+            return;
+        }
+
+        if (ShouldBlockOnlineAction())
         {
             return;
         }
@@ -238,6 +263,11 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool ResolveTakeOver(int playerId, TowerBuildArea buildArea, bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TakeOver, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
         if (buildArea == null)
         {
             ShowToast("Choose a land first.");
@@ -317,6 +347,11 @@ public class TileTargetingManager : MonoBehaviour
 
     public bool ResolveFreezeClaim(int playerId, TowerBuildArea buildArea, bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.FreezeClaim, buildArea != null ? buildArea.gameObject : null))
+        {
+            return false;
+        }
+
         if (!IsValidFreezeClaimTarget(buildArea))
         {
             if (buildArea != null && buildArea.isFrozenOrSealed)
@@ -503,6 +538,11 @@ public class TileTargetingManager : MonoBehaviour
     private PlayerResource GetPlayerResource(int playerId)
     {
         return playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
     private void RefreshPlayerUI(int playerId)

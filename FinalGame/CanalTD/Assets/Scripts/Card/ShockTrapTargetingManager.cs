@@ -170,6 +170,16 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
     public bool BeginShockTrapTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PlaceShockTrap, null))
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         if (CursorToolManager.Instance != null)
         {
             CursorToolManager.Instance.ExitHammerMode();
@@ -207,6 +217,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
             return;
         }
 
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (selectedNode == null)
         {
             ShowToast("Choose a path position first.");
@@ -223,6 +238,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
     public bool ResolveShockTrapPlacement(int playerId, PathNode node, bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PlaceShockTrap, node != null ? node.gameObject : null))
+        {
+            return false;
+        }
+
         if (node == null)
         {
             ShowToast("Choose a path position first.");
@@ -318,6 +338,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
     public void ExitWithoutConsumingCard()
     {
         ExitTargetingMode();
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
     private void ScanRouteNodes()

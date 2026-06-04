@@ -45,9 +45,18 @@ public class GamePhaseManager : MonoBehaviour
     private bool playerTurnToastAlreadyShown = false;
     private bool initialHandsDealt = false;
     private Coroutine waveStartCoroutine;
+    private PhotonOnlineGameSceneManager photonOnlineGameSceneManager;
 
     private void Start()
     {
+        photonOnlineGameSceneManager = FindObjectOfType<PhotonOnlineGameSceneManager>();
+
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+        {
+            Debug.Log("GamePhaseManager using Photon online GameScene flow.");
+            return;
+        }
+
         DealInitialHandsOnce();
         StartPlayerPhase();
     }
@@ -120,7 +129,13 @@ public class GamePhaseManager : MonoBehaviour
 
     public void StartWavePhase()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.WaveStarted, null))
+        {
+            return;
+        }
+
         currentPhase = GamePhase.WavePhase;
+        TutorialManager.Instance?.NotifyTutorialWaveStarted();
 
         if (waveStartCoroutine != null)
         {
@@ -132,6 +147,12 @@ public class GamePhaseManager : MonoBehaviour
 
      private IEnumerator StartWaveAfterIncomingToast()
      {
+         BuildTowerManager buildTowerManager = BuildTowerManager.Instance != null
+             ? BuildTowerManager.Instance
+             : FindObjectOfType<BuildTowerManager>();
+         buildTowerManager?.HideBuildInteractionUI();
+         cardDrawManager?.CancelPendingCard();
+
          if (waveManager != null)
          {
              waveManager.ShowWaveIncoming(currentWaveIndex);
@@ -162,10 +183,28 @@ public class GamePhaseManager : MonoBehaviour
 
     public void OnEndTurnButtonClicked()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.EndTurnClicked, null))
+        {
+            return;
+        }
+
+        if (photonOnlineGameSceneManager == null)
+        {
+            photonOnlineGameSceneManager = FindObjectOfType<PhotonOnlineGameSceneManager>();
+        }
+
+        if (photonOnlineGameSceneManager != null && photonOnlineGameSceneManager.IsOnlineModeActive)
+        {
+            TutorialManager.Instance?.NotifyEndTurnClicked();
+            photonOnlineGameSceneManager.HandleEndTurnButtonClicked();
+            return;
+        }
+
         ITurnSource activeTurnSource = TurnSourceResolver.GetActiveTurnSource(turnManager);
 
         if (activeTurnSource != null && !object.ReferenceEquals(activeTurnSource, turnManager))
         {
+            TutorialManager.Instance?.NotifyEndTurnClicked();
             activeTurnSource.EndCurrentTurn();
             return;
         }
@@ -178,12 +217,14 @@ public class GamePhaseManager : MonoBehaviour
 
         if (playerManager != null && !playerManager.IsLastPlayer())
         {
+            TutorialManager.Instance?.NotifyEndTurnClicked();
             playerManager.AdvanceToNextPlayer();
             playerTurnToastAlreadyShown = true;
             StartPlayerPhase();
             return;
         }
 
+        TutorialManager.Instance?.NotifyEndTurnClicked();
         StartWavePhase();
     }
 
@@ -191,6 +232,7 @@ public class GamePhaseManager : MonoBehaviour
     {
         NotifyTowersWaveEnded();
         NotifyShockTrapsWaveEnded();
+        TutorialManager.Instance?.NotifyTutorialWaveCompleted();
 
         if (currentWaveIndex >= maxWaves)
         {
@@ -405,6 +447,12 @@ public class GamePhaseManager : MonoBehaviour
             manager.DealInitialHands(initialCardsPerPlayer);
             initialHandsDealt = true;
         }
+    }
+
+    // Online GameScene bootstrap reuses the same initial hand setup as local/AI.
+    public void EnsureInitialHandsDealt()
+    {
+        DealInitialHandsOnce();
     }
 
     private CardDrawManager GetCardDrawManager()

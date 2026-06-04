@@ -4792,7 +4792,7 @@ MonoBehaviour:
   playerManager: {fileID: 535938592}
   turnManager: {fileID: 1559123171}
   waveManager: {fileID: 476970906}
-  cardDrawManager: {fileID: 0}
+  cardDrawManager: {fileID: 2056775816}
   toastMessage: {fileID: 848080698}
   waveIncomingDelay: 2
   initialCardsPerPlayer: 2
@@ -10649,6 +10649,7 @@ MonoBehaviour:
   gamePhaseManager: {fileID: 163762666}
   aiPrototypeTurnManager: {fileID: 1332236540}
   cardDrawManager: {fileID: 2056775816}
+  photonOnlineGameSceneManager: {fileID: 0}
   resultSceneName: ResultScene
   homeSceneName: HomeScene
   confirmExitPanel: {fileID: 183310126}
@@ -53298,7 +53299,7 @@ MonoBehaviour:
   currentHP: 20
   ownerPlayerId: 0
   ownerResource: {fileID: 522910943}
-  statusPanel: {fileID: 0}
+  statusPanel: {fileID: 1082147775}
 --- !u!114 &522910943
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55821,7 +55822,7 @@ MonoBehaviour:
   currentHP: 20
   ownerPlayerId: 0
   ownerResource: {fileID: 652415274}
-  statusPanel: {fileID: 0}
+  statusPanel: {fileID: 1444230685}
 --- !u!114 &652415274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63508,7 +63509,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: Player 3
   linkedResource: {fileID: 0}
-  linkedCastle: {fileID: 0}
+  linkedCastle: {fileID: 522910942}
   cardDrawManager: {fileID: 2056775816}
   playerNameText: {fileID: 1089553786}
   moneyText: {fileID: 1872057199}
@@ -64274,7 +64275,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: Player 1
   linkedResource: {fileID: 0}
-  linkedCastle: {fileID: 0}
+  linkedCastle: {fileID: 2031645326}
   cardDrawManager: {fileID: 2056775816}
   playerNameText: {fileID: 134201360}
   moneyText: {fileID: 1324565779}
@@ -68748,7 +68749,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: Player 2
   linkedResource: {fileID: 0}
-  linkedCastle: {fileID: 0}
+  linkedCastle: {fileID: 652415273}
   cardDrawManager: {fileID: 2056775816}
   playerNameText: {fileID: 1027123691}
   moneyText: {fileID: 2072059389}
@@ -74221,7 +74222,7 @@ MonoBehaviour:
   toastMessage: {fileID: 848080698}
   darkOverlay: {fileID: 236984364}
   targetingUI: {fileID: 1872220167}
-  normalGameplayUI: {fileID: 0}
+  normalGameplayUI: {fileID: 1274524793}
   confirmButton: {fileID: 792752231}
   cancelButton: {fileID: 1778146313}
   tilemapsToDim: []
@@ -75692,7 +75693,7 @@ MonoBehaviour:
   currentHP: 20
   ownerPlayerId: 0
   ownerResource: {fileID: 1852332537}
-  statusPanel: {fileID: 0}
+  statusPanel: {fileID: 2117550754}
 --- !u!114 &1852332537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -78247,7 +78248,7 @@ MonoBehaviour:
   currentHP: 20
   ownerPlayerId: 0
   ownerResource: {fileID: 2031645327}
-  statusPanel: {fileID: 0}
+  statusPanel: {fileID: 1118719935}
 --- !u!114 &2031645327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79553,7 +79554,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: Player 0
   linkedResource: {fileID: 0}
-  linkedCastle: {fileID: 0}
+  linkedCastle: {fileID: 1852332536}
   cardDrawManager: {fileID: 2056775816}
   playerNameText: {fileID: 222685185}
   moneyText: {fileID: 2139074616}

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3221702997415786116}
   - component: {fileID: 7394166822143560766}
+  - component: {fileID: 1935140988695671794}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -84,6 +85,33 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1935140988695671794
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7624713037219861474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22d3f883d046049be81db3697aee2553, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frames:
+  - {fileID: 5660684527018279426, guid: 3c9d2ab0044134627b89cb38b7f5c45d, type: 3}
+  - {fileID: 8171228793442069330, guid: 3c9d2ab0044134627b89cb38b7f5c45d, type: 3}
+  - {fileID: 3824603442059132002, guid: 3c9d2ab0044134627b89cb38b7f5c45d, type: 3}
+  - {fileID: -2252640749409525285, guid: 3c9d2ab0044134627b89cb38b7f5c45d, type: 3}
+  - {fileID: 6066097643564557269, guid: 9f1836f5818e64cf6af61648dd29ea2c, type: 3}
+  - {fileID: -6264288685034057130, guid: 9f1836f5818e64cf6af61648dd29ea2c, type: 3}
+  - {fileID: -5347395346856357078, guid: 9f1836f5818e64cf6af61648dd29ea2c, type: 3}
+  - {fileID: -344445710724486630, guid: 9f1836f5818e64cf6af61648dd29ea2c, type: 3}
+  - {fileID: -2112041693564717756, guid: 9f1836f5818e64cf6af61648dd29ea2c, type: 3}
+  - {fileID: 723937664691330518, guid: 9f1836f5818e64cf6af61648dd29ea2c, type: 3}
+  framesPerSecond: 8
+  loop: 1
+  playOnStart: 1
+  randomStartFrame: 1
 --- !u!1 &8723841150012096137
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,7 +123,6 @@ GameObject:
   - component: {fileID: 6831921322682128346}
   - component: {fileID: 70612662488262903}
   - component: {fileID: 635007469872276841}
-  - component: {fileID: 4122633370143803572}
   m_Layer: 0
   m_Name: ShockTrap 1
   m_TagString: Untagged
@@ -133,8 +160,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ownerPlayerId: 0
   ownerResource: {fileID: 0}
-  damage: 2
-  radius: 3
+  damage: 6
+  triggerRadius: 1
+  explosionRadius: 3
   damageDelayAfterTrigger: 1
   triggered: 0
   enemyLayer:
@@ -142,9 +170,9 @@ MonoBehaviour:
     m_Bits: 0
   routeNodeTransform: {fileID: 0}
   countsAsActiveTrap: 0
-  animator: {fileID: 4122633370143803572}
+  animator: {fileID: 0}
   explodeTriggerName: Explode
-  destroyDelayAfterExplode: 0.35
+  destroyDelayAfterExplode: 0.6
   trapRenderer: {fileID: 0}
   useOwnerSprite: 1
 --- !u!58 &635007469872276841
@@ -181,25 +209,4 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 3
---- !u!95 &4122633370143803572
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8723841150012096137}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 3bbc0380ce6974e549e8ca63361123e3, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  m_Radius: 1

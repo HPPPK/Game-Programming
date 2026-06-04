@@ -12,6 +12,7 @@ public class HomeSceneManager : MonoBehaviour
 {
     [Header("Scenes")]
     public string modeSelectSceneName = "ModeSelectScene";
+    public string guideSceneName = "GuideScene";
 
     [Header("Panels")]
     public GameObject instructionPanel;
@@ -27,6 +28,12 @@ public class HomeSceneManager : MonoBehaviour
     public void OpenModeSelectScene()
     {
         SceneManager.LoadScene(modeSelectSceneName);
+    }
+
+    // Loads the interactive tutorial scene from the Home menu Guide button.
+    public void OpenGuide()
+    {
+        SceneManager.LoadScene(guideSceneName);
     }
 
     // Opens the instruction panel and closes the setting panel so only one popup is visible.

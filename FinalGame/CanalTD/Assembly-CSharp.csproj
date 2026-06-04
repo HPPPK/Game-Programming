@@ -28,7 +28,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>Temp/bin/Debug/</OutputPath>
-    <DefineConstants>UNITY_2022_3_62;UNITY_2022_3;UNITY_2022;UNITY_5_3_OR_NEWER;UNITY_5_4_OR_NEWER;UNITY_5_5_OR_NEWER;UNITY_5_6_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2017_2_OR_NEWER;UNITY_2017_3_OR_NEWER;UNITY_2017_4_OR_NEWER;UNITY_2018_1_OR_NEWER;UNITY_2018_2_OR_NEWER;UNITY_2018_3_OR_NEWER;UNITY_2018_4_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_2019_2_OR_NEWER;UNITY_2019_3_OR_NEWER;UNITY_2019_4_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2020_2_OR_NEWER;UNITY_2020_3_OR_NEWER;UNITY_2021_1_OR_NEWER;UNITY_2021_2_OR_NEWER;UNITY_2021_3_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_2022_2_OR_NEWER;UNITY_2022_3_OR_NEWER;PLATFORM_ARCH_64;UNITY_64;UNITY_INCLUDE_TESTS;ENABLE_AR;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_TEXTURE_STREAMING;ENABLE_VIRTUALTEXTURING;ENABLE_LZMA;ENABLE_UNITYEVENTS;ENABLE_VR;ENABLE_WEBCAM;ENABLE_UNITYWEBREQUEST;ENABLE_WWW;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_ADS;ENABLE_CLOUD_SERVICES_USE_WEBREQUEST;ENABLE_CLOUD_SERVICES_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_NATIVE_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_PURCHASING;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_BUILD;ENABLE_EDITOR_GAME_SERVICES;ENABLE_UNITY_GAME_SERVICES_ANALYTICS_SUPPORT;ENABLE_CLOUD_LICENSE;ENABLE_EDITOR_HUB_LICENSE;ENABLE_WEBSOCKET_CLIENT;ENABLE_GENERATE_NATIVE_PLUGINS_FOR_ASSEMBLIES_API;ENABLE_DIRECTOR_AUDIO;ENABLE_DIRECTOR_TEXTURE;ENABLE_MANAGED_JOBS;ENABLE_MANAGED_TRANSFORM_JOBS;ENABLE_MANAGED_ANIMATION_JOBS;ENABLE_MANAGED_AUDIO_JOBS;ENABLE_MANAGED_UNITYTLS;INCLUDE_DYNAMIC_GI;ENABLE_SCRIPTING_GC_WBARRIERS;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;ENABLE_VIDEO;ENABLE_ACCELERATOR_CLIENT_DEBUGGING;ENABLE_NAVIGATION_PACKAGE_DEBUG_VISUALIZATION;ENABLE_NAVIGATION_HEIGHTMESH_RUNTIME_SUPPORT;ENABLE_NAVIGATION_UI_REQUIRES_PACKAGE;PLATFORM_STANDALONE;TEXTCORE_1_0_OR_NEWER;PLATFORM_STANDALONE_OSX;UNITY_STANDALONE_OSX;UNITY_STANDALONE;ENABLE_GAMECENTER;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_CRUNCH_TEXTURE_COMPRESSION;ENABLE_CLUSTER_SYNC;ENABLE_CLUSTERINPUT;ENABLE_SPATIALTRACKING;PLATFORM_UPDATES_TIME_OUTSIDE_OF_PLAYER_LOOP;ENABLE_MONO;NET_STANDARD_2_0;NET_STANDARD;NET_STANDARD_2_1;NETSTANDARD;NETSTANDARD2_1;ENABLE_PROFILER;DEBUG;TRACE;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_OSX;ENABLE_UNITY_COLLECTIONS_CHECKS;ENABLE_BURST_AOT;UNITY_TEAM_LICENSE;ENABLE_CUSTOM_RENDER_TEXTURE;ENABLE_DIRECTOR;ENABLE_LOCALIZATION;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_TILEMAP;ENABLE_TIMELINE;ENABLE_INPUT_SYSTEM;ENABLE_LEGACY_INPUT_MANAGER;TEXTCORE_FONT_ENGINE_1_5_OR_NEWER;CSHARP_7_OR_LATER;CSHARP_7_3_OR_NEWER</DefineConstants>
+    <DefineConstants>UNITY_2022_3_62;UNITY_2022_3;UNITY_2022;UNITY_5_3_OR_NEWER;UNITY_5_4_OR_NEWER;UNITY_5_5_OR_NEWER;UNITY_5_6_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2017_2_OR_NEWER;UNITY_2017_3_OR_NEWER;UNITY_2017_4_OR_NEWER;UNITY_2018_1_OR_NEWER;UNITY_2018_2_OR_NEWER;UNITY_2018_3_OR_NEWER;UNITY_2018_4_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_2019_2_OR_NEWER;UNITY_2019_3_OR_NEWER;UNITY_2019_4_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2020_2_OR_NEWER;UNITY_2020_3_OR_NEWER;UNITY_2021_1_OR_NEWER;UNITY_2021_2_OR_NEWER;UNITY_2021_3_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_2022_2_OR_NEWER;UNITY_2022_3_OR_NEWER;PLATFORM_ARCH_64;UNITY_64;UNITY_INCLUDE_TESTS;ENABLE_AR;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_TEXTURE_STREAMING;ENABLE_VIRTUALTEXTURING;ENABLE_LZMA;ENABLE_UNITYEVENTS;ENABLE_VR;ENABLE_WEBCAM;ENABLE_UNITYWEBREQUEST;ENABLE_WWW;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_ADS;ENABLE_CLOUD_SERVICES_USE_WEBREQUEST;ENABLE_CLOUD_SERVICES_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_NATIVE_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_PURCHASING;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_BUILD;ENABLE_EDITOR_GAME_SERVICES;ENABLE_UNITY_GAME_SERVICES_ANALYTICS_SUPPORT;ENABLE_CLOUD_LICENSE;ENABLE_EDITOR_HUB_LICENSE;ENABLE_WEBSOCKET_CLIENT;ENABLE_GENERATE_NATIVE_PLUGINS_FOR_ASSEMBLIES_API;ENABLE_DIRECTOR_AUDIO;ENABLE_DIRECTOR_TEXTURE;ENABLE_MANAGED_JOBS;ENABLE_MANAGED_TRANSFORM_JOBS;ENABLE_MANAGED_ANIMATION_JOBS;ENABLE_MANAGED_AUDIO_JOBS;ENABLE_MANAGED_UNITYTLS;INCLUDE_DYNAMIC_GI;ENABLE_SCRIPTING_GC_WBARRIERS;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;ENABLE_VIDEO;ENABLE_ACCELERATOR_CLIENT_DEBUGGING;ENABLE_NAVIGATION_PACKAGE_DEBUG_VISUALIZATION;ENABLE_NAVIGATION_HEIGHTMESH_RUNTIME_SUPPORT;ENABLE_NAVIGATION_UI_REQUIRES_PACKAGE;PLATFORM_STANDALONE;TEXTCORE_1_0_OR_NEWER;PLATFORM_STANDALONE_OSX;UNITY_STANDALONE_OSX;UNITY_STANDALONE;ENABLE_GAMECENTER;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_CRUNCH_TEXTURE_COMPRESSION;ENABLE_CLUSTER_SYNC;ENABLE_CLUSTERINPUT;ENABLE_SPATIALTRACKING;PLATFORM_UPDATES_TIME_OUTSIDE_OF_PLAYER_LOOP;ENABLE_MONO;NET_STANDARD_2_0;NET_STANDARD;NET_STANDARD_2_1;NETSTANDARD;NETSTANDARD2_1;ENABLE_PROFILER;DEBUG;TRACE;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_OSX;ENABLE_UNITY_COLLECTIONS_CHECKS;ENABLE_BURST_AOT;UNITY_TEAM_LICENSE;ENABLE_CUSTOM_RENDER_TEXTURE;ENABLE_DIRECTOR;ENABLE_LOCALIZATION;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_TILEMAP;ENABLE_TIMELINE;ENABLE_INPUT_SYSTEM;ENABLE_LEGACY_INPUT_MANAGER;TEXTCORE_FONT_ENGINE_1_5_OR_NEWER;PHOTON_UNITY_NETWORKING;PUN_2_0_OR_NEWER;PUN_2_OR_NEWER;PUN_2_19_OR_NEWER;CSHARP_7_OR_LATER;CSHARP_7_3_OR_NEWER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0169;USG0001</NoWarn>
@@ -65,30 +65,42 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/Map/WaypointPath.cs" />
+    <Compile Include="Assets/Photon/PhotonRealtime/Demos/DemoLoadBalancing/ConnectAndJoinRandomLb.cs" />
     <Compile Include="Assets/Scripts/UI/RoomSlotUI.cs" />
+    <Compile Include="Assets/Scripts/Networking/PhotonOnlineGameSceneManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyTargetSelector.cs" />
     <Compile Include="Assets/Scripts/Card/CardHoverUI.cs" />
     <Compile Include="Assets/Scripts/Card/CardInstanceSelectable.cs" />
     <Compile Include="Assets/Scripts/Path/GatePathBlocker.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/DestroyOnStart.cs" />
     <Compile Include="Assets/Scripts/Core/AIPrototypeTurnManager.cs" />
     <Compile Include="Assets/Scripts/UI/ResultSceneManager.cs" />
     <Compile Include="Assets/Scripts/UI/UIRaycastDebugger.cs" />
     <Compile Include="Assets/Scripts/UI/APDisplayUI.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialData.cs" />
     <Compile Include="Assets/Scripts/UI/GlobalCursorManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyType.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChannelSelector.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/IgnoreUiRaycastWhenInactive.cs" />
     <Compile Include="Assets/Scripts/Core/GameResultData.cs" />
     <Compile Include="Assets/Scripts/Path/PathGraphState.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/NamePickNewGui.cs" />
     <Compile Include="Assets/Scripts/Core/TurnManager.cs" />
     <Compile Include="Assets/Scripts/Path/PathEdge.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/EnableOnStart.cs" />
     <Compile Include="Assets/Scripts/Card/ShockTrapTargetingManager.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemySpawner.cs" />
     <Compile Include="Assets/Scripts/UI/RoomSetupData.cs" />
     <Compile Include="Assets/Scripts/UI/UIClickProbe.cs" />
+    <Compile Include="Assets/Scripts/Networking/PhotonPunRoomLobbyManager.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChatNewGui.cs" />
     <Compile Include="Assets/Scripts/Map/doorChange.cs" />
     <Compile Include="Assets/Scripts/Card/CardDrawManager.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerHand.cs" />
     <Compile Include="Assets/Scripts/Core/TurnSourceResolver.cs" />
     <Compile Include="Assets/Scripts/Map/GateActionType.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChatSettings.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialEnemyDemoSpawner.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyHealth.cs" />
     <Compile Include="Assets/Scripts/UI/RadialTowerMenu.cs" />
     <Compile Include="Assets/Scripts/Tower/CannonTower.cs" />
@@ -97,6 +109,8 @@
     <Compile Include="Assets/Scripts/UI/PlayerStatusPanelUI.cs" />
     <Compile Include="Assets/Scripts/UI/ModeSelectSceneManager.cs" />
     <Compile Include="Assets/Scripts/Path/PathNode.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialActionGate.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/TextToggleIsOnTransition.cs" />
     <Compile Include="Assets/Scripts/UI/EnemyHealthBarSprite.cs" />
     <Compile Include="Assets/Scripts/Core/cursor.cs" />
     <Compile Include="Assets/Scripts/Card/ShockTrapPoint.cs" />
@@ -104,9 +118,11 @@
     <Compile Include="Assets/Scripts/Enemy/EnemyPathAssignmentManager.cs" />
     <Compile Include="Assets/Scripts/UI/ManualUIButtonDebug.cs" />
     <Compile Include="Assets/Scripts/Core/CursorToolManager.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/FriendItem.cs" />
     <Compile Include="Assets/Scripts/Tower/BuildTowerManager.cs" />
     <Compile Include="Assets/Scripts/UI/InstructionBookController.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerExitManager.cs" />
+    <Compile Include="Assets/Scripts/Networking/PhotonLobbyPropertyKeys.cs" />
     <Compile Include="Assets/Scripts/Tower/TargetPriority.cs" />
     <Compile Include="Assets/Scripts/UI/UIButtonSoundBinder.cs" />
     <Compile Include="Assets/Scripts/UI/CursorVisualFollower.cs" />
@@ -117,6 +133,7 @@
     <Compile Include="Assets/Scripts/Enemy/EnemyMover.cs" />
     <Compile Include="Assets/Scripts/Card/TowerTargetingManager.cs" />
     <Compile Include="Assets/Scripts/UI/SimpleFrameAnimator.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/TextButtonTransition.cs" />
     <Compile Include="Assets/Scripts/Path/PathfinderTester.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemySlowEffect.cs" />
     <Compile Include="Assets/Scripts/Core/PlayerManager.cs" />
@@ -130,10 +147,14 @@
     <Compile Include="Assets/Scripts/UI/UIRaycastCleaner.cs" />
     <Compile Include="Assets/Scripts/UI/AudioManager.cs" />
     <Compile Include="Assets/Scripts/Core/AIDifficulty.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialMessageController.cs" />
     <Compile Include="Assets/Scripts/Enemy/WaveManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerType.cs" />
     <Compile Include="Assets/Scripts/UI/ResultRowUI.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialManager.cs" />
     <Compile Include="Assets/Scripts/UI/CastleHealthBar.cs" />
+    <Compile Include="Assets/Scripts/Tutorial/TutorialHighlightController.cs" />
+    <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/ChatIdCheckerUI.cs" />
     <Compile Include="Assets/Scripts/Card/GateOwnershipManager.cs" />
     <Compile Include="Assets/Scripts/UI/SettingsPanelController.cs" />
     <Compile Include="Assets/Scripts/UI/ManualUIButton.cs" />
@@ -151,7 +172,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
+    <None Include="Assets/Photon/PhotonLibs/netstandard2.0/Photon3Unity3D.xml" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader" />
+    <None Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Resources/OpenSans/Apache License.txt" />
+    <None Include="Assets/Photon/PhotonUnityNetworking/changelog.txt" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMPro_Mobile.cginc" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF SSD.shader" />
@@ -161,16 +185,23 @@
     <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader" />
+    <None Include="Assets/Photon/PhotonLibs/changes-library.txt" />
     <None Include="Assets/TextMesh Pro/Resources/LineBreaking Leading Characters.txt" />
     <None Include="Assets/TextMesh Pro/Shaders/TMPro_Properties.cginc" />
     <None Include="Assets/TextMesh Pro/Shaders/TMPro_Surface.cginc" />
+    <None Include="Assets/Photon/PhotonUnityNetworking/readme.txt" />
     <None Include="Assets/TextMesh Pro/Resources/Fonts &amp; Materials/Font/FONTLOG.txt" />
     <None Include="Assets/TextMesh Pro/Resources/Fonts &amp; Materials/Font/SIL - Open Font License.txt" />
+    <None Include="Assets/Photon/PhotonLibs/netstandard2.0/Photon3Unity3D.dll" />
+    <None Include="Assets/Photon/PhotonLibs/Photon3Unity3D.dll" />
     <None Include="Assets/TextMesh Pro/Resources/LineBreaking Following Characters.txt" />
+    <None Include="Assets/Photon/PhotonLibs/Metro/Photon3Unity3D.dll" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader" />
+    <None Include="Assets/Photon/PhotonLibs/Photon3Unity3D.xml" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF Overlay.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader" />
     <None Include="Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt" />
+    <None Include="Assets/Photon/PhotonUnityNetworking/link.xml" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_Sprite.shader" />
   </ItemGroup>
@@ -511,8 +542,16 @@
       <HintPath>Library/PackageCache/com.unity.collections@1.2.4/Unity.Collections.LowLevel.ILSupport/Unity.Collections.LowLevel.ILSupport.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="websocket-sharp">
+      <HintPath>Assets/Photon/PhotonLibs/WebSocket/websocket-sharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
       <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Runtime/VisualScripting.Flow/Dependencies/NCalc/Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Photon3Unity3D">
+      <HintPath>Assets/Photon/PhotonLibs/netstandard2.0/Photon3Unity3D.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
@@ -1087,10 +1126,6 @@
       <HintPath>Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.001.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.Mathematics.Editor">
-      <HintPath>Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.2D.Common.Runtime">
       <HintPath>Library/ScriptAssemblies/Unity.2D.Common.Runtime.dll</HintPath>
       <Private>False</Private>
@@ -1105,6 +1140,10 @@
     </Reference>
     <Reference Include="Unity.Timeline">
       <HintPath>Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Mathematics.Editor">
+      <HintPath>Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.VisualScripting.SettingsProvider.Editor">
@@ -1181,6 +1220,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="PhotonUnityNetworking.Editor.csproj" />
+    <ProjectReference Include="PhotonUnityNetworking.Utilities.PhotonPlayer.Editor.csproj" />
+    <ProjectReference Include="PunDemos.DemoSlotcarEditor.csproj" />
+    <ProjectReference Include="PhotonRealtime.csproj" />
+    <ProjectReference Include="PhotonChat.csproj" />
+    <ProjectReference Include="PhotonUnityNetworking.csproj" />
+    <ProjectReference Include="PhotonUnityNetworking.Utilities.Culling.Editor.csproj" />
+    <ProjectReference Include="PhotonUnityNetworking.Demos.csproj" />
+    <ProjectReference Include="PhotonUnityNetworking.Utilities.csproj" />
+    <ProjectReference Include="PunDemos.DemoHubEditor.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>

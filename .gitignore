@@ -15,6 +15,10 @@ FinalGame/CanalTD/Obj/
 FinalGame/CanalTD/Build/
 FinalGame/CanalTD/Builds/
 FinalGame/CanalTD/Logs/
+FinalGame/CanalTD/*.log
+# Explicitly ignore tracked Unity compile/runtime logs.
+FinalGame/CanalTD/unity-batch-compile.log
+FinalGame/CanalTD/Logs/shadercompiler-UnityShaderCompiler0.log
 FinalGame/CanalTD/UserSettings/
 
 2D shooter/Library/

@@ -116,6 +116,16 @@ public class TowerTargetingManager : MonoBehaviour
 
     public bool BeginPowerBoostTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PowerBoost, null))
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         selectedTower = null;
         validTargets.Clear();
         targetRenderers.Clear();
@@ -173,6 +183,11 @@ public class TowerTargetingManager : MonoBehaviour
             return;
         }
 
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (selectedTower == null)
         {
             ShowToast("Choose a tower first.");
@@ -189,6 +204,11 @@ public class TowerTargetingManager : MonoBehaviour
 
     public bool ResolvePowerBoost(int playerId, CannonTower tower, bool consumePendingCard)
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PowerBoost, tower != null ? tower.gameObject : null))
+        {
+            return false;
+        }
+
         if (!IsValidPowerBoostTarget(tower, playerId))
         {
             ShowToast("Choose one of your towers.");
@@ -254,6 +274,11 @@ public class TowerTargetingManager : MonoBehaviour
     public void ExitWithoutConsumingCard()
     {
         ExitTargetingMode();
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
     private void TrySelectTowerAtMouse()

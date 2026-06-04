@@ -67,6 +67,7 @@ public class RoomSlotUI : MonoBehaviour
         }
 
         SetCharacterVisible(false);
+        SetTypeTextVisible(true);
         SetRemoveButtonVisible(false);
     }
 
@@ -84,6 +85,7 @@ public class RoomSlotUI : MonoBehaviour
         }
 
         SetCharacterVisible(true);
+        SetTypeTextVisible(true);
         SetRemoveButtonVisible(false);
         SetReady(isReady);
     }
@@ -102,8 +104,45 @@ public class RoomSlotUI : MonoBehaviour
         }
 
         SetCharacterVisible(true);
+        SetTypeTextVisible(true);
         SetRemoveButtonVisible(true);
         SetReady(true);
+    }
+
+    // Renders an online-mode empty slot using only the final product fields.
+    public void SetOnlineEmpty()
+    {
+        if (slotNameText != null)
+        {
+            slotNameText.text = "Empty";
+        }
+
+        if (readyText != null)
+        {
+            readyText.text = "Waiting";
+        }
+
+        SetCharacterVisible(false);
+        SetTypeTextVisible(false);
+        SetRemoveButtonVisible(false);
+    }
+
+    // Renders one online player slot with only name and ready/waiting state.
+    public void SetOnlinePlayer(string playerName, bool isReady)
+    {
+        if (slotNameText != null)
+        {
+            slotNameText.text = string.IsNullOrWhiteSpace(playerName) ? "Player" : playerName;
+        }
+
+        if (readyText != null)
+        {
+            readyText.text = isReady ? "Ready" : "Waiting";
+        }
+
+        SetCharacterVisible(true);
+        SetTypeTextVisible(false);
+        SetRemoveButtonVisible(false);
     }
 
     // Updates the ready text for occupied slots.
@@ -122,6 +161,14 @@ public class RoomSlotUI : MonoBehaviour
         {
             removeButton.gameObject.SetActive(visible);
             removeButton.interactable = visible;
+        }
+    }
+
+    public void SetTypeTextVisible(bool visible)
+    {
+        if (slotTypeText != null)
+        {
+            slotTypeText.gameObject.SetActive(visible);
         }
     }
 

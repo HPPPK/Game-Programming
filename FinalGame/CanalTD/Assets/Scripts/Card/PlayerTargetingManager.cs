@@ -130,16 +130,46 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool BeginStealCardTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.StealCard, null))
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(PlayerTargetingMode.StealCard, "No player has cards to steal.");
     }
 
     public bool BeginTradeHandsTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TradeHands, null))
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(PlayerTargetingMode.TradeHands, "No player available to trade hands.");
     }
 
     public bool BeginDisruptTargeting()
     {
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.Disrupt, null))
+        {
+            return false;
+        }
+
+        if (ShouldBlockOnlineAction())
+        {
+            return false;
+        }
+
         return BeginTargeting(PlayerTargetingMode.Disrupt, "No player available to disrupt.");
     }
 
@@ -232,6 +262,11 @@ public class PlayerTargetingManager : MonoBehaviour
             return;
         }
 
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (selectedPlayer == null)
         {
             ShowToast("Choose a player first.");
@@ -274,6 +309,13 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool ResolveStealCard(int playerId, int targetPlayerId, bool consumePendingCard)
     {
+        PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
+
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.StealCard, tutorialTarget != null ? tutorialTarget.gameObject : null))
+        {
+            return false;
+        }
+
         PlayerResource currentPlayer = GetPlayerResource(playerId);
         PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
 
@@ -353,6 +395,13 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool ResolveTradeHands(int playerId, int targetPlayerId, bool consumePendingCard)
     {
+        PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
+
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TradeHands, tutorialTarget != null ? tutorialTarget.gameObject : null))
+        {
+            return false;
+        }
+
         PlayerResource currentPlayer = GetPlayerResource(playerId);
         PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
 
@@ -416,6 +465,13 @@ public class PlayerTargetingManager : MonoBehaviour
 
     public bool ResolveDisrupt(int playerId, int targetPlayerId, bool consumePendingCard)
     {
+        PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
+
+        if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.Disrupt, tutorialTarget != null ? tutorialTarget.gameObject : null))
+        {
+            return false;
+        }
+
         PlayerResource currentPlayer = GetPlayerResource(playerId);
         PlayerResource targetPlayer = GetPlayerResource(targetPlayerId);
 
@@ -489,6 +545,11 @@ public class PlayerTargetingManager : MonoBehaviour
     private int GetCurrentPlayerId()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerId() : -1;
+    }
+
+    private bool ShouldBlockOnlineAction()
+    {
+        return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
     private void SyncAndRefreshPlayers(params PlayerResource[] players)
