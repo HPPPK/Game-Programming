@@ -476,6 +476,7 @@ public class BuildTowerManager : MonoBehaviour
 
         buildArea.SetTower(tower);
         buildArea.towerOwnerPlayerId = activePlayerId;
+        TutorialManager.Instance?.RegisterRuntimeBuiltTower(buildArea.gameObject, tower);
         RefreshCurrentPlayerUI();
         if (showMessages) ShowToast(towerStats.towerType + " tower built.");
         TutorialManager.Instance?.NotifyTowerBuilt(buildArea.gameObject);
@@ -884,7 +885,13 @@ public class BuildTowerManager : MonoBehaviour
             actionType = TutorialActionType.SelectOwnedLand;
         }
 
-        return TutorialActionGate.BlockIfNotAllowed(actionType, buildArea.gameObject);
+        if (TutorialActionGate.BlockIfNotAllowed(actionType, buildArea.gameObject))
+        {
+            return true;
+        }
+
+        TutorialManager.Instance?.NotifyBuildAreaSelected(actionType, buildArea.gameObject);
+        return false;
     }
 
     private GameObject GetPlayerManagerTowerPrefab(int playerId)

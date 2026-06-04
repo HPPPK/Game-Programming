@@ -60,6 +60,10 @@ public class TutorialStep
     public bool requireExactTarget;
     public bool requiresPlayerAction;
     public TutorialActionType expectedActionType = TutorialActionType.None;
+    public List<TutorialActionType> allowedActionTypes = new List<TutorialActionType>();
+    public int tutorialEnemySpawnCount;
+    public float fallbackAutoAdvanceSeconds;
+    public bool hideTutorialUIOnEnter;
 
     [TextArea(1, 3)]
     public string blockedMessageOverride;

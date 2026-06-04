@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-
 public class TutorialHighlightController : MonoBehaviour
 {
     private static readonly Vector2 DefaultWorldFramePadding = new Vector2(0.15f, 0.15f);
@@ -26,9 +25,11 @@ public class TutorialHighlightController : MonoBehaviour
     [SerializeField] private Vector2 worldMessageOffsetAbove = new Vector2(0f, 0.06f);
     [SerializeField] private Vector2 worldMessageOffsetBelow = new Vector2(0f, -0.06f);
     [SerializeField] private Vector2 worldMessageOffsetRight = new Vector2(0.06f, 0f);
+    [SerializeField] private Vector2 worldMessageOffsetRightForLand = new Vector2(0.8f, 0f);
     [SerializeField] private float messageViewportTopLimit = 0.88f;
     [SerializeField] private float uiMessageGap = 18f;
     [SerializeField] private float worldMessageGap = 0.005f;
+    [SerializeField] private float worldMessageGapForLand = 0.2f;
 
     [Header("Layout")]
     [SerializeField] private Vector2 uiFramePadding = new Vector2(12f, 12f);
@@ -342,10 +343,19 @@ public class TutorialHighlightController : MonoBehaviour
 
         if (placeRight)
         {
-            float gap = worldMessageGap;
+            float gap = ShouldUseLandMessageSpacing() ? worldMessageGapForLand : worldMessageGap;
+            Vector2 rightOffset = ShouldUseLandMessageSpacing() ? worldMessageOffsetRightForLand : worldMessageOffsetRight;
+            Rect anchorRect = targetRect;
+
+            if (ShouldAnchorMessageToRadialMenu() &&
+                TryGetRadialMenuCanvasLocalRect(canvasRect, out Rect radialMenuRect))
+            {
+                anchorRect = radialMenuRect;
+            }
+
             desiredPosition = new Vector2(
-                targetRect.xMax + gap + worldMessageOffsetRight.x,
-                targetCenter.y + worldMessageOffsetRight.y);
+                anchorRect.xMax + gap + rightOffset.x,
+                anchorRect.center.y + rightOffset.y);
         }
         else
         {
@@ -384,6 +394,7 @@ public class TutorialHighlightController : MonoBehaviour
         Vector2 clampedPosition = ClampPanelInsideCanvas(canvasRect.rect, anchoredPosition, messagePanel.rect.size);
         messagePanel.anchoredPosition = clampedPosition;
     }
+    
 
     private void UpdateArrow(Rect targetRect, bool isUITarget, bool useWorldSpaceLayout)
     {
@@ -436,6 +447,23 @@ public class TutorialHighlightController : MonoBehaviour
         {
             messagePanel.SetAsLastSibling();
         }
+
+        RadialTowerMenu radialMenu = FindObjectOfType<RadialTowerMenu>();
+        if (radialMenu != null)
+        {
+            radialMenu.transform.SetAsLastSibling();
+            GameObject menuRoot = radialMenu.root != null ? radialMenu.root : radialMenu.gameObject;
+
+            if (menuRoot != null)
+            {
+                menuRoot.transform.SetAsLastSibling();
+
+                if (messagePanel != null)
+                {
+                    messagePanel.SetAsLastSibling();
+                }
+            }
+        }
     }
 
     private void SanitizeWorldSpaceSettings()
@@ -477,6 +505,12 @@ public class TutorialHighlightController : MonoBehaviour
     {
         switch (currentTargetId)
         {
+            case "ClaimableLand":
+            case "PublicBuildArea":
+            case "TowerBuildArea":
+            case "BuiltTower":
+            case "UpgradeButton":
+            case "ConfirmButton":
             case "PlayerInfoPanel":
             case "PlayerNameDisplay":
             case "GoldDisplay":
@@ -487,6 +521,62 @@ public class TutorialHighlightController : MonoBehaviour
             default:
                 return false;
         }
+    }
+
+    private bool ShouldUseLandMessageSpacing()
+    {
+        return currentTargetId == "ClaimableLand" ||
+               currentTargetId == "PublicBuildArea" ||
+               currentTargetId == "TowerBuildArea" ||
+               currentTargetId == "BuiltTower" ||
+               currentTargetId == "UpgradeButton" ||
+               currentTargetId == "ConfirmButton";
+    }
+
+    private bool ShouldAnchorMessageToRadialMenu()
+    {
+        return currentTargetId == "ClaimableLand" ||
+               currentTargetId == "TowerBuildArea" ||
+               currentTargetId == "BuiltTower" ||
+               currentTargetId == "UpgradeButton" ||
+               currentTargetId == "ConfirmButton";
+    }
+
+    private bool TryGetRadialMenuCanvasLocalRect(RectTransform canvasRect, out Rect localRect)
+    {
+        localRect = default;
+
+        if (canvasRect == null)
+        {
+            return false;
+        }
+
+        RadialTowerMenu radialMenu = FindObjectOfType<RadialTowerMenu>();
+        if (radialMenu == null)
+        {
+            return false;
+        }
+
+        GameObject menuObject = radialMenu.root != null ? radialMenu.root : radialMenu.gameObject;
+        if (menuObject == null || !menuObject.activeInHierarchy)
+        {
+            return false;
+        }
+
+        RectTransform menuRect = menuObject.GetComponent<RectTransform>();
+        if (menuRect == null)
+        {
+            menuRect = radialMenu.GetComponent<RectTransform>();
+        }
+
+        if (menuRect == null)
+        {
+            return false;
+        }
+
+        Vector3[] corners = new Vector3[4];
+        menuRect.GetWorldCorners(corners);
+        return TryBuildCanvasLocalRectFromWorldCorners(canvasRect, corners, out localRect);
     }
 
     private bool TryGetTargetCanvasLocalRect(RectTransform canvasRect, GameObject target, bool isUITarget, out Rect localRect)

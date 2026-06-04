@@ -344,6 +344,7 @@ public class RadialTowerMenu : MonoBehaviour
             return;
         }
 
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.InspectTower, selectedBuildArea != null ? selectedBuildArea.gameObject : null);
         ShowUpgradeConfirm(currentTowerStats.GetUpgradeCost());
     }
 

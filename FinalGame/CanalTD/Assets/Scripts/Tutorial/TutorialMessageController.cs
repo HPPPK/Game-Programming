@@ -91,7 +91,9 @@ public class TutorialMessageController : MonoBehaviour
 
         if (nextButton != null)
         {
-            nextButton.interactable = step != null && !step.requiresPlayerAction;
+            nextButton.interactable = tutorialManager != null
+                ? tutorialManager.CanAdvanceCurrentStepManually()
+                : (step != null && !step.requiresPlayerAction);
         }
 
         if (skipPartButton != null)

@@ -17587,9 +17587,11 @@ MonoBehaviour:
   worldMessageOffsetAbove: {x: 0, y: 0.06}
   worldMessageOffsetBelow: {x: 0, y: -0.06}
   worldMessageOffsetRight: {x: 0.06, y: 0}
+  worldMessageOffsetRightForLand: {x: 0.35, y: 0}
   messageViewportTopLimit: 0.88
   uiMessageGap: 18
   worldMessageGap: 0.005
+  worldMessageGapForLand: 0.08
   uiFramePadding: {x: 18, y: 18}
   worldFramePadding: {x: 0.15, y: 0.15}
   minimumUIFrameSize: {x: 48, y: 48}
@@ -54254,7 +54256,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -2.24, y: -0.69}
+  m_AnchoredPosition: {x: -2.24, y: -0.18}
   m_SizeDelta: {x: 3, y: 3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &531724581
@@ -54369,7 +54371,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &535146065
 RectTransform:
   m_ObjectHideFlags: 0
@@ -78397,11 +78399,18 @@ MonoBehaviour:
   homeSceneName: HomeScene
   localPlayerCastleVisualPath: Players/Castle_BottomLeft
   localPlayerInfoPanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel
+  playerNameDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/Player
   hpDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/BloodNum
   goldDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/MoneyText
   cardCountDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/cardNum
   scoreDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/PointText
   turnIndicatorPath: UI/Canvas/TextMeshProUGUI
+  claimableLandPath: Map/BuildAreas/Claimable_BuildArea_Gate01
+  publicBuildAreaPath: Map/BuildAreas/Public_BuildArea_01
+  towerBuildAreaPath: Map/BuildAreas/Public_BuildArea_01
+  radialConfirmButtonPath: UI/Canvas/RadialTowerMenu/ConfirmButton
+  radialUpgradeButtonPath: UI/Canvas/RadialTowerMenu/UpgradeButton
+  guideSceneStartingGold: 100
 --- !u!4 &1842489414
 Transform:
   m_ObjectHideFlags: 0
@@ -80609,7 +80618,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.07500005, y: 0.61249983}
+  m_AnchoredPosition: {x: 0.07500005, y: -0.02}
   m_SizeDelta: {x: 3, y: 3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2006130161
@@ -82296,8 +82305,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 263567146191764764, guid: c8e53266e438245259ecd127b8662caf, type: 3}
   spawnPoints:
-  - {fileID: 820064824}
-  - {fileID: 966247107}
+  - {fileID: 537083399}
   enemiesParent: {fileID: 0}
   spawnIntervalSeconds: 0.35
   notifyTutorialManagerWhenCleared: 1
