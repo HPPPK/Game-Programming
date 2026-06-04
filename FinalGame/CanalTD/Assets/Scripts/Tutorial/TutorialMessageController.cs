@@ -31,16 +31,19 @@ public class TutorialMessageController : MonoBehaviour
 
         if (previousButton != null)
         {
+            NormalizeTutorialButtonColors(previousButton);
             BindButton(previousButton, OnClickPrevious);
         }
 
         if (nextButton != null)
         {
+            NormalizeTutorialButtonColors(nextButton);
             BindButton(nextButton, OnClickNext);
         }
 
         if (skipPartButton != null)
         {
+            NormalizeTutorialButtonColors(skipPartButton);
             BindButton(skipPartButton, OnClickSkipPart);
         }
 
@@ -194,6 +197,19 @@ public class TutorialMessageController : MonoBehaviour
 
         button.onClick.RemoveListener(callback);
         button.onClick.AddListener(callback);
+    }
+
+    private void NormalizeTutorialButtonColors(Button button)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        ColorBlock colors = button.colors;
+        colors.disabledColor = colors.normalColor;
+        colors.colorMultiplier = Mathf.Max(1f, colors.colorMultiplier);
+        button.colors = colors;
     }
 
     private void ApplyTutorialBackgroundColor()

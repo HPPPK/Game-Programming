@@ -4,8 +4,8 @@ using UnityEngine.UI;
 public class TutorialHighlightController : MonoBehaviour
 {
     private static readonly Vector2 DefaultWorldFramePadding = new Vector2(0.15f, 0.15f);
-    private static readonly Vector2 DefaultWorldMessageOffsetAbove = new Vector2(0f, 4.5f);
-    private static readonly Vector2 DefaultWorldMessageOffsetBelow = new Vector2(0f, -4.5f);
+    private static readonly Vector2 DefaultWorldMessageOffsetAbove = new Vector2(0f, 0.06f);
+    private static readonly Vector2 DefaultWorldMessageOffsetBelow = new Vector2(0f, -0.06f);
     private const float DefaultWorldBorderThickness = 0.08f;
 
     [Header("Highlight UI")]
@@ -23,9 +23,12 @@ public class TutorialHighlightController : MonoBehaviour
     [SerializeField] private RectTransform messagePanel;
     [SerializeField] private Vector2 uiMessageOffsetAbove = new Vector2(0f, 120f);
     [SerializeField] private Vector2 uiMessageOffsetBelow = new Vector2(0f, -120f);
-    [SerializeField] private Vector2 worldMessageOffsetAbove = new Vector2(0f, 4.5f);
-    [SerializeField] private Vector2 worldMessageOffsetBelow = new Vector2(0f, -4.5f);
+    [SerializeField] private Vector2 worldMessageOffsetAbove = new Vector2(0f, 0.06f);
+    [SerializeField] private Vector2 worldMessageOffsetBelow = new Vector2(0f, -0.06f);
+    [SerializeField] private Vector2 worldMessageOffsetRight = new Vector2(0.06f, 0f);
     [SerializeField] private float messageViewportTopLimit = 0.88f;
+    [SerializeField] private float uiMessageGap = 18f;
+    [SerializeField] private float worldMessageGap = 0.005f;
 
     [Header("Layout")]
     [SerializeField] private Vector2 uiFramePadding = new Vector2(12f, 12f);
@@ -46,6 +49,7 @@ public class TutorialHighlightController : MonoBehaviour
     private Image[] dimPanelImages;
     private RectTransform[] borderBars;
     private Image[] borderBarImages;
+    private string currentTargetId;
 
     private void Awake()
     {
@@ -66,15 +70,17 @@ public class TutorialHighlightController : MonoBehaviour
         UpdateHighlightVisual();
     }
 
-    public void ShowHighlight(GameObject target)
+    public void ShowHighlight(GameObject target, string targetId = null)
     {
         currentTarget = target;
+        currentTargetId = targetId;
         UpdateHighlightVisual();
     }
 
     public void HideHighlight()
     {
         currentTarget = null;
+        currentTargetId = null;
 
         if (highlightRoot != null)
         {
@@ -330,19 +336,52 @@ public class TutorialHighlightController : MonoBehaviour
         }
 
         Vector2 targetCenter = targetRect.center;
-        Vector2 targetTop = new Vector2(targetCenter.x, targetRect.yMax);
-        Vector2 targetBottom = new Vector2(targetCenter.x, targetRect.yMin);
-        Vector2 offsetAbove = useWorldSpaceLayout ? worldMessageOffsetAbove : (isUITarget ? uiMessageOffsetAbove : worldMessageOffsetAbove);
-        Vector2 offsetBelow = useWorldSpaceLayout ? worldMessageOffsetBelow : (isUITarget ? uiMessageOffsetBelow : worldMessageOffsetBelow);
+        Vector2 desiredPosition;
+        bool placeRight = useWorldSpaceLayout && ShouldPlaceMessageOnRight();
+        bool placeAbove = false;
 
-        Vector2 desiredAbove = targetTop + offsetAbove;
-        Vector2 desiredBelow = targetBottom + offsetBelow;
+        if (placeRight)
+        {
+            float gap = worldMessageGap;
+            desiredPosition = new Vector2(
+                targetRect.xMax + gap + worldMessageOffsetRight.x,
+                targetCenter.y + worldMessageOffsetRight.y);
+        }
+        else
+        {
+            Vector2 offsetAbove = useWorldSpaceLayout ? worldMessageOffsetAbove : (isUITarget ? uiMessageOffsetAbove : worldMessageOffsetAbove);
+            Vector2 offsetBelow = useWorldSpaceLayout ? worldMessageOffsetBelow : (isUITarget ? uiMessageOffsetBelow : worldMessageOffsetBelow);
+            float gap = useWorldSpaceLayout ? worldMessageGap : uiMessageGap;
 
-        Vector3 aboveViewport = RectTransformToViewport(canvasRect, desiredAbove);
-        bool placeAbove = aboveViewport.y <= messageViewportTopLimit;
+            Vector2 desiredAbove = new Vector2(
+                targetCenter.x + offsetAbove.x,
+                targetRect.yMax + gap + offsetAbove.y);
+            Vector2 desiredBelow = new Vector2(
+                targetCenter.x + offsetBelow.x,
+                targetRect.yMin - gap + offsetBelow.y);
 
-        Vector2 desiredPosition = placeAbove ? desiredAbove : desiredBelow;
-        Vector2 clampedPosition = ClampPanelInsideCanvas(canvasRect.rect, desiredPosition, messagePanel.rect.size);
+            Vector3 aboveViewport = RectTransformToViewport(canvasRect, desiredAbove);
+            placeAbove = aboveViewport.y <= messageViewportTopLimit;
+            desiredPosition = placeAbove ? desiredAbove : desiredBelow;
+        }
+
+        Vector2 anchoredPosition = desiredPosition;
+        if (placeRight)
+        {
+            anchoredPosition.x += messagePanel.rect.width * 0.5f;
+        }
+        else
+        {
+            anchoredPosition.y += (placeAbove ? 1f : -1f) * (messagePanel.rect.height * 0.5f);
+        }
+
+        if (useWorldSpaceLayout)
+        {
+            messagePanel.anchoredPosition = anchoredPosition;
+            return;
+        }
+
+        Vector2 clampedPosition = ClampPanelInsideCanvas(canvasRect.rect, anchoredPosition, messagePanel.rect.size);
         messagePanel.anchoredPosition = clampedPosition;
     }
 
@@ -432,6 +471,22 @@ public class TutorialHighlightController : MonoBehaviour
         float x = Mathf.Clamp(desiredPosition.x, canvasRect.xMin + halfWidth, canvasRect.xMax - halfWidth);
         float y = Mathf.Clamp(desiredPosition.y, canvasRect.yMin + halfHeight, canvasRect.yMax - halfHeight);
         return new Vector2(x, y);
+    }
+
+    private bool ShouldPlaceMessageOnRight()
+    {
+        switch (currentTargetId)
+        {
+            case "PlayerInfoPanel":
+            case "PlayerNameDisplay":
+            case "GoldDisplay":
+            case "HPDisplay":
+            case "CardCountDisplay":
+            case "ScoreDisplay":
+                return true;
+            default:
+                return false;
+        }
     }
 
     private bool TryGetTargetCanvasLocalRect(RectTransform canvasRect, GameObject target, bool isUITarget, out Rect localRect)

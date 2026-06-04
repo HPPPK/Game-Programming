@@ -26,6 +26,7 @@ public class TutorialManager : MonoBehaviour
     [Header("Default Part 1 Paths")]
     [SerializeField] private string localPlayerCastleVisualPath = "Players/Castle_BottomLeft";
     [SerializeField] private string localPlayerInfoPanelPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel";
+    [SerializeField] private string playerNameDisplayPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel/Player";
     [SerializeField] private string hpDisplayPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel/BloodNum";
     [SerializeField] private string goldDisplayPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel/MoneyText";
     [SerializeField] private string cardCountDisplayPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel/cardNum";
@@ -411,7 +412,7 @@ public class TutorialManager : MonoBehaviour
         messageController?.ShowStep(step);
         GameObject highlightTarget = ResolveHighlightTarget(step);
         Debug.Log("Tutorial Highlight target: " + (highlightTarget != null ? GetHierarchyPath(highlightTarget) : "None"));
-        highlightController?.ShowHighlight(highlightTarget);
+        highlightController?.ShowHighlight(highlightTarget, step.highlightTargetId);
     }
 
     public bool IsAtFirstStep()
@@ -574,7 +575,7 @@ public class TutorialManager : MonoBehaviour
     {
         TutorialPartDefinition part1 = FindPartDefinition(TutorialPartId.PlayerInfoAndScore);
 
-        if (part1 == null || part1.steps == null || part1.steps.Count != 9)
+        if (part1 == null || part1.steps == null || part1.steps.Count != 10)
         {
             return false;
         }
@@ -583,6 +584,7 @@ public class TutorialManager : MonoBehaviour
         {
             "PlayerCastle",
             "PlayerInfoPanel",
+            "PlayerNameDisplay",
             "GoldDisplay",
             "HPDisplay",
             "CardCountDisplay",
@@ -610,6 +612,7 @@ public class TutorialManager : MonoBehaviour
 
         AddBinding("PlayerCastle", localPlayerCastleVisualPath);
         AddBinding("PlayerInfoPanel", localPlayerInfoPanelPath);
+        AddBinding("PlayerNameDisplay", playerNameDisplayPath);
         AddBinding("GoldDisplay", goldDisplayPath);
         AddBinding("HPDisplay", hpDisplayPath);
         AddBinding("CardCountDisplay", cardCountDisplayPath);
@@ -632,13 +635,14 @@ public class TutorialManager : MonoBehaviour
             {
                 CreateInfoStep("part1_step_1", "This is your castle. Protect it from enemy attacks.", "PlayerCastle"),
                 CreateInfoStep("part1_step_2", "This panel shows your current game information.", "PlayerInfoPanel"),
-                CreateInfoStep("part1_step_3", "HP represents your remaining castle health.", "HPDisplay"),
-                CreateInfoStep("part1_step_4", "Gold is used to buy land, build towers, and upgrade towers.", "GoldDisplay"),
-                CreateInfoStep("part1_step_5", "Cards give you powerful actions and strategic options.", "CardCountDisplay"),
-                CreateInfoStep("part1_step_6", "Score determines the final winner.", "ScoreDisplay"),
-                CreateInfoStep("part1_step_7", "Defeating enemies and surviving waves will increase your score.", "ScoreDisplay"),
-                CreateInfoStep("part1_step_8", "Always pay attention to whose turn it is.", "TurnIndicator"),
-                CreateInfoStep("part1_step_9", "Great! You now understand the player information system.", null)
+                CreateInfoStep("part1_step_3", "This is your player name. You can customize it before starting a match.", "PlayerNameDisplay"),
+                CreateInfoStep("part1_step_4", "HP represents your remaining castle health.", "HPDisplay"),
+                CreateInfoStep("part1_step_5", "Gold is used to buy land, build towers, and upgrade towers.", "GoldDisplay"),
+                CreateInfoStep("part1_step_6", "Cards give you powerful actions and strategic options.", "CardCountDisplay"),
+                CreateInfoStep("part1_step_7", "Score determines the final winner.", "ScoreDisplay"),
+                CreateInfoStep("part1_step_8", "Defeating enemies and surviving waves will increase your score.", "ScoreDisplay"),
+                CreateInfoStep("part1_step_9", "Always pay attention to whose turn it is.", "TurnIndicator"),
+                CreateInfoStep("part1_step_10", "Great! You now understand the player information system.", null)
             }
         };
 
