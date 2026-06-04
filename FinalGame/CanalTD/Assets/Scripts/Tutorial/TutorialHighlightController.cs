@@ -25,6 +25,7 @@ public class TutorialHighlightController : MonoBehaviour
     [SerializeField] private Vector2 worldMessageOffsetAbove = new Vector2(0f, 0.06f);
     [SerializeField] private Vector2 worldMessageOffsetBelow = new Vector2(0f, -0.06f);
     [SerializeField] private Vector2 worldMessageOffsetRight = new Vector2(0.06f, 0f);
+    [SerializeField] private Vector2 worldMessageOffsetLeft = new Vector2(-0.06f, 0f);
     [SerializeField] private Vector2 worldMessageOffsetRightForLand = new Vector2(0.8f, 0f);
     [SerializeField] private float messageViewportTopLimit = 0.88f;
     [SerializeField] private float uiMessageGap = 18f;
@@ -339,12 +340,16 @@ public class TutorialHighlightController : MonoBehaviour
         Vector2 targetCenter = targetRect.center;
         Vector2 desiredPosition;
         bool placeRight = useWorldSpaceLayout && ShouldPlaceMessageOnRight();
+        bool placeLeft = useWorldSpaceLayout && ShouldPlaceMessageOnLeft();
         bool placeAbove = false;
 
-        if (placeRight)
+        if (placeRight || placeLeft)
         {
-            float gap = ShouldUseLandMessageSpacing() ? worldMessageGapForLand : worldMessageGap;
-            Vector2 rightOffset = ShouldUseLandMessageSpacing() ? worldMessageOffsetRightForLand : worldMessageOffsetRight;
+            bool useLandSpacing = ShouldUseLandMessageSpacing();
+            float gap = useLandSpacing ? worldMessageGapForLand : worldMessageGap;
+            Vector2 sideOffset = placeRight
+                ? (useLandSpacing ? worldMessageOffsetRightForLand : worldMessageOffsetRight)
+                : worldMessageOffsetLeft;
             Rect anchorRect = targetRect;
 
             if (ShouldAnchorMessageToRadialMenu() &&
@@ -354,8 +359,10 @@ public class TutorialHighlightController : MonoBehaviour
             }
 
             desiredPosition = new Vector2(
-                anchorRect.xMax + gap + rightOffset.x,
-                anchorRect.center.y + rightOffset.y);
+                placeRight
+                    ? anchorRect.xMax + gap + sideOffset.x
+                    : anchorRect.xMin - gap + sideOffset.x,
+                anchorRect.center.y + sideOffset.y);
         }
         else
         {
@@ -379,6 +386,10 @@ public class TutorialHighlightController : MonoBehaviour
         if (placeRight)
         {
             anchoredPosition.x += messagePanel.rect.width * 0.5f;
+        }
+        else if (placeLeft)
+        {
+            anchoredPosition.x -= messagePanel.rect.width * 0.5f;
         }
         else
         {
@@ -505,18 +516,33 @@ public class TutorialHighlightController : MonoBehaviour
     {
         switch (currentTargetId)
         {
+            case "Player1Panel":
+            case "Player2Panel":
             case "ClaimableLand":
             case "PublicBuildArea":
             case "TowerBuildArea":
             case "BuiltTower":
             case "UpgradeButton":
             case "ConfirmButton":
+            case "TurnIndicator":
             case "PlayerInfoPanel":
             case "PlayerNameDisplay":
             case "GoldDisplay":
             case "HPDisplay":
             case "CardCountDisplay":
             case "ScoreDisplay":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private bool ShouldPlaceMessageOnLeft()
+    {
+        switch (currentTargetId)
+        {
+            case "Player3Panel":
+            case "Player4Panel":
                 return true;
             default:
                 return false;

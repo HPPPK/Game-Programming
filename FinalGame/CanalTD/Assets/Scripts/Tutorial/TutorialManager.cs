@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class TutorialManager : MonoBehaviour
 {
+    private const string ForcedGuideSceneTurnMarkerPath = "Players/Castle_TopLeft/TurnMaker";
+    private const string ForcedGuideSceneTurnBannerPath = "UI/Canvas/TextMeshProUGUI";
+
     public static TutorialManager Instance { get; private set; }
 
     [Header("Tutorial Flow")]
@@ -32,8 +35,6 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private string goldDisplayPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel/MoneyText";
     [SerializeField] private string cardCountDisplayPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel/cardNum";
     [SerializeField] private string scoreDisplayPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel/PointText";
-    [SerializeField] private string turnIndicatorPath = "UI/Canvas/TextMeshProUGUI";
-
     [Header("Default Part 2 Paths")]
     [SerializeField] private string claimableLandPath = "Map/BuildAreas/Claimable_BuildArea_Gate01";
     [SerializeField] private string publicBuildAreaPath = "Map/BuildAreas/Public_BuildArea_01";
@@ -41,6 +42,12 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private string radialConfirmButtonPath = "UI/Canvas/RadialTowerMenu/ConfirmButton";
     [SerializeField] private string radialUpgradeButtonPath = "UI/Canvas/RadialTowerMenu/UpgradeButton";
     [SerializeField] private int guideSceneStartingGold = 100;
+
+    [Header("Merged Player / Turn Paths")]
+    [SerializeField] private string player1PanelPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel";
+    [SerializeField] private string player2PanelPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel (1)";
+    [SerializeField] private string player3PanelPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel (2)";
+    [SerializeField] private string player4PanelPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel (3)";
 
     private int currentPartIndex;
     private int currentStepIndex;
@@ -763,12 +770,14 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        if (IsPart1ConfiguredCorrectly() && IsPart2ConfiguredCorrectly())
+        if (IsPart1ConfiguredCorrectly() &&
+            IsPart2ConfiguredCorrectly() &&
+            FindPartDefinition(TutorialPartId.PlayersTurnsScoring) == null)
         {
             return;
         }
 
-        Debug.Log("GuideScene tutorial data invalid. Regenerating default Part 1 and Part 2.");
+        Debug.Log("GuideScene tutorial data invalid. Regenerating default merged Part 1 and Part 2.");
         RemoveInvalidTutorialParts();
         RemoveInvalidTargetBindings();
         BuildDefaultPart1Bindings();
@@ -809,7 +818,7 @@ public class TutorialManager : MonoBehaviour
     {
         TutorialPartDefinition part1 = FindPartDefinition(TutorialPartId.PlayerInfoAndScore);
 
-        if (part1 == null || part1.steps == null || part1.steps.Count != 10)
+        if (part1 == null || part1.steps == null || part1.steps.Count != 17)
         {
             return false;
         }
@@ -823,7 +832,12 @@ public class TutorialManager : MonoBehaviour
             "HPDisplay",
             "CardCountDisplay",
             "ScoreDisplay",
-            "TurnIndicator"
+            "TurnBanner",
+            "TurnIndicator",
+            "Player1Panel",
+            "Player2Panel",
+            "Player3Panel",
+            "Player4Panel"
         };
 
         for (int i = 0; i < requiredTargetIds.Length; i++)
@@ -832,6 +846,12 @@ public class TutorialManager : MonoBehaviour
             {
                 return false;
             }
+        }
+
+        if (!DoesBindingMatchPath("TurnBanner", ForcedGuideSceneTurnBannerPath) ||
+            !DoesBindingMatchPath("TurnIndicator", ForcedGuideSceneTurnMarkerPath))
+        {
+            return false;
         }
 
         return true;
@@ -882,7 +902,12 @@ public class TutorialManager : MonoBehaviour
         AddBinding("HPDisplay", hpDisplayPath);
         AddBinding("CardCountDisplay", cardCountDisplayPath);
         AddBinding("ScoreDisplay", scoreDisplayPath);
-        AddBinding("TurnIndicator", turnIndicatorPath);
+        AddBinding("TurnBanner", ForcedGuideSceneTurnBannerPath);
+        AddBinding("TurnIndicator", ForcedGuideSceneTurnMarkerPath);
+        AddBinding("Player1Panel", player1PanelPath);
+        AddBinding("Player2Panel", player2PanelPath);
+        AddBinding("Player3Panel", player3PanelPath);
+        AddBinding("Player4Panel", player4PanelPath);
     }
 
     private void BuildDefaultPart2Bindings()
@@ -924,8 +949,15 @@ public class TutorialManager : MonoBehaviour
                 CreateInfoStep("part1_step_6", "Cards give you powerful actions and strategic options.", "CardCountDisplay"),
                 CreateInfoStep("part1_step_7", "Score determines the final winner.", "ScoreDisplay"),
                 CreateInfoStep("part1_step_8", "Defeating enemies and surviving waves will increase your score.", "ScoreDisplay"),
-                CreateInfoStep("part1_step_9", "Always pay attention to whose turn it is.", "TurnIndicator"),
-                CreateInfoStep("part1_step_10", "Great! You now understand the player information system.", null)
+                CreateInfoStep("part1_step_9", "Each player is represented by a unique color.", "Player1Panel"),
+                CreateInfoStep("part1_step_10", "Player colors help identify ownership of land, towers, and actions.", "Player2Panel"),
+                CreateInfoStep("part1_step_11", "Throughout the match, every player's assets follow their color.", "Player3Panel"),
+                CreateInfoStep("part1_step_12", "Knowing who owns a structure is important for strategy.", "Player4Panel"),
+                CreateInfoStep("part1_step_13", "This banner displays the current round and whose turn it is.", "TurnBanner"),
+                CreateInfoStep("part1_step_14", "This marker also indicates the player whose turn is active.", "TurnIndicator"),
+                CreateInfoStep("part1_step_15", "Only the active player may perform turn actions.", "TurnIndicator"),
+                CreateInfoStep("part1_step_16", "Always monitor both your status panel and your opponents' progress.", "PlayerInfoPanel"),
+                CreateInfoStep("part1_step_17", "Great! You now understand the player information system.", null)
             }
         };
 
@@ -955,7 +987,7 @@ public class TutorialManager : MonoBehaviour
                 CreateActionStep("part2_step_8", "Click Upgrade to prepare the tower upgrade.", "UpgradeButton", TutorialActionType.InspectTower, false, TutorialActionType.InspectTower),
                 CreateActionStep("part2_step_9", "Confirm the upgrade to make your tower stronger.", "ConfirmButton", TutorialActionType.UpgradeTower, false, TutorialActionType.UpgradeTower),
                 CreateInfoStep("part2_step_10", "Enemy waves will come from the spawn point. Click Next to start a small wave.", "WaveSpawnPoint"),
-                CreateHiddenEnemyWaveStep("part2_step_11", 3, 10f),
+                CreateHiddenEnemyWaveStep("part2_step_11", 1, 10f),
                 CreateInfoStep("part2_step_12", "Great! You have learned the basic build loop.", null)
             }
         };
@@ -1165,6 +1197,13 @@ public class TutorialManager : MonoBehaviour
         return false;
     }
 
+    private bool DoesBindingMatchPath(string targetId, string hierarchyPath)
+    {
+        GameObject expectedObject = FindSceneObjectByPath(hierarchyPath);
+        GameObject actualObject = ResolveBindingTarget(targetId);
+        return expectedObject != null && actualObject == expectedObject;
+    }
+
     private void RemoveInvalidTutorialParts()
     {
         if (parts == null)
@@ -1187,6 +1226,7 @@ public class TutorialManager : MonoBehaviour
 
             if (part.partId == TutorialPartId.PlayerInfoAndScore ||
                 part.partId == TutorialPartId.LandTowerGold ||
+                part.partId == TutorialPartId.PlayersTurnsScoring ||
                 isPlaceholder)
             {
                 parts.RemoveAt(i);

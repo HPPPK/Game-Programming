@@ -8,7 +8,8 @@ public enum TutorialPartId
     LandTowerGold,
     Cards,
     EndTurn,
-    EnemyWave
+    EnemyWave,
+    PlayersTurnsScoring
 }
 
 public enum TutorialActionType
