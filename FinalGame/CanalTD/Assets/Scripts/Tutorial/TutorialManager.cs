@@ -1151,26 +1151,26 @@ public class TutorialManager : MonoBehaviour
         steps.Add(playSelectStep);
         steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_9", "This selected card is ready to play.", "CardHand"));
         steps.Add(CreateActionStep(TutorialPartId.Cards, "part4_step_10", "Now click Play to enter card targeting mode.", "PlayButton", TutorialActionType.PlayCard, false, TutorialActionType.PlayCard));
-        steps.Add(CreateActionStep(TutorialPartId.Cards, "part4_step_11", "Select a valid gate target first. Confirm stays disabled until you choose a target.", "Gate", TutorialActionType.SelectTarget, false, TutorialActionType.SelectTarget));
-        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_12", "Confirm uses the card on the selected target, and Cancel returns it to your hand.", "TargetingConfirmButton"));
+        steps.Add(CreateActionStep(TutorialPartId.Cards, "part4_step_11", "Lock Gate closes a route and can force enemies to take a different path. Select a valid gate target first.", "Gate", TutorialActionType.SelectTarget, false, TutorialActionType.SelectTarget));
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_12", "Confirm applies Lock Gate to the selected target. Cancel returns the card to your hand without using it.", "TargetingConfirmButton"));
         steps.Add(CreateActionStep(TutorialPartId.Cards, "part4_step_13", "Now click Confirm to lock the selected gate.", "TargetingConfirmButton", TutorialActionType.LockGate, false, TutorialActionType.LockGate));
         steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_14", "Next, you will practice the remaining card effects. Use Skip if you want to skip the rest of the card demonstrations.", null));
 
         steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_15", "Open Gate reopens a route after a gate has been locked.", "Gate"));
-        AddDetailedCardDemoSteps(steps, 16, "Open Gate", "OpenGate", "Gate", TutorialActionType.OpenGate, "Now click Confirm to open the selected gate.");
+        AddDetailedCardDemoSteps(steps, 16, "Open Gate", "OpenGate", "Gate", TutorialActionType.OpenGate, "Open Gate reopens a closed route so enemies can use that path again.", "Now click Confirm to open the selected gate.");
 
         steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_22", "Tile control cards influence expansion and territory.", "ClaimableLand"));
-        AddDetailedCardDemoSteps(steps, 23, "Freeze Claim", "FreezeClaim", "ClaimableLand", TutorialActionType.FreezeClaim, "Now click Confirm to freeze the selected tile.");
-        AddDetailedCardDemoSteps(steps, 29, "Take Over", "TakeOver", "PublicBuildArea", TutorialActionType.TakeOver, "Now click Confirm to take control of the selected tile.");
+        AddDetailedCardDemoSteps(steps, 23, "Freeze Claim", "FreezeClaim", "ClaimableLand", TutorialActionType.FreezeClaim, "Freeze Claim seals a land tile so normal land actions cannot use it until the effect clears.", "Now click Confirm to freeze the selected tile.");
+        AddDetailedCardDemoSteps(steps, 29, "Take Over", "TakeOver", "PublicBuildArea", TutorialActionType.TakeOver, "Take Over captures an opponent's owned tile and transfers control to you.", "Now click Confirm to take control of the selected tile.");
 
         steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_35", "Combat cards help defend difficult waves.", "BuiltTower"));
-        AddDetailedCardDemoSteps(steps, 36, "Power Boost", "PowerBoost", "BuiltTower", TutorialActionType.PowerBoost, "Now click Confirm to apply Power Boost to the selected tower.");
-        AddDetailedCardDemoSteps(steps, 42, "Shock Trap", "ShockTrap", "ShockTrapNode", TutorialActionType.PlaceShockTrap, "Now click Confirm to place Shock Trap at the selected position.");
+        AddDetailedCardDemoSteps(steps, 36, "Power Boost", "PowerBoost", "BuiltTower", TutorialActionType.PowerBoost, "Power Boost strengthens one of your towers for the next wave.", "Now click Confirm to apply Power Boost to the selected tower.");
+        AddDetailedCardDemoSteps(steps, 42, "Shock Trap", "ShockTrap", "ShockTrapNode", TutorialActionType.PlaceShockTrap, "Shock Trap places a trap on the path that damages enemies when they move onto it.", "Now click Confirm to place Shock Trap at the selected position.");
 
         steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_48", "Interaction cards directly affect opponents.", "OpponentCastle"));
-        AddDetailedCardDemoSteps(steps, 49, "Disrupt", "Disrupt", "OpponentCastle", TutorialActionType.Disrupt, "Now click Confirm to apply Disrupt to the selected opponent.");
-        AddDetailedCardDemoSteps(steps, 55, "Steal Card", "StealCard", "OpponentCastle", TutorialActionType.StealCard, "Now click Confirm to steal a card from the selected opponent.");
-        AddDetailedCardDemoSteps(steps, 61, "Trade Hands", "TradeHands", "OpponentCastle", TutorialActionType.TradeHands, "Now click Confirm to swap hands with the selected opponent.");
+        AddDetailedCardDemoSteps(steps, 49, "Disrupt", "Disrupt", "OpponentCastle", TutorialActionType.Disrupt, "Disrupt blocks the chosen opponent from using card actions on their next turn.", "Now click Confirm to apply Disrupt to the selected opponent.");
+        AddDetailedCardDemoSteps(steps, 55, "Steal Card", "StealCard", "OpponentCastle", TutorialActionType.StealCard, "Steal Card takes one random card from the chosen opponent and adds it to your hand.", "Now click Confirm to steal a card from the selected opponent.");
+        AddDetailedCardDemoSteps(steps, 61, "Trade Hands", "TradeHands", "OpponentCastle", TutorialActionType.TradeHands, "Trade Hands swaps your current hand with the chosen opponent's hand.", "Now click Confirm to swap hands with the selected opponent.");
 
         steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_66", "Cards create powerful strategic opportunities. Experiment with different combinations to control the battlefield.", null));
 
@@ -1184,6 +1184,7 @@ public class TutorialManager : MonoBehaviour
         string tutorialCardId,
         string targetHighlightId,
         TutorialActionType resolutionActionType,
+        string effectDescription,
         string resolutionMessage)
     {
         steps.Add(CreateCardActionStep(
@@ -1214,7 +1215,7 @@ public class TutorialManager : MonoBehaviour
         steps.Add(CreateActionStep(
             TutorialPartId.Cards,
             "part4_step_" + (startIndex + 3),
-            "Select a valid target first. Confirm stays disabled until you choose a target.",
+            effectDescription + " Select a valid target first.",
             targetHighlightId,
             TutorialActionType.SelectTarget,
             false,
@@ -1223,7 +1224,7 @@ public class TutorialManager : MonoBehaviour
         steps.Add(CreateInfoStep(
             TutorialPartId.Cards,
             "part4_step_" + (startIndex + 4),
-            "Confirm will apply " + displayName + ", and Cancel will return it to your hand.",
+            "Confirm will apply " + displayName + " to the selected target, and Cancel will return it to your hand.",
             "TargetingConfirmButton"));
 
         steps.Add(CreateActionStep(
