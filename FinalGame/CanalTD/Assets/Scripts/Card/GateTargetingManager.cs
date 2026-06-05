@@ -117,7 +117,9 @@ public class GateTargetingManager : MonoBehaviour
 
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            ShowToast("You cannot control gates during enemy wave.");
+            ShowToast(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot control gates during enemy wave.")
+                : "You cannot control gates during enemy wave.");
             return false;
         }
 
@@ -317,7 +319,9 @@ public class GateTargetingManager : MonoBehaviour
 
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            ShowToast("You cannot control gates during enemy wave.");
+            ShowToast(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot control gates during enemy wave.")
+                : "You cannot control gates during enemy wave.");
             return;
         }
 
@@ -776,7 +780,9 @@ public class GateTargetingManager : MonoBehaviour
 
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            ShowToast("You cannot control gates during enemy wave.");
+            ShowToast(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot control gates during enemy wave.")
+                : "You cannot control gates during enemy wave.");
             return false;
         }
 

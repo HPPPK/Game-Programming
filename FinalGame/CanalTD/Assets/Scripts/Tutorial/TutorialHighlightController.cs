@@ -29,6 +29,7 @@ public class TutorialHighlightController : MonoBehaviour
     [SerializeField] private Vector2 worldMessageOffsetRightForLand = new Vector2(0.8f, 0f);
     [SerializeField] private float messageViewportTopLimit = 0.88f;
     [SerializeField] private float uiMessageGap = 18f;
+    [SerializeField] private float tutorialPart5TopLeftMessageGap = 8f;
     [SerializeField] private float worldMessageGap = 0.005f;
     [SerializeField] private float worldMessageGapForLand = 0.2f;
 
@@ -342,9 +343,16 @@ public class TutorialHighlightController : MonoBehaviour
 
         if (ShouldPlaceMessageAtTopLeft(isUITarget, useWorldSpaceLayout))
         {
+            float topLeftGap = ShouldUsePart5TopLeftMessageGap() ? tutorialPart5TopLeftMessageGap : uiMessageGap;
             Vector2 topLeftAnchoredPosition = new Vector2(
-                targetRect.xMin - uiMessageGap - (messagePanel.rect.width * 0.5f),
-                targetRect.yMax + uiMessageGap + (messagePanel.rect.height * 0.5f));
+                targetRect.xMin - topLeftGap - (messagePanel.rect.width * 0.5f),
+                targetRect.yMax + topLeftGap + (messagePanel.rect.height * 0.5f));
+
+            if (useWorldSpaceLayout)
+            {
+                messagePanel.anchoredPosition = topLeftAnchoredPosition;
+                return;
+            }
 
             Vector2 topLeftClampedPosition = ClampPanelInsideCanvas(canvasRect.rect, topLeftAnchoredPosition, messagePanel.rect.size);
             messagePanel.anchoredPosition = topLeftClampedPosition;
@@ -359,6 +367,17 @@ public class TutorialHighlightController : MonoBehaviour
 
             Vector2 rightClampedPosition = ClampPanelInsideCanvas(canvasRect.rect, rightAnchoredPosition, messagePanel.rect.size);
             messagePanel.anchoredPosition = rightClampedPosition;
+            return;
+        }
+
+        if (ShouldPlaceMessageOnLeftBottom())
+        {
+            Vector2 bottomLeftAnchoredPosition = new Vector2(
+                targetRect.xMin - uiMessageGap - (messagePanel.rect.width * 0.5f),
+                targetRect.yMin - uiMessageGap - (messagePanel.rect.height * 0.5f));
+
+            Vector2 bottomLeftClampedPosition = ClampPanelInsideCanvas(canvasRect.rect, bottomLeftAnchoredPosition, messagePanel.rect.size);
+            messagePanel.anchoredPosition = bottomLeftClampedPosition;
             return;
         }
 
@@ -591,7 +610,35 @@ public class TutorialHighlightController : MonoBehaviour
 
     private bool ShouldPlaceMessageAtTopLeft(bool isUITarget, bool useWorldSpaceLayout)
     {
-        return isUITarget && !useWorldSpaceLayout && currentTargetId == "PlayButton";
+        TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
+
+        if (currentStep != null &&
+            currentStep.partId == TutorialPartId.EndTurn &&
+            (currentStep.stepId == "part5_step_1" || currentStep.stepId == "part5_step_2"))
+        {
+            return true;
+        }
+
+        return isUITarget &&
+               !useWorldSpaceLayout &&
+               (currentTargetId == "PlayButton" || currentTargetId == "EndTurnButton");
+    }
+
+    private bool ShouldUsePart5TopLeftMessageGap()
+    {
+        TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
+        return currentStep != null &&
+               currentStep.partId == TutorialPartId.EndTurn &&
+               (currentStep.stepId == "part5_step_1" || currentStep.stepId == "part5_step_2");
+    }
+
+    private bool ShouldPlaceMessageOnLeftBottom()
+    {
+        TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
+
+        return currentStep != null &&
+               currentStep.partId == TutorialPartId.EndTurn &&
+               currentTargetId == "TurnIndicator";
     }
 
     private bool ShouldPlaceMessageAtRight(bool isUITarget, bool useWorldSpaceLayout)

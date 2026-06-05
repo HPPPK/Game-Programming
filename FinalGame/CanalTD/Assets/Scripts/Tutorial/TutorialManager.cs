@@ -6,7 +6,12 @@ using UnityEngine.SceneManagement;
 public class TutorialManager : MonoBehaviour
 {
     private const string ForcedGuideSceneTurnMarkerPath = "Players/Castle_TopLeft/TurnMaker";
+    private const string ForcedGuideSceneTurnMarkerTopRightPath = "Players/Castle_TopRight/TurnMaker";
+    private const string ForcedGuideSceneTurnMarkerBottomLeftPath = "Players/Castle_BottomLeft/TurnMaker";
+    private const string ForcedGuideSceneTurnMarkerBottomRightPath = "Players/Castle_BottomRight/TurnMaker";
     private const string ForcedGuideSceneTurnBannerPath = "UI/Canvas/TextMeshProUGUI";
+    private const string GuideSceneEndTurnButtonPath = "UI/Canvas/NormalGameplayUI/EndTurnButton";
+    private const string TutorialWaveBlockedMessage = "Wait until the wave is finished.";
 
     public static TutorialManager Instance { get; private set; }
 
@@ -24,8 +29,11 @@ public class TutorialManager : MonoBehaviour
 
     [Header("Scene Names")]
     [SerializeField] private string guideSceneName = "GuideScene";
+    [SerializeField] private string modeSelectSceneName = "ModeSelectScene";
     [SerializeField] private string practiceVsAISceneName = "GameScene_AIPrototype";
     [SerializeField] private string homeSceneName = "HomeScene";
+    [TextArea(2, 5)]
+    [SerializeField] private string tutorialCompletionMessage = "You have completed the CanalTD tutorial.\n\nGood luck!";
 
     [Header("Default Part 1 Paths")]
     [SerializeField] private string localPlayerCastleVisualPath = "Players/Castle_BottomLeft";
@@ -62,6 +70,9 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private string tutorialOwnedTowerAreaPath = "Map/BuildAreas/Public_BuildArea_01";
     [SerializeField] private string tutorialOpponentLandAreaPath = "Map/BuildAreas/Claimable_BuildArea_Gate02";
     [SerializeField] private string tutorialOpponentTowerAreaPath = "Map/BuildAreas/Claimable_BuildArea_Gate03";
+    [Header("Default Part 5 Paths")]
+    [SerializeField] private string endTurnButtonPath = GuideSceneEndTurnButtonPath;
+    [SerializeField] private string roundTextPath = ForcedGuideSceneTurnBannerPath;
 
     private int currentPartIndex;
     private int currentStepIndex;
@@ -72,6 +83,10 @@ public class TutorialManager : MonoBehaviour
     private GameObject lastBuiltTowerObject;
     private GameObject lastTutorialBuildAreaObject;
     private HashSet<string> completedStepIds = new HashSet<string>();
+    private bool guideSceneWaveTutorialStarted;
+    private bool guideSceneWaveTutorialCompleted;
+    private bool guideSceneWaveTutorialRemainingTurnsSimulated;
+    private bool guideSceneWaveTutorialEnemiesSpawned;
 
     public bool IsTutorialGameplayActive => tutorialStarted && !tutorialCompleted && CurrentStep != null && IsGuideScene();
     public TutorialStep CurrentStep => GetCurrentStep();
@@ -123,6 +138,10 @@ public class TutorialManager : MonoBehaviour
         lastBuiltTowerObject = null;
         lastTutorialBuildAreaObject = null;
         completedStepIds.Clear();
+        guideSceneWaveTutorialStarted = false;
+        guideSceneWaveTutorialCompleted = false;
+        guideSceneWaveTutorialRemainingTurnsSimulated = false;
+        guideSceneWaveTutorialEnemiesSpawned = false;
 
         if (parts == null || parts.Count == 0)
         {
@@ -234,7 +253,11 @@ public class TutorialManager : MonoBehaviour
         PlayerPrefs.Save();
         tutorialEnemyDemoSpawner?.ClearTutorialEnemies();
         highlightController?.HideHighlight();
-        messageController?.ShowCompletionPanel();
+        messageController?.ShowCompletionPanel(tutorialCompletionMessage);
+        guideSceneWaveTutorialStarted = false;
+        guideSceneWaveTutorialCompleted = false;
+        guideSceneWaveTutorialRemainingTurnsSimulated = false;
+        guideSceneWaveTutorialEnemiesSpawned = false;
     }
 
     public void OnClickPracticeVsAI()
@@ -242,6 +265,13 @@ public class TutorialManager : MonoBehaviour
         PlayerPrefs.SetInt("TutorialCompleted", 1);
         PlayerPrefs.Save();
         SceneManager.LoadScene(practiceVsAISceneName);
+    }
+
+    public void OnClickOpenModeSelect()
+    {
+        PlayerPrefs.SetInt("TutorialCompleted", 1);
+        PlayerPrefs.Save();
+        SceneManager.LoadScene(modeSelectSceneName);
     }
 
     public void OnClickReturnToMenu()
@@ -267,7 +297,23 @@ public class TutorialManager : MonoBehaviour
 
         if (!step.requiresPlayerAction)
         {
-            return false;
+            if (step.allowedActionTypes == null || step.allowedActionTypes.Count == 0)
+            {
+                return false;
+            }
+
+            if (!IsAllowedActionForStep(step, actionType))
+            {
+                return false;
+            }
+
+            if (!step.requireExactTarget)
+            {
+                return true;
+            }
+
+            GameObject passiveStepTarget = ResolveHighlightTarget(step);
+            return passiveStepTarget == null || passiveStepTarget == target;
         }
 
         if (!IsAllowedActionForStep(step, actionType))
@@ -299,6 +345,13 @@ public class TutorialManager : MonoBehaviour
         }
 
         return "Read the tutorial step and press Next.";
+    }
+
+    public string GetWaveInteractionBlockedMessageOrDefault(string fallbackMessage)
+    {
+        return IsGuideSceneTutorialWaveInteractionBlocked()
+            ? TutorialWaveBlockedMessage
+            : fallbackMessage;
     }
 
     public GameObject GetBoundTargetObject(string targetId)
@@ -373,6 +426,11 @@ public class TutorialManager : MonoBehaviour
 
     public void NotifyTutorialWaveCompleted()
     {
+        if (IsGuideScenePart5WaveStepActive())
+        {
+            CompleteGuideSceneTutorialWaveState(false);
+        }
+
         NotifyAction(TutorialActionType.WaveCompleted, null);
     }
 
@@ -513,6 +571,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         step.partId = parts[currentPartIndex].partId;
+        PrepareStepBindings(step);
         Debug.Log("Tutorial Step changed: part=" + GetCurrentPartTitle() + ", stepIndex=" + currentStepIndex + ", stepId=" + step.stepId);
         if (step.hideTutorialUIOnEnter)
         {
@@ -527,6 +586,19 @@ public class TutorialManager : MonoBehaviour
             highlightController?.ShowHighlight(highlightTarget, step.highlightTargetId);
         }
         HandleStepEnterEffects(step);
+    }
+
+    private void PrepareStepBindings(TutorialStep step)
+    {
+        if (step == null)
+        {
+            return;
+        }
+
+        if (IsGuideScene() && step.partId == TutorialPartId.EndTurn)
+        {
+            UpdateGuideScenePart5TurnIndicatorBinding(step.stepId);
+        }
     }
 
     public bool IsAtFirstStep()
@@ -734,6 +806,9 @@ public class TutorialManager : MonoBehaviour
                 return buildArea != null && buildArea.currentTower != null && buildArea.isOccupied;
             }
 
+            case TutorialActionType.WaveCompleted:
+                return guideSceneWaveTutorialCompleted;
+
             default:
                 return false;
         }
@@ -830,12 +905,14 @@ public class TutorialManager : MonoBehaviour
         if (IsPart1ConfiguredCorrectly() &&
             IsPart2ConfiguredCorrectly() &&
             IsPart4ConfiguredCorrectly() &&
+            IsPart5ConfiguredCorrectly() &&
+            FindPartDefinition(TutorialPartId.EnemyWave) == null &&
             FindPartDefinition(TutorialPartId.PlayersTurnsScoring) == null)
         {
             return;
         }
 
-        Debug.Log("GuideScene tutorial data invalid. Regenerating default merged Part 1, Part 2, and Part 4.");
+        Debug.Log("GuideScene tutorial data invalid. Regenerating default merged Parts 1, 2, 4, and 5.");
         RemoveInvalidTutorialParts();
         RemoveInvalidTargetBindings();
         BuildDefaultPart1Bindings();
@@ -844,6 +921,8 @@ public class TutorialManager : MonoBehaviour
         BuildDefaultPart2Definition();
         BuildDefaultPart4Bindings();
         BuildDefaultPart4Definition();
+        BuildDefaultPart5Bindings();
+        BuildDefaultPart5Definition();
     }
 
     private void EnsureGuideSceneStartingResources()
@@ -992,6 +1071,42 @@ public class TutorialManager : MonoBehaviour
         return true;
     }
 
+    public bool IsPart5ConfiguredCorrectly()
+    {
+        TutorialPartDefinition part5 = FindPartDefinition(TutorialPartId.EndTurn);
+
+        if (part5 == null || part5.steps == null || part5.steps.Count != 11)
+        {
+            return false;
+        }
+
+        string[] requiredTargetIds =
+        {
+            "EndTurnButton",
+            "TurnIndicator",
+            "WaveIndicator",
+            "RoundText",
+            "BuiltTower"
+        };
+
+        for (int i = 0; i < requiredTargetIds.Length; i++)
+        {
+            if (!HasValidTargetBinding(requiredTargetIds[i]))
+            {
+                return false;
+            }
+        }
+
+        if (!DoesBindingMatchPath("EndTurnButton", endTurnButtonPath) ||
+            !DoesBindingMatchPath("WaveIndicator", roundTextPath) ||
+            !DoesBindingMatchPath("RoundText", roundTextPath))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private void BuildDefaultPart1Bindings()
     {
         if (targetBindings == null)
@@ -1049,6 +1164,18 @@ public class TutorialManager : MonoBehaviour
         AddBinding("TargetingCancelButton", targetingCancelButtonPath);
         AddBinding("ShockTrapNode", tutorialShockTrapNodePath);
         AddBinding("OpponentCastle", tutorialOpponentCastlePath);
+    }
+
+    private void BuildDefaultPart5Bindings()
+    {
+        if (targetBindings == null)
+        {
+            targetBindings = new List<TutorialTargetBinding>();
+        }
+
+        AddBinding("EndTurnButton", endTurnButtonPath);
+        AddBinding("WaveIndicator", roundTextPath);
+        AddBinding("RoundText", roundTextPath);
     }
 
     private void BuildDefaultPart1Definition()
@@ -1175,6 +1302,36 @@ public class TutorialManager : MonoBehaviour
         steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_66", "Cards create powerful strategic opportunities. Experiment with different combinations to control the battlefield.", null));
 
         parts.Add(part4);
+    }
+
+    private void BuildDefaultPart5Definition()
+    {
+        if (parts == null)
+        {
+            parts = new List<TutorialPartDefinition>();
+        }
+
+        TutorialPartDefinition part5 = new TutorialPartDefinition
+        {
+            partId = TutorialPartId.EndTurn,
+            displayTitle = "End Turn and Enemy Waves",
+            steps = new List<TutorialStep>
+            {
+                CreateInfoStep(TutorialPartId.EndTurn, "part5_step_1", "When you finish your turn, press End Turn.", "EndTurnButton"),
+                CreateActionStep(TutorialPartId.EndTurn, "part5_step_2", "Click End Turn now.", "EndTurnButton", TutorialActionType.EndTurnClicked, false, TutorialActionType.EndTurnClicked),
+                CreateInfoStep(TutorialPartId.EndTurn, "part5_step_3", "The turn moves to the next player.", "TurnIndicator"),
+                CreateInfoStep(TutorialPartId.EndTurn, "part5_step_4", "When every player has completed their turn, an Enemy Wave begins.", "WaveIndicator"),
+                CreateInfoStep(TutorialPartId.EndTurn, "part5_step_5", "Enemy Waves occur after all players finish their turns.", "WaveIndicator"),
+                CreateEnemyDemoStep(TutorialPartId.EndTurn, "part5_step_6", "Enemy Waves send enemies toward player castles.", null, 4),
+                CreateInfoStep(TutorialPartId.EndTurn, "part5_step_7", "Towers automatically attack enemies.", "BuiltTower"),
+                CreateWaveLockStep(),
+                CreateInfoStep(TutorialPartId.EndTurn, "part5_step_9", "The wave has ended.", null),
+                CreateInfoStep(TutorialPartId.EndTurn, "part5_step_10", "A new round begins.", "RoundText"),
+                CreateInfoStep(TutorialPartId.EndTurn, "part5_step_11", "Players take turns again after the wave.", "TurnIndicator")
+            }
+        };
+
+        parts.Add(part5);
     }
 
     private void AddDetailedCardDemoSteps(
@@ -1357,6 +1514,35 @@ public class TutorialManager : MonoBehaviour
     {
         TutorialStep step = CreateInfoStep(partId, stepId, message, highlightTargetId);
         step.tutorialEnemySpawnCount = Mathf.Max(1, enemyCount);
+        return step;
+    }
+
+    private TutorialStep CreateWaveLockStep()
+    {
+        TutorialStep step = CreateActionStep(
+            TutorialPartId.EndTurn,
+            "part5_step_8",
+            "Players cannot perform actions during Enemy Waves.",
+            null,
+            TutorialActionType.WaveCompleted,
+            false,
+            TutorialActionType.SelectLand,
+            TutorialActionType.SelectOwnedLand,
+            TutorialActionType.InspectTower,
+            TutorialActionType.PrepareUpgradeTower,
+            TutorialActionType.PrepareSellTower,
+            TutorialActionType.BuyLand,
+            TutorialActionType.BuildTower,
+            TutorialActionType.UpgradeTower,
+            TutorialActionType.SellTower,
+            TutorialActionType.DrawCard,
+            TutorialActionType.DiscardCard,
+            TutorialActionType.PlayCard,
+            TutorialActionType.SelectCard,
+            TutorialActionType.EndTurnClicked);
+
+        step.blockedMessageOverride = TutorialWaveBlockedMessage;
+        step.fallbackAutoAdvanceSeconds = 10f;
         return step;
     }
 
@@ -1561,6 +1747,8 @@ public class TutorialManager : MonoBehaviour
             if (part.partId == TutorialPartId.PlayerInfoAndScore ||
                 part.partId == TutorialPartId.LandTowerGold ||
                 part.partId == TutorialPartId.Cards ||
+                part.partId == TutorialPartId.EndTurn ||
+                part.partId == TutorialPartId.EnemyWave ||
                 part.partId == TutorialPartId.PlayersTurnsScoring ||
                 isPlaceholder)
             {
@@ -1614,6 +1802,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         EnsureGuideSceneCardDemoBoardState(step);
+        EnsureGuideScenePart5State(step);
 
         if (step.resetTurnActionsOnEnter)
         {
@@ -1641,7 +1830,19 @@ public class TutorialManager : MonoBehaviour
 
         if (step.tutorialEnemySpawnCount > 0)
         {
-            SpawnTutorialWeakEnemies(step.tutorialEnemySpawnCount);
+            bool shouldSpawnTutorialEnemies = !(step.partId == TutorialPartId.EndTurn &&
+                                                step.stepId == "part5_step_6" &&
+                                                guideSceneWaveTutorialEnemiesSpawned);
+
+            if (shouldSpawnTutorialEnemies)
+            {
+                SpawnTutorialWeakEnemies(step.tutorialEnemySpawnCount);
+
+                if (step.partId == TutorialPartId.EndTurn && step.stepId == "part5_step_6")
+                {
+                    guideSceneWaveTutorialEnemiesSpawned = true;
+                }
+            }
         }
 
         if (step.requiresPlayerAction && step.fallbackAutoAdvanceSeconds > 0f)
@@ -1721,6 +1922,288 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    private void EnsureGuideScenePart5State(TutorialStep step)
+    {
+        if (!IsGuideScene() || step == null || step.partId != TutorialPartId.EndTurn)
+        {
+            return;
+        }
+
+        EnsureGuideSceneWaveTutorialBoardState();
+        UpdateGuideScenePart5TurnIndicatorBinding(step.stepId);
+
+        switch (step.stepId)
+        {
+            case "part5_step_1":
+                if (!guideSceneWaveTutorialStarted && !guideSceneWaveTutorialCompleted)
+                {
+                    ResetGuideScenePart5StateToPlayerTurn();
+                }
+                break;
+
+            case "part5_step_4":
+                StartGuideSceneTutorialWaveState();
+                break;
+
+            case "part5_step_5":
+                if (!guideSceneWaveTutorialStarted)
+                {
+                    StartGuideSceneTutorialWaveState();
+                }
+                break;
+
+            case "part5_step_9":
+            case "part5_step_10":
+            case "part5_step_11":
+                if (guideSceneWaveTutorialStarted && !guideSceneWaveTutorialCompleted)
+                {
+                    CompleteGuideSceneTutorialWaveState(true);
+                }
+                break;
+        }
+    }
+
+    private void EnsureGuideSceneWaveTutorialBoardState()
+    {
+        PlayerManager playerManager = FindObjectOfType<PlayerManager>();
+        BuildTowerManager buildTowerManager = BuildTowerManager.Instance != null
+            ? BuildTowerManager.Instance
+            : FindObjectOfType<BuildTowerManager>();
+
+        if (playerManager == null || buildTowerManager == null)
+        {
+            return;
+        }
+
+        PlayerResource currentPlayer = GetFirstActivePlayer(playerManager);
+        PlayerResource opponent = currentPlayer != null ? GetFirstOtherActivePlayer(playerManager, currentPlayer.playerId) : null;
+
+        if (currentPlayer == null || opponent == null)
+        {
+            return;
+        }
+
+        TowerBuildArea ownedTowerArea = ResolveBuildAreaByPath(tutorialOwnedTowerAreaPath);
+        TowerBuildArea opponentLandArea = ResolveBuildAreaByPath(tutorialOpponentLandAreaPath);
+        TowerBuildArea opponentTowerArea = ResolveBuildAreaByPath(tutorialOpponentTowerAreaPath);
+
+        EnsureBuildAreaOwnedByPlayer(ownedTowerArea, currentPlayer.playerId, playerManager, false);
+        EnsureBuildAreaOwnedByPlayer(opponentLandArea, opponent.playerId, playerManager, false);
+        EnsureBuildAreaOwnedByPlayer(opponentTowerArea, opponent.playerId, playerManager, true);
+        EnsureTowerForPlayer(ownedTowerArea, currentPlayer.playerId, buildTowerManager);
+        EnsureTowerForPlayer(opponentTowerArea, opponent.playerId, buildTowerManager);
+
+        if (ownedTowerArea != null)
+        {
+            SetOrAddBinding("TowerBuildArea", ownedTowerArea.gameObject);
+
+            GameObject builtTowerTarget = ownedTowerArea.currentTower != null
+                ? ResolveTutorialTowerHighlightTarget(ownedTowerArea.currentTower)
+                : ownedTowerArea.gameObject;
+
+            if (builtTowerTarget != null)
+            {
+                lastBuiltTowerObject = builtTowerTarget;
+                lastTutorialBuildAreaObject = ownedTowerArea.gameObject;
+                SetOrAddBinding("BuiltTower", builtTowerTarget);
+            }
+        }
+    }
+
+    private void ResetGuideScenePart5StateToPlayerTurn()
+    {
+        guideSceneWaveTutorialStarted = false;
+        guideSceneWaveTutorialCompleted = false;
+        guideSceneWaveTutorialRemainingTurnsSimulated = false;
+        guideSceneWaveTutorialEnemiesSpawned = false;
+        tutorialEnemyDemoSpawner?.ClearTutorialEnemies();
+        ResetTutorialCardAction();
+        cardDrawManager?.CancelPendingCard();
+
+        GamePhaseManager gamePhaseManager = FindObjectOfType<GamePhaseManager>();
+        PlayerManager playerManager = FindObjectOfType<PlayerManager>();
+        TurnManager turnManager = TurnManager.Instance != null ? TurnManager.Instance : FindObjectOfType<TurnManager>();
+        PlayerResource firstPlayer = GetFirstActivePlayer(playerManager);
+
+        if (gamePhaseManager != null)
+        {
+            gamePhaseManager.currentPhase = GamePhase.PlayerPhase;
+        }
+
+        if (firstPlayer != null)
+        {
+            SetGuideSceneCurrentPlayer(firstPlayer.playerId, playerManager, turnManager, true);
+        }
+    }
+
+    private void SimulateGuideSceneRemainingTurnsForWaveTutorial()
+    {
+        if (guideSceneWaveTutorialRemainingTurnsSimulated)
+        {
+            return;
+        }
+
+        PlayerManager playerManager = FindObjectOfType<PlayerManager>();
+        TurnManager turnManager = TurnManager.Instance != null ? TurnManager.Instance : FindObjectOfType<TurnManager>();
+        PlayerResource lastPlayer = GetLastActivePlayer(playerManager);
+
+        if (lastPlayer == null)
+        {
+            return;
+        }
+
+        SetGuideSceneCurrentPlayer(lastPlayer.playerId, playerManager, turnManager, true);
+        guideSceneWaveTutorialRemainingTurnsSimulated = true;
+    }
+
+    private void StartGuideSceneTutorialWaveState()
+    {
+        if (guideSceneWaveTutorialStarted)
+        {
+            return;
+        }
+
+        guideSceneWaveTutorialStarted = true;
+        guideSceneWaveTutorialCompleted = false;
+
+        GamePhaseManager gamePhaseManager = FindObjectOfType<GamePhaseManager>();
+        WaveManager waveManager = FindObjectOfType<WaveManager>();
+        BuildTowerManager buildTowerManager = BuildTowerManager.Instance != null
+            ? BuildTowerManager.Instance
+            : FindObjectOfType<BuildTowerManager>();
+
+        if (gamePhaseManager != null)
+        {
+            gamePhaseManager.currentPhase = GamePhase.WavePhase;
+        }
+
+        buildTowerManager?.HideBuildInteractionUI();
+        cardDrawManager?.CancelPendingCard();
+        CurrentTurnIndicatorManager.Instance?.HideAllMarkers();
+
+        if (waveManager != null)
+        {
+            int currentWave = gamePhaseManager != null ? gamePhaseManager.currentWaveIndex : 1;
+            waveManager.ShowWaveIncoming(currentWave);
+        }
+    }
+
+    private void CompleteGuideSceneTutorialWaveState(bool forceClearEnemies)
+    {
+        if (!guideSceneWaveTutorialStarted || guideSceneWaveTutorialCompleted)
+        {
+            return;
+        }
+
+        guideSceneWaveTutorialCompleted = true;
+
+        if (forceClearEnemies)
+        {
+            tutorialEnemyDemoSpawner?.ClearTutorialEnemies();
+        }
+
+        GamePhaseManager gamePhaseManager = FindObjectOfType<GamePhaseManager>();
+        WaveManager waveManager = FindObjectOfType<WaveManager>();
+        PlayerManager playerManager = FindObjectOfType<PlayerManager>();
+        TurnManager turnManager = TurnManager.Instance != null ? TurnManager.Instance : FindObjectOfType<TurnManager>();
+        PlayerResource firstPlayer = GetFirstActivePlayer(playerManager);
+
+        if (gamePhaseManager != null)
+        {
+            gamePhaseManager.currentPhase = GamePhase.PlayerPhase;
+
+            if (gamePhaseManager.currentWaveIndex < gamePhaseManager.maxWaves)
+            {
+                gamePhaseManager.currentRound += 1;
+                gamePhaseManager.currentWaveIndex += 1;
+            }
+        }
+
+        waveManager?.RefreshWaveCounterUI();
+
+        if (firstPlayer != null)
+        {
+            SetGuideSceneCurrentPlayer(firstPlayer.playerId, playerManager, turnManager, true);
+        }
+    }
+
+    private void SetGuideSceneCurrentPlayer(int playerId, PlayerManager playerManager, TurnManager turnManager, bool restartTurn)
+    {
+        if (playerManager == null)
+        {
+            return;
+        }
+
+        playerManager.currentPlayerId = playerId;
+
+        if (turnManager != null)
+        {
+            turnManager.currentPlayerId = playerId;
+
+            if (restartTurn)
+            {
+                turnManager.StartTurn(false);
+            }
+        }
+
+        playerManager.RefreshCurrentPlayerUI();
+        CurrentTurnIndicatorManager.Instance?.UpdateCurrentTurnIndicator(playerId);
+    }
+
+    private void UpdateGuideScenePart5TurnIndicatorBinding(string stepId)
+    {
+        if (string.IsNullOrWhiteSpace(stepId))
+        {
+            return;
+        }
+
+        string markerPath = null;
+
+        switch (stepId)
+        {
+            case "part5_step_1":
+            case "part5_step_2":
+                markerPath = ForcedGuideSceneTurnMarkerPath;
+                break;
+            case "part5_step_3":
+                markerPath = ForcedGuideSceneTurnMarkerTopRightPath;
+                break;
+            case "part5_step_10":
+            case "part5_step_11":
+                markerPath = ForcedGuideSceneTurnMarkerPath;
+                break;
+        }
+
+        if (string.IsNullOrWhiteSpace(markerPath))
+        {
+            return;
+        }
+
+        GameObject markerObject = FindSceneObjectByPath(markerPath);
+
+        if (markerObject != null)
+        {
+            SetOrAddBinding("TurnIndicator", markerObject);
+        }
+    }
+
+    private bool IsGuideScenePart5WaveStepActive()
+    {
+        TutorialStep step = CurrentStep;
+        return IsGuideScene() &&
+               step != null &&
+               step.partId == TutorialPartId.EndTurn &&
+               !string.IsNullOrWhiteSpace(step.stepId) &&
+               step.stepId.StartsWith("part5_step_");
+    }
+
+    private bool IsGuideSceneTutorialWaveInteractionBlocked()
+    {
+        return IsGuideScenePart5WaveStepActive() &&
+               guideSceneWaveTutorialStarted &&
+               !guideSceneWaveTutorialCompleted;
+    }
+
     private string InferTutorialCardIdFromStep(string stepId)
     {
         if (string.IsNullOrWhiteSpace(stepId))
@@ -1753,6 +2236,44 @@ public class TutorialManager : MonoBehaviour
         foreach (PlayerResource player in playerManager.players)
         {
             if (player != null && !player.isEliminated && player.playerId != currentPlayerId)
+            {
+                return player;
+            }
+        }
+
+        return null;
+    }
+
+    private PlayerResource GetFirstActivePlayer(PlayerManager playerManager)
+    {
+        if (playerManager == null || playerManager.players == null)
+        {
+            return null;
+        }
+
+        foreach (PlayerResource player in playerManager.players)
+        {
+            if (player != null && !player.isEliminated && player.playerType != PlayerType.Empty)
+            {
+                return player;
+            }
+        }
+
+        return null;
+    }
+
+    private PlayerResource GetLastActivePlayer(PlayerManager playerManager)
+    {
+        if (playerManager == null || playerManager.players == null)
+        {
+            return null;
+        }
+
+        for (int i = playerManager.players.Count - 1; i >= 0; i--)
+        {
+            PlayerResource player = playerManager.players[i];
+
+            if (player != null && !player.isEliminated && player.playerType != PlayerType.Empty)
             {
                 return player;
             }
@@ -1815,6 +2336,12 @@ public class TutorialManager : MonoBehaviour
         if (tutorialCompleted || !tutorialStarted || CurrentStep != expectedStep)
         {
             yield break;
+        }
+
+        if (expectedStep.partId == TutorialPartId.EndTurn &&
+            expectedStep.expectedActionType == TutorialActionType.WaveCompleted)
+        {
+            CompleteGuideSceneTutorialWaveState(true);
         }
 
         Debug.LogWarning("Tutorial step timed out. Advancing: " + expectedStep.stepId);

@@ -231,7 +231,9 @@ public class CardDrawManager : MonoBehaviour
 
         if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
+            StartCoroutine(ShowWarning(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot use cards during enemy wave.")
+                : "You cannot use cards during enemy wave."));
             return false;
         }
 
@@ -570,7 +572,9 @@ public class CardDrawManager : MonoBehaviour
 
         if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
+            StartCoroutine(ShowWarning(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot use cards during enemy wave.")
+                : "You cannot use cards during enemy wave."));
             return false;
         }
 
@@ -646,7 +650,9 @@ public class CardDrawManager : MonoBehaviour
 
         if (ShouldUseLegacyPhaseCheck() && gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            StartCoroutine(ShowWarning("You cannot use cards during enemy wave."));
+            StartCoroutine(ShowWarning(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot use cards during enemy wave.")
+                : "You cannot use cards during enemy wave."));
             return false;
         }
 
