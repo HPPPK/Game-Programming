@@ -541,6 +541,7 @@ public class CardDrawManager : MonoBehaviour
         selectedCard.SetSelected(true);
 
         Debug.Log("Selected card: " + selectedCard.sourcePrefab.name);
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.SelectCard, selectedCard.gameObject);
     }
 
     public void DiscardSelectedCard()
@@ -775,12 +776,7 @@ public class CardDrawManager : MonoBehaviour
                 yield break;
             }
 
-            pendingPlayedCard = card;
-            selectedCard = null;
-
-            // Hide the played card without destroying it yet.
-            // Confirm will consume it; Cancel will return it to the hand slot.
-            card.gameObject.SetActive(false);
+            EnterPendingTargetingCard(card);
 
             if (CursorToolManager.Instance != null)
             {
@@ -802,9 +798,7 @@ public class CardDrawManager : MonoBehaviour
                 yield break;
             }
 
-            pendingPlayedCard = card;
-            selectedCard = null;
-            card.gameObject.SetActive(false);
+            EnterPendingTargetingCard(card);
             isBusy = false;
             yield break;
         }
@@ -820,9 +814,7 @@ public class CardDrawManager : MonoBehaviour
                 yield break;
             }
 
-            pendingPlayedCard = card;
-            selectedCard = null;
-            card.gameObject.SetActive(false);
+            EnterPendingTargetingCard(card);
             isBusy = false;
             yield break;
         }
@@ -838,9 +830,7 @@ public class CardDrawManager : MonoBehaviour
                 yield break;
             }
 
-            pendingPlayedCard = card;
-            selectedCard = null;
-            card.gameObject.SetActive(false);
+            EnterPendingTargetingCard(card);
             isBusy = false;
             yield break;
         }
@@ -856,9 +846,7 @@ public class CardDrawManager : MonoBehaviour
                 yield break;
             }
 
-            pendingPlayedCard = card;
-            selectedCard = null;
-            card.gameObject.SetActive(false);
+            EnterPendingTargetingCard(card);
             isBusy = false;
             yield break;
         }
@@ -874,9 +862,7 @@ public class CardDrawManager : MonoBehaviour
                 yield break;
             }
 
-            pendingPlayedCard = card;
-            selectedCard = null;
-            card.gameObject.SetActive(false);
+            EnterPendingTargetingCard(card);
             isBusy = false;
             yield break;
         }
@@ -892,9 +878,7 @@ public class CardDrawManager : MonoBehaviour
                 yield break;
             }
 
-            pendingPlayedCard = card;
-            selectedCard = null;
-            card.gameObject.SetActive(false);
+            EnterPendingTargetingCard(card);
             isBusy = false;
             yield break;
         }
@@ -912,9 +896,7 @@ public class CardDrawManager : MonoBehaviour
                 yield break;
             }
 
-            pendingPlayedCard = card;
-            selectedCard = null;
-            card.gameObject.SetActive(false);
+            EnterPendingTargetingCard(card);
             isBusy = false;
             yield break;
         }
@@ -937,6 +919,16 @@ public class CardDrawManager : MonoBehaviour
         RenderCurrentPlayerHand();
 
         isBusy = false;
+    }
+
+    private void EnterPendingTargetingCard(CardInstanceSelectable card)
+    {
+        pendingPlayedCard = card;
+        selectedCard = null;
+
+        // Confirm consumes the hidden card; Cancel restores it to the hand slot.
+        card.gameObject.SetActive(false);
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.PlayCard, card.gameObject);
     }
 
     public void ConfirmPendingCard()
@@ -1186,9 +1178,73 @@ public class CardDrawManager : MonoBehaviour
             return true;
         }
 
+        if (!hand.CanAddCard())
+        {
+            List<GameObject> cards = hand.GetCards();
+            GameObject cardToReturn = cards != null && cards.Count > 0 ? cards[0] : null;
+
+            if (cardToReturn != null)
+            {
+                hand.RemoveCard(cardToReturn);
+                AddCardToDeck(cardToReturn);
+            }
+        }
+
         if (!hand.AddCard(cardPrefab))
         {
             return false;
+        }
+
+        player.SyncCardCountFromHand();
+        RenderCurrentPlayerHand();
+        return true;
+    }
+
+    public bool ForceSingleTutorialCard(string cardId)
+    {
+        return ForceTutorialHand(new[] { cardId });
+    }
+
+    public bool ForceTutorialHand(IEnumerable<string> cardIds)
+    {
+        PlayerResource player = GetVisibleHandPlayerResource();
+
+        if (player == null)
+        {
+            return false;
+        }
+
+        PlayerHand hand = player.GetPlayerHand();
+        if (hand == null || cardIds == null)
+        {
+            return false;
+        }
+
+        List<GameObject> cardPrefabs = new List<GameObject>();
+
+        foreach (string cardId in cardIds)
+        {
+            GameObject cardPrefab = FindCardPrefabById(cardId);
+
+            if (cardPrefab != null)
+            {
+                cardPrefabs.Add(cardPrefab);
+            }
+        }
+
+        if (cardPrefabs.Count == 0)
+        {
+            return false;
+        }
+
+        hand.Clear();
+
+        foreach (GameObject cardPrefab in cardPrefabs)
+        {
+            if (!hand.AddCard(cardPrefab))
+            {
+                return false;
+            }
         }
 
         player.SyncCardCountFromHand();
@@ -1210,9 +1266,21 @@ public class CardDrawManager : MonoBehaviour
 
     public bool PrepareTutorialCardDemo(string cardId)
     {
+        return PrepareTutorialCardDemo(cardId, null);
+    }
+
+    public bool PrepareTutorialCardDemo(string cardId, IEnumerable<string> handCardIds)
+    {
         ResetTutorialCardAction();
 
-        if (!ForceGiveTutorialCard(cardId))
+        if (handCardIds != null)
+        {
+            if (!ForceTutorialHand(handCardIds))
+            {
+                return false;
+            }
+        }
+        else if (!ForceSingleTutorialCard(cardId))
         {
             return false;
         }

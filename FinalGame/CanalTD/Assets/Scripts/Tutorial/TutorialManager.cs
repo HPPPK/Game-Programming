@@ -49,6 +49,20 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private string player3PanelPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel (2)";
     [SerializeField] private string player4PanelPath = "UI/Canvas/NormalGameplayUI/PlayerStatusPanel (3)";
 
+    [Header("Default Part 4 Paths")]
+    [SerializeField] private string cardHandPath = "UI/Canvas/NormalGameplayUI/CardSlot";
+    [SerializeField] private string drawButtonPath = "UI/Canvas/NormalGameplayUI/DrawCardButton";
+    [SerializeField] private string discardButtonPath = "UI/Canvas/NormalGameplayUI/DiscardButton";
+    [SerializeField] private string playButtonPath = "UI/Canvas/NormalGameplayUI/PlayCardButton";
+    [SerializeField] private string targetingConfirmButtonPath = "UI/Canvas/TargetingUI/ConfirmButton";
+    [SerializeField] private string targetingCancelButtonPath = "UI/Canvas/TargetingUI/CancelButton";
+    [SerializeField] private string tutorialGatePath = "Gates/Gate_Stone_01";
+    [SerializeField] private string tutorialShockTrapNodePath = "Map/PathGraph/RouteNodes/R_Left_01";
+    [SerializeField] private string tutorialOpponentCastlePath = "Players/Castle_TopRight";
+    [SerializeField] private string tutorialOwnedTowerAreaPath = "Map/BuildAreas/Public_BuildArea_01";
+    [SerializeField] private string tutorialOpponentLandAreaPath = "Map/BuildAreas/Claimable_BuildArea_Gate02";
+    [SerializeField] private string tutorialOpponentTowerAreaPath = "Map/BuildAreas/Claimable_BuildArea_Gate03";
+
     private int currentPartIndex;
     private int currentStepIndex;
     private bool tutorialStarted;
@@ -57,6 +71,7 @@ public class TutorialManager : MonoBehaviour
     private Coroutine currentStepRoutine;
     private GameObject lastBuiltTowerObject;
     private GameObject lastTutorialBuildAreaObject;
+    private HashSet<string> completedStepIds = new HashSet<string>();
 
     public bool IsTutorialGameplayActive => tutorialStarted && !tutorialCompleted && CurrentStep != null && IsGuideScene();
     public TutorialStep CurrentStep => GetCurrentStep();
@@ -107,6 +122,7 @@ public class TutorialManager : MonoBehaviour
         currentStepIndex = 0;
         lastBuiltTowerObject = null;
         lastTutorialBuildAreaObject = null;
+        completedStepIds.Clear();
 
         if (parts == null || parts.Count == 0)
         {
@@ -285,6 +301,11 @@ public class TutorialManager : MonoBehaviour
         return "Read the tutorial step and press Next.";
     }
 
+    public GameObject GetBoundTargetObject(string targetId)
+    {
+        return ResolveBindingTarget(targetId);
+    }
+
     public void NotifyLandPurchased(GameObject target)
     {
         NotifyAction(TutorialActionType.BuyLand, target);
@@ -297,6 +318,16 @@ public class TutorialManager : MonoBehaviour
 
     public void NotifyTutorialAction(TutorialActionType actionType, GameObject target)
     {
+        if (actionType == TutorialActionType.SelectCard && target != null)
+        {
+            SetOrAddBinding("CurrentCard", target);
+            Transform cardSlot = target.transform.parent;
+            if (cardSlot != null)
+            {
+                SetOrAddBinding("CurrentCardSlot", cardSlot.gameObject);
+            }
+        }
+
         NotifyAction(actionType, target);
     }
 
@@ -377,6 +408,16 @@ public class TutorialManager : MonoBehaviour
         return cardDrawManager != null && cardDrawManager.ForceGiveTutorialCard(cardId);
     }
 
+    public bool ForceSingleTutorialCard(string cardId)
+    {
+        return cardDrawManager != null && cardDrawManager.ForceSingleTutorialCard(cardId);
+    }
+
+    public bool ForceTutorialHand(IEnumerable<string> cardIds)
+    {
+        return cardDrawManager != null && cardDrawManager.ForceTutorialHand(cardIds);
+    }
+
     public void ResetTutorialCardAction()
     {
         cardDrawManager?.ResetTutorialCardAction();
@@ -385,6 +426,11 @@ public class TutorialManager : MonoBehaviour
     public bool PrepareTutorialCardDemo(string cardId)
     {
         return cardDrawManager != null && cardDrawManager.PrepareTutorialCardDemo(cardId);
+    }
+
+    public bool PrepareTutorialCardDemo(string cardId, IEnumerable<string> handCardIds)
+    {
+        return cardDrawManager != null && cardDrawManager.PrepareTutorialCardDemo(cardId, handCardIds);
     }
 
     private void NotifyAction(TutorialActionType actionType, GameObject target)
@@ -411,6 +457,7 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
+        MarkStepCompleted(step);
         AdvanceToNextStep();
     }
 
@@ -576,6 +623,11 @@ public class TutorialManager : MonoBehaviour
                    IsSpecificCardAction(expected);
         }
 
+        if (actual == TutorialActionType.SelectTarget)
+        {
+            return expected == TutorialActionType.SelectTarget;
+        }
+
         if (expected == TutorialActionType.PlayCard && IsSpecificCardAction(actual))
         {
             return true;
@@ -643,6 +695,11 @@ public class TutorialManager : MonoBehaviour
     private bool IsStepAlreadySatisfied(TutorialStep step)
     {
         if (step == null || !step.requiresPlayerAction)
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(step.stepId) && completedStepIds.Contains(step.stepId))
         {
             return true;
         }
@@ -772,18 +829,21 @@ public class TutorialManager : MonoBehaviour
 
         if (IsPart1ConfiguredCorrectly() &&
             IsPart2ConfiguredCorrectly() &&
+            IsPart4ConfiguredCorrectly() &&
             FindPartDefinition(TutorialPartId.PlayersTurnsScoring) == null)
         {
             return;
         }
 
-        Debug.Log("GuideScene tutorial data invalid. Regenerating default merged Part 1 and Part 2.");
+        Debug.Log("GuideScene tutorial data invalid. Regenerating default merged Part 1, Part 2, and Part 4.");
         RemoveInvalidTutorialParts();
         RemoveInvalidTargetBindings();
         BuildDefaultPart1Bindings();
         BuildDefaultPart1Definition();
         BuildDefaultPart2Bindings();
         BuildDefaultPart2Definition();
+        BuildDefaultPart4Bindings();
+        BuildDefaultPart4Definition();
     }
 
     private void EnsureGuideSceneStartingResources()
@@ -861,7 +921,7 @@ public class TutorialManager : MonoBehaviour
     {
         TutorialPartDefinition part2 = FindPartDefinition(TutorialPartId.LandTowerGold);
 
-        if (part2 == null || part2.steps == null || part2.steps.Count != 12)
+        if (part2 == null || part2.steps == null || part2.steps.Count != 15)
         {
             return false;
         }
@@ -874,7 +934,51 @@ public class TutorialManager : MonoBehaviour
             "TowerBuildArea",
             "ConfirmButton",
             "UpgradeButton",
+            "SellButton",
             "BuiltTower"
+        };
+
+        for (int i = 0; i < requiredTargetIds.Length; i++)
+        {
+            if (!HasValidTargetBinding(requiredTargetIds[i]))
+            {
+                return false;
+            }
+        }
+
+        if (!DoesBindingMatchPath("ConfirmButton", radialConfirmButtonPath) ||
+            !DoesBindingMatchPath("UpgradeButton", radialUpgradeButtonPath) ||
+            !DoesBindingMatchPath("SellButton", "UI/Canvas/RadialTowerMenu/SellButton/Image"))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool IsPart4ConfiguredCorrectly()
+    {
+        TutorialPartDefinition part4 = FindPartDefinition(TutorialPartId.Cards);
+
+        if (part4 == null || part4.steps == null || part4.steps.Count != 66)
+        {
+            return false;
+        }
+
+        string[] requiredTargetIds =
+        {
+            "CardHand",
+            "DrawButton",
+            "DiscardButton",
+            "PlayButton",
+            "Gate",
+            "TargetingConfirmButton",
+            "TargetingCancelButton",
+            "ClaimableLand",
+            "PublicBuildArea",
+            "BuiltTower",
+            "ShockTrapNode",
+            "OpponentCastle"
         };
 
         for (int i = 0; i < requiredTargetIds.Length; i++)
@@ -922,10 +1026,29 @@ public class TutorialManager : MonoBehaviour
         AddBinding("TowerBuildArea", towerBuildAreaPath);
         AddBinding("ConfirmButton", radialConfirmButtonPath);
         AddBinding("UpgradeButton", radialUpgradeButtonPath);
+        AddBinding("SellButton", "UI/Canvas/RadialTowerMenu/SellButton/Image");
         AddBinding("WaveSpawnPoint", "Spawners/Spawner_Left");
 
         GameObject builtTowerFallback = FindSceneObjectByPath(towerBuildAreaPath);
         SetOrAddBinding("BuiltTower", builtTowerFallback);
+    }
+
+    private void BuildDefaultPart4Bindings()
+    {
+        if (targetBindings == null)
+        {
+            targetBindings = new List<TutorialTargetBinding>();
+        }
+
+        AddBinding("CardHand", cardHandPath);
+        AddBinding("DrawButton", drawButtonPath);
+        AddBinding("DiscardButton", discardButtonPath);
+        AddBinding("PlayButton", playButtonPath);
+        AddBinding("Gate", tutorialGatePath);
+        AddBinding("TargetingConfirmButton", targetingConfirmButtonPath);
+        AddBinding("TargetingCancelButton", targetingCancelButtonPath);
+        AddBinding("ShockTrapNode", tutorialShockTrapNodePath);
+        AddBinding("OpponentCastle", tutorialOpponentCastlePath);
     }
 
     private void BuildDefaultPart1Definition()
@@ -977,29 +1100,159 @@ public class TutorialManager : MonoBehaviour
             displayTitle = "Gold, Land, Towers, and Upgrades",
             steps = new List<TutorialStep>
             {
-                CreateInfoStep("part2_step_1", "Gold is used to buy land, build towers, and upgrade towers.", "GoldDisplay"),
-                CreateInfoStep("part2_step_2", "Claimable land must be purchased before you can build on it.", "ClaimableLand"),
-                CreateActionStep("part2_step_3", "Click the highlighted land tile.", "ClaimableLand", TutorialActionType.SelectLand, true, TutorialActionType.SelectLand),
-                CreateActionStep("part2_step_4", "Purchase this land to claim it.", "ClaimableLand", TutorialActionType.BuyLand, false, TutorialActionType.BuyLand),
-                CreateInfoStep("part2_step_5", "Public build areas can be used immediately without purchasing land.", "PublicBuildArea"),
-                CreateActionStep("part2_step_6", "Build your first tower here.", "TowerBuildArea", TutorialActionType.BuildTower, true, TutorialActionType.SelectOwnedLand, TutorialActionType.BuildTower),
-                CreateActionStep("part2_step_7", "Click your tower to open the upgrade menu.", "BuiltTower", TutorialActionType.InspectTower, false, TutorialActionType.InspectTower),
-                CreateActionStep("part2_step_8", "Click Upgrade to prepare the tower upgrade.", "UpgradeButton", TutorialActionType.InspectTower, false, TutorialActionType.InspectTower),
-                CreateActionStep("part2_step_9", "Confirm the upgrade to make your tower stronger.", "ConfirmButton", TutorialActionType.UpgradeTower, false, TutorialActionType.UpgradeTower),
-                CreateInfoStep("part2_step_10", "Enemy waves will come from the spawn point. Click Next to start a small wave.", "WaveSpawnPoint"),
-                CreateHiddenEnemyWaveStep("part2_step_11", 1, 10f),
-                CreateInfoStep("part2_step_12", "Great! You have learned the basic build loop.", null)
+                CreateInfoStep(TutorialPartId.LandTowerGold, "part2_step_1", "Gold is used to buy land, build towers, and upgrade towers.", "GoldDisplay"),
+                CreateInfoStep(TutorialPartId.LandTowerGold, "part2_step_2", "Claimable land must be purchased before you can build on it.", "ClaimableLand"),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_3", "Click the highlighted land tile.", "ClaimableLand", TutorialActionType.SelectLand, true, TutorialActionType.SelectLand),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_4", "Purchase this land to claim it.", "ClaimableLand", TutorialActionType.BuyLand, false, TutorialActionType.BuyLand),
+                CreateInfoStep(TutorialPartId.LandTowerGold, "part2_step_5", "Public build areas can be used immediately without purchasing land.", "PublicBuildArea"),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_6", "Build your first tower here.", "TowerBuildArea", TutorialActionType.BuildTower, true, TutorialActionType.SelectOwnedLand, TutorialActionType.BuildTower),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_7", "Click your tower to open the upgrade menu.", "BuiltTower", TutorialActionType.InspectTower, false, TutorialActionType.InspectTower),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_8", "Click Upgrade to prepare the tower upgrade.", "UpgradeButton", TutorialActionType.PrepareUpgradeTower, false, TutorialActionType.PrepareUpgradeTower),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_9", "Confirm the upgrade to make your tower stronger.", "ConfirmButton", TutorialActionType.UpgradeTower, false, TutorialActionType.UpgradeTower),
+                CreateInfoStep(TutorialPartId.LandTowerGold, "part2_step_10", "Enemy waves will come from the spawn point. Click Next to start a small wave.", "WaveSpawnPoint"),
+                CreateHiddenEnemyWaveStep(TutorialPartId.LandTowerGold, "part2_step_11", 1, 10f),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_12", "Click your upgraded tower to open the tower menu.", "BuiltTower", TutorialActionType.InspectTower, false, TutorialActionType.InspectTower),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_13", "Click Sell to prepare selling this tower.", "SellButton", TutorialActionType.PrepareSellTower, false, TutorialActionType.PrepareSellTower),
+                CreateActionStep(TutorialPartId.LandTowerGold, "part2_step_14", "Confirm the sale to recover some gold.", "ConfirmButton", TutorialActionType.SellTower, false, TutorialActionType.SellTower),
+                CreateInfoStep(TutorialPartId.LandTowerGold, "part2_step_15", "Great! You have learned the basic build loop.", null)
             }
         };
 
         parts.Add(part2);
     }
 
-    private TutorialStep CreateInfoStep(string stepId, string message, string highlightTargetId)
+    private void BuildDefaultPart4Definition()
+    {
+        if (parts == null)
+        {
+            parts = new List<TutorialPartDefinition>();
+        }
+
+        TutorialPartDefinition part4 = new TutorialPartDefinition
+        {
+            partId = TutorialPartId.Cards,
+            displayTitle = "Cards and Special Actions",
+            steps = new List<TutorialStep>()
+        };
+
+        List<TutorialStep> steps = part4.steps;
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_1", "Cards provide powerful strategic actions.", "CardHand"));
+        steps.Add(CreateCardActionStep(TutorialPartId.Cards, "part4_step_2", "Instead of playing a card, you may draw one card.", "DrawButton", TutorialActionType.DrawCard, null, false, TutorialActionType.DrawCard));
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_3", "Discard returns one selected card to the deck.", "DiscardButton"));
+        TutorialStep discardSelectStep = CreateCardActionStep(TutorialPartId.Cards, "part4_step_4", "Click a card in your hand to select it for discarding.", "CardHand", TutorialActionType.SelectCard, "StealCard", false, TutorialActionType.SelectCard);
+        SetTutorialHand(discardSelectStep, "StealCard", "ShockTrap", "LockGate");
+        steps.Add(discardSelectStep);
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_5", "The selected card rises slightly so you can see it is active.", "CardHand"));
+        steps.Add(CreateCardActionStep(TutorialPartId.Cards, "part4_step_6", "Now click Discard to discard the selected card.", "DiscardButton", TutorialActionType.DiscardCard, null, false, TutorialActionType.DiscardCard));
+        TutorialStep playIntroStep = CreateInfoStep(TutorialPartId.Cards, "part4_step_7", "Playing a card uses its special effect.", "PlayButton");
+        SetTutorialHand(playIntroStep, "LockGate");
+        steps.Add(playIntroStep);
+        TutorialStep playSelectStep = CreateCardActionStep(TutorialPartId.Cards, "part4_step_8", "Click a card in your hand to select it for play.", "CardHand", TutorialActionType.SelectCard, "LockGate", false, TutorialActionType.SelectCard);
+        steps.Add(playSelectStep);
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_9", "This selected card is ready to play.", "CardHand"));
+        steps.Add(CreateActionStep(TutorialPartId.Cards, "part4_step_10", "Now click Play to enter card targeting mode.", "PlayButton", TutorialActionType.PlayCard, false, TutorialActionType.PlayCard));
+        steps.Add(CreateActionStep(TutorialPartId.Cards, "part4_step_11", "Select a valid gate target first. Confirm stays disabled until you choose a target.", "Gate", TutorialActionType.SelectTarget, false, TutorialActionType.SelectTarget));
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_12", "Confirm uses the card on the selected target, and Cancel returns it to your hand.", "TargetingConfirmButton"));
+        steps.Add(CreateActionStep(TutorialPartId.Cards, "part4_step_13", "Now click Confirm to lock the selected gate.", "TargetingConfirmButton", TutorialActionType.LockGate, false, TutorialActionType.LockGate));
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_14", "Next, you will practice the remaining card effects. Use Skip if you want to skip the rest of the card demonstrations.", null));
+
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_15", "Open Gate reopens a route after a gate has been locked.", "Gate"));
+        AddDetailedCardDemoSteps(steps, 16, "Open Gate", "OpenGate", "Gate", TutorialActionType.OpenGate, "Now click Confirm to open the selected gate.");
+
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_22", "Tile control cards influence expansion and territory.", "ClaimableLand"));
+        AddDetailedCardDemoSteps(steps, 23, "Freeze Claim", "FreezeClaim", "ClaimableLand", TutorialActionType.FreezeClaim, "Now click Confirm to freeze the selected tile.");
+        AddDetailedCardDemoSteps(steps, 29, "Take Over", "TakeOver", "PublicBuildArea", TutorialActionType.TakeOver, "Now click Confirm to take control of the selected tile.");
+
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_35", "Combat cards help defend difficult waves.", "BuiltTower"));
+        AddDetailedCardDemoSteps(steps, 36, "Power Boost", "PowerBoost", "BuiltTower", TutorialActionType.PowerBoost, "Now click Confirm to apply Power Boost to the selected tower.");
+        AddDetailedCardDemoSteps(steps, 42, "Shock Trap", "ShockTrap", "ShockTrapNode", TutorialActionType.PlaceShockTrap, "Now click Confirm to place Shock Trap at the selected position.");
+
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_48", "Interaction cards directly affect opponents.", "OpponentCastle"));
+        AddDetailedCardDemoSteps(steps, 49, "Disrupt", "Disrupt", "OpponentCastle", TutorialActionType.Disrupt, "Now click Confirm to apply Disrupt to the selected opponent.");
+        AddDetailedCardDemoSteps(steps, 55, "Steal Card", "StealCard", "OpponentCastle", TutorialActionType.StealCard, "Now click Confirm to steal a card from the selected opponent.");
+        AddDetailedCardDemoSteps(steps, 61, "Trade Hands", "TradeHands", "OpponentCastle", TutorialActionType.TradeHands, "Now click Confirm to swap hands with the selected opponent.");
+
+        steps.Add(CreateInfoStep(TutorialPartId.Cards, "part4_step_66", "Cards create powerful strategic opportunities. Experiment with different combinations to control the battlefield.", null));
+
+        parts.Add(part4);
+    }
+
+    private void AddDetailedCardDemoSteps(
+        List<TutorialStep> steps,
+        int startIndex,
+        string displayName,
+        string tutorialCardId,
+        string targetHighlightId,
+        TutorialActionType resolutionActionType,
+        string resolutionMessage)
+    {
+        steps.Add(CreateCardActionStep(
+            TutorialPartId.Cards,
+            "part4_step_" + startIndex,
+            "Click " + displayName + " in your hand to select it.",
+            "CardHand",
+            TutorialActionType.SelectCard,
+            tutorialCardId,
+            false,
+            TutorialActionType.SelectCard));
+
+        steps.Add(CreateInfoStep(
+            TutorialPartId.Cards,
+            "part4_step_" + (startIndex + 1),
+            displayName + " is now selected and raised above its slot.",
+            "CardHand"));
+
+        steps.Add(CreateActionStep(
+            TutorialPartId.Cards,
+            "part4_step_" + (startIndex + 2),
+            "Now click Play to begin using " + displayName + ".",
+            "PlayButton",
+            TutorialActionType.PlayCard,
+            false,
+            TutorialActionType.PlayCard));
+
+        steps.Add(CreateActionStep(
+            TutorialPartId.Cards,
+            "part4_step_" + (startIndex + 3),
+            "Select a valid target first. Confirm stays disabled until you choose a target.",
+            targetHighlightId,
+            TutorialActionType.SelectTarget,
+            false,
+            TutorialActionType.SelectTarget));
+
+        steps.Add(CreateInfoStep(
+            TutorialPartId.Cards,
+            "part4_step_" + (startIndex + 4),
+            "Confirm will apply " + displayName + ", and Cancel will return it to your hand.",
+            "TargetingConfirmButton"));
+
+        steps.Add(CreateActionStep(
+            TutorialPartId.Cards,
+            "part4_step_" + (startIndex + 5),
+            resolutionMessage,
+            "TargetingConfirmButton",
+            resolutionActionType,
+            false,
+            resolutionActionType));
+    }
+
+    private void SetTutorialHand(TutorialStep step, params string[] cardIds)
+    {
+        if (step == null)
+        {
+            return;
+        }
+
+        step.tutorialHandCardIds = cardIds != null
+            ? new List<string>(cardIds)
+            : new List<string>();
+    }
+
+    private TutorialStep CreateInfoStep(TutorialPartId partId, string stepId, string message, string highlightTargetId)
     {
         return new TutorialStep
         {
-            partId = TutorialPartId.PlayerInfoAndScore,
+            partId = partId,
             stepId = stepId,
             messageText = message,
             highlightTargetId = highlightTargetId,
@@ -1008,7 +1261,13 @@ public class TutorialManager : MonoBehaviour
         };
     }
 
+    private TutorialStep CreateInfoStep(string stepId, string message, string highlightTargetId)
+    {
+        return CreateInfoStep(TutorialPartId.PlayerInfoAndScore, stepId, message, highlightTargetId);
+    }
+
     private TutorialStep CreateActionStep(
+        TutorialPartId partId,
         string stepId,
         string message,
         string highlightTargetId,
@@ -1016,7 +1275,7 @@ public class TutorialManager : MonoBehaviour
         bool requireExactTarget,
         params TutorialActionType[] allowedActions)
     {
-        TutorialStep step = CreateInfoStep(stepId, message, highlightTargetId);
+        TutorialStep step = CreateInfoStep(partId, stepId, message, highlightTargetId);
         step.requiresPlayerAction = true;
         step.requireExactTarget = requireExactTarget;
         step.expectedActionType = completionActionType;
@@ -1029,29 +1288,103 @@ public class TutorialManager : MonoBehaviour
         return step;
     }
 
-    private TutorialStep CreateEnemyDemoStep(string stepId, string message, string highlightTargetId, int enemyCount)
+    private TutorialStep CreateActionStep(
+        string stepId,
+        string message,
+        string highlightTargetId,
+        TutorialActionType completionActionType,
+        bool requireExactTarget,
+        params TutorialActionType[] allowedActions)
     {
-        TutorialStep step = CreateInfoStep(stepId, message, highlightTargetId);
+        return CreateActionStep(
+            TutorialPartId.PlayerInfoAndScore,
+            stepId,
+            message,
+            highlightTargetId,
+            completionActionType,
+            requireExactTarget,
+            allowedActions);
+    }
+
+    private TutorialStep CreateCardActionStep(
+        TutorialPartId partId,
+        string stepId,
+        string message,
+        string highlightTargetId,
+        TutorialActionType completionActionType,
+        string tutorialCardId,
+        bool prepareSelectedCard,
+        params TutorialActionType[] allowedActions)
+    {
+        TutorialStep step = CreateActionStep(
+            partId,
+            stepId,
+            message,
+            highlightTargetId,
+            completionActionType,
+            false,
+            allowedActions);
+
+        step.tutorialCardId = tutorialCardId;
+        step.prepareTutorialCardOnEnter = prepareSelectedCard;
+        step.resetTurnActionsOnEnter = true;
+        step.fallbackAutoAdvanceSeconds = IsSpecificCardAction(completionActionType) ? 12f : 0f;
+        return step;
+    }
+
+    private TutorialStep CreateCardActionStep(
+        string stepId,
+        string message,
+        string highlightTargetId,
+        TutorialActionType completionActionType,
+        string tutorialCardId,
+        bool prepareSelectedCard,
+        params TutorialActionType[] allowedActions)
+    {
+        return CreateCardActionStep(
+            TutorialPartId.PlayerInfoAndScore,
+            stepId,
+            message,
+            highlightTargetId,
+            completionActionType,
+            tutorialCardId,
+            prepareSelectedCard,
+            allowedActions);
+    }
+
+    private TutorialStep CreateEnemyDemoStep(TutorialPartId partId, string stepId, string message, string highlightTargetId, int enemyCount)
+    {
+        TutorialStep step = CreateInfoStep(partId, stepId, message, highlightTargetId);
         step.tutorialEnemySpawnCount = Mathf.Max(1, enemyCount);
         return step;
     }
 
-    private TutorialStep CreateHiddenEnemyWaveStep(string stepId, int enemyCount, float fallbackAutoAdvanceSeconds)
+    private TutorialStep CreateHiddenEnemyWaveStep(TutorialPartId partId, string stepId, int enemyCount, float fallbackAutoAdvanceSeconds)
     {
-        TutorialStep step = CreateWaitStep(stepId, string.Empty, TutorialActionType.WaveCompleted, fallbackAutoAdvanceSeconds);
+        TutorialStep step = CreateWaitStep(partId, stepId, string.Empty, TutorialActionType.WaveCompleted, fallbackAutoAdvanceSeconds);
         step.tutorialEnemySpawnCount = Mathf.Max(1, enemyCount);
         step.hideTutorialUIOnEnter = true;
         return step;
     }
 
-    private TutorialStep CreateWaitStep(string stepId, string message, TutorialActionType completionActionType, float fallbackAutoAdvanceSeconds)
+    private TutorialStep CreateWaitStep(TutorialPartId partId, string stepId, string message, TutorialActionType completionActionType, float fallbackAutoAdvanceSeconds)
     {
-        TutorialStep step = CreateInfoStep(stepId, message, null);
+        TutorialStep step = CreateInfoStep(partId, stepId, message, null);
         step.requiresPlayerAction = true;
         step.expectedActionType = completionActionType;
         step.allowedActionTypes = new List<TutorialActionType> { completionActionType };
         step.fallbackAutoAdvanceSeconds = fallbackAutoAdvanceSeconds;
         return step;
+    }
+
+    private TutorialStep CreateWaitStep(string stepId, string message, TutorialActionType completionActionType, float fallbackAutoAdvanceSeconds)
+    {
+        return CreateWaitStep(
+            TutorialPartId.PlayerInfoAndScore,
+            stepId,
+            message,
+            completionActionType,
+            fallbackAutoAdvanceSeconds);
     }
 
     private void AddBinding(string targetId, string hierarchyPath)
@@ -1226,6 +1559,7 @@ public class TutorialManager : MonoBehaviour
 
             if (part.partId == TutorialPartId.PlayerInfoAndScore ||
                 part.partId == TutorialPartId.LandTowerGold ||
+                part.partId == TutorialPartId.Cards ||
                 part.partId == TutorialPartId.PlayersTurnsScoring ||
                 isPlaceholder)
             {
@@ -1278,6 +1612,32 @@ public class TutorialManager : MonoBehaviour
             SetOrAddBinding("BuiltTower", lastTutorialBuildAreaObject);
         }
 
+        EnsureGuideSceneCardDemoBoardState(step);
+
+        if (step.resetTurnActionsOnEnter)
+        {
+            TurnManager turnManager = TurnManager.Instance != null ? TurnManager.Instance : FindObjectOfType<TurnManager>();
+            turnManager?.StartTurn(false);
+        }
+
+        if ((step.tutorialHandCardIds != null && step.tutorialHandCardIds.Count > 0) ||
+            !string.IsNullOrWhiteSpace(step.tutorialCardId))
+        {
+            ResetTutorialCardAction();
+
+            bool hasTutorialHand = step.tutorialHandCardIds != null && step.tutorialHandCardIds.Count > 0;
+            bool prepared = step.prepareTutorialCardOnEnter
+                ? PrepareTutorialCardDemo(step.tutorialCardId, hasTutorialHand ? step.tutorialHandCardIds : null)
+                : hasTutorialHand
+                    ? ForceTutorialHand(step.tutorialHandCardIds)
+                    : ForceSingleTutorialCard(step.tutorialCardId);
+
+            if (!prepared)
+            {
+                Debug.LogWarning("Could not prepare tutorial card: " + step.tutorialCardId);
+            }
+        }
+
         if (step.tutorialEnemySpawnCount > 0)
         {
             SpawnTutorialWeakEnemies(step.tutorialEnemySpawnCount);
@@ -1287,6 +1647,164 @@ public class TutorialManager : MonoBehaviour
         {
             currentStepRoutine = StartCoroutine(FallbackAdvanceRoutine(step, step.fallbackAutoAdvanceSeconds));
         }
+    }
+
+    private void EnsureGuideSceneCardDemoBoardState(TutorialStep step)
+    {
+        if (!IsGuideScene() || step == null || step.partId != TutorialPartId.Cards)
+        {
+            return;
+        }
+
+        string cardId = !string.IsNullOrWhiteSpace(step.tutorialCardId)
+            ? step.tutorialCardId
+            : InferTutorialCardIdFromStep(step.stepId);
+
+        if (string.IsNullOrWhiteSpace(cardId))
+        {
+            return;
+        }
+
+        PlayerManager playerManager = FindObjectOfType<PlayerManager>();
+        BuildTowerManager buildTowerManager = BuildTowerManager.Instance != null
+            ? BuildTowerManager.Instance
+            : FindObjectOfType<BuildTowerManager>();
+
+        if (playerManager == null || buildTowerManager == null)
+        {
+            return;
+        }
+
+        int currentPlayerId = playerManager.GetCurrentPlayerId();
+        PlayerResource opponent = GetFirstOtherActivePlayer(playerManager, currentPlayerId);
+
+        if (opponent == null)
+        {
+            return;
+        }
+
+        TowerBuildArea ownedTowerArea = ResolveBuildAreaByPath(tutorialOwnedTowerAreaPath);
+        TowerBuildArea opponentLandArea = ResolveBuildAreaByPath(tutorialOpponentLandAreaPath);
+        TowerBuildArea opponentTowerArea = ResolveBuildAreaByPath(tutorialOpponentTowerAreaPath);
+
+        EnsureBuildAreaOwnedByPlayer(ownedTowerArea, currentPlayerId, playerManager, false);
+        EnsureBuildAreaOwnedByPlayer(opponentLandArea, opponent.playerId, playerManager, false);
+        EnsureBuildAreaOwnedByPlayer(opponentTowerArea, opponent.playerId, playerManager, true);
+        EnsureTowerForPlayer(ownedTowerArea, currentPlayerId, buildTowerManager);
+        EnsureTowerForPlayer(opponentTowerArea, opponent.playerId, buildTowerManager);
+
+        if (ownedTowerArea != null)
+        {
+            SetOrAddBinding("TowerBuildArea", ownedTowerArea.gameObject);
+
+            GameObject ownedTowerHighlight = ownedTowerArea.currentTower != null
+                ? ResolveTutorialTowerHighlightTarget(ownedTowerArea.currentTower)
+                : ownedTowerArea.gameObject;
+
+            if (ownedTowerHighlight != null)
+            {
+                lastBuiltTowerObject = ownedTowerHighlight;
+                lastTutorialBuildAreaObject = ownedTowerArea.gameObject;
+                SetOrAddBinding("BuiltTower", ownedTowerHighlight);
+            }
+        }
+
+        if (opponentLandArea != null)
+        {
+            SetOrAddBinding("ClaimableLand", opponentLandArea.gameObject);
+        }
+
+        if (opponentTowerArea != null)
+        {
+            SetOrAddBinding("PublicBuildArea", opponentTowerArea.gameObject);
+        }
+    }
+
+    private string InferTutorialCardIdFromStep(string stepId)
+    {
+        if (string.IsNullOrWhiteSpace(stepId))
+        {
+            return null;
+        }
+
+        switch (stepId)
+        {
+            case "part4_step_7":
+            case "part4_step_8":
+            case "part4_step_9":
+            case "part4_step_10":
+            case "part4_step_11":
+            case "part4_step_12":
+            case "part4_step_13":
+                return "LockGate";
+            default:
+                return null;
+        }
+    }
+
+    private PlayerResource GetFirstOtherActivePlayer(PlayerManager playerManager, int currentPlayerId)
+    {
+        if (playerManager == null || playerManager.players == null)
+        {
+            return null;
+        }
+
+        foreach (PlayerResource player in playerManager.players)
+        {
+            if (player != null && !player.isEliminated && player.playerId != currentPlayerId)
+            {
+                return player;
+            }
+        }
+
+        return null;
+    }
+
+    private TowerBuildArea ResolveBuildAreaByPath(string hierarchyPath)
+    {
+        GameObject areaObject = FindSceneObjectByPath(hierarchyPath);
+        return areaObject != null ? areaObject.GetComponent<TowerBuildArea>() : null;
+    }
+
+    private void EnsureBuildAreaOwnedByPlayer(TowerBuildArea buildArea, int playerId, PlayerManager playerManager, bool preserveTower)
+    {
+        if (buildArea == null)
+        {
+            return;
+        }
+
+        buildArea.activatesNextTurn = false;
+        buildArea.inactiveForPlayerId = -1;
+        buildArea.ClearFreeze();
+
+        if (buildArea.ownerPlayerId != playerId || !buildArea.isOwned)
+        {
+            if (!preserveTower)
+            {
+                buildArea.RemoveCurrentTower();
+            }
+
+            buildArea.SetOwner(playerId, playerManager);
+        }
+    }
+
+    private void EnsureTowerForPlayer(TowerBuildArea buildArea, int playerId, BuildTowerManager buildTowerManager)
+    {
+        if (buildArea == null || buildTowerManager == null)
+        {
+            return;
+        }
+
+        buildArea.activatesNextTurn = false;
+        buildArea.inactiveForPlayerId = -1;
+
+        if (buildArea.currentTower != null && buildArea.towerOwnerPlayerId == playerId)
+        {
+            return;
+        }
+
+        buildArea.RemoveCurrentTower();
+        buildTowerManager.TryBuildTowerForPlayer(buildArea, TowerType.Cannon, playerId, false);
     }
 
     private IEnumerator FallbackAdvanceRoutine(TutorialStep expectedStep, float delaySeconds)
@@ -1299,7 +1817,18 @@ public class TutorialManager : MonoBehaviour
         }
 
         Debug.LogWarning("Tutorial step timed out. Advancing: " + expectedStep.stepId);
+        MarkStepCompleted(expectedStep);
         AdvanceToNextStep();
+    }
+
+    private void MarkStepCompleted(TutorialStep step)
+    {
+        if (step == null || string.IsNullOrWhiteSpace(step.stepId))
+        {
+            return;
+        }
+
+        completedStepIds.Add(step.stepId);
     }
 
     private void StopCurrentStepRoutine()

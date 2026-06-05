@@ -4562,7 +4562,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -16.5}
-  m_SizeDelta: {x: 30, y: 1}
+  m_SizeDelta: {x: 35, y: 10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &134782284
 MonoBehaviour:
@@ -4761,8 +4761,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 1
-  m_fontSizeBase: 1
+  m_fontSize: 0.8
+  m_fontSizeBase: 0.8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -74356,6 +74356,7 @@ MonoBehaviour:
   darkOverlay: {fileID: 236984364}
   hammerButton: {fileID: 0}
   normalGameplayUI: {fileID: 1274524793}
+  confirmButton: {fileID: 0}
   currentPlayerId: 0
   gateOwnershipManager: {fileID: 1823688006}
   playerManager: {fileID: 0}
@@ -78405,7 +78406,6 @@ MonoBehaviour:
   goldDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/MoneyText
   cardCountDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/cardNum
   scoreDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/PointText
-  turnIndicatorPath: UI/Canvas/TextMeshProUGUI
   claimableLandPath: Map/BuildAreas/Claimable_BuildArea_Gate01
   publicBuildAreaPath: Map/BuildAreas/Public_BuildArea_01
   towerBuildAreaPath: Map/BuildAreas/Public_BuildArea_01
@@ -78416,6 +78416,18 @@ MonoBehaviour:
   player2PanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel (1)
   player3PanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel (2)
   player4PanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel (3)
+  cardHandPath: UI/Canvas/NormalGameplayUI/CardSlot
+  drawButtonPath: UI/Canvas/NormalGameplayUI/DrawCardButton
+  discardButtonPath: UI/Canvas/NormalGameplayUI/DiscardButton
+  playButtonPath: UI/Canvas/NormalGameplayUI/PlayCardButton
+  targetingConfirmButtonPath: UI/Canvas/TargetingUI/ConfirmButton
+  targetingCancelButtonPath: UI/Canvas/TargetingUI/CancelButton
+  tutorialGatePath: Gates/Gate_Stone_01
+  tutorialShockTrapNodePath: Map/PathGraph/RouteNodes/R_Left_01
+  tutorialOpponentCastlePath: Players/Castle_TopRight
+  tutorialOwnedTowerAreaPath: Map/BuildAreas/Public_BuildArea_01
+  tutorialOpponentLandAreaPath: Map/BuildAreas/Claimable_BuildArea_Gate02
+  tutorialOpponentTowerAreaPath: Map/BuildAreas/Claimable_BuildArea_Gate03
 --- !u!4 &1842489414
 Transform:
   m_ObjectHideFlags: 0
