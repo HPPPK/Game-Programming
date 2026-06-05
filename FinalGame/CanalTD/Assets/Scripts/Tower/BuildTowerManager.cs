@@ -838,14 +838,18 @@ public class BuildTowerManager : MonoBehaviour
 
             if (turnSource == null || !turnSource.CanHumanAct)
             {
-                ShowToast("You cannot build during enemy wave.");
+                ShowToast(TutorialManager.Instance != null
+                    ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot build during enemy wave.")
+                    : "You cannot build during enemy wave.");
                 HideBuildInteractionUI();
                 return false;
             }
         }
         else if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            ShowToast("You cannot build during enemy wave.");
+            ShowToast(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot build during enemy wave.")
+                : "You cannot build during enemy wave.");
             HideBuildInteractionUI();
             return false;
         }

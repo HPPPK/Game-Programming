@@ -25,9 +25,11 @@ public class TutorialHighlightController : MonoBehaviour
     [SerializeField] private Vector2 worldMessageOffsetAbove = new Vector2(0f, 0.06f);
     [SerializeField] private Vector2 worldMessageOffsetBelow = new Vector2(0f, -0.06f);
     [SerializeField] private Vector2 worldMessageOffsetRight = new Vector2(0.06f, 0f);
+    [SerializeField] private Vector2 worldMessageOffsetLeft = new Vector2(-0.06f, 0f);
     [SerializeField] private Vector2 worldMessageOffsetRightForLand = new Vector2(0.8f, 0f);
     [SerializeField] private float messageViewportTopLimit = 0.88f;
     [SerializeField] private float uiMessageGap = 18f;
+    [SerializeField] private float tutorialPart5TopLeftMessageGap = 8f;
     [SerializeField] private float worldMessageGap = 0.005f;
     [SerializeField] private float worldMessageGapForLand = 0.2f;
 
@@ -132,10 +134,13 @@ public class TutorialHighlightController : MonoBehaviour
             return;
         }
 
-        Vector2 padding = useWorldSpaceLayout ? worldFramePadding : (isUITarget ? uiFramePadding : worldFramePadding);
+        bool useExactUIFrame = ShouldUseExactUIFrame(isUITarget, useWorldSpaceLayout);
+        Vector2 padding = useExactUIFrame
+            ? Vector2.zero
+            : (useWorldSpaceLayout ? worldFramePadding : (isUITarget ? uiFramePadding : worldFramePadding));
         Vector2 localSize = localRect.size + padding;
 
-        if (isUITarget && !useWorldSpaceLayout)
+        if (isUITarget && !useWorldSpaceLayout && !useExactUIFrame)
         {
             localSize.x = Mathf.Max(localSize.x, minimumUIFrameSize.x);
             localSize.y = Mathf.Max(localSize.y, minimumUIFrameSize.y);
@@ -336,15 +341,59 @@ public class TutorialHighlightController : MonoBehaviour
             return;
         }
 
+        if (ShouldPlaceMessageAtTopLeft(isUITarget, useWorldSpaceLayout))
+        {
+            float topLeftGap = ShouldUsePart5TopLeftMessageGap() ? tutorialPart5TopLeftMessageGap : uiMessageGap;
+            Vector2 topLeftAnchoredPosition = new Vector2(
+                targetRect.xMin - topLeftGap - (messagePanel.rect.width * 0.5f),
+                targetRect.yMax + topLeftGap + (messagePanel.rect.height * 0.5f));
+
+            if (useWorldSpaceLayout)
+            {
+                messagePanel.anchoredPosition = topLeftAnchoredPosition;
+                return;
+            }
+
+            Vector2 topLeftClampedPosition = ClampPanelInsideCanvas(canvasRect.rect, topLeftAnchoredPosition, messagePanel.rect.size);
+            messagePanel.anchoredPosition = topLeftClampedPosition;
+            return;
+        }
+
+        if (ShouldPlaceMessageAtRight(isUITarget, useWorldSpaceLayout))
+        {
+            Vector2 rightAnchoredPosition = new Vector2(
+                targetRect.xMax + uiMessageGap + (messagePanel.rect.width * 0.5f),
+                targetRect.center.y);
+
+            Vector2 rightClampedPosition = ClampPanelInsideCanvas(canvasRect.rect, rightAnchoredPosition, messagePanel.rect.size);
+            messagePanel.anchoredPosition = rightClampedPosition;
+            return;
+        }
+
+        if (ShouldPlaceMessageOnLeftBottom())
+        {
+            Vector2 bottomLeftAnchoredPosition = new Vector2(
+                targetRect.xMin - uiMessageGap - (messagePanel.rect.width * 0.5f),
+                targetRect.yMin - uiMessageGap - (messagePanel.rect.height * 0.5f));
+
+            Vector2 bottomLeftClampedPosition = ClampPanelInsideCanvas(canvasRect.rect, bottomLeftAnchoredPosition, messagePanel.rect.size);
+            messagePanel.anchoredPosition = bottomLeftClampedPosition;
+            return;
+        }
+
         Vector2 targetCenter = targetRect.center;
         Vector2 desiredPosition;
         bool placeRight = useWorldSpaceLayout && ShouldPlaceMessageOnRight();
+        bool placeLeft = useWorldSpaceLayout && ShouldPlaceMessageOnLeft();
         bool placeAbove = false;
 
-        if (placeRight)
+        if (placeRight || placeLeft)
         {
-            float gap = ShouldUseLandMessageSpacing() ? worldMessageGapForLand : worldMessageGap;
-            Vector2 rightOffset = ShouldUseLandMessageSpacing() ? worldMessageOffsetRightForLand : worldMessageOffsetRight;
+            bool useLandSpacing = ShouldUseLandMessageSpacing();
+            float gap = useLandSpacing ? worldMessageGapForLand : worldMessageGap;
+            Vector2 sideOffset = placeRight
+                ? (useLandSpacing ? worldMessageOffsetRightForLand : worldMessageOffsetRight)
+                : worldMessageOffsetLeft;
             Rect anchorRect = targetRect;
 
             if (ShouldAnchorMessageToRadialMenu() &&
@@ -354,8 +403,10 @@ public class TutorialHighlightController : MonoBehaviour
             }
 
             desiredPosition = new Vector2(
-                anchorRect.xMax + gap + rightOffset.x,
-                anchorRect.center.y + rightOffset.y);
+                placeRight
+                    ? anchorRect.xMax + gap + sideOffset.x
+                    : anchorRect.xMin - gap + sideOffset.x,
+                anchorRect.center.y + sideOffset.y);
         }
         else
         {
@@ -369,7 +420,6 @@ public class TutorialHighlightController : MonoBehaviour
             Vector2 desiredBelow = new Vector2(
                 targetCenter.x + offsetBelow.x,
                 targetRect.yMin - gap + offsetBelow.y);
-
             Vector3 aboveViewport = RectTransformToViewport(canvasRect, desiredAbove);
             placeAbove = aboveViewport.y <= messageViewportTopLimit;
             desiredPosition = placeAbove ? desiredAbove : desiredBelow;
@@ -380,6 +430,11 @@ public class TutorialHighlightController : MonoBehaviour
         {
             anchoredPosition.x += messagePanel.rect.width * 0.5f;
         }
+        else if (placeLeft)
+        {
+            anchoredPosition.x -= messagePanel.rect.width * 0.5f;
+        }
+        
         else
         {
             anchoredPosition.y += (placeAbove ? 1f : -1f) * (messagePanel.rect.height * 0.5f);
@@ -464,6 +519,17 @@ public class TutorialHighlightController : MonoBehaviour
                 }
             }
         }
+
+        GameObject targetingUI = GameObject.Find("TargetingUI");
+        if (targetingUI != null)
+        {
+            targetingUI.transform.SetAsLastSibling();
+
+            if (messagePanel != null)
+            {
+                messagePanel.SetAsLastSibling();
+            }
+        }
     }
 
     private void SanitizeWorldSpaceSettings()
@@ -505,12 +571,17 @@ public class TutorialHighlightController : MonoBehaviour
     {
         switch (currentTargetId)
         {
+            case "Player1Panel":
+            case "Player2Panel":
             case "ClaimableLand":
             case "PublicBuildArea":
             case "TowerBuildArea":
             case "BuiltTower":
             case "UpgradeButton":
+            case "SellButton":
             case "ConfirmButton":
+            case "TargetingConfirmButton":
+            case "TurnIndicator":
             case "PlayerInfoPanel":
             case "PlayerNameDisplay":
             case "GoldDisplay":
@@ -523,6 +594,67 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    private bool ShouldPlaceMessageOnLeft()
+    {
+        switch (currentTargetId)
+        {
+            case "Player3Panel":
+            case "Player4Panel":
+            case "DrawButton":
+            case "DiscardButton":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private bool ShouldPlaceMessageAtTopLeft(bool isUITarget, bool useWorldSpaceLayout)
+    {
+        TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
+
+        if (currentStep != null &&
+            currentStep.partId == TutorialPartId.EndTurn &&
+            (currentStep.stepId == "part5_step_1" || currentStep.stepId == "part5_step_2"))
+        {
+            return true;
+        }
+
+        return isUITarget &&
+               !useWorldSpaceLayout &&
+               (currentTargetId == "PlayButton" || currentTargetId == "EndTurnButton");
+    }
+
+    private bool ShouldUsePart5TopLeftMessageGap()
+    {
+        TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
+        return currentStep != null &&
+               currentStep.partId == TutorialPartId.EndTurn &&
+               (currentStep.stepId == "part5_step_1" || currentStep.stepId == "part5_step_2");
+    }
+
+    private bool ShouldPlaceMessageOnLeftBottom()
+    {
+        TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
+
+        return currentStep != null &&
+               currentStep.partId == TutorialPartId.EndTurn &&
+               currentTargetId == "TurnIndicator";
+    }
+
+    private bool ShouldPlaceMessageAtRight(bool isUITarget, bool useWorldSpaceLayout)
+    {
+        return isUITarget &&
+               !useWorldSpaceLayout &&
+               (currentTargetId == "TargetingConfirmButton" || currentTargetId == "ConfirmButton");
+    }
+
+    private bool ShouldUseExactUIFrame(bool isUITarget, bool useWorldSpaceLayout)
+    {
+        return isUITarget &&
+               !useWorldSpaceLayout &&
+               (currentTargetId == "SellButton" || currentTargetId == "UpgradeButton");
+    }
+
     private bool ShouldUseLandMessageSpacing()
     {
         return currentTargetId == "ClaimableLand" ||
@@ -530,6 +662,7 @@ public class TutorialHighlightController : MonoBehaviour
                currentTargetId == "TowerBuildArea" ||
                currentTargetId == "BuiltTower" ||
                currentTargetId == "UpgradeButton" ||
+               currentTargetId == "SellButton" ||
                currentTargetId == "ConfirmButton";
     }
 
@@ -539,6 +672,7 @@ public class TutorialHighlightController : MonoBehaviour
                currentTargetId == "TowerBuildArea" ||
                currentTargetId == "BuiltTower" ||
                currentTargetId == "UpgradeButton" ||
+               currentTargetId == "SellButton" ||
                currentTargetId == "ConfirmButton";
     }
 
@@ -588,6 +722,13 @@ public class TutorialHighlightController : MonoBehaviour
             return false;
         }
 
+        if (currentTargetId == "SelectedCardArea" &&
+            TryGetSelectedCardAreaRect(canvasRect, out Rect selectedCardAreaRect))
+        {
+            localRect = selectedCardAreaRect;
+            return true;
+        }
+
         if (isUITarget)
         {
             RectTransform targetRect = target.GetComponent<RectTransform>();
@@ -607,6 +748,49 @@ public class TutorialHighlightController : MonoBehaviour
         }
 
         return TryBuildCanvasLocalRectFromWorldCorners(canvasRect, worldCorners, out localRect);
+    }
+
+    private bool TryGetSelectedCardAreaRect(RectTransform canvasRect, out Rect localRect)
+    {
+        localRect = default;
+
+        TutorialManager manager = TutorialManager.Instance;
+        if (manager == null)
+        {
+            return false;
+        }
+
+        GameObject slotTarget = manager.GetBoundTargetObject("CurrentCardSlot");
+        GameObject cardTarget = manager.GetBoundTargetObject("CurrentCard");
+        if (slotTarget == null || cardTarget == null)
+        {
+            return false;
+        }
+
+        RectTransform slotRectTransform = slotTarget.GetComponent<RectTransform>();
+        RectTransform cardRectTransform = cardTarget.GetComponent<RectTransform>();
+        if (slotRectTransform == null || cardRectTransform == null)
+        {
+            return false;
+        }
+
+        Vector3[] slotCorners = new Vector3[4];
+        Vector3[] cardCorners = new Vector3[4];
+        slotRectTransform.GetWorldCorners(slotCorners);
+        cardRectTransform.GetWorldCorners(cardCorners);
+
+        Vector3[] mergedCorners = new Vector3[slotCorners.Length + cardCorners.Length];
+        for (int i = 0; i < slotCorners.Length; i++)
+        {
+            mergedCorners[i] = slotCorners[i];
+        }
+
+        for (int i = 0; i < cardCorners.Length; i++)
+        {
+            mergedCorners[slotCorners.Length + i] = cardCorners[i];
+        }
+
+        return TryBuildCanvasLocalRectFromWorldCorners(canvasRect, mergedCorners, out localRect);
     }
 
     private bool TryBuildCanvasLocalRectFromWorldCorners(RectTransform canvasRect, Vector3[] worldCorners, out Rect localRect)

@@ -344,7 +344,7 @@ public class RadialTowerMenu : MonoBehaviour
             return;
         }
 
-        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.InspectTower, selectedBuildArea != null ? selectedBuildArea.gameObject : null);
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.PrepareUpgradeTower, selectedBuildArea != null ? selectedBuildArea.gameObject : null);
         ShowUpgradeConfirm(currentTowerStats.GetUpgradeCost());
     }
 
@@ -365,6 +365,7 @@ public class RadialTowerMenu : MonoBehaviour
             return;
         }
 
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.PrepareSellTower, selectedBuildArea != null ? selectedBuildArea.gameObject : null);
         ShowSellConfirm(currentTowerStats.GetSellValue());
     }
 

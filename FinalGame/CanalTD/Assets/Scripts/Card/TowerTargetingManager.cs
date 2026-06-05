@@ -157,6 +157,7 @@ public class TowerTargetingManager : MonoBehaviour
 
         isTargeting = true;
         SetTargetingVisuals(true);
+        UpdateConfirmButtonState();
 
         foreach (CannonTower tower in validTargets)
         {
@@ -248,6 +249,8 @@ public class TowerTargetingManager : MonoBehaviour
             ExitTargetingMode();
         }
 
+        TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.PowerBoost, tower != null ? tower.gameObject : null);
+
         return true;
     }
 
@@ -324,6 +327,9 @@ public class TowerTargetingManager : MonoBehaviour
         {
             ApplyTargetVisual(selectedRenderer, selectedColor, selectedSortingOrder);
         }
+
+        UpdateConfirmButtonState();
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.SelectTarget, selectedTower != null ? selectedTower.gameObject : null);
 
         Debug.Log("Selected tower: " + selectedTower.name);
     }
@@ -600,6 +606,23 @@ public class TowerTargetingManager : MonoBehaviour
         selectedTower = null;
         isTargeting = false;
         SetTargetingVisuals(false);
+        UpdateConfirmButtonState();
+    }
+
+    private void UpdateConfirmButtonState()
+    {
+        if (confirmButton == null)
+        {
+            return;
+        }
+
+        if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialGameplayActive)
+        {
+            confirmButton.interactable = true;
+            return;
+        }
+
+        confirmButton.interactable = isTargeting && selectedTower != null;
     }
 
     private void RestoreTargetVisuals()

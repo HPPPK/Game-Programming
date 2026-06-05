@@ -51,6 +51,7 @@ public class GateTargetingManager : MonoBehaviour
     public GameObject darkOverlay;
     public GameObject hammerButton;
     public CanvasGroup normalGameplayUI;
+    public Button confirmButton;
 
     [Header("Gate Ownership")]
     public int currentPlayerId = 0;
@@ -92,6 +93,7 @@ public class GateTargetingManager : MonoBehaviour
     void Start()
     {
         ResolveHammerButton();
+        ResolveConfirmButton();
         RefreshGates();
         ForceExitVisualState();
     }
@@ -115,7 +117,9 @@ public class GateTargetingManager : MonoBehaviour
 
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            ShowToast("You cannot control gates during enemy wave.");
+            ShowToast(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot control gates during enemy wave.")
+                : "You cannot control gates during enemy wave.");
             return false;
         }
 
@@ -146,6 +150,7 @@ public class GateTargetingManager : MonoBehaviour
         selectedGate = null;
 
         EnterTargetingVisualState();
+        UpdateConfirmButtonState();
 
         foreach (GateFrameAnimation gate in validTargets)
         {
@@ -231,6 +236,8 @@ public class GateTargetingManager : MonoBehaviour
 
         selectedGate = gate;
         selectedGate.SetHighlight(true, GetSelectedTargetColor());
+        UpdateConfirmButtonState();
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.SelectTarget, gate != null ? gate.gameObject : null);
 
         Debug.Log("Gate selected: " + gate.name);
     }
@@ -312,7 +319,9 @@ public class GateTargetingManager : MonoBehaviour
 
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            ShowToast("You cannot control gates during enemy wave.");
+            ShowToast(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot control gates during enemy wave.")
+                : "You cannot control gates during enemy wave.");
             return;
         }
 
@@ -424,6 +433,7 @@ public class GateTargetingManager : MonoBehaviour
 
         selectedGate = null;
         validTargets.Clear();
+        UpdateConfirmButtonState();
 
         Debug.Log("Gate targeting mode OFF.");
     }
@@ -594,6 +604,31 @@ public class GateTargetingManager : MonoBehaviour
         }
     }
 
+    void ResolveConfirmButton()
+    {
+        if (confirmButton != null || targetingUI == null)
+        {
+            return;
+        }
+
+        Transform[] children = targetingUI.GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform child in children)
+        {
+            if (child == null || child.name != "ConfirmButton")
+            {
+                continue;
+            }
+
+            confirmButton = child.GetComponent<Button>();
+
+            if (confirmButton != null)
+            {
+                return;
+            }
+        }
+    }
+
     void ResolveNormalGameplayUI()
     {
         if (normalGameplayUI != null)
@@ -616,6 +651,24 @@ public class GateTargetingManager : MonoBehaviour
     public bool IsTargetingGate()
     {
         return isTargetingGate;
+    }
+
+    private void UpdateConfirmButtonState()
+    {
+        ResolveConfirmButton();
+
+        if (confirmButton == null)
+        {
+            return;
+        }
+
+        if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialGameplayActive)
+        {
+            confirmButton.interactable = true;
+            return;
+        }
+
+        confirmButton.interactable = isTargetingGate && selectedGate != null;
     }
 
     public bool IsAnyTargetingActive()
@@ -727,7 +780,9 @@ public class GateTargetingManager : MonoBehaviour
 
         if (gamePhaseManager != null && !gamePhaseManager.IsPlayerPhase())
         {
-            ShowToast("You cannot control gates during enemy wave.");
+            ShowToast(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("You cannot control gates during enemy wave.")
+                : "You cannot control gates during enemy wave.");
             return false;
         }
 
@@ -811,6 +866,8 @@ public class GateTargetingManager : MonoBehaviour
                 return false;
             }
         }
+
+        TutorialManager.Instance?.NotifyCardPlayed(GetTutorialActionType(actionType), gate != null ? gate.gameObject : null);
 
         return true;
     }

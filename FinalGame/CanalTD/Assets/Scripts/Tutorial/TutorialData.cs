@@ -8,7 +8,8 @@ public enum TutorialPartId
     LandTowerGold,
     Cards,
     EndTurn,
-    EnemyWave
+    EnemyWave,
+    PlayersTurnsScoring
 }
 
 public enum TutorialActionType
@@ -18,6 +19,9 @@ public enum TutorialActionType
     SelectOwnedLand,
     InspectTower,
     SelectCard,
+    SelectTarget,
+    PrepareUpgradeTower,
+    PrepareSellTower,
     BuyLand,
     BuildTower,
     UpgradeTower,
@@ -64,6 +68,10 @@ public class TutorialStep
     public int tutorialEnemySpawnCount;
     public float fallbackAutoAdvanceSeconds;
     public bool hideTutorialUIOnEnter;
+    public string tutorialCardId;
+    public List<string> tutorialHandCardIds = new List<string>();
+    public bool prepareTutorialCardOnEnter;
+    public bool resetTurnActionsOnEnter;
 
     [TextArea(1, 3)]
     public string blockedMessageOverride;
