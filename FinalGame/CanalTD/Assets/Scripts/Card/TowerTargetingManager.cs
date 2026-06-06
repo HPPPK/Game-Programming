@@ -283,6 +283,11 @@ public class TowerTargetingManager : MonoBehaviour
 
     private void TrySelectTowerAtMouse()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (IsPointerOverTargetingControls())
         {
             return;

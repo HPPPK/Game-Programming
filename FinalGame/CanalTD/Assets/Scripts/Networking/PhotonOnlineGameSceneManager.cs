@@ -44,6 +44,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     public TurnManager turnManager;
     public GamePhaseManager gamePhaseManager;
     public MonoBehaviour toastMessage;
+    public PhotonOnlineBuildSyncManager onlineBuildSyncManager;
 
     [Header("Online Turn Settings")]
     public int minOnlinePlayersToStart = 2;
@@ -72,6 +73,21 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     public bool IsLocalLeavingMatch
     {
         get { return isLocalLeavingMatch; }
+    }
+
+    public bool HasAuthoritativeTurnStateReady
+    {
+        get { return HasLiveOnlineMatchSession() && !ShouldIgnoreOnlineCallbacks() && bootstrapComplete; }
+    }
+
+    public int CurrentTurnPlayerId
+    {
+        get { return GetRoomCurrentTurnPlayerId(); }
+    }
+
+    public int CurrentRound
+    {
+        get { return GetRoomCurrentRound(); }
     }
 
     public bool HasDetachedFromOnlineMatch
@@ -105,12 +121,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     // online turn authority belongs to another player.
     public static bool ShouldBlockLocalGameplayAction(bool showToast = true)
     {
-        if (!IsLiveOnlineGameSceneContext() || Instance == null || !Instance.HasLiveOnlineMatchSession())
-        {
-            return false;
-        }
-
-        return !Instance.IsLocalPlayerAllowedToAct(showToast);
+        return OnlineTurnPermissionManager.ShouldBlockLocalGameplayAction(showToast);
     }
 #endif
 
@@ -132,6 +143,8 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         {
             gamePhaseManager = FindObjectOfType<GamePhaseManager>();
         }
+
+        EnsureOnlineBuildSyncManagerExists();
     }
 
     private void OnEnable()
@@ -208,6 +221,10 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
 
         ApplyRoomTurnState(forceApply: true);
+        if (onlineBuildSyncManager != null)
+        {
+            onlineBuildSyncManager.InitializeForOnlineMatch();
+        }
         bootstrapComplete = true;
     }
 
@@ -259,37 +276,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     // during the current synchronized online turn.
     public bool IsLocalPlayerAllowedToAct(bool showToast = true)
     {
-        if (!HasLiveOnlineMatchSession())
-        {
-            return true;
-        }
-
-        if (ShouldIgnoreOnlineCallbacks())
-        {
-            return false;
-        }
-
-        if (!bootstrapComplete)
-        {
-            if (showToast)
-            {
-                ShowToast("Online turn system is still loading.");
-            }
-
-            return false;
-        }
-
-        if (GetRoomCurrentTurnPlayerId() != LocalPlayerId)
-        {
-            if (showToast)
-            {
-                ShowToast("Not your turn.");
-            }
-
-            return false;
-        }
-
-        return true;
+        return OnlineTurnPermissionManager.CanLocalPlayerAct(showToast);
     }
 
     public void DetachFromOnlineMatchState()
@@ -306,6 +293,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         LocalPlayerId = -1;
         LocalSlotIndex = -1;
         LocalPlayerName = "Player";
+        OnlineTurnPermissionManager.ResetRuntimeState();
         ClearOnlineRuntimePlayerPrefs();
     }
 
@@ -316,17 +304,8 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             return false;
         }
 
-        if (!bootstrapComplete)
+        if (!OnlineTurnPermissionManager.CanLocalPlayerAct(true))
         {
-            ShowToast("Online turn system is still loading.");
-            return true;
-        }
-
-        int currentTurnPlayerId = GetRoomCurrentTurnPlayerId();
-
-        if (currentTurnPlayerId != LocalPlayerId)
-        {
-            ShowToast("It's not your turn.");
             return true;
         }
 
@@ -357,6 +336,16 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         {
             ApplyRoomTurnState(forceApply: false);
         }
+
+        if (propertiesThatChanged.ContainsKey(PhotonLobbyPropertyKeys.OnlineBuildSnapshot))
+        {
+            EnsureOnlineBuildSyncManagerExists();
+
+            if (onlineBuildSyncManager != null)
+            {
+                onlineBuildSyncManager.HandleRoomPropertiesUpdated();
+            }
+        }
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -372,6 +361,11 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         if (PhotonNetwork.IsMasterClient)
         {
             EnsureCurrentTurnTargetsActivePlayer();
+        }
+
+        if (onlineBuildSyncManager != null)
+        {
+            onlineBuildSyncManager.InitializeForOnlineMatch();
         }
     }
 
@@ -396,6 +390,11 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         {
             EnsureCurrentTurnTargetsActivePlayer();
         }
+
+        if (onlineBuildSyncManager != null)
+        {
+            onlineBuildSyncManager.InitializeForOnlineMatch();
+        }
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)
@@ -411,6 +410,11 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         if (PhotonNetwork.IsMasterClient)
         {
             EnsureCurrentTurnTargetsActivePlayer();
+        }
+
+        if (onlineBuildSyncManager != null)
+        {
+            onlineBuildSyncManager.InitializeForOnlineMatch();
         }
     }
 
@@ -720,9 +724,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         if (playerManager != null)
         {
-            // Reuse the existing player-turn UI/toast flow so online mode shows
-            // the same turn feedback style as local and AI modes.
-            playerManager.SetCurrentPlayer(currentTurnPlayerId);
+            playerManager.SetCurrentPlayer(currentTurnPlayerId, false);
             playerManager.RefreshAllPlayerStatusPanels();
         }
 
@@ -730,6 +732,8 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         {
             CurrentTurnIndicatorManager.Instance.UpdateCurrentTurnIndicator(currentTurnPlayerId);
         }
+
+        OnlineTurnPermissionManager.NotifyTurnStateApplied(this, currentTurnPlayerId, currentRound);
 
         hasAppliedTurnState = true;
         lastAppliedTurnPlayerId = currentTurnPlayerId;
@@ -884,12 +888,81 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             return;
         }
 
+        if (gamePhaseManager != null &&
+            gamePhaseManager.toastMessage != null &&
+            !ReferenceEquals(gamePhaseManager.toastMessage, toastMessage) &&
+            TryCallToastMethod(gamePhaseManager.toastMessage, message))
+        {
+            return;
+        }
+
+        if (GlobalUIManager.Instance != null)
+        {
+            GlobalUIManager.Instance.ShowToast(message);
+            return;
+        }
+
+        CardDrawManager cardDrawManager = FindObjectOfType<CardDrawManager>();
+
+        if (cardDrawManager != null)
+        {
+            cardDrawManager.ShowWarningMessage(message);
+            return;
+        }
+
         Debug.Log(message);
+    }
+
+    public void ShowOnlineToast(string message)
+    {
+        ShowToast(message);
+    }
+
+    public string GetOnlineTurnOwnerDisplayName(int playerId)
+    {
+        if (playerManager != null)
+        {
+            return playerManager.GetPlayerDisplayName(playerId);
+        }
+
+        return "Player " + playerId;
+    }
+
+    public int GetOnlinePlayerIdByActorNumber(int actorNumber)
+    {
+#if PHOTON_UNITY_NETWORKING
+        return GetPlayerIdByActorNumber(actorNumber);
+#else
+        return -1;
+#endif
+    }
+
+    private void EnsureOnlineBuildSyncManagerExists()
+    {
+        if (onlineBuildSyncManager != null)
+        {
+            return;
+        }
+
+        onlineBuildSyncManager = FindObjectOfType<PhotonOnlineBuildSyncManager>();
+
+        if (onlineBuildSyncManager != null)
+        {
+            return;
+        }
+
+        GameObject managerObject = new GameObject("PhotonOnlineBuildSyncManager");
+        onlineBuildSyncManager = managerObject.AddComponent<PhotonOnlineBuildSyncManager>();
     }
 
     private bool TryCallToastMethod(string message)
     {
-        if (toastMessage == null)
+        return TryCallToastMethod(toastMessage, message);
+    }
+
+    private bool TryCallToastMethod(MonoBehaviour toastSource, string message)
+    {
+        if (toastSource == null)
         {
             return false;
         }
@@ -905,7 +978,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         foreach (string methodName in methodNames)
         {
-            MethodInfo method = toastMessage.GetType().GetMethod(
+            MethodInfo method = toastSource.GetType().GetMethod(
                 methodName,
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 null,
@@ -918,7 +991,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
                 continue;
             }
 
-            method.Invoke(toastMessage, new object[] { message });
+            method.Invoke(toastSource, new object[] { message });
             return true;
         }
 

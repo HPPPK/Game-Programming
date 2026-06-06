@@ -19,4 +19,5 @@ public static class PhotonLobbyPropertyKeys
     public const string CurrentTurnPlayerId = "currentTurnPlayerId";
     public const string CurrentRound = "currentRound";
     public const string OnlineGameActive = "onlineGameActive";
+    public const string OnlineBuildSnapshot = "onlineBuildSnapshot";
 }

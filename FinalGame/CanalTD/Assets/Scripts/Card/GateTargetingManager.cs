@@ -216,6 +216,11 @@ public class GateTargetingManager : MonoBehaviour
 
     public void SelectGate(GateFrameAnimation gate)
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (!isTargetingGate) return;
 
         if (!IsValidTarget(gate))

@@ -400,6 +400,11 @@ public class TileTargetingManager : MonoBehaviour
 
     private void TrySelectTileAtMouse()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (IsPointerOverTargetingControls())
         {
             return;

@@ -248,7 +248,14 @@ public class RadialTowerMenu : MonoBehaviour
         {
             if (buildTowerManager.ConfirmBuyLand(selectedBuildArea))
             {
-                ShowBuildSelection(selectedBuildArea);
+                if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+                {
+                    Hide();
+                }
+                else
+                {
+                    ShowBuildSelection(selectedBuildArea);
+                }
             }
 
             return;

@@ -385,6 +385,13 @@ public class PlayerTargetingManager : MonoBehaviour
             ExitTargetingMode();
         }
 
+<<<<<<< Updated upstream
+=======
+        RefreshVisibleHandAfterPlayerInteraction();
+
+        TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.StealCard, tutorialTarget != null ? tutorialTarget.gameObject : null);
+
+>>>>>>> Stashed changes
         return true;
     }
 
@@ -431,23 +438,27 @@ public class PlayerTargetingManager : MonoBehaviour
 
         if (consumePendingCard && playedCardPrefab != null)
         {
-            currentCards.Remove(playedCardPrefab);
+            if (!currentCards.Remove(playedCardPrefab))
+            {
+                ShowToast("Could not play this card.");
+                return false;
+            }
+        }
+
+        if (consumePendingCard)
+        {
+            if (cardDrawManager == null ||
+                !cardDrawManager.ConsumePendingTargetingCardFromPlayerHand(playerId, true))
+            {
+                ShowToast("Could not play this card.");
+                return false;
+            }
         }
 
         currentHand.CopyFrom(targetCards);
         targetHand.CopyFrom(currentCards);
         SyncAndRefreshPlayers(currentPlayer, targetPlayer);
 
-        if (consumePendingCard && !cardDrawManager.ConsumeSelectedCardAfterSuccessfulTargeting())
-        {
-            currentHand.CopyFrom(currentCards);
-            targetHand.CopyFrom(targetCards);
-            SyncAndRefreshPlayers(currentPlayer, targetPlayer);
-            ShowToast("Could not play this card.");
-            return false;
-        }
-
-        cardDrawManager?.RenderCurrentPlayerHand();
         ShowPublicCardToast(currentPlayer, "Trade Hands", targetPlayer);
 
         if (consumePendingCard)
@@ -455,6 +466,13 @@ public class PlayerTargetingManager : MonoBehaviour
             ExitTargetingMode();
         }
 
+<<<<<<< Updated upstream
+=======
+        RefreshVisibleHandAfterPlayerInteraction();
+
+        TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.TradeHands, tutorialTarget != null ? tutorialTarget.gameObject : null);
+
+>>>>>>> Stashed changes
         return true;
     }
 
@@ -509,6 +527,13 @@ public class PlayerTargetingManager : MonoBehaviour
             ExitTargetingMode();
         }
 
+<<<<<<< Updated upstream
+=======
+        RefreshVisibleHandAfterPlayerInteraction();
+
+        TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.Disrupt, tutorialTarget != null ? tutorialTarget.gameObject : null);
+
+>>>>>>> Stashed changes
         return true;
     }
 
@@ -579,6 +604,14 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    private void RefreshVisibleHandAfterPlayerInteraction()
+    {
+        if (cardDrawManager != null)
+        {
+            cardDrawManager.RenderCurrentPlayerHand();
+        }
+    }
+
     public void CancelSelection()
     {
         if (!isTargeting)
@@ -606,6 +639,11 @@ public class PlayerTargetingManager : MonoBehaviour
 
     private void TrySelectPlayerAtMouse()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (IsPointerOverTargetingControls())
         {
             return;

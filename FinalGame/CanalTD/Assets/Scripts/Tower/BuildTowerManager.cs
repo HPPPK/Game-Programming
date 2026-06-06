@@ -321,6 +321,21 @@ public class BuildTowerManager : MonoBehaviour
             return false;
         }
 
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+        {
+            PhotonOnlineBuildSyncManager syncManager = PhotonOnlineBuildSyncManager.Instance != null
+                ? PhotonOnlineBuildSyncManager.Instance
+                : FindObjectOfType<PhotonOnlineBuildSyncManager>();
+
+            if (syncManager == null)
+            {
+                ShowToast("Online build sync is missing.");
+                return false;
+            }
+
+            return syncManager.RequestBuyLand(buildArea);
+        }
+
         return TryBuyLandForPlayer(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
     }
 
@@ -516,6 +531,21 @@ public class BuildTowerManager : MonoBehaviour
             return false;
         }
 
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+        {
+            PhotonOnlineBuildSyncManager syncManager = PhotonOnlineBuildSyncManager.Instance != null
+                ? PhotonOnlineBuildSyncManager.Instance
+                : FindObjectOfType<PhotonOnlineBuildSyncManager>();
+
+            if (syncManager == null)
+            {
+                ShowToast("Online build sync is missing.");
+                return false;
+            }
+
+            return syncManager.RequestBuildTower(buildArea, towerType);
+        }
+
         return TryBuildTowerForPlayer(buildArea, towerType, GetCurrentPlayerId(), true);
     }
 
@@ -567,6 +597,21 @@ public class BuildTowerManager : MonoBehaviour
             return false;
         }
 
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+        {
+            PhotonOnlineBuildSyncManager syncManager = PhotonOnlineBuildSyncManager.Instance != null
+                ? PhotonOnlineBuildSyncManager.Instance
+                : FindObjectOfType<PhotonOnlineBuildSyncManager>();
+
+            if (syncManager == null)
+            {
+                ShowToast("Online build sync is missing.");
+                return false;
+            }
+
+            return syncManager.RequestUpgradeTower(buildArea);
+        }
+
         return TryUpgradeTowerForPlayer(buildArea, GetCurrentPlayerId(), true);
     }
 
@@ -596,6 +641,21 @@ public class BuildTowerManager : MonoBehaviour
         if (ShouldBlockOnlineAction())
         {
             return false;
+        }
+
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+        {
+            PhotonOnlineBuildSyncManager syncManager = PhotonOnlineBuildSyncManager.Instance != null
+                ? PhotonOnlineBuildSyncManager.Instance
+                : FindObjectOfType<PhotonOnlineBuildSyncManager>();
+
+            if (syncManager == null)
+            {
+                ShowToast("Online build sync is missing.");
+                return false;
+            }
+
+            return syncManager.RequestSellTower(buildArea);
         }
 
         return TrySellTowerForPlayer(buildArea, GetCurrentPlayerId(), true);
@@ -654,6 +714,115 @@ public class BuildTowerManager : MonoBehaviour
         }
 
         return cannonTowerCost;
+    }
+
+    public GameObject GetResolvedTowerPrefab(TowerType towerType, int playerId)
+    {
+        return ResolveTowerPrefab(towerType, playerId);
+    }
+
+    public TowerBuildArea ResolveBuildAreaByStableId(string buildAreaId)
+    {
+        if (string.IsNullOrWhiteSpace(buildAreaId))
+        {
+            return null;
+        }
+
+        TowerBuildArea[] buildAreas = FindObjectsOfType<TowerBuildArea>(true);
+
+        foreach (TowerBuildArea buildArea in buildAreas)
+        {
+            if (buildArea != null && buildArea.name == buildAreaId)
+            {
+                return buildArea;
+            }
+        }
+
+        return null;
+    }
+
+    public bool ApplyOnlineBuyLand(string buildAreaId, int ownerPlayerId, int newGold)
+    {
+        TowerBuildArea buildArea = ResolveBuildAreaByStableId(buildAreaId);
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(ownerPlayerId) : null;
+
+        if (buildArea == null || playerResource == null)
+        {
+            return false;
+        }
+
+        buildArea.SetOwner(ownerPlayerId, playerManager);
+        ApplySyncedPlayerGold(playerResource, newGold);
+        FinalizeSyncedAreaChange(buildArea);
+        return true;
+    }
+
+    public bool ApplyOnlineBuildTower(string buildAreaId, string towerId, TowerType towerType, int ownerPlayerId, int level, int newGold)
+    {
+        TowerBuildArea buildArea = ResolveBuildAreaByStableId(buildAreaId);
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(ownerPlayerId) : null;
+
+        if (buildArea == null || playerResource == null)
+        {
+            return false;
+        }
+
+        GameObject tower = EnsureOnlineTowerState(buildArea, towerId, towerType, ownerPlayerId, Mathf.Max(1, level));
+
+        if (tower == null)
+        {
+            return false;
+        }
+
+        ApplySyncedPlayerGold(playerResource, newGold);
+        FinalizeSyncedAreaChange(buildArea);
+        return true;
+    }
+
+    public bool ApplyOnlineUpgradeTower(string buildAreaId, string towerId, int ownerPlayerId, int newLevel, int newGold)
+    {
+        TowerBuildArea buildArea = ResolveBuildAreaByStableId(buildAreaId);
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(ownerPlayerId) : null;
+        TowerStats currentStats = GetTowerStatsFromArea(buildArea);
+
+        if (buildArea == null || playerResource == null || currentStats == null)
+        {
+            return false;
+        }
+
+        GameObject tower = EnsureOnlineTowerState(
+            buildArea,
+            string.IsNullOrWhiteSpace(towerId) ? buildAreaId + "_tower" : towerId,
+            currentStats.towerType,
+            ownerPlayerId,
+            Mathf.Max(1, newLevel)
+        );
+
+        if (tower == null)
+        {
+            return false;
+        }
+
+        ApplySyncedPlayerGold(playerResource, newGold);
+        FinalizeSyncedAreaChange(buildArea);
+        return true;
+    }
+
+    public bool ApplyOnlineSellTower(string buildAreaId, string towerId, int ownerPlayerId, int newGold)
+    {
+        TowerBuildArea buildArea = ResolveBuildAreaByStableId(buildAreaId);
+        PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(ownerPlayerId) : null;
+
+        if (buildArea == null || playerResource == null)
+        {
+            return false;
+        }
+
+        buildArea.RemoveCurrentTower();
+        buildArea.towerOwnerPlayerId = -1;
+        ApplySyncedPlayerGold(playerResource, newGold);
+        FinalizeSyncedAreaChange(buildArea);
+        return true;
     }
 
     private bool TryUpgradeTower(
@@ -740,6 +909,112 @@ public class BuildTowerManager : MonoBehaviour
         if (showMessages) ShowToast("Tower sold.");
         TutorialManager.Instance?.NotifyTowerSold(buildArea.gameObject);
         return true;
+    }
+
+    private GameObject EnsureOnlineTowerState(TowerBuildArea buildArea, string towerId, TowerType towerType, int ownerPlayerId, int level)
+    {
+        if (buildArea == null)
+        {
+            return null;
+        }
+
+        GameObject existingTower = buildArea.currentTower;
+        TowerStats existingStats = GetTowerStatsFromArea(buildArea);
+        bool needsRebuild = existingTower == null ||
+            existingStats == null ||
+            existingStats.towerType != towerType ||
+            buildArea.towerOwnerPlayerId != ownerPlayerId ||
+            (existingStats != null && existingStats.level > level);
+
+        GameObject tower = existingTower;
+
+        if (needsRebuild)
+        {
+            if (buildArea.currentTower != null)
+            {
+                buildArea.RemoveCurrentTower();
+            }
+
+            GameObject towerPrefab = ResolveTowerPrefab(towerType, ownerPlayerId);
+
+            if (towerPrefab == null)
+            {
+                return null;
+            }
+
+            Transform spawnPoint = buildArea.towerSpawnPoint != null
+                ? buildArea.towerSpawnPoint
+                : buildArea.transform;
+
+            tower = towersParent != null
+                ? Instantiate(towerPrefab, spawnPoint.position, Quaternion.identity, towersParent)
+                : Instantiate(towerPrefab, spawnPoint.position, Quaternion.identity);
+
+            if (!string.IsNullOrWhiteSpace(towerId))
+            {
+                tower.name = towerId;
+            }
+
+            ForceTowerAlphaOpaque(tower);
+            EnsureTowerCollider(tower);
+
+            int baseCost = GetTowerCost(towerType, ownerPlayerId);
+            TowerStats towerStats = EnsureTowerStats(tower, towerType, baseCost, ownerPlayerId);
+            CannonTower cannonTower = tower.GetComponent<CannonTower>();
+
+            if (cannonTower == null)
+            {
+                cannonTower = tower.GetComponentInChildren<CannonTower>();
+            }
+
+            if (cannonTower != null)
+            {
+                cannonTower.ownerPlayerId = ownerPlayerId;
+                cannonTower.ownerResource = playerManager != null ? playerManager.GetPlayerResource(ownerPlayerId) : null;
+                cannonTower.ApplyOwnerVisual(playerManager, ownerPlayerId, !HasPlayerSpecificTowerPrefab(towerType, ownerPlayerId));
+                cannonTower.SyncAttackFieldsFromStats();
+            }
+            else if (!HasPlayerSpecificTowerPrefab(towerType, ownerPlayerId))
+            {
+                ApplyOwnerVisualToGenericTower(tower, ownerPlayerId);
+            }
+
+            buildArea.SetTower(tower);
+            buildArea.towerOwnerPlayerId = ownerPlayerId;
+            TutorialManager.Instance?.RegisterRuntimeBuiltTower(buildArea.gameObject, tower);
+            existingStats = towerStats;
+        }
+
+        if (existingStats == null)
+        {
+            existingStats = GetTowerStatsFromArea(buildArea);
+        }
+
+        if (existingStats == null)
+        {
+            return null;
+        }
+
+        while (existingStats.level < level && existingStats.CanUpgrade())
+        {
+            existingStats.Upgrade();
+        }
+
+        CannonTower syncedTower = buildArea.currentTower != null ? buildArea.currentTower.GetComponent<CannonTower>() : null;
+
+        if (syncedTower == null && buildArea.currentTower != null)
+        {
+            syncedTower = buildArea.currentTower.GetComponentInChildren<CannonTower>();
+        }
+
+        if (syncedTower != null)
+        {
+            syncedTower.ownerPlayerId = ownerPlayerId;
+            syncedTower.ownerResource = playerManager != null ? playerManager.GetPlayerResource(ownerPlayerId) : null;
+            syncedTower.SyncAttackFieldsFromStats();
+        }
+
+        return buildArea.currentTower;
     }
 
     private void ShowBuildMenuOrFallback(TowerBuildArea buildArea)
@@ -1044,6 +1319,36 @@ public class BuildTowerManager : MonoBehaviour
     {
         if (playerManager != null)
         {
+            playerManager.RefreshCurrentPlayerUI();
+        }
+    }
+
+    private void ApplySyncedPlayerGold(PlayerResource playerResource, int newGold)
+    {
+        if (playerResource == null || newGold < 0)
+        {
+            return;
+        }
+
+        playerResource.money = newGold;
+        playerResource.RefreshUI();
+    }
+
+    private void FinalizeSyncedAreaChange(TowerBuildArea buildArea)
+    {
+        if (buildArea != null)
+        {
+            buildArea.RefreshOwnershipVisual(playerManager);
+        }
+
+        if (radialTowerMenu != null && radialTowerMenu.IsOpen)
+        {
+            radialTowerMenu.Hide();
+        }
+
+        if (playerManager != null)
+        {
+            playerManager.RefreshAllPlayerStatusPanels();
             playerManager.RefreshCurrentPlayerUI();
         }
     }

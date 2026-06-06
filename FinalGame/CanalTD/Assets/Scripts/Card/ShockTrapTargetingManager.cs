@@ -366,6 +366,11 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
     private void TrySelectHoveredNode()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (IsPointerOverTargetingControls())
         {
             return;

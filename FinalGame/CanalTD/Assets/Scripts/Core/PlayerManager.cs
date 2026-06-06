@@ -125,6 +125,11 @@ public class PlayerManager : MonoBehaviour
 
     public void SetCurrentPlayer(int playerId)
     {
+        SetCurrentPlayer(playerId, true);
+    }
+
+    public void SetCurrentPlayer(int playerId, bool showTurnToast)
+    {
         PlayerResource requestedPlayer = GetPlayerResource(playerId);
 
         if (requestedPlayer != null && requestedPlayer.isEliminated)
@@ -142,7 +147,11 @@ public class PlayerManager : MonoBehaviour
         currentPlayerId = playerId;
         OnCurrentPlayerChanged?.Invoke(currentPlayerId);
         RefreshCurrentPlayerUI();
-        ShowToast(GetPlayerDisplayName(currentPlayerId) + "'s turn started.");
+
+        if (showTurnToast)
+        {
+            ShowToast(GetPlayerDisplayName(currentPlayerId) + "'s turn started.");
+        }
     }
 
     public void AdvanceToNextPlayer()

@@ -217,9 +217,8 @@ public class CardDrawManager : MonoBehaviour
             return false;
         }
 
-        if (!CanHumanUseCardsNow())
+        if (!CanHumanUseCardsNow(true))
         {
-            StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
             return false;
         }
 
@@ -516,9 +515,8 @@ public class CardDrawManager : MonoBehaviour
             return;
         }
 
-        if (!CanHumanUseCardsNow())
+        if (!CanHumanUseCardsNow(true))
         {
-            ShowWarningMessage(GetBlockedTurnMessage());
             return;
         }
 
@@ -555,9 +553,8 @@ public class CardDrawManager : MonoBehaviour
             return false;
         }
 
-        if (!CanHumanUseCardsNow())
+        if (!CanHumanUseCardsNow(true))
         {
-            StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
             return false;
         }
 
@@ -631,9 +628,8 @@ public class CardDrawManager : MonoBehaviour
             return false;
         }
 
-        if (!CanHumanUseCardsNow())
+        if (!CanHumanUseCardsNow(true))
         {
-            StartCoroutine(ShowWarning(GetBlockedTurnMessage()));
             return false;
         }
 
@@ -985,6 +981,31 @@ public class CardDrawManager : MonoBehaviour
     public bool ConsumeSelectedCardAfterSuccessfulTargeting()
     {
         return ConfirmPendingCardInternal(true);
+    }
+
+    public bool ConsumePendingTargetingCardFromPlayerHand(int playerId, bool consumePlayAction)
+    {
+        if (pendingPlayedCard == null || pendingPlayedCard.sourcePrefab == null)
+        {
+            return false;
+        }
+
+        GameObject pendingCardObject = pendingPlayedCard.gameObject;
+        GameObject pendingCardPrefab = pendingPlayedCard.sourcePrefab;
+
+        if (!TryConsumeDirectPlayedCard(playerId, pendingCardPrefab, consumePlayAction))
+        {
+            return false;
+        }
+
+        if (pendingCardObject != null)
+        {
+            Destroy(pendingCardObject);
+        }
+
+        pendingPlayedCard = null;
+        selectedCard = null;
+        return true;
     }
 
     public bool CanConsumeSelectedCardAfterSuccessfulTargeting()
@@ -1426,9 +1447,9 @@ public class CardDrawManager : MonoBehaviour
     }
 
     // In GameScene_AIPrototype, ITurnSource is AIPrototypeTurnManager; in old GameScene it is TurnManager.
-    private bool CanHumanUseCardsNow()
+    private bool CanHumanUseCardsNow(bool showBlockedTurnToast = false)
     {
-        if (PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(false))
+        if (OnlineTurnPermissionManager.ShouldBlockLocalGameplayAction(showBlockedTurnToast))
         {
             return false;
         }
@@ -1583,7 +1604,7 @@ public class CardDrawManager : MonoBehaviour
     private string GetBlockedTurnMessage()
     {
         return PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext()
-            ? "Not your turn."
+            ? "Wait for your turn."
             : "Wait for your turn.";
     }
 

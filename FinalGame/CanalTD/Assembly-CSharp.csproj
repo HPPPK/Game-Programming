@@ -83,6 +83,7 @@
     <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChannelSelector.cs" />
     <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/Utilities/IgnoreUiRaycastWhenInactive.cs" />
     <Compile Include="Assets/Scripts/Core/GameResultData.cs" />
+    <Compile Include="Assets/Scripts/Networking/OnlineBuildSyncData.cs" />
     <Compile Include="Assets/Scripts/Path/PathGraphState.cs" />
     <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/NamePickNewGui.cs" />
     <Compile Include="Assets/Scripts/Core/TurnManager.cs" />
@@ -151,6 +152,7 @@
     <Compile Include="Assets/Scripts/Enemy/WaveManager.cs" />
     <Compile Include="Assets/Scripts/Tower/TowerType.cs" />
     <Compile Include="Assets/Scripts/UI/ResultRowUI.cs" />
+    <Compile Include="Assets/Scripts/Networking/PhotonOnlineBuildSyncManager.cs" />
     <Compile Include="Assets/Scripts/Tutorial/TutorialManager.cs" />
     <Compile Include="Assets/Scripts/UI/CastleHealthBar.cs" />
     <Compile Include="Assets/Scripts/Tutorial/TutorialHighlightController.cs" />
@@ -161,6 +163,7 @@
     <Compile Include="Assets/Scripts/Core/GamePhaseManager.cs" />
     <Compile Include="Assets/Scripts/UI/GlobalUIManager.cs" />
     <Compile Include="Assets/Scripts/Card/GateTargetingManager.cs" />
+    <Compile Include="Assets/Scripts/Networking/OnlineTurnPermissionManager.cs" />
     <Compile Include="Assets/Scripts/UI/TurnMarkerAnimator.cs" />
     <Compile Include="Assets/Scripts/Core/CastleBase.cs" />
     <Compile Include="Assets/Scripts/UI/HomeSceneManager.cs" />
