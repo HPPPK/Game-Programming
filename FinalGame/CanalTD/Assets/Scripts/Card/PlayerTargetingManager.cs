@@ -384,14 +384,9 @@ public class PlayerTargetingManager : MonoBehaviour
         {
             ExitTargetingMode();
         }
-
-<<<<<<< Updated upstream
-=======
         RefreshVisibleHandAfterPlayerInteraction();
 
         TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.StealCard, tutorialTarget != null ? tutorialTarget.gameObject : null);
-
->>>>>>> Stashed changes
         return true;
     }
 
@@ -465,14 +460,9 @@ public class PlayerTargetingManager : MonoBehaviour
         {
             ExitTargetingMode();
         }
-
-<<<<<<< Updated upstream
-=======
         RefreshVisibleHandAfterPlayerInteraction();
 
         TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.TradeHands, tutorialTarget != null ? tutorialTarget.gameObject : null);
-
->>>>>>> Stashed changes
         return true;
     }
 
@@ -526,14 +516,9 @@ public class PlayerTargetingManager : MonoBehaviour
         {
             ExitTargetingMode();
         }
-
-<<<<<<< Updated upstream
-=======
         RefreshVisibleHandAfterPlayerInteraction();
 
         TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.Disrupt, tutorialTarget != null ? tutorialTarget.gameObject : null);
-
->>>>>>> Stashed changes
         return true;
     }
 
