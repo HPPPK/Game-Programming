@@ -32,7 +32,7 @@ If someone opens the Unity project folder directly on GitHub, this file should h
    - [./CONTRIBUTIONS_AND_FEEDBACK.md](./CONTRIBUTIONS_AND_FEEDBACK.md)
 3. Development log:
    - [../DEVELOPMENT_LOG.md](../DEVELOPMENT_LOG.md)
-4. Resource / asset / AI reference placeholders:
+4. Resource / asset / AI references:
    - [./Assets/Docs/ResourceReferences.md](./Assets/Docs/ResourceReferences.md)
 5. Early concept document:
    - [../prototype.md](../prototype.md)
@@ -43,6 +43,10 @@ If someone opens the Unity project folder directly on GitHub, this file should h
 - Unity version: `2022.3.62f3`
 - Recommended entry scene: `Assets/Scenes/BootstrapScene.unity`
 - Project type: turn-based multiplayer strategy / tower-defense vertical slice
+
+## Final scene flow
+
+The final assessment-facing flow starts from `BootstrapScene`, then uses `HomeScene` and `ModeSelectScene` to enter `GuideScene` or the main `GameScene`, with match outcomes shown through `ResultScene`.
 
 ## Why this structure is useful
 

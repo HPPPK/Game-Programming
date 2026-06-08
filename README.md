@@ -54,8 +54,16 @@ Protect your own castle, manage enemy pressure better than the other players, an
 - Local mode is playable.
 - AI mode includes three difficulty levels and playable turn logic.
 - Core card, tower, enemy, path, and result systems are integrated.
-- Online room flow and core sync are implemented and under active testing.
+- Online room flow and core sync are implemented as an experimental extension that still needs broader multiplayer validation.
 - Tutorial / guide flow exists through the dedicated Guide scene.
+
+## Final assessment route
+
+For marking, the primary assessment route is Local mode or AI mode:
+
+`BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI mode -> `GameScene` -> `ResultScene`
+
+Online mode is included as an implemented extension, but it is not the primary stable assessment path for final marking.
 
 ## Vertical slice coverage
 
@@ -65,17 +73,27 @@ Protect your own castle, manage enemy pressure better than the other players, an
 - Feedback through current-turn UI, status panels, targeting highlights, toasts, and result screens
 - Challenge and decision-making through shared enemy pressure, path control, and tactical card use
 
-## Planned features
+## Future work
 
-- Finish and stabilise the remaining online card-effect sync edge cases.
+- Broaden validation for online card-effect sync edge cases.
 - Continue balancing AI behaviour, card pacing, and multiplayer clarity.
-- Improve final presentation polish, testing coverage, and supporting documentation.
+- Add more regression coverage and playtesting evidence.
 
-## Known issues
+## Known limitations
 
-- Some online multiplayer card interactions are still being regression-tested.
-- Multiplayer room flow and late-match edge cases still need broader validation.
-- Balance, tutorial pacing, and final polish are still being tuned.
+- Online mode is an extension and still needs broader multi-device and late-match validation.
+- Balance and tutorial pacing can be improved with more playtesting.
+
+## Development tracking
+
+I used GitHub Issues throughout development to plan, track, and close tasks as features were completed.
+
+Most implementation tasks are now closed because they were completed before final submission. This is normal project-management evidence rather than missing process evidence.
+
+Useful links:
+
+- Closed development issues: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aclosed
+- Open remaining issues / limitations: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aopen
 
 ## Credits
 
@@ -100,7 +118,7 @@ Protect your own castle, manage enemy pressure better than the other players, an
   - `Click Buttons - UI Menu Sounds Effects - Button 7`
   - `Taking Playing Card 3`
   - `UI Button Click #5`
-- Additional local audio files are credited as Pixabay-sourced where the platform is known but the exact original file page is no longer fully traceable from the preserved filename.
+- Additional local audio files that need exact source links are listed in the resource reference document.
 
 ## Legal, ethical, accessibility, and process notes
 
