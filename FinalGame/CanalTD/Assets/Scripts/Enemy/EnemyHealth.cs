@@ -81,6 +81,11 @@ public class EnemyHealth : MonoBehaviour
         get { return maxHP; }
     }
 
+    public bool IsDead
+    {
+        get { return isDead; }
+    }
+
     private void Awake()
     {
         enemyStats = GetComponent<EnemyStats>();
@@ -206,6 +211,11 @@ public class EnemyHealth : MonoBehaviour
             return;
         }
 
+        if (PhotonOnlineWaveCombatSyncManager.ShouldBlockLocalEnemyDamage())
+        {
+            return;
+        }
+
         int finalDamage = enemyStats != null ? enemyStats.GetFinalDamage(damage) : Mathf.Max(1, damage);
         currentHP -= finalDamage;
 
@@ -226,10 +236,64 @@ public class EnemyHealth : MonoBehaviour
             healthBar.PlayDamageFlash();
         }
 
+        PhotonOnlineWaveCombatSyncManager.NotifyEnemyDamagedByMaster(this, finalDamage, damageOwner);
+
         if (currentHP <= 0)
         {
             Die();
         }
+    }
+
+    public void ApplyOnlineHealthState(int syncedCurrentHP, int syncedMaxHP)
+    {
+        maxHP = Mathf.Max(1, syncedMaxHP);
+        currentHP = Mathf.Clamp(syncedCurrentHP, 0, maxHP);
+
+        if (healthBar != null)
+        {
+            healthBar.gameObject.SetActive(currentHP > 0);
+            healthBar.SetHealth(currentHP, maxHP);
+        }
+    }
+
+    public void ApplyOnlineKilledState()
+    {
+        if (isDead)
+        {
+            return;
+        }
+
+        isDead = true;
+        currentHP = 0;
+
+        Collider2D collider2D = GetComponent<Collider2D>();
+        if (collider2D != null)
+        {
+            collider2D.enabled = false;
+        }
+
+        EnemyMover mover = GetComponent<EnemyMover>();
+        if (mover != null)
+        {
+            mover.enabled = false;
+        }
+
+        if (animator != null)
+        {
+            animator.enabled = false;
+        }
+
+        if (spriteRenderer != null && deathSprite != null)
+        {
+            spriteRenderer.sprite = deathSprite;
+        }
+
+        if (healthBar != null)
+        {
+            healthBar.gameObject.SetActive(false);
+        }
+
+        StartCoroutine(DestroyAfterDelay());
     }
 
     private void Die()
@@ -246,6 +310,7 @@ public class EnemyHealth : MonoBehaviour
         {
             lastDamageOwner.AddMoney(goldReward);
             lastDamageOwner.AddScore(killerScoreReward);
+            PhotonOnlineWaveCombatSyncManager.NotifyRewardGrantedByMaster(lastDamageOwner);
         }
 
         foreach (PlayerResource participant in damageParticipants)
@@ -253,8 +318,11 @@ public class EnemyHealth : MonoBehaviour
             if (participant != null && participant != lastDamageOwner)
             {
                 participant.AddScore(assistScoreReward);
+                PhotonOnlineWaveCombatSyncManager.NotifyRewardGrantedByMaster(participant);
             }
         }
+
+        PhotonOnlineWaveCombatSyncManager.NotifyEnemyKilledByMaster(this, lastDamageOwner);
 
         Collider2D collider2D = GetComponent<Collider2D>();
         if (collider2D != null)
@@ -304,6 +372,11 @@ public class EnemyHealth : MonoBehaviour
 
     private void SpawnSplitEnemies()
     {
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+        {
+            return;
+        }
+
         if (enemyStats == null ||
             !enemyStats.canSplit ||
             enemyStats.splitEnemyPrefab == null ||

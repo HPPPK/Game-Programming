@@ -64,6 +64,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     public MonoBehaviour toastMessage;
     public PhotonOnlineBuildSyncManager onlineBuildSyncManager;
     public PhotonOnlineCardSyncManager onlineCardSyncManager;
+    public PhotonOnlineWaveCombatSyncManager onlineWaveCombatSyncManager;
 
     [Header("Online Turn Settings")]
     public int minOnlinePlayersToStart = 2;
@@ -171,6 +172,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
 
         EnsureOnlineBuildSyncManagerExists();
+        EnsureOnlineWaveCombatSyncManagerExists();
     }
 
     private void OnEnable()
@@ -247,6 +249,13 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         if (onlineCardSyncManager != null)
         {
             onlineCardSyncManager.InitializeForOnlineMatch();
+        }
+
+        EnsureOnlineWaveCombatSyncManagerExists();
+
+        if (onlineWaveCombatSyncManager != null)
+        {
+            onlineWaveCombatSyncManager.InitializeForOnlineMatch();
         }
 
         if (PhotonNetwork.IsMasterClient)
@@ -754,6 +763,26 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
             if (nextIndex == 0)
             {
+                if (onlineWaveCombatSyncManager == null)
+                {
+                    EnsureOnlineWaveCombatSyncManagerExists();
+                }
+
+                if (onlineWaveCombatSyncManager != null &&
+                    onlineWaveCombatSyncManager.TryStartWaveAsMaster(currentRound, currentRound))
+                {
+                    PhotonHashtable waveProperties = new PhotonHashtable
+                    {
+                        { PhotonLobbyPropertyKeys.CurrentTurnPlayerId, -1 },
+                        { PhotonLobbyPropertyKeys.CurrentRound, currentRound },
+                        { PhotonLobbyPropertyKeys.OnlineGameActive, true }
+                    };
+
+                    PhotonNetwork.CurrentRoom.SetCustomProperties(waveProperties);
+                    Debug.Log("Online wave started after all players ended turns. round=" + currentRound);
+                    return;
+                }
+
                 nextRound += 1;
             }
         }
@@ -767,6 +796,33 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
         Debug.Log("Turn advanced. reason=" + reason + ", nextPlayerId=" + nextPlayerId + ", round=" + nextRound);
+    }
+
+    public void BeginNextOnlineRoundAfterWaveAsMaster(int nextRound)
+    {
+#if PHOTON_UNITY_NETWORKING
+        if (!PhotonNetwork.IsMasterClient || PhotonNetwork.CurrentRoom == null)
+        {
+            return;
+        }
+
+        int firstActivePlayerId = GetFirstActiveOnlinePlayerId();
+
+        if (firstActivePlayerId < 0)
+        {
+            return;
+        }
+
+        PhotonHashtable roomProperties = new PhotonHashtable
+        {
+            { PhotonLobbyPropertyKeys.CurrentTurnPlayerId, firstActivePlayerId },
+            { PhotonLobbyPropertyKeys.CurrentRound, Mathf.Max(1, nextRound) },
+            { PhotonLobbyPropertyKeys.OnlineGameActive, true }
+        };
+
+        PhotonNetwork.CurrentRoom.SetCustomProperties(roomProperties);
+        Debug.Log("Online next round started after wave. playerId=" + firstActivePlayerId + ", round=" + Mathf.Max(1, nextRound));
+#endif
     }
 
     private void ApplyRoomTurnState(bool forceApply)
@@ -1073,6 +1129,29 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         GameObject managerObject = new GameObject("PhotonOnlineCardSyncManager");
         onlineCardSyncManager = managerObject.AddComponent<PhotonOnlineCardSyncManager>();
+    }
+
+    private void EnsureOnlineWaveCombatSyncManagerExists()
+    {
+        if (!CanUseOnlineCardSyncRuntime())
+        {
+            return;
+        }
+
+        if (onlineWaveCombatSyncManager != null)
+        {
+            return;
+        }
+
+        onlineWaveCombatSyncManager = FindObjectOfType<PhotonOnlineWaveCombatSyncManager>();
+
+        if (onlineWaveCombatSyncManager != null)
+        {
+            return;
+        }
+
+        GameObject managerObject = new GameObject("PhotonOnlineWaveCombatSyncManager");
+        onlineWaveCombatSyncManager = managerObject.AddComponent<PhotonOnlineWaveCombatSyncManager>();
     }
 
     private bool CanUseOnlineCardSyncRuntime()

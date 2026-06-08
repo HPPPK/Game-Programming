@@ -38,6 +38,11 @@ public class CastleEndNode : PathNode
 
     public void OnEnemyArrive(GameObject enemy)
     {
+        if (PhotonOnlineWaveCombatSyncManager.ShouldBlockLocalCastleDamage())
+        {
+            return;
+        }
+
         if (targetCastle != null)
         {
             int damage = damagePerEnemy;
@@ -55,6 +60,7 @@ public class CastleEndNode : PathNode
             Debug.LogWarning(name + " has no target castle assigned.");
         }
 
+        PhotonOnlineWaveCombatSyncManager.NotifyEnemyResolvedAtCastleByMaster(enemy, targetCastle);
         Destroy(enemy);
         
     }

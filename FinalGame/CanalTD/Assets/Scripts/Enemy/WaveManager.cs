@@ -149,6 +149,70 @@ public class WaveManager : MonoBehaviour
         StartCoroutine(SpawnWaveRoutine());
     }
 
+    public int GetOnlineEnemyCountForRound(int round)
+    {
+        return GetEnemyCountForRound(round);
+    }
+
+    public List<GameObject> BuildOnlineEnemySpawnPlan(int round, int enemyCount)
+    {
+        return BuildEnemySpawnPlan(round, enemyCount);
+    }
+
+    public GameObject ResolveOnlineEnemyPrefab(string enemyTypeId)
+    {
+        if (string.IsNullOrWhiteSpace(enemyTypeId))
+        {
+            return null;
+        }
+
+        if (enemyEntries != null)
+        {
+            foreach (WaveEnemyEntry entry in enemyEntries)
+            {
+                if (entry != null &&
+                    entry.enemyPrefab != null &&
+                    entry.enemyPrefab.name == enemyTypeId)
+                {
+                    return entry.enemyPrefab;
+                }
+            }
+        }
+
+        if (spawners != null)
+        {
+            foreach (EnemySpawner spawner in spawners)
+            {
+                if (spawner != null &&
+                    spawner.enemyPrefab != null &&
+                    spawner.enemyPrefab.name == enemyTypeId)
+                {
+                    return spawner.enemyPrefab;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public void ApplyOnlineWaveStarted(int waveIndex)
+    {
+        activeWaveNumber = Mathf.Max(1, waveIndex);
+        currentRound = activeWaveNumber;
+        isWaveRunning = true;
+        isSpawning = true;
+        RefreshWaveCounterUI();
+        ShowToast("Enemy Wave Started");
+    }
+
+    public void ApplyOnlineWaveEnded(int nextRound)
+    {
+        isSpawning = false;
+        isWaveRunning = false;
+        currentRound = Mathf.Max(1, nextRound);
+        RefreshWaveCounterUI();
+    }
+
     private IEnumerator SpawnWaveRoutine()
     {
         isSpawning = true;
