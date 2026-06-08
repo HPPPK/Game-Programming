@@ -74,6 +74,9 @@ public class OnlineBuildAreaState
     public string buildAreaId = string.Empty;
     public bool isOwned = false;
     public int ownerPlayerId = -1;
+    public bool isFrozen = false;
+    public int frozenByPlayerId = -1;
+    public bool frozenUntilPlayerNextTurn = false;
     public bool towerExists = false;
     public int towerOwnerPlayerId = -1;
     public int towerTypeId = -1;

@@ -65,9 +65,17 @@ public class OnlineCardApplyData
     public long timestamp;
     public int newHandCount;
     public int remainingDeckCount;
+    public int actorNewGold = -1;
     public bool accepted;
     public string rejectReason;
     public bool targetDisrupted;
+    public string targetTileId;
+    public int previousOwnerPlayerId = -1;
+    public int newOwnerPlayerId = -1;
+    public bool tileFrozen;
+    public int frozenByPlayerId = -1;
+    public bool frozenUntilPlayerNextTurn;
+    public bool removeTowerFromTile;
     public List<OnlinePlayerHandCountState> affectedPlayerHandCounts = new List<OnlinePlayerHandCountState>();
 }
 

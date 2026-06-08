@@ -50,6 +50,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
     private const byte CardSyncRequestEventCode = 21;
     private const byte CardSyncApplyEventCode = 22;
     private const byte CardSyncPrivateHandEventCode = 23;
+    private const byte CardSyncPrivateHandRequestEventCode = 24;
 #endif
 
     public static PhotonOnlineCardSyncManager Instance { get; private set; }
@@ -62,6 +63,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
     private readonly List<string> deckCardIds = new List<string>();
     private readonly Dictionary<int, List<string>> playerHandCardIds = new Dictionary<int, List<string>>();
+    private readonly Dictionary<string, TowerBuildArea> tileTargetsById = new Dictionary<string, TowerBuildArea>();
     private bool initializedForOnlineMatch;
     private bool photonCallbacksRegistered;
 
@@ -121,6 +123,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         else
         {
             ApplySnapshotFromRoomProperties();
+            RequestPrivateHandStateFromMaster();
         }
 #endif
     }
@@ -161,6 +164,26 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                 " cardName=" + cardName
             );
         }
+        else if (IsTakeOverCardId(normalizedCardId))
+        {
+            Debug.Log(
+                "RequestTakeOver" +
+                " actorPlayerId=" + (onlineGameSceneManager != null ? onlineGameSceneManager.LocalPlayerId : -1) +
+                " targetTileId=" + targetId +
+                " cardId=" + normalizedCardId +
+                " cardName=" + cardName
+            );
+        }
+        else if (IsFreezeClaimCardId(normalizedCardId))
+        {
+            Debug.Log(
+                "RequestFreezeClaim" +
+                " actorPlayerId=" + (onlineGameSceneManager != null ? onlineGameSceneManager.LocalPlayerId : -1) +
+                " targetTileId=" + targetId +
+                " cardId=" + normalizedCardId +
+                " cardName=" + cardName
+            );
+        }
 
         return RequestAction(OnlineCardActionType.Play, cardId, cardName, targetId, targetPlayerId);
     }
@@ -185,6 +208,16 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             if (request != null)
             {
                 ProcessRequestAsMaster(request, photonEvent.Sender);
+            }
+
+            return;
+        }
+
+        if (photonEvent.Code == CardSyncPrivateHandRequestEventCode)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                ProcessPrivateHandStateRequest(photonEvent);
             }
 
             return;
@@ -307,14 +340,13 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             cardId = request.actionType == OnlineCardActionType.Play ? request.cardId : string.Empty,
             cardName = request.actionType == OnlineCardActionType.Play ? request.cardName : string.Empty,
             targetId = request.targetId,
+            targetTileId = request.targetId,
             targetPlayerId = request.targetPlayerId,
             timestamp = request.timestamp,
             accepted = false
         };
 
-        int resolvedSenderPlayerId = onlineGameSceneManager != null
-            ? onlineGameSceneManager.GetOnlinePlayerIdByActorNumber(senderActorNumber)
-            : -1;
+        int resolvedSenderPlayerId = ResolvePlayerIdForActorNumber(senderActorNumber);
 
         if (!PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
         {
@@ -366,7 +398,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                     return RejectValidation(request, result, "Discard already used.");
                 }
 
-                if (!authoritativeHand.Contains(request.cardId))
+                if (!HandContainsCardId(authoritativeHand, request.cardId))
                 {
                     return RejectValidation(request, result, "Card not in hand.");
                 }
@@ -378,7 +410,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                     return RejectValidation(request, result, "Play unavailable.");
                 }
 
-                if (!authoritativeHand.Contains(request.cardId))
+                if (!HandContainsCardId(authoritativeHand, request.cardId))
                 {
                     return RejectValidation(request, result, "Card not in hand.");
                 }
@@ -397,6 +429,15 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                         return RejectValidation(request, result, cardEffectRejectReason);
                     }
                 }
+                else if (IsLandControlCardId(request.cardId))
+                {
+                    string tileRejectReason = ValidateLandControlCardEffect(request, result);
+
+                    if (!string.IsNullOrWhiteSpace(tileRejectReason))
+                    {
+                        return RejectValidation(request, result, tileRejectReason);
+                    }
+                }
                 break;
 
             default:
@@ -405,6 +446,16 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
         result.accepted = true;
         LogCardEffectValidation(request, result);
+
+        if (IsTakeOverCardId(request.cardId))
+        {
+            LogLandControlValidation("ValidateTakeOver", request, result, "(none)");
+        }
+        else if (IsFreezeClaimCardId(request.cardId))
+        {
+            LogLandControlValidation("ValidateFreezeClaim", request, result, "(none)");
+        }
+
         return result;
     }
 
@@ -421,8 +472,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
         else if (request.actionType == OnlineCardActionType.Discard)
         {
-            authoritativeHand.Remove(request.cardId);
-            deckCardIds.Add(request.cardId);
+            string removedCardId;
+            RemoveCardIdFromHand(authoritativeHand, request.cardId, out removedCardId);
+            deckCardIds.Add(string.IsNullOrWhiteSpace(removedCardId) ? request.cardId : removedCardId);
             ShuffleDeckCardIds();
         }
         else if (request.actionType == OnlineCardActionType.Play)
@@ -439,9 +491,17 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             {
                 ApplyDisruptEffect(request, authoritativeHand, applyData);
             }
+            else if (IsTakeOverCardId(normalizedCardId))
+            {
+                ApplyTakeOverEffect(request, authoritativeHand, applyData);
+            }
+            else if (IsFreezeClaimCardId(normalizedCardId))
+            {
+                ApplyFreezeClaimEffect(request, authoritativeHand, applyData);
+            }
             else
             {
-                authoritativeHand.Remove(request.cardId);
+                RemoveCardIdFromHand(authoritativeHand, request.cardId);
             }
         }
 
@@ -467,6 +527,76 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             new RaiseEventOptions { Receivers = ReceiverGroup.All },
             new SendOptions { Reliability = true }
         );
+    }
+
+    private void RequestPrivateHandStateFromMaster()
+    {
+        if (!CanRunOnlineGameSceneCardSync() ||
+            PhotonNetwork.IsMasterClient ||
+            onlineGameSceneManager == null ||
+            onlineGameSceneManager.LocalPlayerId < 0)
+        {
+            return;
+        }
+
+        object[] requestPayload = { onlineGameSceneManager.LocalPlayerId };
+
+        Debug.Log(
+            "Requesting private online hand state" +
+            " ownerPlayerId=" + onlineGameSceneManager.LocalPlayerId +
+            " actorNumber=" + (PhotonNetwork.LocalPlayer != null ? PhotonNetwork.LocalPlayer.ActorNumber : -1)
+        );
+
+        PhotonNetwork.RaiseEvent(
+            CardSyncPrivateHandRequestEventCode,
+            requestPayload,
+            new RaiseEventOptions { Receivers = ReceiverGroup.MasterClient },
+            new SendOptions { Reliability = true }
+        );
+    }
+
+    private void ProcessPrivateHandStateRequest(EventData photonEvent)
+    {
+        if (!CanRunOnlineGameSceneCardSync() || !PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+
+        int requestedPlayerId = ExtractRequestedPrivateHandPlayerId(photonEvent.CustomData);
+        int senderPlayerId = ResolvePlayerIdForActorNumber(photonEvent.Sender);
+
+        if (requestedPlayerId < 0)
+        {
+            requestedPlayerId = senderPlayerId;
+        }
+
+        if (requestedPlayerId < 0 || senderPlayerId != requestedPlayerId)
+        {
+            Debug.LogWarning(
+                "Rejected private hand state request" +
+                " senderActor=" + photonEvent.Sender +
+                " requestedPlayerId=" + requestedPlayerId +
+                " senderPlayerId=" + senderPlayerId
+            );
+            return;
+        }
+
+        Debug.Log(
+            "Accepted private hand state request" +
+            " senderActor=" + photonEvent.Sender +
+            " requestedPlayerId=" + requestedPlayerId
+        );
+        SendPrivateHandStateToOwner(requestedPlayerId);
+    }
+
+    private int ExtractRequestedPrivateHandPlayerId(object requestData)
+    {
+        if (requestData is object[] requestArray && requestArray.Length > 0)
+        {
+            return ConvertToInt(requestArray[0], -1);
+        }
+
+        return ConvertToInt(requestData, -1);
     }
 
     private void SendApplyToRequester(int targetActorNumber, OnlineCardApplyData applyData)
@@ -713,6 +843,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
 
         ConsumeLocalTurnState(applyData);
+        ApplySyncedTileState(applyData);
 
         if (playerManager != null)
         {
@@ -742,6 +873,16 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                 if (actor != null)
                 {
                     actor.SetCardCount(applyData.newHandCount);
+                }
+            }
+
+            if (applyData.actorNewGold >= 0)
+            {
+                PlayerResource actor = playerManager.GetPlayerResource(applyData.actorPlayerId);
+
+                if (actor != null)
+                {
+                    actor.money = applyData.actorNewGold;
                 }
             }
 
@@ -786,6 +927,108 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                 ", cardIds=[" + string.Join(",", privateState.cardIds != null ? privateState.cardIds.ToArray() : new string[0]) + "]"
             );
         }
+    }
+
+    private void ApplySyncedTileState(OnlineCardApplyData applyData)
+    {
+        if (applyData == null || !IsLandControlCardId(applyData.cardId))
+        {
+            return;
+        }
+
+        ApplyTileStateToScene(applyData);
+
+        Debug.Log(
+            (IsTakeOverCardId(applyData.cardId) ? "ApplyTakeOver" : "ApplyFreezeClaim") +
+            " actorPlayerId=" + applyData.actorPlayerId +
+            " targetTileId=" + applyData.targetTileId +
+            " previousOwner=" + applyData.previousOwnerPlayerId +
+            " newOwner=" + applyData.newOwnerPlayerId +
+            " accepted=true rejectedReason=(none)"
+        );
+    }
+
+    private void ApplyTileStateToScene(OnlineCardApplyData applyData)
+    {
+        if (playerManager == null)
+        {
+            playerManager = FindObjectOfType<PlayerManager>();
+        }
+
+        TowerBuildArea targetTile = ResolveTileTargetById(applyData.targetTileId);
+
+        if (targetTile == null)
+        {
+            Debug.LogWarning("Online card tile apply failed. targetTileId=" + applyData.targetTileId);
+            return;
+        }
+
+        if (applyData.removeTowerFromTile)
+        {
+            targetTile.RemoveCurrentTower();
+        }
+
+        if (IsTakeOverCardId(applyData.cardId) && applyData.newOwnerPlayerId >= 0)
+        {
+            targetTile.ownerPlayerId = applyData.newOwnerPlayerId;
+            targetTile.isOwned = true;
+            targetTile.inactiveForPlayerId = applyData.newOwnerPlayerId;
+            targetTile.activatesNextTurn = true;
+        }
+        else if (IsTakeOverCardId(applyData.cardId) && applyData.previousOwnerPlayerId < 0)
+        {
+            targetTile.ClearOwner();
+        }
+
+        if (applyData.tileFrozen)
+        {
+            targetTile.FreezeForPlayer(applyData.frozenByPlayerId);
+            targetTile.frozenUntilPlayerNextTurn = applyData.frozenUntilPlayerNextTurn;
+        }
+        else
+        {
+            targetTile.ClearFreeze();
+        }
+
+        targetTile.RefreshOwnershipVisual(playerManager);
+
+        Debug.Log(
+            "Applied online tile state" +
+            " targetTileId=" + applyData.targetTileId +
+            " actualOwner=" + targetTile.ownerPlayerId +
+            " actualOwned=" + targetTile.isOwned +
+            " actualFrozen=" + targetTile.isFrozenOrSealed +
+            " frozenBy=" + targetTile.frozenByPlayerId
+        );
+    }
+
+    private void UpdateBuildSnapshotForTileState(OnlineCardApplyData applyData)
+    {
+#if PHOTON_UNITY_NETWORKING
+        if (!PhotonNetwork.IsMasterClient || applyData == null)
+        {
+            return;
+        }
+
+        PhotonOnlineBuildSyncManager buildSyncManager = PhotonOnlineBuildSyncManager.Instance != null
+            ? PhotonOnlineBuildSyncManager.Instance
+            : FindObjectOfType<PhotonOnlineBuildSyncManager>();
+
+        if (buildSyncManager == null)
+        {
+            return;
+        }
+
+        buildSyncManager.UpdateOnlineTileStateSnapshot(
+            applyData.targetTileId,
+            applyData.newOwnerPlayerId >= 0,
+            applyData.newOwnerPlayerId,
+            applyData.tileFrozen,
+            applyData.frozenByPlayerId,
+            applyData.frozenUntilPlayerNextTurn,
+            applyData.removeTowerFromTile
+        );
+#endif
     }
 
     private void ConsumeLocalTurnState(OnlineCardApplyData applyData)
@@ -890,6 +1133,32 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             return;
         }
 
+        if (IsTakeOverCardId(normalizedCardId))
+        {
+            bool isLocalPreviousOwner = onlineGameSceneManager.IsLocalOnlinePlayer(applyData.previousOwnerPlayerId);
+            onlineGameSceneManager.ShowOnlineToast(
+                isLocalActor
+                    ? "You took over a tile."
+                    : isLocalPreviousOwner
+                        ? actorName + " took over one of your tiles."
+                        : actorName + " took over a tile."
+            );
+            return;
+        }
+
+        if (IsFreezeClaimCardId(normalizedCardId))
+        {
+            bool isLocalTileOwner = onlineGameSceneManager.IsLocalOnlinePlayer(applyData.previousOwnerPlayerId);
+            onlineGameSceneManager.ShowOnlineToast(
+                isLocalActor
+                    ? "You froze a tile."
+                    : isLocalTileOwner
+                        ? actorName + " froze one of your tiles."
+                        : actorName + " froze a tile."
+            );
+            return;
+        }
+
         string playedCardName = string.IsNullOrWhiteSpace(applyData.cardName) ? "a card" : applyData.cardName;
         onlineGameSceneManager.ShowOnlineToast(isLocalActor
             ? "You played " + playedCardName + "."
@@ -918,6 +1187,53 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             onlineGameSceneManager = PhotonOnlineGameSceneManager.Instance != null
                 ? PhotonOnlineGameSceneManager.Instance
                 : FindObjectOfType<PhotonOnlineGameSceneManager>();
+        }
+
+        RebuildTileTargetRegistryIfNeeded();
+    }
+
+    private TowerBuildArea ResolveTileTargetById(string targetTileId)
+    {
+        RebuildTileTargetRegistryIfNeeded();
+
+        if (string.IsNullOrWhiteSpace(targetTileId))
+        {
+            return null;
+        }
+
+        tileTargetsById.TryGetValue(targetTileId, out TowerBuildArea targetTile);
+        return targetTile;
+    }
+
+    private void RebuildTileTargetRegistryIfNeeded()
+    {
+        if (tileTargetsById.Count > 0)
+        {
+            return;
+        }
+
+        RebuildTileTargetRegistry();
+    }
+
+    private void RebuildTileTargetRegistry()
+    {
+        tileTargetsById.Clear();
+        TowerBuildArea[] buildAreas = FindObjectsOfType<TowerBuildArea>(true);
+
+        foreach (TowerBuildArea buildArea in buildAreas)
+        {
+            if (buildArea == null || string.IsNullOrWhiteSpace(buildArea.name))
+            {
+                continue;
+            }
+
+            if (tileTargetsById.ContainsKey(buildArea.name))
+            {
+                Debug.LogWarning("Duplicate online tile target id found: " + buildArea.name);
+                continue;
+            }
+
+            tileTargetsById.Add(buildArea.name, buildArea);
         }
     }
 
@@ -951,6 +1267,64 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
 
         return hand;
+    }
+
+    private bool HandContainsCardId(List<string> hand, string cardId)
+    {
+        if (hand == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < hand.Count; i++)
+        {
+            if (CardIdsMatch(hand[i], cardId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool RemoveCardIdFromHand(List<string> hand, string cardId)
+    {
+        string removedCardId;
+        return RemoveCardIdFromHand(hand, cardId, out removedCardId);
+    }
+
+    private bool RemoveCardIdFromHand(List<string> hand, string cardId, out string removedCardId)
+    {
+        removedCardId = string.Empty;
+
+        if (hand == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < hand.Count; i++)
+        {
+            if (!CardIdsMatch(hand[i], cardId))
+            {
+                continue;
+            }
+
+            removedCardId = hand[i];
+            hand.RemoveAt(i);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool CardIdsMatch(string leftCardId, string rightCardId)
+    {
+        return CanonicalCardId(leftCardId) == CanonicalCardId(rightCardId);
+    }
+
+    private string CanonicalCardId(string cardId)
+    {
+        return CardDrawManager.NormalizeCardId(cardId).Replace(" ", string.Empty);
     }
 
     private OnlinePrivateHandStateData BuildPrivateHandState(int ownerPlayerId)
@@ -997,6 +1371,19 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
     {
         result.rejectReason = rejectReason;
         LogCardEffectValidation(request, result);
+
+        if (request != null && result != null)
+        {
+            if (IsTakeOverCardId(request.cardId))
+            {
+                LogLandControlValidation("ValidateTakeOver", request, result, rejectReason);
+            }
+            else if (IsFreezeClaimCardId(request.cardId))
+            {
+                LogLandControlValidation("ValidateFreezeClaim", request, result, rejectReason);
+            }
+        }
+
         return result;
     }
 
@@ -1061,6 +1448,11 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return IsStealCardId(cardId) || IsTradeHandsCardId(cardId) || IsDisruptCardId(cardId);
     }
 
+    private bool IsLandControlCardId(string cardId)
+    {
+        return IsTakeOverCardId(cardId) || IsFreezeClaimCardId(cardId);
+    }
+
     private bool IsStealCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
@@ -1078,13 +1470,100 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return CardDrawManager.NormalizeCardId(cardId) == "disrupt";
     }
 
+    private bool IsTakeOverCardId(string cardId)
+    {
+        string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
+        return normalizedCardId == "takeover" || normalizedCardId == "take over";
+    }
+
+    private bool IsFreezeClaimCardId(string cardId)
+    {
+        string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
+        return normalizedCardId == "freezeclaim" || normalizedCardId == "freeze claim";
+    }
+
+    private string ValidateLandControlCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
+    {
+        if (request == null)
+        {
+            return "Invalid request.";
+        }
+
+        TowerBuildArea targetTile = ResolveTileTargetById(request.targetId);
+
+        if (targetTile == null)
+        {
+            return "Target tile is missing.";
+        }
+
+        result.targetTileId = request.targetId;
+        result.previousOwnerPlayerId = targetTile.ownerPlayerId;
+        result.newOwnerPlayerId = targetTile.ownerPlayerId;
+        result.tileFrozen = targetTile.isFrozenOrSealed;
+        result.frozenByPlayerId = targetTile.frozenByPlayerId;
+        result.frozenUntilPlayerNextTurn = targetTile.frozenUntilPlayerNextTurn;
+
+        if (IsTakeOverCardId(request.cardId))
+        {
+            if (!targetTile.isOwned || targetTile.ownerPlayerId < 0)
+            {
+                return "Target tile has no owner.";
+            }
+
+            if (targetTile.ownerPlayerId == request.actorPlayerId)
+            {
+                return "Choose an opponent-owned land.";
+            }
+
+            if (targetTile.isFrozenOrSealed || !targetTile.CanBeTakenOverBy(request.actorPlayerId))
+            {
+                return "This land cannot be taken over.";
+            }
+
+            PlayerResource actor = playerManager != null
+                ? playerManager.GetPlayerResource(request.actorPlayerId)
+                : null;
+
+            if (actor == null)
+            {
+                return "Player resource is missing.";
+            }
+
+            int takeOverCost = targetTile.GetTakeOverCardCost();
+
+            if (!actor.CanAfford(takeOverCost))
+            {
+                return "Not enough gold to take over this land.";
+            }
+
+            result.newOwnerPlayerId = request.actorPlayerId;
+            result.actorNewGold = actor.money - takeOverCost;
+            return string.Empty;
+        }
+
+        if (IsFreezeClaimCardId(request.cardId))
+        {
+            if (targetTile.isFrozenOrSealed || !targetTile.CanBeFrozen())
+            {
+                return "This land is already frozen.";
+            }
+
+            result.tileFrozen = true;
+            result.frozenByPlayerId = request.actorPlayerId;
+            result.frozenUntilPlayerNextTurn = true;
+            return string.Empty;
+        }
+
+        return "Unsupported land-control card.";
+    }
+
     private void ApplyStealCardEffect(
         OnlineCardRequestData request,
         List<string> actorHand,
         OnlineCardApplyData applyData)
     {
         List<string> targetHand = GetOrCreateAuthoritativeHand(request.targetPlayerId);
-        actorHand.Remove(request.cardId);
+        RemoveCardIdFromHand(actorHand, request.cardId);
 
         int randomIndex = Random.Range(0, targetHand.Count);
         string stolenCardId = targetHand[randomIndex];
@@ -1109,7 +1588,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         OnlineCardApplyData applyData)
     {
         List<string> targetHand = GetOrCreateAuthoritativeHand(request.targetPlayerId);
-        actorHand.Remove(request.cardId);
+        RemoveCardIdFromHand(actorHand, request.cardId);
 
         List<string> actorRemainingHand = new List<string>(actorHand);
         List<string> targetOriginalHand = new List<string>(targetHand);
@@ -1137,7 +1616,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         List<string> actorHand,
         OnlineCardApplyData applyData)
     {
-        actorHand.Remove(request.cardId);
+        RemoveCardIdFromHand(actorHand, request.cardId);
         applyData.targetDisrupted = true;
         applyData.affectedPlayerHandCounts = BuildAffectedHandCounts(request.actorPlayerId, request.targetPlayerId);
 
@@ -1156,6 +1635,93 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             " targetPlayerId=" + request.targetPlayerId +
             " cardId=" + request.cardId +
             " cardName=" + request.cardName
+        );
+    }
+
+    private void ApplyTakeOverEffect(
+        OnlineCardRequestData request,
+        List<string> actorHand,
+        OnlineCardApplyData applyData)
+    {
+        TowerBuildArea targetTile = ResolveTileTargetById(request.targetId);
+
+        if (targetTile == null)
+        {
+            applyData.accepted = false;
+            applyData.rejectReason = "Target tile is missing.";
+            return;
+        }
+
+        RemoveCardIdFromHand(actorHand, request.cardId);
+
+        PlayerResource actor = playerManager != null
+            ? playerManager.GetPlayerResource(request.actorPlayerId)
+            : null;
+
+        if (actor != null && applyData.actorNewGold >= 0)
+        {
+            actor.money = applyData.actorNewGold;
+        }
+
+        applyData.targetTileId = request.targetId;
+        applyData.previousOwnerPlayerId = targetTile.ownerPlayerId;
+        applyData.newOwnerPlayerId = request.actorPlayerId;
+        applyData.tileFrozen = false;
+        applyData.frozenByPlayerId = -1;
+        applyData.frozenUntilPlayerNextTurn = false;
+        applyData.removeTowerFromTile = true;
+        applyData.targetPlayerId = applyData.previousOwnerPlayerId;
+        applyData.affectedPlayerHandCounts = BuildAffectedHandCounts(request.actorPlayerId);
+
+        ApplyTileStateToScene(applyData);
+        UpdateBuildSnapshotForTileState(applyData);
+
+        Debug.Log(
+            "ApplyTakeOver" +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetTileId=" + request.targetId +
+            " previousOwner=" + applyData.previousOwnerPlayerId +
+            " newOwner=" + applyData.newOwnerPlayerId +
+            " accepted=true rejectedReason=(none)"
+        );
+    }
+
+    private void ApplyFreezeClaimEffect(
+        OnlineCardRequestData request,
+        List<string> actorHand,
+        OnlineCardApplyData applyData)
+    {
+        TowerBuildArea targetTile = ResolveTileTargetById(request.targetId);
+
+        if (targetTile == null)
+        {
+            applyData.accepted = false;
+            applyData.rejectReason = "Target tile is missing.";
+            return;
+        }
+
+        RemoveCardIdFromHand(actorHand, request.cardId);
+
+        applyData.targetTileId = request.targetId;
+        applyData.previousOwnerPlayerId = targetTile.ownerPlayerId;
+        applyData.newOwnerPlayerId = targetTile.ownerPlayerId;
+        applyData.tileFrozen = true;
+        applyData.frozenByPlayerId = request.actorPlayerId;
+        applyData.frozenUntilPlayerNextTurn = true;
+        applyData.removeTowerFromTile = false;
+        applyData.targetPlayerId = applyData.previousOwnerPlayerId;
+        applyData.affectedPlayerHandCounts = BuildAffectedHandCounts(request.actorPlayerId);
+
+        ApplyTileStateToScene(applyData);
+        UpdateBuildSnapshotForTileState(applyData);
+
+        Debug.Log(
+            "ApplyFreezeClaim" +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetTileId=" + request.targetId +
+            " previousOwner=" + applyData.previousOwnerPlayerId +
+            " newOwner=" + applyData.newOwnerPlayerId +
+            " accepted=true rejectedReason=(none)"
         );
     }
 
@@ -1233,6 +1799,24 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    private void LogLandControlValidation(string label, OnlineCardRequestData request, OnlineCardApplyData applyData, string reason)
+    {
+        if (request == null || applyData == null)
+        {
+            return;
+        }
+
+        Debug.Log(
+            label +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetTileId=" + request.targetId +
+            " previousOwner=" + applyData.previousOwnerPlayerId +
+            " newOwner=" + applyData.newOwnerPlayerId +
+            " accepted=" + applyData.accepted +
+            " rejectedReason=" + (string.IsNullOrWhiteSpace(reason) ? "(none)" : reason)
+        );
+    }
+
     private int ResolveActorNumberForPlayerId(int playerId)
     {
 #if !PHOTON_UNITY_NETWORKING
@@ -1250,10 +1834,89 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             {
                 return photonPlayer.ActorNumber;
             }
+
+            if (GetPhotonPlayerIntProperty(photonPlayer, PhotonLobbyPropertyKeys.PlayerId, -1) == playerId)
+            {
+                return photonPlayer.ActorNumber;
+            }
         }
 
         return -1;
 #endif
+    }
+
+    private int ResolvePlayerIdForActorNumber(int actorNumber)
+    {
+#if !PHOTON_UNITY_NETWORKING
+        return -1;
+#else
+        if (!CanRunOnlineGameSceneCardSync())
+        {
+            return -1;
+        }
+
+        if (onlineGameSceneManager != null)
+        {
+            int managerPlayerId = onlineGameSceneManager.GetOnlinePlayerIdByActorNumber(actorNumber);
+
+            if (managerPlayerId >= 0)
+            {
+                return managerPlayerId;
+            }
+        }
+
+        foreach (Player photonPlayer in PhotonNetwork.PlayerList)
+        {
+            if (photonPlayer != null && photonPlayer.ActorNumber == actorNumber)
+            {
+                return GetPhotonPlayerIntProperty(photonPlayer, PhotonLobbyPropertyKeys.PlayerId, -1);
+            }
+        }
+
+        return -1;
+#endif
+    }
+
+    private int GetPhotonPlayerIntProperty(Player photonPlayer, string key, int fallbackValue)
+    {
+        if (photonPlayer == null ||
+            photonPlayer.CustomProperties == null ||
+            !photonPlayer.CustomProperties.ContainsKey(key))
+        {
+            return fallbackValue;
+        }
+
+        return ConvertToInt(photonPlayer.CustomProperties[key], fallbackValue);
+    }
+
+    private int ConvertToInt(object value, int fallbackValue)
+    {
+        if (value == null)
+        {
+            return fallbackValue;
+        }
+
+        if (value is int intValue)
+        {
+            return intValue;
+        }
+
+        if (value is short shortValue)
+        {
+            return shortValue;
+        }
+
+        if (value is byte byteValue)
+        {
+            return byteValue;
+        }
+
+        if (value is string stringValue && int.TryParse(stringValue, out int parsedValue))
+        {
+            return parsedValue;
+        }
+
+        return fallbackValue;
     }
 
     private OnlineCardRequestData DeserializeRequest(string json)

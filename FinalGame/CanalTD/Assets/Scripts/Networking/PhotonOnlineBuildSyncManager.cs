@@ -149,6 +149,90 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return RequestAction(OnlineBuildActionType.SellTower, buildArea, TowerType.Cannon);
     }
 
+    public void UpdateOnlineTileStateSnapshot(
+        string buildAreaId,
+        bool isOwned,
+        int ownerPlayerId,
+        bool isFrozen,
+        int frozenByPlayerId,
+        bool frozenUntilPlayerNextTurn,
+        bool clearTowerState)
+    {
+#if PHOTON_UNITY_NETWORKING
+        if (!PhotonNetwork.IsMasterClient || PhotonNetwork.CurrentRoom == null || string.IsNullOrWhiteSpace(buildAreaId))
+        {
+            return;
+        }
+
+        OnlineBuildSnapshot snapshot = GetSnapshotFromRoomOrScene();
+        OnlineBuildAreaState areaState = GetOrCreateAreaState(snapshot, buildAreaId);
+        areaState.isOwned = isOwned;
+        areaState.ownerPlayerId = ownerPlayerId;
+        areaState.isFrozen = isFrozen;
+        areaState.frozenByPlayerId = frozenByPlayerId;
+        areaState.frozenUntilPlayerNextTurn = frozenUntilPlayerNextTurn;
+
+        if (clearTowerState)
+        {
+            areaState.towerExists = false;
+            areaState.towerOwnerPlayerId = -1;
+            areaState.towerTypeId = -1;
+            areaState.towerLevel = 0;
+        }
+
+        WriteSnapshotToRoom(snapshot);
+#endif
+    }
+
+    public int ClearExpiredFreezeClaimsForPlayer(int playerId)
+    {
+        int clearedCount = 0;
+
+#if PHOTON_UNITY_NETWORKING
+        if (!PhotonNetwork.IsMasterClient || PhotonNetwork.CurrentRoom == null || playerId < 0)
+        {
+            return clearedCount;
+        }
+
+        AutoAssignReferences();
+        RebuildBuildAreaRegistryIfNeeded();
+
+        OnlineBuildSnapshot snapshot = GetSnapshotFromRoomOrScene();
+
+        foreach (OnlineBuildAreaState areaState in snapshot.areas)
+        {
+            if (areaState == null ||
+                !areaState.isFrozen ||
+                !areaState.frozenUntilPlayerNextTurn ||
+                areaState.frozenByPlayerId != playerId)
+            {
+                continue;
+            }
+
+            areaState.isFrozen = false;
+            areaState.frozenByPlayerId = -1;
+            areaState.frozenUntilPlayerNextTurn = false;
+
+            TowerBuildArea buildArea = ResolveBuildAreaById(areaState.buildAreaId);
+
+            if (buildArea != null)
+            {
+                buildArea.ClearFreeze();
+            }
+
+            clearedCount++;
+        }
+
+        if (clearedCount > 0)
+        {
+            WriteSnapshotToRoom(snapshot);
+            Debug.Log("Cleared expired online Freeze Claim tiles for playerId=" + playerId + ", count=" + clearedCount);
+        }
+#endif
+
+        return clearedCount;
+    }
+
     public void OnEvent(EventData photonEvent)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -628,6 +712,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
             case OnlineBuildActionType.BuyLand:
                 areaState.isOwned = true;
                 areaState.ownerPlayerId = applyData.ownerPlayerId;
+                areaState.isFrozen = false;
+                areaState.frozenByPlayerId = -1;
+                areaState.frozenUntilPlayerNextTurn = false;
                 break;
             case OnlineBuildActionType.BuildTower:
                 areaState.towerExists = true;
@@ -709,6 +796,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
                 buildAreaId = pair.Key,
                 isOwned = buildArea.isOwned,
                 ownerPlayerId = buildArea.ownerPlayerId,
+                isFrozen = buildArea.isFrozenOrSealed,
+                frozenByPlayerId = buildArea.frozenByPlayerId,
+                frozenUntilPlayerNextTurn = buildArea.frozenUntilPlayerNextTurn,
                 towerExists = buildArea.currentTower != null,
                 towerOwnerPlayerId = buildArea.towerOwnerPlayerId,
                 towerTypeId = stats != null ? (int)stats.towerType : -1,
@@ -744,6 +834,16 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
             else
             {
                 buildArea.ClearOwner();
+            }
+
+            if (state.isFrozen)
+            {
+                buildArea.FreezeForPlayer(state.frozenByPlayerId);
+                buildArea.frozenUntilPlayerNextTurn = state.frozenUntilPlayerNextTurn;
+            }
+            else
+            {
+                buildArea.ClearFreeze();
             }
 
             if (!state.towerExists)
