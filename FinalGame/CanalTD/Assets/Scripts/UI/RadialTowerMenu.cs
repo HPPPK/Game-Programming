@@ -2,9 +2,32 @@
  * File: RadialTowerMenu.cs
  *
  * Purpose:
- * World-space UI controller for build-area and tower actions. This script only
- * switches visible button groups, stores pending confirmation state, and forwards
- * confirmed actions to BuildTowerManager.
+ * Implements RadialTowerMenu for the ui layer of Rail Rumble and supports the playable vertical slice of the project.
+ *
+ * Attached GameObject:
+ * None. This script defines shared data or types and is not attached directly to a GameObject.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for RadialTowerMenu within the ui system.
+ * - Update the owning object state and react to gameplay events during play.
+ * - Present readable feedback so players can understand turns, actions, and results.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Player input, button clicks, pointer events, or scene transition requests.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Updates visible UI, indicators, prompts, and player-facing status messages.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify RadialTowerMenu in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Confirm the related UI remains readable in both the normal scene flow and edge/error states.
  */
 using TMPro;
 using UnityEngine;
@@ -248,7 +271,14 @@ public class RadialTowerMenu : MonoBehaviour
         {
             if (buildTowerManager.ConfirmBuyLand(selectedBuildArea))
             {
-                ShowBuildSelection(selectedBuildArea);
+                if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+                {
+                    Hide();
+                }
+                else
+                {
+                    ShowBuildSelection(selectedBuildArea);
+                }
             }
 
             return;

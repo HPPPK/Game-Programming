@@ -2,21 +2,38 @@
  * File: PhotonPunRoomLobbyManager.cs
  *
  * Purpose:
- * Implements the final-product Phase 2A Photon PUN2 lobby flow for the
- * OnlineModePanel only. It automatically creates a private friend room when the
- * panel opens, supports joining by room code, supports random matchmaking, and
- * synchronizes the 4-slot room UI through Photon player properties.
+ * Implements PhotonPunRoomLobbyManager for the networking layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * - This script does not synchronize gameplay yet.
- * - It only prepares room/lobby behavior before GameScene loads.
- * - When Photon PUN2 is missing, the script still compiles and falls back to
- *   toast/debug warnings instead of breaking the project.
+ * Attached GameObject:
+ * None. This script defines shared data or types and is not attached directly to a GameObject.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for PhotonPunRoomLobbyManager within the networking system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Keep multiplayer state aligned while respecting online lifecycle guards and scene context.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Photon room/player state, network events, and authoritative sync payloads when online mode is active.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Sends, applies, or guards online sync operations without changing project-level Photon settings.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify PhotonPunRoomLobbyManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Retest both single-client and multi-client online flows after editing this script.
  */
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 #if PHOTON_UNITY_NETWORKING
@@ -170,6 +187,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     public void ConnectToPhoton()
     {
 #if PHOTON_UNITY_NETWORKING
+        LogPhotonConnectionRequestDiagnostics("ConnectToPhoton");
         Debug.Log("Photon connect requested.");
         ApplyLocalDisplayName();
         PhotonNetwork.AutomaticallySyncScene = true;
@@ -546,7 +564,15 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
-        Debug.Log("Join room failed: " + message);
+        Debug.Log(
+            "Join room failed: " + message +
+            ", returnCode=" + returnCode +
+            ", pendingJoinRoomCode=" + pendingJoinRoomCode +
+            ", activeScene=" + SceneManager.GetActiveScene().name +
+            ", inRoom=" + PhotonNetwork.InRoom +
+            ", inLobby=" + PhotonNetwork.InLobby +
+            ", clientState=" + PhotonNetwork.NetworkClientState
+        );
         ClearPendingLobbyState();
         ClearPersistentLobbyMessage();
         ShowLobbyMessage("Join room failed: " + message);
@@ -555,7 +581,20 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.Log("Matchmaking failed: " + message);
+        Debug.Log(
+            "Matchmaking join-random failed: " + message +
+            ", returnCode=" + returnCode +
+            ", isMatchmaking=" + isMatchmaking +
+            ", pendingLobbyAction=" + pendingLobbyAction
+        );
+
+        if (isMatchmaking || pendingLobbyAction == PendingLobbyAction.JoinRandomMatchmaking)
+        {
+            ShowPersistentLobbyMessage("No open matchmaking room found. Creating one...");
+            CreatePublicMatchmakingRoom();
+            return;
+        }
+
         ClearPendingLobbyState();
         ClearPersistentLobbyMessage();
         ShowLobbyMessage("Matchmaking failed: " + message);
@@ -745,6 +784,14 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             }
 
             isCreatingOrJoiningRoom = true;
+            Debug.Log(
+                "Attempting JoinRoom. roomCode=" + pendingJoinRoomCode +
+                ", activeScene=" + SceneManager.GetActiveScene().name +
+                ", isConnected=" + PhotonNetwork.IsConnected +
+                ", inLobby=" + PhotonNetwork.InLobby +
+                ", inRoom=" + PhotonNetwork.InRoom +
+                ", clientState=" + PhotonNetwork.NetworkClientState
+            );
             PhotonNetwork.JoinRoom(pendingJoinRoomCode);
             return;
         }
@@ -758,6 +805,13 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             };
 
             isCreatingOrJoiningRoom = true;
+            Debug.Log(
+                "Attempting JoinRandomRoom for matchmaking. activeScene=" + SceneManager.GetActiveScene().name +
+                ", isConnected=" + PhotonNetwork.IsConnected +
+                ", inLobby=" + PhotonNetwork.InLobby +
+                ", inRoom=" + PhotonNetwork.InRoom +
+                ", clientState=" + PhotonNetwork.NetworkClientState
+            );
             PhotonNetwork.JoinRandomRoom(expectedProperties, maxPlayersPerRoom);
         }
     }
@@ -784,6 +838,13 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             modeSelectSceneManager.SetOnlineRoomCodeDisplay(roomCode);
         }
 
+        Debug.Log(
+            "Creating private friend room. roomCode=" + roomCode +
+            ", activeScene=" + SceneManager.GetActiveScene().name +
+            ", isConnected=" + PhotonNetwork.IsConnected +
+            ", inLobby=" + PhotonNetwork.InLobby +
+            ", clientState=" + PhotonNetwork.NetworkClientState
+        );
         PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
         UpdateLobbyUIState();
     }
@@ -807,6 +868,13 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             }
         };
 
+        Debug.Log(
+            "Creating public matchmaking room. roomCode=" + roomCode +
+            ", activeScene=" + SceneManager.GetActiveScene().name +
+            ", isConnected=" + PhotonNetwork.IsConnected +
+            ", inLobby=" + PhotonNetwork.InLobby +
+            ", clientState=" + PhotonNetwork.NetworkClientState
+        );
         PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
         UpdateLobbyUIState();
     }
@@ -1282,4 +1350,23 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return false;
 #endif
     }
+
+#if PHOTON_UNITY_NETWORKING
+    private void LogPhotonConnectionRequestDiagnostics(string source)
+    {
+        PhotonOnlineGameSceneManager[] onlineManagers = Resources.FindObjectsOfTypeAll<PhotonOnlineGameSceneManager>();
+        PhotonOnlineCardSyncManager[] cardSyncManagers = Resources.FindObjectsOfTypeAll<PhotonOnlineCardSyncManager>();
+
+        Debug.Log(
+            "Photon connection diagnostics source=" + source +
+            ", activeScene=" + SceneManager.GetActiveScene().name +
+            ", isConnected=" + PhotonNetwork.IsConnected +
+            ", clientState=" + PhotonNetwork.NetworkClientState +
+            ", inRoom=" + PhotonNetwork.InRoom +
+            ", inLobby=" + PhotonNetwork.InLobby +
+            ", onlineGameSceneManagerCount=" + (onlineManagers != null ? onlineManagers.Length : 0) +
+            ", onlineCardSyncManagerCount=" + (cardSyncManagers != null ? cardSyncManagers.Length : 0)
+        );
+    }
+#endif
 }

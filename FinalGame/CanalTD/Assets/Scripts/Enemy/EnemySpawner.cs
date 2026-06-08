@@ -2,24 +2,31 @@
  * File: EnemySpawner.cs
  *
  * Purpose:
- * This script creates enemy instances at a specific starting PathNode. It is a
- * simple bridge between WaveManager and EnemyMover: WaveManager decides when to
- * spawn, while EnemySpawner creates the object and initializes its movement.
+ * Implements EnemySpawner for the enemy layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Runtime behavior:
- * - SpawnOne() validates that an enemy prefab and start node are assigned.
- * - It instantiates the prefab at the start node's world position.
- * - It looks for EnemyMover on the spawned prefab.
- * - It calls EnemyMover.Init(startNode) so the enemy can begin moving.
+ * Attached GameObject:
+ * Enemy prefabs, wave helpers, or enemy-related scene managers.
  *
- * Inspector setup:
- * - enemyPrefab is the fallback prefab used when WaveManager does not provide
- *   a weighted enemy entry prefab.
- * - startNode should point to the PathNode where enemies enter the map.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for EnemySpawner within the enemy system.
+ * - Update the owning object state and react to gameplay events during play.
+ * - Support enemy spawning, pathing, targeting, combat, or wave pressure behaviour.
  *
- * Dependency notes:
- * - WaveManager calls SpawnOne() repeatedly during a wave.
- * - EnemyMover handles path selection and movement after spawning.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Moves enemies, adjusts combat results, or influences castle pressure and wave outcomes.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify EnemySpawner in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 

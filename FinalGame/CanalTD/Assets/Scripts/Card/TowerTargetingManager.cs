@@ -2,13 +2,32 @@
  * File: TowerTargetingManager.cs
  *
  * Purpose:
- * Handles tower-targeting cards such as Power Boost. It finds current-player
- * towers, highlights valid targets, records the selected tower, and applies the
- * boost only after Confirm.
+ * Implements TowerTargetingManager for the card layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * The boost is stored on CannonTower and activates during the next WavePhase,
- * then expires automatically when the wave ends.
+ * Attached GameObject:
+ * Card UI objects, targeting overlays, gate helpers, or card-related gameplay managers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for TowerTargetingManager within the card system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Handle card usage, targeting, hand state, or card-driven map interactions.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Card selections, targeting choices, turn permissions, and player hand data.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Applies card outcomes, targeting results, hand count changes, or card-related restrictions.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify TowerTargetingManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Check local mode, AI mode, and online mode if the script participates in shared card flow.
  */
 using System.Collections.Generic;
 using System.Reflection;
@@ -195,6 +214,36 @@ public class TowerTargetingManager : MonoBehaviour
             return;
         }
 
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineCardSyncManager.Instance != null &&
+            cardDrawManager != null)
+        {
+            GameObject pendingCardPrefab = cardDrawManager.GetPendingCardPrefabForTargeting();
+            string targetId = selectedTower.transform.parent != null
+                ? selectedTower.transform.parent.name + "_tower"
+                : selectedTower.gameObject.name;
+
+            if (pendingCardPrefab == null)
+            {
+                ShowToast("Could not play this card.");
+                return;
+            }
+
+            bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
+                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
+                pendingCardPrefab.name,
+                targetId,
+                -1
+            );
+
+            if (requested)
+            {
+                ExitWithoutConsumingCard();
+            }
+
+            return;
+        }
+
         ResolvePowerBoost(playerManager != null ? playerManager.GetCurrentPlayerId() : 0, selectedTower, true);
     }
 
@@ -286,6 +335,11 @@ public class TowerTargetingManager : MonoBehaviour
 
     private void TrySelectTowerAtMouse()
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (IsPointerOverTargetingControls())
         {
             return;

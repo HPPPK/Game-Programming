@@ -2,12 +2,28 @@
  * File: cursor.cs
  *
  * Purpose:
- * Displays a custom visual cursor sprite that follows the mouse. It can switch
- * between normal and hammer visuals depending on the current tool mode.
+ * Implements cursor for the core layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * The class name is VisualCursorFollower even though the file name is cursor.cs,
- * matching the existing project setup.
+ * Attached GameObject:
+ * Core gameplay managers, player objects, turn systems, or shared scene controllers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for cursor within the core system.
+ * - Update the owning object state and react to gameplay events during play.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify cursor in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 

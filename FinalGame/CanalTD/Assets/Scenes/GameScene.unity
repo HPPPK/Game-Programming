@@ -60881,7 +60881,7 @@ MonoBehaviour:
   playerId: 0
   displayName: Kate
   playerType: 0
-  money: 12
+  money: 20
   score: 0
   cardCount: 0
   playerHand: {fileID: 910001006}
@@ -61075,7 +61075,7 @@ MonoBehaviour:
   playerId: 1
   displayName: Tom
   playerType: 0
-  money: 12
+  money: 20
   score: 0
   cardCount: 0
   playerHand: {fileID: 910002006}
@@ -72349,6 +72349,7 @@ MonoBehaviour:
   darkOverlay: {fileID: 236984364}
   hammerButton: {fileID: 0}
   normalGameplayUI: {fileID: 1274524793}
+  confirmButton: {fileID: 0}
   currentPlayerId: 0
   gateOwnershipManager: {fileID: 1823688006}
   playerManager: {fileID: 0}
@@ -72839,6 +72840,7 @@ MonoBehaviour:
   turnManager: {fileID: 1559123171}
   gamePhaseManager: {fileID: 163762666}
   toastMessage: {fileID: 848080698}
+  onlineBuildSyncManager: {fileID: 0}
   minOnlinePlayersToStart: 2
   homeSceneName: HomeScene
 --- !u!1 &1586250674

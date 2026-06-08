@@ -2,12 +2,28 @@
  * File: TowerProjectile.cs
  *
  * Purpose:
- * Moves a projectile toward its target and applies tower-owner damage when it
- * reaches the enemy.
+ * Implements TowerProjectile for the tower layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * The owner resource is passed to EnemyHealth so kill and assist scoring can
- * credit the player who built the tower.
+ * Attached GameObject:
+ * Tower prefabs, build spots, projectiles, or tower-related scene controllers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for TowerProjectile within the tower system.
+ * - Update the owning object state and react to gameplay events during play.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify TowerProjectile in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 

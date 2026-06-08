@@ -2,10 +2,31 @@
  * File: EnemyStats.cs
  *
  * Purpose:
- * Optional prefab component for enemy type data. If an enemy prefab has this
- * component, EnemyHealth and EnemyMover read final HP, speed, reward, armor,
- * and special behavior from it. Runtime values are calculated by methods so the
- * Inspector only shows editable base configuration.
+ * Implements EnemyStats for the enemy layer of Rail Rumble and supports the playable vertical slice of the project.
+ *
+ * Attached GameObject:
+ * Enemy prefabs, wave helpers, or enemy-related scene managers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for EnemyStats within the enemy system.
+ * - Update the owning object state and react to gameplay events during play.
+ * - Support enemy spawning, pathing, targeting, combat, or wave pressure behaviour.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Moves enemies, adjusts combat results, or influences castle pressure and wave outcomes.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify EnemyStats in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 

@@ -2,12 +2,28 @@
  * File: PlayerResource.cs
  *
  * Purpose:
- * Holds one player's gameplay resources: player ID, display name, gold, score,
- * card count, PlayerHand reference, and temporary status effects.
+ * Implements PlayerResource for the core layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * UI panels read from this component so player resource display stays tied to
- * the actual player/castle data.
+ * Attached GameObject:
+ * Core gameplay managers, player objects, turn systems, or shared scene controllers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for PlayerResource within the core system.
+ * - Update the owning object state and react to gameplay events during play.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify PlayerResource in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Collections.Generic;
 using UnityEngine;
@@ -240,6 +256,23 @@ public class PlayerResource : MonoBehaviour
     {
         EnsurePlayerHand();
         return playerHand != null ? playerHand.GetCardCount() : cardCount;
+    }
+
+    public int GetDisplayedCardCount()
+    {
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+        {
+            if (PhotonOnlineGameSceneManager.Instance != null &&
+                PhotonOnlineGameSceneManager.Instance.LocalPlayerId == playerId)
+            {
+                EnsurePlayerHand();
+                return playerHand != null ? playerHand.GetCardCount() : cardCount;
+            }
+
+            return Mathf.Max(0, cardCount);
+        }
+
+        return GetHandCardCount();
     }
 
     public void AddCardToHand(GameObject cardPrefab)

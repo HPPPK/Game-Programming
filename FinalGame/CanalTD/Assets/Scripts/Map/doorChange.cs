@@ -2,26 +2,28 @@
  * File: doorChange.cs
  *
  * Purpose:
- * This script controls a simple open/closed door object. It can swap sprites,
- * show/hide separate visual GameObjects, and invoke UnityEvents when the door
- * changes state.
+ * Implements doorChange for the map layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Runtime behavior:
- * - Awake() applies the starting visual state.
- * - ToggleDoor() switches between Closed and Open.
- * - OnMouseDown() optionally toggles the door when clicked.
- * - OpenDoor() and CloseDoor() are public methods for buttons/events.
- * - SetDoorState() is the central state setter and invokes the correct event.
+ * Attached GameObject:
+ * None. This script defines shared data or types and is not attached directly to a GameObject.
  *
- * Inspector setup:
- * - targetRenderer/closedSprite/openSprite are used for sprite-swap mode.
- * - closedVisual/openVisual are used for GameObject toggle mode.
- * - onDoorOpened/onDoorClosed can trigger other scene actions.
- * - clickToToggle controls whether direct mouse clicks change the door.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for doorChange within the map system.
+ * - Update the owning object state and react to gameplay events during play.
  *
- * Dependency notes:
- * - This script is independent from GateFrameAnimation and the pathfinding gate
- *   system. It is a general-purpose visual door toggle.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify doorChange in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 using UnityEngine.Events;

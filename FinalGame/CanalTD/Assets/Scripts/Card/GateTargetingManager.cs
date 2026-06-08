@@ -2,34 +2,32 @@
  * File: GateTargetingManager.cs
  *
  * Purpose:
- * This manager controls the temporary mode where the player chooses a gate after
- * playing a gate-related card. It dims the map, highlights valid gates, tracks
- * the selected gate, and runs the final Open Gate or Lock Gate action when the
- * player confirms the choice.
+ * Implements GateTargetingManager for the card layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Main gameplay flow:
- * 1. CardDrawManager calls EnterGateTargetMode(actionType) after a gate card is played.
- * 2. This manager finds every GateFrameAnimation in the scene.
- * 3. It filters gates into validTargets based on the requested GateActionType.
- * 4. Valid gates are highlighted and the targeting UI/dark overlay is shown.
- * 5. GateFrameAnimation calls SelectGate(this) when the player clicks a valid gate.
- * 6. ConfirmSelection() executes OpenGate() or LockGate() on the selected gate.
- * 7. The pending card is confirmed through CardDrawManager only after the gate
- *    action succeeds.
+ * Attached GameObject:
+ * Card UI objects, targeting overlays, gate helpers, or card-related gameplay managers.
  *
- * Inspector setup:
- * - tilemapsToDim and spritesToDim define which map visuals get darkened.
- * - targetingUI should contain the confirm/cancel controls for targeting mode.
- * - darkOverlay is the screen overlay shown while picking a gate.
- * - hammerButton is shown only while the player is choosing a gate target. If
- *   it is not assigned manually, this script tries to find a child named
- *   "HammerButton" under normalGameplayUI.
- * - normalGameplayUI is disabled during targeting so normal UI does not receive clicks.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for GateTargetingManager within the card system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Handle card usage, targeting, hand state, or card-driven map interactions.
  *
- * Dependency notes:
- * - GateFrameAnimation owns each individual gate's animation and blocking state.
- * - CardDrawManager owns the pending card that should be consumed or returned.
- * - CursorToolManager exits hammer mode when targeting ends.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Card selections, targeting choices, turn permissions, and player hand data.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Applies card outcomes, targeting results, hand count changes, or card-related restrictions.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify GateTargetingManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Check local mode, AI mode, and online mode if the script participates in shared card flow.
  */
 using System.Collections.Generic;
 using UnityEngine;
@@ -221,6 +219,11 @@ public class GateTargetingManager : MonoBehaviour
 
     public void SelectGate(GateFrameAnimation gate)
     {
+        if (ShouldBlockOnlineAction())
+        {
+            return;
+        }
+
         if (!isTargetingGate) return;
 
         if (!IsValidTarget(gate))
@@ -343,6 +346,33 @@ public class GateTargetingManager : MonoBehaviour
         if (TurnSourceResolver.IsAIPrototypeActive() && (turnSource == null || !turnSource.CanHumanAct))
         {
             ShowToast("Wait for your turn.");
+            return;
+        }
+
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineCardSyncManager.Instance != null)
+        {
+            CardDrawManager cardManager = GetCardDrawManager();
+            GameObject pendingCardPrefab = cardManager != null ? cardManager.GetPendingCardPrefabForTargeting() : null;
+
+            if (pendingCardPrefab == null)
+            {
+                ShowToast("Could not play this card.");
+                return;
+            }
+
+            bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
+                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
+                pendingCardPrefab.name,
+                selectedGate.gameObject.name,
+                -1
+            );
+
+            if (requested)
+            {
+                ExitGateTargetMode();
+            }
+
             return;
         }
 

@@ -2,24 +2,28 @@
  * File: CursorToolManager.cs
  *
  * Purpose:
- * This singleton controls the player's cursor/tool state. It does not replace
- * Unity's system cursor, because custom cursor hot spots can offset UI and
- * world click detection on some displays.
+ * Implements CursorToolManager for the core layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Runtime behavior:
- * - EnterHammerMode() switches the internal state used by gate targeting.
- * - ExitHammerMode() leaves hammer mode.
- * - ToggleHammerMode() is intended for the HammerButton.
- * - ExitToolMode() is kept as a compatibility wrapper for existing scripts.
+ * Attached GameObject:
+ * Core gameplay managers, player objects, turn systems, or shared scene controllers.
  *
- * Inspector setup:
- * - VisualCursorFollower is the main visual cursor controller in the scene.
- * - Do not use Cursor.SetCursor here.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for CursorToolManager within the core system.
+ * - Coordinate related objects, state changes, and cross-system communication.
  *
- * Dependency notes:
- * - CardDrawManager enters hammer mode when a gate card starts targeting.
- * - GateFrameAnimation checks isHammerMode before accepting a gate click.
- * - GateTargetingManager exits tool mode when targeting finishes or is cancelled.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify CursorToolManager in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 

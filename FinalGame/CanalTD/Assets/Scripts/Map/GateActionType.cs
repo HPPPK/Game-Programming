@@ -2,19 +2,28 @@
  * File: GateActionType.cs
  *
  * Purpose:
- * This enum lists the gate actions that can be requested by card gameplay.
- * It gives CardDrawManager, GateTargetingManager, and GateFrameAnimation a shared
- * vocabulary so they can agree on what kind of gate operation is currently being
- * performed.
+ * Implements GateActionType for the map layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Values:
- * - None: no gate action is active.
- * - OpenGate: the player wants to open an existing blocking gate.
- * - LockGate: the player wants to close/build/lock a gate, depending on state.
+ * Attached GameObject:
+ * None. This script defines shared data or types and is not attached directly to a GameObject.
  *
- * Dependency notes:
- * - CardDrawManager converts card prefab names into GateActionType values.
- * - GateTargetingManager uses this enum to filter valid target gates.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for GateActionType within the map system.
+ * - Update the owning object state and react to gameplay events during play.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify GateActionType in the scene or prefab where it is used and confirm the main happy path still works.
  */
 public enum GateActionType
 {

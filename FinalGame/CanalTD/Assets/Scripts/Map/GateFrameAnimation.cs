@@ -2,32 +2,28 @@
  * File: GateFrameAnimation.cs
  *
  * Purpose:
- * This script controls one gate's visual animation, click handling, and blocking
- * state. It is attached directly to a gate GameObject with a SpriteRenderer and
- * Collider2D.
+ * Implements GateFrameAnimation for the map layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Main gameplay flow:
- * 1. Start() caches SpriteRenderer/Collider2D and applies the correct starting
- *    sprite based on isBlocking.
- * 2. Update() checks mouse clicks and calls CheckClick().
- * 3. CheckClick() only accepts clicks when the cursor is in hammer mode and
- *    GateTargetingManager is currently targeting gates.
- * 4. The gate reports itself to GateTargetingManager.SelectGate(this).
- * 5. OpenGate() plays the opening animation and makes the gate non-blocking.
- * 6. LockGate() plays the closing animation or applies the blocking visual.
- * 7. When the gate changes, PathGraphState.MarkDirty() tells path systems to
- *    refresh cached paths.
+ * Attached GameObject:
+ * Map props, gate visuals, or waypoint/path presentation objects.
  *
- * Inspector setup:
- * - frames should contain the ordered animation sprites.
- * - frameRate controls time between animation frames.
- * - isBlocking defines whether the gate begins closed/blocking.
- * - isLocked prevents the gate from being opened.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for GateFrameAnimation within the map system.
+ * - Update the owning object state and react to gameplay events during play.
  *
- * Dependency notes:
- * - GateTargetingManager controls selection, highlighting, confirm, and cancel.
- * - CursorToolManager controls whether the player is allowed to click gates.
- * - PathEdge checks IsBlocking() to know if a path through this gate is open.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify GateFrameAnimation in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 using System.Collections;

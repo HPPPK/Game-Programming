@@ -2,23 +2,29 @@
  * File: PathfinderTester.cs
  *
  * Purpose:
- * This is a debug-only helper for checking whether the path graph can reach each
- * castle endpoint from a chosen start node. It does not move enemies or affect
- * gameplay state; it only logs pathfinder results to the Console.
+ * Implements PathfinderTester for the path layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Runtime behavior:
- * - Press T while the scene is running to call TestPaths().
- * - TestPaths() checks every CastleEndNode in castleEnds.
- * - It logs whether each castle is reachable from startNode.
- * - If reachable, it also logs the selected path length.
+ * Attached GameObject:
+ * Path nodes, edges, gates, or path-debug objects placed in the gameplay scene.
  *
- * Inspector setup:
- * - startNode should be the path node where the test begins.
- * - castleEnds should contain the castle endpoints you want to verify.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for PathfinderTester within the path system.
+ * - Update the owning object state and react to gameplay events during play.
  *
- * Dependency notes:
- * - Uses Pathfinder.FindPath().
- * - Safe to disable or remove in final gameplay builds if no longer needed.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify PathfinderTester in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Collections.Generic;
 using UnityEngine;

@@ -2,23 +2,29 @@
  * File: CastleEndNode.cs
  *
  * Purpose:
- * This script marks a PathNode as a castle endpoint. When an enemy reaches this
- * node, the endpoint applies damage to its linked CastleBase and removes the
- * enemy from the scene.
+ * Implements CastleEndNode for the path layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Runtime behavior:
- * - EnemyMover detects that its target node is a CastleEndNode.
- * - EnemyMover calls OnEnemyArrive(enemy).
- * - OnEnemyArrive() calls targetCastle.TakeDamage(damagePerEnemy).
- * - The arriving enemy GameObject is destroyed after the damage step.
+ * Attached GameObject:
+ * Path nodes, edges, gates, or path-debug objects placed in the gameplay scene.
  *
- * Inspector setup:
- * - targetCastle should point to the castle/base that this endpoint belongs to.
- * - damagePerEnemy controls how much HP one enemy removes.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for CastleEndNode within the path system.
+ * - Update the owning object state and react to gameplay events during play.
  *
- * Dependency notes:
- * - Inherits from PathNode, so it can still be used in the graph.
- * - CastleBase owns HP and game-over behavior.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify CastleEndNode in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 

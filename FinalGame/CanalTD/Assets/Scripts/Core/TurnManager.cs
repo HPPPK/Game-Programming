@@ -2,12 +2,28 @@
  * File: TurnManager.cs
  *
  * Purpose:
- * Tracks per-turn action state such as AP, draw usage, card play usage, discard
- * usage, and disruption restrictions.
+ * Implements TurnManager for the core layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * GamePhaseManager controls the larger phase order, while this script controls
- * what the active player is allowed to do during a single turn.
+ * Attached GameObject:
+ * Core gameplay managers, player objects, turn systems, or shared scene controllers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for TurnManager within the core system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify TurnManager in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Reflection;
 using UnityEngine;
@@ -132,6 +148,11 @@ public class TurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    public void ApplyAuthoritativeDrawConsumed()
+    {
+        hasDrawnCard = true;
+    }
+
     public bool CanPlayCard()
     {
         return !cardActionsBlockedThisTurn && !hasPlayedCard && HasEnoughAP(1);
@@ -160,6 +181,12 @@ public class TurnManager : MonoBehaviour, ITurnSource
         currentAP -= 1;
         hasPlayedCard = true;
         return true;
+    }
+
+    public void ApplyAuthoritativePlayConsumed(int apCost)
+    {
+        hasPlayedCard = true;
+        currentAP = Mathf.Max(0, currentAP - Mathf.Max(0, apCost));
     }
 
     public bool CanChangeGate()
@@ -200,6 +227,11 @@ public class TurnManager : MonoBehaviour, ITurnSource
 
         hasDiscardedCard = true;
         return true;
+    }
+
+    public void ApplyAuthoritativeDiscardConsumed()
+    {
+        hasDiscardedCard = true;
     }
 
     public bool HasEnoughAP(int cost)

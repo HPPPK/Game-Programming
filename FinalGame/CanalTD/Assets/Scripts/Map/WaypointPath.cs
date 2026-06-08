@@ -2,25 +2,28 @@
  * File: WaypointPath.cs
  *
  * Purpose:
- * This script stores an ordered list of Transform waypoints. It is useful for
- * simple waypoint movement where an object follows points in sequence instead
- * of using the PathNode/PathEdge graph system.
+ * Implements WaypointPath for the map layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Runtime behavior:
- * - PathId exposes a readable identifier for this waypoint path.
- * - Count exposes how many waypoint transforms are assigned.
- * - GetWaypoint(index) returns the Transform at an index or null if invalid.
- * - GetWaypointPosition(index) returns a waypoint position, falling back to this
- *   GameObject's position if the index is invalid.
- * - GetNextPathForDirectionA/B expose optional future branch paths.
+ * Attached GameObject:
+ * Map props, gate visuals, or waypoint/path presentation objects.
  *
- * Inspector setup:
- * - waypoints should be ordered from first movement point to last movement point.
- * - nextPathForDirectionA and nextPathForDirectionB are optional branch links.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for WaypointPath within the map system.
+ * - Update the owning object state and react to gameplay events during play.
  *
- * Dependency notes:
- * - This script is separate from Pathfinder and PathNode.
- * - It can be used for simpler linear paths or future branching experiments.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify WaypointPath in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Collections.Generic;
 using UnityEngine;

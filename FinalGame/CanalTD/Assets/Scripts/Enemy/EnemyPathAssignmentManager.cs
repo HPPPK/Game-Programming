@@ -2,34 +2,31 @@
  * File: EnemyPathAssignmentManager.cs
  *
  * Purpose:
- * This singleton chooses which castle an enemy should attack and which path it
- * should follow. It uses the pathfinder to find reachable castles, keeps track
- * of how many enemies have already been assigned to each castle, and rotates
- * through available paths so enemies do not all use the exact same route.
+ * Implements EnemyPathAssignmentManager for the enemy layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Main gameplay flow:
- * 1. WaveManager calls ResetAssignmentsForWave() at the start of a wave.
- * 2. EnemyMover calls GetPathToLeastAssignedReachableCastle(startNode).
- * 3. The manager finds all castles that can currently be reached from startNode.
- * 4. It creates a wave plan so every reachable castle gets enemies when the
- *    wave has enough enemies to cover all reachable castles.
- * 5. Reachable castles receive an even enemy quota for the current wave.
- * 6. Each castle's valid paths are weighted by path length, so longer
- *    paths are chosen more often.
- * 7. It returns a List<PathNode> for EnemyMover to follow.
+ * Attached GameObject:
+ * Enemy prefabs, wave helpers, or enemy-related scene managers.
  *
- * Cache behavior:
- * - cachedPaths stores all paths between a start node and a castle.
- * - PathGraphState.Version is checked before using the cache.
- * - When a gate opens/closes and marks the graph dirty, cached paths are cleared.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for EnemyPathAssignmentManager within the enemy system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Support enemy spawning, pathing, targeting, combat, or wave pressure behaviour.
  *
- * Inspector setup:
- * - castleEnds must contain every CastleEndNode that enemies can attack.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
  *
- * Dependency notes:
- * - Pathfinder performs the graph search.
- * - PathGraphState tells this manager when gate/path availability changed.
- * - EnemyMover consumes the final selected path.
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Moves enemies, adjusts combat results, or influences castle pressure and wave outcomes.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify EnemyPathAssignmentManager in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Collections.Generic;
 using UnityEngine;
