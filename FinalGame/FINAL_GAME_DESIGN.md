@@ -59,6 +59,8 @@ AI Mode is one of the primary stable assessment routes. It provides AI-controlle
 
 Online Mode is implemented as an extension using Photon-related scripts and room/lobby flow. It is not the primary stable assessment path unless broader multiplayer validation is completed. See `FinalGame/CanalTD/ONLINE_STATUS.md`.
 
+Manual validation of online room joining, scene transition, turn authority, and card/build synchronization must be recorded separately before Online Mode is described as fully stable.
+
 ## Win / lose / completion condition
 
 The match completion route leads to `ResultScene`, where ranking/result information is displayed. Manual Unity verification is required to record final pass/fail evidence for every result-state scenario.

@@ -20,6 +20,8 @@ My work influenced the project at several levels:
 - system integration between cards, towers, players, enemies, and online flow
 - ongoing debugging and final documentation
 
+All final design decisions, Unity integration choices, testing decisions, acceptance or rejection of suggestions, and final submission responsibility remained my personal work for this individual coursework submission.
+
 ## Personal contribution evidence table
 
 | Area / system | Main files or scenes | What I personally did | AI assistance used? | Evidence / related issue or document |

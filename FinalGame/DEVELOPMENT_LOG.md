@@ -8,6 +8,8 @@ Exact development dates are not reconstructed here. The GitHub commit history, c
 
 ## Development timeline
 
+The periods below are broad development stages. Exact dates should be read from the commit history, closed issues, and Project board rather than reconstructed in this document.
+
 | Date or period | Goal | Work completed | Evidence / issue / file | Problem encountered | Change made | Result |
 |---|---|---|---|---|---|---|
 | Early concept stage | Define a clear game idea and rules direction. | Developed the CanalTD concept around canal/path control, indirect competition, cards, towers, and enemy pressure. | [prototype.md](./prototype.md), [FINAL_GAME_DESIGN.md](./FINAL_GAME_DESIGN.md) | Early scope could become too broad if every multiplayer idea was treated as core. | Final design separates primary Local/AI route from Online extension. | Clearer final vertical-slice scope. |
@@ -66,3 +68,4 @@ GitHub Issues were used as task tracking and completion evidence. Closed issues 
 - Online multiplayer edge cases require broader validation.
 - Balance and tutorial pacing may need further polish after more playtesting.
 - Manual test results in `FinalGame/TESTING_LOG.md` need to be completed in Unity before final submission.
+- Unity Editor compilation and runtime testing must be manually verified and recorded before claiming runtime pass results.

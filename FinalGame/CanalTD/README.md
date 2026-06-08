@@ -78,6 +78,7 @@ If someone opens the Unity project folder directly on GitHub, this file should h
 - `GameScene_AIPrototype.unity` is a prototype/AI development scene and is not the primary final route.
 - `GameScene.unity.bak_before_layout_edit` is a scene-layout backup and is not used for final assessment.
 - `Assets/Docs/v3.docx` is treated as a draft/report-like document. The assessment-facing Markdown documents linked above are the final documentation entry points.
+- UI debug/probe helper scripts such as `ManualUIButtonDebug.cs`, `UIClickProbe.cs`, `UIRaycastCleaner.cs`, and `UIRaycastDebugger.cs` are development support utilities, not main gameplay systems.
 
 ## Why this structure is useful
 

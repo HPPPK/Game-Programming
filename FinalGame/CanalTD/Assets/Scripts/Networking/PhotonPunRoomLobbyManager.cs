@@ -48,6 +48,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviourPunCallbacks
 public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
 {
+    private const string DefaultFixedRegion = "asia";
     private const string OnlinePhotonMode = "OnlinePhotonPUN2";
     private const string PrivateRoomKind = "private";
     private const string MatchmakingRoomKind = "matchmaking";
@@ -68,6 +69,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
     [Header("Photon Settings")]
     public string gameVersion = "0.1";
+    public string fixedRegion = DefaultFixedRegion;
     public byte maxPlayersPerRoom = 4;
     public byte minPlayersToStart = 2;
 
@@ -191,7 +193,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         Debug.Log("Photon connect requested.");
         ApplyLocalDisplayName();
         PhotonNetwork.AutomaticallySyncScene = true;
-        PhotonNetwork.GameVersion = gameVersion;
+        ApplyPhotonConnectionSettings();
 
         if (PhotonNetwork.IsConnected)
         {
@@ -226,18 +228,20 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     public void OnClickJoinRoom()
     {
 #if PHOTON_UNITY_NETWORKING
-        string roomCode = modeSelectSceneManager != null
+        string rawRoomCode = modeSelectSceneManager != null
             ? modeSelectSceneManager.GetOnlineJoinRoomCode()
             : string.Empty;
+        string normalizedRoomCode = NormalizeRoomCode(rawRoomCode);
 
-        if (string.IsNullOrWhiteSpace(roomCode))
+        if (string.IsNullOrWhiteSpace(normalizedRoomCode))
         {
-            ShowLobbyMessage("Enter a room code.");
+            ShowLobbyMessage("Enter a valid room code.");
             return;
         }
 
-        pendingJoinRoomCode = NormalizeRoomCode(roomCode);
+        pendingJoinRoomCode = normalizedRoomCode;
         pendingLobbyAction = PendingLobbyAction.JoinPrivateRoomByCode;
+        ShowPersistentLobbyMessage("Joining room " + pendingJoinRoomCode + "...");
 
         if (PhotonNetwork.InRoom)
         {
@@ -571,11 +575,16 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             ", activeScene=" + SceneManager.GetActiveScene().name +
             ", inRoom=" + PhotonNetwork.InRoom +
             ", inLobby=" + PhotonNetwork.InLobby +
+            ", gameVersion=" + PhotonNetwork.GameVersion +
+            ", cloudRegion=" + PhotonNetwork.CloudRegion +
             ", clientState=" + PhotonNetwork.NetworkClientState
         );
         ClearPendingLobbyState();
         ClearPersistentLobbyMessage();
-        ShowLobbyMessage("Join room failed: " + message);
+        ShowLobbyMessage(
+            "Join room failed: " + message +
+            ". Check that the host is still in the room, both clients use the same Photon settings, and enter only the shown room code."
+        );
         UpdateLobbyUIState();
     }
 
@@ -727,6 +736,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     private void EnsureConnectedAndLobbyReady()
     {
         ApplyLocalDisplayName();
+        ApplyPhotonConnectionSettings();
 
         if (!PhotonNetwork.IsConnected)
         {
@@ -754,6 +764,11 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     {
         if (!PhotonNetwork.IsConnected || (!PhotonNetwork.InLobby && !PhotonNetwork.InRoom))
         {
+            if (PhotonNetwork.IsConnected && !PhotonNetwork.InRoom && !PhotonNetwork.InLobby)
+            {
+                PhotonNetwork.JoinLobby();
+            }
+
             return;
         }
 
@@ -790,6 +805,8 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
                 ", isConnected=" + PhotonNetwork.IsConnected +
                 ", inLobby=" + PhotonNetwork.InLobby +
                 ", inRoom=" + PhotonNetwork.InRoom +
+                ", gameVersion=" + PhotonNetwork.GameVersion +
+                ", cloudRegion=" + PhotonNetwork.CloudRegion +
                 ", clientState=" + PhotonNetwork.NetworkClientState
             );
             PhotonNetwork.JoinRoom(pendingJoinRoomCode);
@@ -843,6 +860,8 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             ", activeScene=" + SceneManager.GetActiveScene().name +
             ", isConnected=" + PhotonNetwork.IsConnected +
             ", inLobby=" + PhotonNetwork.InLobby +
+            ", gameVersion=" + PhotonNetwork.GameVersion +
+            ", cloudRegion=" + PhotonNetwork.CloudRegion +
             ", clientState=" + PhotonNetwork.NetworkClientState
         );
         PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
@@ -873,6 +892,8 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             ", activeScene=" + SceneManager.GetActiveScene().name +
             ", isConnected=" + PhotonNetwork.IsConnected +
             ", inLobby=" + PhotonNetwork.InLobby +
+            ", gameVersion=" + PhotonNetwork.GameVersion +
+            ", cloudRegion=" + PhotonNetwork.CloudRegion +
             ", clientState=" + PhotonNetwork.NetworkClientState
         );
         PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
@@ -911,6 +932,22 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         };
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(updatedProperties);
+    }
+
+    private void ApplyPhotonConnectionSettings()
+    {
+        PhotonNetwork.GameVersion = gameVersion;
+
+        if (PhotonNetwork.PhotonServerSettings == null || PhotonNetwork.PhotonServerSettings.AppSettings == null)
+        {
+            return;
+        }
+
+        string normalizedFixedRegion = string.IsNullOrWhiteSpace(fixedRegion)
+            ? DefaultFixedRegion
+            : fixedRegion.Trim().ToLowerInvariant();
+
+        PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = normalizedFixedRegion;
     }
 
     private void AssignSlotsAuthoritatively()
@@ -1194,7 +1231,32 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
     private string NormalizeRoomCode(string roomCode)
     {
-        return string.IsNullOrWhiteSpace(roomCode) ? string.Empty : roomCode.Trim().ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(roomCode))
+        {
+            return string.Empty;
+        }
+
+        string normalizedRoomCode = roomCode.Trim();
+        int labelSeparatorIndex = normalizedRoomCode.LastIndexOf(':');
+
+        if (labelSeparatorIndex >= 0 && labelSeparatorIndex < normalizedRoomCode.Length - 1)
+        {
+            normalizedRoomCode = normalizedRoomCode.Substring(labelSeparatorIndex + 1);
+        }
+
+        StringBuilder roomCodeBuilder = new StringBuilder(normalizedRoomCode.Length);
+
+        for (int i = 0; i < normalizedRoomCode.Length; i++)
+        {
+            char currentCharacter = normalizedRoomCode[i];
+
+            if (char.IsLetterOrDigit(currentCharacter))
+            {
+                roomCodeBuilder.Append(char.ToUpperInvariant(currentCharacter));
+            }
+        }
+
+        return roomCodeBuilder.ToString();
     }
 
     private string GenerateShortRoomCode()

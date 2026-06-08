@@ -35,3 +35,7 @@ Primary assessment route:
 ## Manual verification note
 
 Unity Editor compilation and runtime testing must be manually verified. This overview maps systems to files and scenes; it does not claim every runtime path has passed testing.
+
+## Support and debug utility note
+
+Some UI helper scripts are retained for development support, such as manual button or raycast probing utilities. They are not listed as main gameplay systems and should not be treated as final feature claims.
