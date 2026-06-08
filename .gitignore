@@ -3,6 +3,7 @@
 
 # Local template workspace
 template/
+FinalGame/template/
 
 # Local presentation exports
 Post/Unity_EventDriven_Code_Lab_Editable_English.pptx
@@ -16,11 +17,12 @@ FinalGame/CanalTD/Build/
 FinalGame/CanalTD/Builds/
 FinalGame/CanalTD/Logs/
 FinalGame/CanalTD/*.log
-# Explicitly ignore tracked Unity compile/runtime logs.
+# Explicitly ignore Unity compile/runtime logs.
 FinalGame/CanalTD/unity-batch-compile.log
 FinalGame/CanalTD/Logs/shadercompiler-UnityShaderCompiler0.log
 FinalGame/CanalTD/UserSettings/
 
+# Old class activity Unity generated files
 2D shooter/Library/
 2D shooter/Temp/
 2D shooter/Obj/
@@ -29,4 +31,5 @@ FinalGame/CanalTD/UserSettings/
 2D shooter/Logs/
 2D shooter/UserSettings/
 
+# Local planning/generated helpers
 Plan.py
