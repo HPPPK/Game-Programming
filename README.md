@@ -36,6 +36,10 @@ Protect your own castle, manage enemy pressure better than the other players, an
 4. Press **Play** in the Unity Editor.
 5. Use the Home and Mode Select scenes to enter Local, AI, Guide, or Online play.
 
+## Build / release
+
+No downloadable release is currently provided. The assessed project should be opened in Unity `2022.3.62f3` from `FinalGame/CanalTD`.
+
 ## Main scenes
 
 - `BootstrapScene`: standard project entry scene

@@ -10,11 +10,18 @@ This document records testing coverage for the CanalTD playable vertical slice: 
 
 Local Mode and AI Mode are the main assessment routes. Online Mode is treated as an implemented extension unless broader multiplayer validation is completed separately.
 
+## Current verification status
+
+- Unity batchmode compile check was attempted locally on 2026-06-08 using Unity `2022.3.62f3`.
+- The batchmode check did not reach project compilation because Unity LicensingClient IPC timed out.
+- This result is an environment/licensing blocker, not evidence that C# compilation passed or failed.
+- Gameplay route tests still require manual Unity Editor verification and should not be marked `Pass` until actually checked.
+
 ## Testing summary table
 
 | ID | Area | Test case | Expected result | Manual result | Status | Evidence / related issue or file | Change made after testing |
 |---|---|---|---|---|---|---|---|
-| T01 | Unity setup | Unity project opens from `FinalGame/CanalTD` in Unity `2022.3.62f3`. | Project opens without missing project configuration. | Manual verification required | Needs manual verification | `FinalGame/CanalTD`, `ProjectSettings/ProjectVersion.txt` | To be completed after manual verification |
+| T01 | Unity setup | Unity project opens from `FinalGame/CanalTD` in Unity `2022.3.62f3`. | Project opens without missing project configuration. | Batchmode attempt on 2026-06-08 was blocked by Unity LicensingClient IPC timeout before project compilation. Manual Editor verification still required. | Partial | `FinalGame/CanalTD`, `ProjectSettings/ProjectVersion.txt`, ignored local log `unity-batch-compile.log` | No project change made; complete this check manually in Unity Editor |
 | T02 | Scene flow | `BootstrapScene` loads the normal scene flow. | Startup reaches the expected menu flow. | Manual verification required | Needs manual verification | `Assets/Scenes/BootstrapScene.unity` | To be completed after manual verification |
 | T03 | Home UI | `HomeScene` buttons navigate correctly. | Buttons route to mode selection, guide, settings, or exit behavior as configured. | Manual verification required | Needs manual verification | `Assets/Scenes/HomeScene.unity`, issue [#61](https://github.com/HPPPK/Game-Programming/issues/61) | To be completed after manual verification |
 | T04 | Local mode | `ModeSelectScene` enters Local Mode. | Local player setup loads the main game route. | Manual verification required | Needs manual verification | `Assets/Scenes/ModeSelectScene.unity`, `Assets/Scripts/UI/ModeSelectSceneManager.cs` | To be completed after manual verification |
@@ -67,4 +74,5 @@ Local Mode and AI Mode are the main assessment routes. Online Mode is treated as
 - Online multiplayer edge cases require broader validation.
 - Balance and tutorial pacing may need further polish after more playtesting.
 - Tests marked `Manual verification required` must be completed in Unity before final submission.
+- Unity batchmode compilation was attempted but blocked by Unity licensing IPC before compilation.
 - Unity Editor compilation and runtime testing must be manually verified.
