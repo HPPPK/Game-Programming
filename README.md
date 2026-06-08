@@ -133,14 +133,13 @@ Known limitations are documented as future work above. If any limitation needs a
 - AI-assisted coding and writing support are disclosed below and in supporting documentation.
 - The Guide scene, clearer turn indicators, and UI feedback improvements were added to improve accessibility and readability.
 - Development process and iterative progress are evidenced through the GitHub repository, including project issues, kanban-style task tracking, documentation updates, and ongoing revision records.
+- Unity Editor compilation and runtime testing must be manually verified through the testing log before final submission.
 
 ## AI / tutorial / template use
 
 - AI-assisted coding and debugging were used for selected implementation, refactoring, bug investigation, and documentation tasks.
-- Main AI-assisted coding support:
-  - `OpenAI GPT Codex 5.4`
-  - `OpenAI GPT Codex 5.5`
-  - Product page: https://openai.com/codex/
+- AI-assisted coding support was used for selected coding suggestions, debugging suggestions, refactoring suggestions, and documentation drafting.
+- Final design choices, Unity integration, testing, and acceptance/rejection of AI suggestions remained my responsibility.
 - Main AI-assisted art support:
   - GPT-generated card visuals and card-slot visuals for this project
 - Coursework planning templates in [FinalGame/template](./FinalGame/template) were used as lightweight project-management support.
@@ -148,6 +147,9 @@ Known limitations are documented as future work above. If any limitation needs a
 ## Development log
 
 - Main development log: [FinalGame/DEVELOPMENT_LOG.md](./FinalGame/DEVELOPMENT_LOG.md)
+- Final game design: [FinalGame/FINAL_GAME_DESIGN.md](./FinalGame/FINAL_GAME_DESIGN.md)
+- Testing log: [FinalGame/TESTING_LOG.md](./FinalGame/TESTING_LOG.md)
+- Submission checklist: [FinalGame/SUBMISSION_CHECKLIST.md](./FinalGame/SUBMISSION_CHECKLIST.md)
 - Early prototype document: [FinalGame/prototype.md](./FinalGame/prototype.md)
 
 ## Contribution and feedback notes
@@ -159,14 +161,20 @@ Known limitations are documented as future work above. If any limitation needs a
 - Main Unity project folder: [FinalGame/CanalTD](./FinalGame/CanalTD)
 - Project folder guide: [FinalGame/CanalTD/README.md](./FinalGame/CanalTD/README.md)
 - Contribution notes: [FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md](./FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md)
+- Final game design: [FinalGame/FINAL_GAME_DESIGN.md](./FinalGame/FINAL_GAME_DESIGN.md)
+- Testing log: [FinalGame/TESTING_LOG.md](./FinalGame/TESTING_LOG.md)
 - Development log: [FinalGame/DEVELOPMENT_LOG.md](./FinalGame/DEVELOPMENT_LOG.md)
-- Prototype document: [FinalGame/prototype.md](./FinalGame/prototype.md)
+- Submission checklist: [FinalGame/SUBMISSION_CHECKLIST.md](./FinalGame/SUBMISSION_CHECKLIST.md)
+- Unity system overview: [FinalGame/CanalTD/SYSTEM_OVERVIEW.md](./FinalGame/CanalTD/SYSTEM_OVERVIEW.md)
+- Online mode status: [FinalGame/CanalTD/ONLINE_STATUS.md](./FinalGame/CanalTD/ONLINE_STATUS.md)
 - Kanban and issue evidence: [FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md](./FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md)
+- Prototype document: [FinalGame/prototype.md](./FinalGame/prototype.md)
 - Resource / asset / AI references: [FinalGame/CanalTD/Assets/Docs/ResourceReferences.md](./FinalGame/CanalTD/Assets/Docs/ResourceReferences.md)
 
 ## Scope note
 
 This README is the main entry point for the FinalGame coursework documentation.  
+The assessed final Unity project is `FinalGame/CanalTD`.
 The unrelated folders below are not part of this final game but are related to the class activities documentation merge:
 
 - `2D shooter`

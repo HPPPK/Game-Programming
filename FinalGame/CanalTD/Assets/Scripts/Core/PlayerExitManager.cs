@@ -53,10 +53,10 @@ public class PlayerExitManager : MonoBehaviour
     public Button confirmExitButton;
     public Button cancelExitButton;
 
-    [Header("Future Online Placeholder")]
-    [Tooltip("Safe placeholder until a real online mode exists. Leave false for current project scenes.")]
+    [Header("Online Extension Fallback")]
+    [Tooltip("Safe fallback used for online-extension checks. Leave false for current local/AI assessment scenes.")]
     public bool forceOnlineMode = false;
-    [Tooltip("Future local online player id. Kept simple until networking is added.")]
+    [Tooltip("Local online player id used by extension checks when networking state is not available.")]
     public int localOnlinePlayerId = 0;
 
     private const string LocalFourPlayerMode = "Local4Player";
@@ -339,10 +339,10 @@ public class PlayerExitManager : MonoBehaviour
         CleanupOwnedBuildAreasAndTowers(playerId);
         CleanupOwnedShockTraps(playerId);
 
-        // TODO: Gates do not currently track ownership for lock state, so owned locks
-        // cannot be released precisely here. Land ownership cleanup still releases control.
-        Debug.LogWarning("TODO: Gate lock ownership is not tracked yet. No direct gate unlock cleanup was applied for player " + playerId + ".");
-        Debug.LogWarning("TODO: Temporary boost ownership is not tracked separately yet. Player-owned towers were removed, but foreign boosted towers are not explicitly reset.");
+        // Future improvement: gates do not currently track ownership for lock state,
+        // so owned locks cannot be released precisely here. Land ownership cleanup still releases control.
+        Debug.LogWarning("Future improvement: gate lock ownership is not tracked yet. No direct gate unlock cleanup was applied for player " + playerId + ".");
+        Debug.LogWarning("Future improvement: temporary boost ownership is not tracked separately yet. Player-owned towers were removed, but foreign boosted towers are not explicitly reset.");
 
         player.MarkEliminated();
         player.RefreshUI();

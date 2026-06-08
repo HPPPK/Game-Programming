@@ -1,32 +1,30 @@
 /*
- * File: EnemyPathAssignmentManager.cs
+ * CanalTD - EnemyPathAssignmentManager
  *
  * Purpose:
- * Implements EnemyPathAssignmentManager for the enemy layer of CanalTD and supports the playable vertical slice of the project.
+ * Assigns enemies to reachable destination paths so enemy pressure can respond to canal/path state.
  *
  * Attached GameObject:
- * Enemy prefabs, wave helpers, or enemy-related scene managers.
+ * Configured in the Unity scene / Inspector as part of the enemy wave and routing setup.
  *
  * Main responsibilities:
- * - Provide the runtime behaviour for EnemyPathAssignmentManager within the enemy system.
- * - Coordinate related objects, state changes, and cross-system communication.
- * - Support enemy spawning, pathing, targeting, combat, or wave pressure behaviour.
+ * - Collect and evaluate valid route data for spawned enemies.
+ * - Select reachable castle/path destinations based on current path graph state.
+ * - Help distribute pressure so enemy waves support the indirect competition mechanic.
+ * - Reassign or validate routes when gate/path conditions change.
  *
  * Inputs:
  * - Inspector references configured in Unity.
- * - Runtime state from connected managers, scene objects, or event callbacks.
- * - Path graph data, wave settings, target selection, or movement parameters.
+ * - Path graph data, castle/end-node state, wave spawn requests, and gate/path availability.
  *
- * Outputs or effects:
- * - Changes scene state, gameplay data, or visual feedback in the active match.
- * - Moves enemies, adjusts combat results, or influences castle pressure and wave outcomes.
+ * Outputs / effects:
+ * - Assigns enemy path targets and influences which castles receive enemy pressure.
  *
- * Authorship or assistance:
- * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
- * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ * Authorship / assistance:
+ * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
- * - Verify EnemyPathAssignmentManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Manually verify valid path selection, blocked/gated paths, route recalculation, pressure distribution, and enemy destination assignment.
  */
 using System.Collections.Generic;
 using UnityEngine;

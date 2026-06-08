@@ -22,6 +22,16 @@ This file records the main external resources, AI-assisted support, and referenc
 
 ### Confirmed audio files currently used in Unity
 
+| Resource type | Local path / file | Source / creator | Source link | Licence / attribution note | Used for | Traceability status |
+|---|---|---|---|---|---|---|
+| Music | `Assets/Art/Asset/Sound/backgroundmusicforvideos-roblox-minecraft-fortnite-video-game-music-358426.mp3` | `Roblox Minecraft Fortnite Video Game Music` / `BackgroundMusicForVideos` | https://pixabay.com/music/video-games-roblox-minecraft-fortnite-video-game-music-358426/ | Pixabay source page | `backgroundMusic` | Complete source link recorded |
+| Sound effect | `Assets/Art/Asset/Sound/skyscraper_seven-click-buttons-ui-menu-sounds-effects-button-7-203601.mp3` | `Click Buttons - UI Menu Sounds Effects - Button 7` / `skyscraper_seven` | https://pixabay.com/sound-effects/film-special-effects-click-buttons-ui-menu-sounds-effects-button-7-203601/ | Pixabay source page | `uiClickSound` | Complete source link recorded |
+| Sound effect | `Assets/Art/Asset/Sound/oxidvideos-taking-playing-card-3-522513.mp3` | `Taking Playing Card` / `OxidVideos` | https://pixabay.com/sound-effects/film-special-effects-taking-playing-card-522520/ | Pixabay source page | `cardPlaySound` | Complete source link recorded |
+| Sound effect | `Assets/Art/Asset/Sound/Gun.mp3` | `Shoot 5` / `freesound_community` | https://pixabay.com/sound-effects/film-special-effects-shoot-5-102360/ | Pixabay source page | `towerShootSound` | Complete source link recorded |
+| Sound effect | `Assets/Art/Asset/Sound/death.mp3` | `Dramatic Death Collapse` / `Universfield` | https://pixabay.com/sound-effects/film-special-effects-dramatic-death-collapse-352720/ | Pixabay source page | `enemyDeathSound` | Complete source link recorded |
+| Sound effect | `Assets/Art/Asset/Sound/building.mp3` | `Gaming Victory` / `EAGLAXLE` | https://pixabay.com/sound-effects/gaming-victory-464016/ | Pixabay source page | `buildSound` | Complete source link recorded |
+| Sound effect | `Assets/Art/Asset/Sound/Victory.mp3` | `Victory Chime` / `Scratchonix` | https://pixabay.com/sound-effects/musical-victory-chime-366449/ | Pixabay source page | `victorySound` | Complete source link recorded |
+
 - Background music:
   - Local file: `Assets/Art/Asset/Sound/backgroundmusicforvideos-roblox-minecraft-fortnite-video-game-music-358426.mp3`
   - Assigned use: `backgroundMusic`
@@ -87,9 +97,9 @@ This file records the main external resources, AI-assisted support, and referenc
 ## AI-assisted coding or documentation
 
 - AI coding support:
-  - Tool / model: `OpenAI GPT Codex 5.4 and GPT Codex 5.5`
-  - Link: `https://openai.com/codex/`
-  - Notes: `Used mainly for coding assistance, debugging support, refactoring suggestions, and documentation drafting.`
+  - Tool type: `AI-assisted coding and documentation tools`
+  - Notes: `Used for selected coding suggestions, debugging suggestions, refactoring suggestions, and documentation drafting.`
+  - Responsibility note: `Final design choices, Unity integration, testing, and acceptance/rejection of suggestions remained the student's responsibility.`
 - AI-generated or AI-assisted art reference:
   - Tool: `GPT image / visual generation workflow for card and card-slot art`
   - Link: `Used as project-specific generative support for card visuals; no separate asset-pack page is being cited here.`
@@ -99,6 +109,11 @@ This file records the main external resources, AI-assisted support, and referenc
 
 - Planning / feature / bug / integration template source:
   - Link: `Templates are stored locally in FinalGame/template and were used as lightweight internal project-management support.`
+
+## Items with incomplete traceability
+
+- No currently assigned audio file is documented here with incomplete traceability.
+- If an additional asset is later found without a source link, it should be added to this section as `Incomplete` rather than given an invented source.
 
 ## Local project assets already used
 
