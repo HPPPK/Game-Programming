@@ -65,12 +65,8 @@ If someone opens the Unity project folder directly on GitHub, this file should h
 - Root README: [../../README.md](../../README.md)
 - Final game design: [../FINAL_GAME_DESIGN.md](../FINAL_GAME_DESIGN.md)
 - Testing log: [../TESTING_LOG.md](../TESTING_LOG.md)
-- Kanban and issue evidence: [../KANBAN_AND_ISSUE_EVIDENCE.md](../KANBAN_AND_ISSUE_EVIDENCE.md)
 - Development log: [../DEVELOPMENT_LOG.md](../DEVELOPMENT_LOG.md)
-- Submission checklist: [../SUBMISSION_CHECKLIST.md](../SUBMISSION_CHECKLIST.md)
 - Contribution and feedback notes: [./CONTRIBUTIONS_AND_FEEDBACK.md](./CONTRIBUTIONS_AND_FEEDBACK.md)
-- Unity system overview: [./SYSTEM_OVERVIEW.md](./SYSTEM_OVERVIEW.md)
-- Online mode status: [./ONLINE_STATUS.md](./ONLINE_STATUS.md)
 - Resource references: [./Assets/Docs/ResourceReferences.md](./Assets/Docs/ResourceReferences.md)
 
 ## Prototype and draft files

@@ -85,7 +85,8 @@ Online mode is included as an implemented extension, but it is not the primary s
 
 ## Known limitations
 
-- Online mode is an extension and still needs broader multi-device and late-match validation.
+- Online mode is an implemented extension and still needs broader multi-device, late-match, disconnection, and card/build synchronization validation.
+- Online room joining should be checked with both clients using the same Photon AppId, fixed region, and game version.
 - Balance and tutorial pacing can be improved with more playtesting.
 
 ## Development tracking / Kanban evidence
@@ -100,9 +101,19 @@ The GitHub Project/Kanban board was used to move tasks through planning, progres
 - Closed development issues: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aclosed
 - Open remaining issues / limitations: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aopen
 - Main milestone: https://github.com/HPPPK/Game-Programming/milestone/2
-- Kanban and issue evidence summary: [FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md](./FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md)
 
 Known limitations are documented as future work above. If any limitation needs active tracking after submission, it should be represented by a separate open issue instead of reopening completed development tasks.
+
+## Main Unity systems
+
+| System | Main scripts / scenes | Assessment relevance |
+|---|---|---|
+| Turn / AP management | `Assets/Scripts/Core/TurnManager.cs`, `GamePhaseManager.cs` | Core rule structure, turn limits, AP costs, and player action flow. |
+| Cards and targeting | `Assets/Scripts/Card`, `GameScene` | Draw, play, discard, targeting confirm/cancel, and tactical interaction. |
+| Towers and resources | `Assets/Scripts/Tower`, `PlayerResource.cs` | Land ownership, build, upgrade, sell, tower combat, and resource decisions. |
+| Enemy routing / canal pressure | `Assets/Scripts/Enemy`, `Assets/Scripts/Path`, `Assets/Scripts/Map` | Main strategic pressure mechanic and enemy-wave challenge. |
+| UI, guide, audio, result | `Assets/Scripts/UI`, `Assets/Scripts/Tutorial`, `ResultScene` | Player feedback, onboarding, status clarity, audio feedback, and completion state. |
+| AI / Online modes | `AIPrototypeTurnManager.cs`, `Assets/Scripts/Networking` | AI supports the primary assessment route; Online is an implemented extension. |
 
 ## Credits
 
@@ -137,7 +148,7 @@ Known limitations are documented as future work above. If any limitation needs a
 - AI-assisted coding and writing support are disclosed below and in supporting documentation.
 - The Guide scene, clearer turn indicators, and UI feedback improvements were added to improve accessibility and readability.
 - Development process and iterative progress are evidenced through the GitHub repository, including project issues, kanban-style task tracking, documentation updates, and ongoing revision records.
-- Unity Editor compilation and runtime testing must be manually verified through the testing log before final submission.
+- Local and AI gameplay route verification is recorded in the testing log based on student manual Unity Editor checks.
 
 ## AI / tutorial / template use
 
@@ -148,14 +159,13 @@ Known limitations are documented as future work above. If any limitation needs a
   - GPT-generated card visuals and card-slot visuals for this project
 - Local coursework planning templates were used as private planning support and are intentionally not committed because they are excluded by `.gitignore`.
 - The template folder is not required for running or assessing the final game.
-- Submitted assessment evidence is provided through the README, final design document, testing log, development log, Kanban evidence, contribution notes, and resource references.
+- Submitted assessment evidence is provided through the README, final design document, testing log, development log, GitHub Project/Issues links, contribution notes, and resource references.
 
 ## Development log
 
 - Main development log: [FinalGame/DEVELOPMENT_LOG.md](./FinalGame/DEVELOPMENT_LOG.md)
 - Final game design: [FinalGame/FINAL_GAME_DESIGN.md](./FinalGame/FINAL_GAME_DESIGN.md)
 - Testing log: [FinalGame/TESTING_LOG.md](./FinalGame/TESTING_LOG.md)
-- Submission checklist: [FinalGame/SUBMISSION_CHECKLIST.md](./FinalGame/SUBMISSION_CHECKLIST.md)
 - Early prototype document: [FinalGame/prototype.md](./FinalGame/prototype.md)
 
 ## Contribution and feedback notes
@@ -166,16 +176,14 @@ Known limitations are documented as future work above. If any limitation needs a
 
 - Main Unity project folder: [FinalGame/CanalTD](./FinalGame/CanalTD)
 - Project folder guide: [FinalGame/CanalTD/README.md](./FinalGame/CanalTD/README.md)
-- Contribution notes: [FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md](./FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md)
 - Final game design: [FinalGame/FINAL_GAME_DESIGN.md](./FinalGame/FINAL_GAME_DESIGN.md)
-- Testing log: [FinalGame/TESTING_LOG.md](./FinalGame/TESTING_LOG.md)
 - Development log: [FinalGame/DEVELOPMENT_LOG.md](./FinalGame/DEVELOPMENT_LOG.md)
-- Submission checklist: [FinalGame/SUBMISSION_CHECKLIST.md](./FinalGame/SUBMISSION_CHECKLIST.md)
-- Unity system overview: [FinalGame/CanalTD/SYSTEM_OVERVIEW.md](./FinalGame/CanalTD/SYSTEM_OVERVIEW.md)
-- Online mode status: [FinalGame/CanalTD/ONLINE_STATUS.md](./FinalGame/CanalTD/ONLINE_STATUS.md)
-- Kanban and issue evidence: [FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md](./FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md)
-- Prototype document: [FinalGame/prototype.md](./FinalGame/prototype.md)
+- Testing log: [FinalGame/TESTING_LOG.md](./FinalGame/TESTING_LOG.md)
+- Contribution notes: [FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md](./FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md)
 - Resource / asset / AI references: [FinalGame/CanalTD/Assets/Docs/ResourceReferences.md](./FinalGame/CanalTD/Assets/Docs/ResourceReferences.md)
+- GitHub Project board: https://github.com/users/HPPPK/projects/2
+- Closed development issues: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aclosed
+- Main milestone: https://github.com/HPPPK/Game-Programming/milestone/2
 
 ## Backup, draft, and support files
 
