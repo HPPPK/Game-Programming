@@ -4562,7 +4562,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -16.5}
-  m_SizeDelta: {x: 30, y: 1}
+  m_SizeDelta: {x: 35, y: 10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &134782284
 MonoBehaviour:
@@ -4761,8 +4761,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 1
-  m_fontSizeBase: 1
+  m_fontSize: 0.8
+  m_fontSizeBase: 0.8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -17587,9 +17587,11 @@ MonoBehaviour:
   worldMessageOffsetAbove: {x: 0, y: 0.06}
   worldMessageOffsetBelow: {x: 0, y: -0.06}
   worldMessageOffsetRight: {x: 0.06, y: 0}
+  worldMessageOffsetLeft: {x: -0.06, y: 0}
   worldMessageOffsetRightForLand: {x: 0.35, y: 0}
   messageViewportTopLimit: 0.88
   uiMessageGap: 18
+  tutorialPart5TopLeftMessageGap: 8
   worldMessageGap: 0.005
   worldMessageGapForLand: 0.08
   uiFramePadding: {x: 18, y: 18}
@@ -54371,7 +54373,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &535146065
 RectTransform:
   m_ObjectHideFlags: 0
@@ -63225,7 +63227,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 10, y: 3}
+  m_AnchoredPosition: {x: 10, y: 3.5}
   m_SizeDelta: {x: 12, y: 3.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &945628417
@@ -63271,7 +63273,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 945628418}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1842489413}
+        m_TargetAssemblyTypeName: TutorialManager, Assembly-CSharp
+        m_MethodName: OnClickOpenModeSelect
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &945628418
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65342,7 +65356,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -10, y: 3}
+  m_AnchoredPosition: {x: -10, y: 3.5}
   m_SizeDelta: {x: 12, y: 3.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1031674263
@@ -65388,7 +65402,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1031674264}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1842489413}
+        m_TargetAssemblyTypeName: TutorialManager, Assembly-CSharp
+        m_MethodName: OnClickReturnToMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1031674264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65787,6 +65813,8 @@ MonoBehaviour:
   messageText: {fileID: 683588817}
   partTitleText: {fileID: 1998773524}
   completionPanel: {fileID: 0}
+  completionTitleText: {fileID: 0}
+  completionMessageText: {fileID: 0}
   messagePanelBackground: {fileID: 0}
   tutorialBackgroundColor: {r: 0.17, g: 0.14, b: 0.1, a: 0.92}
   completionBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
@@ -68121,7 +68149,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1750395230, guid: 20b214a442f0b4a09ad67f9e33b94bbe, type: 3}
+  m_Sprite: {fileID: 21300000, guid: cd481f5685f59413fb3764043d2d56d0, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -70739,7 +70767,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 19}
-  m_SizeDelta: {x: 60, y: 10}
+  m_SizeDelta: {x: 50, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1379908662
 MonoBehaviour:
@@ -74355,6 +74383,7 @@ MonoBehaviour:
   darkOverlay: {fileID: 236984364}
   hammerButton: {fileID: 0}
   normalGameplayUI: {fileID: 1274524793}
+  confirmButton: {fileID: 0}
   currentPlayerId: 0
   gateOwnershipManager: {fileID: 1823688006}
   playerManager: {fileID: 0}
@@ -78395,8 +78424,14 @@ MonoBehaviour:
   tutorialEnemyDemoSpawner: {fileID: 2122048852}
   cardDrawManager: {fileID: 2056775816}
   guideSceneName: GuideScene
+  modeSelectSceneName: ModeSelectScene
   practiceVsAISceneName: GameScene_AIPrototype
   homeSceneName: HomeScene
+  tutorialCompletionMessage: 'You have completed the CanalTD tutorial.
+
+
+    Good
+    luck!'
   localPlayerCastleVisualPath: Players/Castle_BottomLeft
   localPlayerInfoPanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel
   playerNameDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/Player
@@ -78404,13 +78439,30 @@ MonoBehaviour:
   goldDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/MoneyText
   cardCountDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/cardNum
   scoreDisplayPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel/PointText
-  turnIndicatorPath: UI/Canvas/TextMeshProUGUI
   claimableLandPath: Map/BuildAreas/Claimable_BuildArea_Gate01
   publicBuildAreaPath: Map/BuildAreas/Public_BuildArea_01
   towerBuildAreaPath: Map/BuildAreas/Public_BuildArea_01
   radialConfirmButtonPath: UI/Canvas/RadialTowerMenu/ConfirmButton
   radialUpgradeButtonPath: UI/Canvas/RadialTowerMenu/UpgradeButton
   guideSceneStartingGold: 100
+  player1PanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel
+  player2PanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel (1)
+  player3PanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel (2)
+  player4PanelPath: UI/Canvas/NormalGameplayUI/PlayerStatusPanel (3)
+  cardHandPath: UI/Canvas/NormalGameplayUI/CardSlot
+  drawButtonPath: UI/Canvas/NormalGameplayUI/DrawCardButton
+  discardButtonPath: UI/Canvas/NormalGameplayUI/DiscardButton
+  playButtonPath: UI/Canvas/NormalGameplayUI/PlayCardButton
+  targetingConfirmButtonPath: UI/Canvas/TargetingUI/ConfirmButton
+  targetingCancelButtonPath: UI/Canvas/TargetingUI/CancelButton
+  tutorialGatePath: Gates/Gate_Stone_01
+  tutorialShockTrapNodePath: Map/PathGraph/RouteNodes/R_Left_01
+  tutorialOpponentCastlePath: Players/Castle_TopRight
+  tutorialOwnedTowerAreaPath: Map/BuildAreas/Public_BuildArea_01
+  tutorialOpponentLandAreaPath: Map/BuildAreas/Claimable_BuildArea_Gate02
+  tutorialOpponentTowerAreaPath: Map/BuildAreas/Claimable_BuildArea_Gate03
+  endTurnButtonPath: UI/Canvas/NormalGameplayUI/EndTurnButton
+  roundTextPath: UI/Canvas/TextMeshProUGUI
 --- !u!4 &1842489414
 Transform:
   m_ObjectHideFlags: 0
@@ -78542,6 +78594,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 421083976}
   - {fileID: 1384337318}
   - {fileID: 236984365}
   - {fileID: 1872220168}
@@ -78553,7 +78606,6 @@ RectTransform:
   - {fileID: 1048470136}
   - {fileID: 750669010}
   - {fileID: 535308326}
-  - {fileID: 421083976}
   - {fileID: 1211274339}
   m_Father: {fileID: 577981503}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -79973,7 +80025,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 2}
+  m_AnchoredPosition: {x: 0, y: 1.7}
   m_SizeDelta: {x: 32, y: 8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1959679784

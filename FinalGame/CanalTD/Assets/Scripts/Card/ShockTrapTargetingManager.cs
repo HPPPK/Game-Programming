@@ -220,6 +220,7 @@ public class ShockTrapTargetingManager : MonoBehaviour
 
         isTargeting = true;
         SetTargetingVisuals(true);
+        UpdateConfirmButtonState();
         SetRouteNodeVisualsActive(true);
         CreateRouteNodeHighlights();
         EnsurePreview();
@@ -357,6 +358,8 @@ public class ShockTrapTargetingManager : MonoBehaviour
             ExitTargetingMode();
         }
 
+        TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.PlaceShockTrap, node != null ? node.gameObject : null);
+
         return true;
     }
 
@@ -436,6 +439,8 @@ public class ShockTrapTargetingManager : MonoBehaviour
         selectedNode = hoveredNode;
         UpdatePreview(selectedNode.transform.position, selectedPreviewColor);
         HighlightNode(selectedNode, selectedPreviewColor);
+        UpdateConfirmButtonState();
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.SelectTarget, selectedNode != null ? selectedNode.gameObject : null);
         Debug.Log("Selected RouteNode: " + selectedNode.name);
     }
 
@@ -945,6 +950,23 @@ public class ShockTrapTargetingManager : MonoBehaviour
         routeNodes.Clear();
         isTargeting = false;
         SetTargetingVisuals(false);
+        UpdateConfirmButtonState();
+    }
+
+    private void UpdateConfirmButtonState()
+    {
+        if (confirmButton == null)
+        {
+            return;
+        }
+
+        if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialGameplayActive)
+        {
+            confirmButton.interactable = true;
+            return;
+        }
+
+        confirmButton.interactable = isTargeting && selectedNode != null;
     }
 
     private void SetRouteNodeVisualsActive(bool active)

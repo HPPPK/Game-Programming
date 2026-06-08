@@ -190,6 +190,7 @@ public class TileTargetingManager : MonoBehaviour
 
         isTargeting = true;
         SetTargetingVisuals(true);
+        UpdateConfirmButtonState();
 
         foreach (TowerBuildArea buildArea in validTargets)
         {
@@ -410,6 +411,8 @@ public class TileTargetingManager : MonoBehaviour
             ExitTargetingMode();
         }
 
+        TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.TakeOver, buildArea != null ? buildArea.gameObject : null);
+
         return true;
     }
 
@@ -468,6 +471,8 @@ public class TileTargetingManager : MonoBehaviour
             ExitTargetingMode();
         }
 
+        TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.FreezeClaim, buildArea != null ? buildArea.gameObject : null);
+
         return true;
     }
 
@@ -504,6 +509,8 @@ public class TileTargetingManager : MonoBehaviour
 
         selectedTile = clickedTile;
         ApplyTileVisual(selectedTile, selectedColor, selectedSortingOrder, true);
+        UpdateConfirmButtonState();
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.SelectTarget, selectedTile != null ? selectedTile.gameObject : null);
 
         Debug.Log($"Selected tile: {selectedTile.name}");
     }
@@ -765,6 +772,23 @@ public class TileTargetingManager : MonoBehaviour
         currentMode = TileTargetingMode.None;
         isTargeting = false;
         SetTargetingVisuals(false);
+        UpdateConfirmButtonState();
+    }
+
+    private void UpdateConfirmButtonState()
+    {
+        if (confirmButton == null)
+        {
+            return;
+        }
+
+        if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialGameplayActive)
+        {
+            confirmButton.interactable = true;
+            return;
+        }
+
+        confirmButton.interactable = isTargeting && selectedTile != null;
     }
 
     private void ClearHighlights()

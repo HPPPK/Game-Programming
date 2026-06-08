@@ -244,6 +244,7 @@ public class PlayerTargetingManager : MonoBehaviour
 
         isTargeting = true;
         SetTargetingVisuals(true);
+        UpdateConfirmButtonState();
 
         // Show action markers on valid target castles
         if (CurrentTurnIndicatorManager.Instance != null)
@@ -487,6 +488,7 @@ public class PlayerTargetingManager : MonoBehaviour
         RefreshVisibleHandAfterPlayerInteraction();
 
         TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.StealCard, tutorialTarget != null ? tutorialTarget.gameObject : null);
+
         return true;
     }
 
@@ -563,6 +565,7 @@ public class PlayerTargetingManager : MonoBehaviour
         RefreshVisibleHandAfterPlayerInteraction();
 
         TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.TradeHands, tutorialTarget != null ? tutorialTarget.gameObject : null);
+
         return true;
     }
 
@@ -619,6 +622,7 @@ public class PlayerTargetingManager : MonoBehaviour
         RefreshVisibleHandAfterPlayerInteraction();
 
         TutorialManager.Instance?.NotifyCardPlayed(TutorialActionType.Disrupt, tutorialTarget != null ? tutorialTarget.gameObject : null);
+
         return true;
     }
 
@@ -771,6 +775,9 @@ public class PlayerTargetingManager : MonoBehaviour
         {
             ApplyTargetVisual(selectedRenderer, selectedColor, selectedSortingOrder);
         }
+
+        UpdateConfirmButtonState();
+        TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.SelectTarget, clickedPlayer != null ? clickedPlayer.gameObject : null);
 
         Debug.Log("Selected player: " + selectedPlayer.GetDisplayName());
     }
@@ -1159,12 +1166,29 @@ public class PlayerTargetingManager : MonoBehaviour
         currentMode = PlayerTargetingMode.None;
         isTargeting = false;
         SetTargetingVisuals(false);
+        UpdateConfirmButtonState();
 
         // Restore turn markers when exiting targeting mode
         if (CurrentTurnIndicatorManager.Instance != null)
         {
             CurrentTurnIndicatorManager.Instance.ResetMarkersToTurnIndicator();
         }
+    }
+
+    private void UpdateConfirmButtonState()
+    {
+        if (confirmButton == null)
+        {
+            return;
+        }
+
+        if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialGameplayActive)
+        {
+            confirmButton.interactable = true;
+            return;
+        }
+
+        confirmButton.interactable = isTargeting && selectedPlayer != null;
     }
 
     private void RestoreTargetVisuals()

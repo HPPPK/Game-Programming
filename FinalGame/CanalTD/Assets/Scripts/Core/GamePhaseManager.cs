@@ -226,7 +226,9 @@ public class GamePhaseManager : MonoBehaviour
 
         if (!IsPlayerPhase())
         {
-            ShowToast("Enemy wave is running.");
+            ShowToast(TutorialManager.Instance != null
+                ? TutorialManager.Instance.GetWaveInteractionBlockedMessageOrDefault("Enemy wave is running.")
+                : "Enemy wave is running.");
             return;
         }
 

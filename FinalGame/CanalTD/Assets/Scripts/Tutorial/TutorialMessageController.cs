@@ -36,6 +36,8 @@ public class TutorialMessageController : MonoBehaviour
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text partTitleText;
     [SerializeField] private GameObject completionPanel;
+    [SerializeField] private TMP_Text completionTitleText;
+    [SerializeField] private TMP_Text completionMessageText;
     [SerializeField] private Image messagePanelBackground;
     [SerializeField] private Color tutorialBackgroundColor = new Color(0.17f, 0.14f, 0.10f, 0.92f);
     [SerializeField] private Color completionBackgroundColor = Color.white;
@@ -50,11 +52,30 @@ public class TutorialMessageController : MonoBehaviour
     private TutorialManager tutorialManager;
     private bool cachedDefaultBackgroundColor;
     private Color defaultBackgroundColor;
+    private RectTransform messageRootRect;
+    private Vector2 defaultMessageRootAnchoredPosition;
+    private Vector2 defaultMessageRootSizeDelta;
+    private bool cachedDefaultMessageRootLayout;
+    private float defaultMessageFontSize;
+    private float defaultTitleFontSize;
+    private bool cachedDefaultFontSizes;
+    private RectTransform messageTextRect;
+    private RectTransform partTitleTextRect;
+    private Vector2 defaultMessageTextAnchoredPosition;
+    private Vector2 defaultMessageTextSizeDelta;
+    private Vector2 defaultPartTitleAnchoredPosition;
+    private Vector2 defaultPartTitleSizeDelta;
+    private bool cachedDefaultTextRects;
 
     private void Awake()
     {
         ResolveButtonReferences();
+        ResolveCompletionPanelReference();
+        ResolveCompletionTextReferences();
         ResolveBackgroundReference();
+        ResolveMessageRootLayoutDefaults();
+        ResolveFontDefaults();
+        ResolveTextRectDefaults();
 
         if (previousButton != null)
         {
@@ -93,6 +114,7 @@ public class TutorialMessageController : MonoBehaviour
         }
 
         ApplyTutorialBackgroundColor();
+        ApplyStepLayout(step);
 
         if (completionPanel != null)
         {
@@ -129,13 +151,28 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
-    public void ShowCompletionPanel()
+    public void ShowCompletionPanel(string completionMessage = null)
     {
+        ResolveCompletionPanelReference();
+        ResolveCompletionTextReferences();
         ApplyCompletionBackgroundColor();
+        RestoreDefaultStepLayout();
 
         if (messageRoot != null)
         {
             messageRoot.SetActive(false);
+        }
+
+        if (completionTitleText != null)
+        {
+            completionTitleText.text = "Congratulations!";
+        }
+
+        if (completionMessageText != null)
+        {
+            completionMessageText.text = string.IsNullOrWhiteSpace(completionMessage)
+                ? "You have completed the CanalTD tutorial.\n\nGood luck!"
+                : completionMessage;
         }
 
         if (completionPanel != null)
@@ -146,6 +183,8 @@ public class TutorialMessageController : MonoBehaviour
 
     public void HideAll()
     {
+        RestoreDefaultStepLayout();
+
         if (messageRoot != null)
         {
             messageRoot.SetActive(false);
@@ -206,6 +245,109 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    private void ResolveCompletionPanelReference()
+    {
+        if (completionPanel != null)
+        {
+            return;
+        }
+
+        Transform parent = transform.parent;
+
+        if (parent != null)
+        {
+            Transform siblingPanel = parent.Find("TutorialCompletionPanel");
+
+            if (siblingPanel != null)
+            {
+                completionPanel = siblingPanel.gameObject;
+                return;
+            }
+        }
+
+        GameObject foundPanel = GameObject.Find("TutorialCompletionPanel");
+
+        if (foundPanel != null)
+        {
+            completionPanel = foundPanel;
+        }
+    }
+
+    private void ResolveCompletionTextReferences()
+    {
+        if (completionPanel == null)
+        {
+            return;
+        }
+
+        if (completionTitleText == null)
+        {
+            Transform titleTransform = completionPanel.transform.Find("TitleText");
+
+            if (titleTransform != null)
+            {
+                completionTitleText = titleTransform.GetComponent<TMP_Text>();
+            }
+        }
+
+        if (completionMessageText == null)
+        {
+            Transform messageTransform = completionPanel.transform.Find("MessageText");
+
+            if (messageTransform != null)
+            {
+                completionMessageText = messageTransform.GetComponent<TMP_Text>();
+            }
+        }
+    }
+
+    private void ResolveMessageRootLayoutDefaults()
+    {
+        if (messageRootRect == null)
+        {
+            messageRootRect = transform as RectTransform;
+        }
+
+        if (!cachedDefaultMessageRootLayout && messageRootRect != null)
+        {
+            defaultMessageRootAnchoredPosition = messageRootRect.anchoredPosition;
+            defaultMessageRootSizeDelta = messageRootRect.sizeDelta;
+            cachedDefaultMessageRootLayout = true;
+        }
+    }
+
+    private void ResolveFontDefaults()
+    {
+        if (!cachedDefaultFontSizes && messageText != null && partTitleText != null)
+        {
+            defaultMessageFontSize = messageText.fontSize;
+            defaultTitleFontSize = partTitleText.fontSize;
+            cachedDefaultFontSizes = true;
+        }
+    }
+
+    private void ResolveTextRectDefaults()
+    {
+        if (messageTextRect == null && messageText != null)
+        {
+            messageTextRect = messageText.transform as RectTransform;
+        }
+
+        if (partTitleTextRect == null && partTitleText != null)
+        {
+            partTitleTextRect = partTitleText.transform as RectTransform;
+        }
+
+        if (!cachedDefaultTextRects && messageTextRect != null && partTitleTextRect != null)
+        {
+            defaultMessageTextAnchoredPosition = messageTextRect.anchoredPosition;
+            defaultMessageTextSizeDelta = messageTextRect.sizeDelta;
+            defaultPartTitleAnchoredPosition = partTitleTextRect.anchoredPosition;
+            defaultPartTitleSizeDelta = partTitleTextRect.sizeDelta;
+            cachedDefaultTextRects = true;
+        }
+    }
+
     private Button FindChildButton(string objectName)
     {
         Transform child = transform.Find(objectName);
@@ -249,6 +391,101 @@ public class TutorialMessageController : MonoBehaviour
         {
             messagePanelBackground.color = tutorialBackgroundColor;
         }
+    }
+
+    private void ApplyStepLayout(TutorialStep step)
+    {
+        ResolveMessageRootLayoutDefaults();
+        ResolveFontDefaults();
+
+        if (IsFinalSummaryStep(step))
+        {
+            ApplyFinalSummaryLayout();
+            return;
+        }
+
+        RestoreDefaultStepLayout();
+    }
+
+    private void ApplyFinalSummaryLayout()
+    {
+        ResolveTextRectDefaults();
+
+        if (messageRootRect != null)
+        {
+            messageRootRect.anchoredPosition = defaultMessageRootAnchoredPosition;
+            messageRootRect.sizeDelta = new Vector2(
+                defaultMessageRootSizeDelta.x + 4f,
+                defaultMessageRootSizeDelta.y + 4.5f);
+        }
+
+        if (partTitleTextRect != null && cachedDefaultTextRects)
+        {
+            partTitleTextRect.anchoredPosition = defaultPartTitleAnchoredPosition;
+            partTitleTextRect.sizeDelta = defaultPartTitleSizeDelta;
+        }
+
+        if (messageTextRect != null && cachedDefaultTextRects)
+        {
+            messageTextRect.anchoredPosition = new Vector2(
+                defaultMessageTextAnchoredPosition.x,
+                defaultMessageTextAnchoredPosition.y - 0.2f);
+            messageTextRect.sizeDelta = new Vector2(
+                defaultMessageTextSizeDelta.x,
+                defaultMessageTextSizeDelta.y + 4f);
+        }
+
+        if (partTitleText != null)
+        {
+            partTitleText.fontSize = defaultTitleFontSize;
+        }
+
+        if (messageText != null)
+        {
+            messageText.fontSize = defaultMessageFontSize - 0.1f;
+        }
+    }
+
+    private void RestoreDefaultStepLayout()
+    {
+        ResolveMessageRootLayoutDefaults();
+        ResolveFontDefaults();
+        ResolveTextRectDefaults();
+
+        if (messageRootRect != null && cachedDefaultMessageRootLayout)
+        {
+            messageRootRect.anchoredPosition = defaultMessageRootAnchoredPosition;
+            messageRootRect.sizeDelta = defaultMessageRootSizeDelta;
+        }
+
+        if (partTitleTextRect != null && cachedDefaultTextRects)
+        {
+            partTitleTextRect.anchoredPosition = defaultPartTitleAnchoredPosition;
+            partTitleTextRect.sizeDelta = defaultPartTitleSizeDelta;
+        }
+
+        if (messageTextRect != null && cachedDefaultTextRects)
+        {
+            messageTextRect.anchoredPosition = defaultMessageTextAnchoredPosition;
+            messageTextRect.sizeDelta = defaultMessageTextSizeDelta;
+        }
+
+        if (partTitleText != null && cachedDefaultFontSizes)
+        {
+            partTitleText.fontSize = defaultTitleFontSize;
+        }
+
+        if (messageText != null && cachedDefaultFontSizes)
+        {
+            messageText.fontSize = defaultMessageFontSize;
+        }
+    }
+
+    private bool IsFinalSummaryStep(TutorialStep step)
+    {
+        return step != null &&
+               step.partId == TutorialPartId.EndTurn &&
+               step.stepId == "part5_step_12";
     }
 
     private void ApplyCompletionBackgroundColor()
