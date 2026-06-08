@@ -1,6 +1,6 @@
-# Rail Rumble
+# CanalTD
 
-Rail Rumble is a turn-based multiplayer strategy game where players control railway intersections to redirect enemy waves toward opponents.
+CanalTD is a turn-based multiplayer strategy game where players control canal gates and path direction to redirect enemy waves toward opponents.
 
 ---
 
@@ -9,7 +9,7 @@ Rail Rumble is a turn-based multiplayer strategy game where players control rail
 Instead of directly attacking other players, the game focuses on indirect interaction.
 
 Players:
-- control railway switches (intersections)
+- control canal gates and direction-change points
 - redirect enemy waves
 - try to survive while influencing others
 
@@ -32,7 +32,7 @@ Each turn, a player will:
 
 1. Draw a card  
 2. Play a card  
-3. Build towers or change railway direction  
+3. Build towers or change path direction  
 
 Enemies continuously move through the system, and players influence **where they go** rather than simply stopping them.
 
@@ -44,7 +44,7 @@ Enemies continuously move through the system, and players influence **where they
 
 - 4 players (Red, Blue, Green, Yellow)
 - Each player protects their own base (carrot)
-- Enemies move along fixed railway tracks
+- Enemies move along fixed paths
 - Towers automatically attack enemies
 - Players influence enemy routes using cards and node control
 
@@ -82,7 +82,7 @@ This system is inspired by UNO-style interaction combined with strategy elements
 
 ![Intersection Control](Doc/image/control.png)
 
-- Railway intersections act as controllable nodes
+- Canal gates and direction-control nodes act as controllable map points
 - Each node is owned by a player
 - Only the owner can change its direction
 
@@ -156,7 +156,7 @@ Players can make strategic decisions through map control, while the card system 
 ---
 
 ### 3️⃣ Players who enjoy social and interactive gameplay  
-Rail Rumble is intended for small groups of players who enjoy interacting during gameplay.  
+CanalTD is intended for small groups of players who enjoy interacting during gameplay.  
 Players can cooperate, compete, or disrupt each other, making the experience more engaging in a shared setting.
 
 ---
