@@ -64,6 +64,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
     private readonly List<string> deckCardIds = new List<string>();
     private readonly Dictionary<int, List<string>> playerHandCardIds = new Dictionary<int, List<string>>();
     private readonly Dictionary<string, TowerBuildArea> tileTargetsById = new Dictionary<string, TowerBuildArea>();
+    private readonly Dictionary<string, GateFrameAnimation> gateTargetsById = new Dictionary<string, GateFrameAnimation>();
     private bool initializedForOnlineMatch;
     private bool photonCallbacksRegistered;
 
@@ -180,6 +181,26 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                 "RequestFreezeClaim" +
                 " actorPlayerId=" + (onlineGameSceneManager != null ? onlineGameSceneManager.LocalPlayerId : -1) +
                 " targetTileId=" + targetId +
+                " cardId=" + normalizedCardId +
+                " cardName=" + cardName
+            );
+        }
+        else if (IsLockGateCardId(normalizedCardId))
+        {
+            Debug.Log(
+                "RequestLockGate" +
+                " actorPlayerId=" + (onlineGameSceneManager != null ? onlineGameSceneManager.LocalPlayerId : -1) +
+                " targetGateId=" + targetId +
+                " cardId=" + normalizedCardId +
+                " cardName=" + cardName
+            );
+        }
+        else if (IsOpenGateCardId(normalizedCardId))
+        {
+            Debug.Log(
+                "RequestOpenGate" +
+                " actorPlayerId=" + (onlineGameSceneManager != null ? onlineGameSceneManager.LocalPlayerId : -1) +
+                " targetGateId=" + targetId +
                 " cardId=" + normalizedCardId +
                 " cardName=" + cardName
             );
@@ -341,6 +362,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             cardName = request.actionType == OnlineCardActionType.Play ? request.cardName : string.Empty,
             targetId = request.targetId,
             targetTileId = request.targetId,
+            targetGateId = request.targetId,
             targetPlayerId = request.targetPlayerId,
             timestamp = request.timestamp,
             accepted = false
@@ -410,6 +432,11 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                     return RejectValidation(request, result, "Play unavailable.");
                 }
 
+                if (turnManager != null && IsGateControlCardId(request.cardId) && !turnManager.CanChangeGate())
+                {
+                    return RejectValidation(request, result, "Gate change already used.");
+                }
+
                 if (!HandContainsCardId(authoritativeHand, request.cardId))
                 {
                     return RejectValidation(request, result, "Card not in hand.");
@@ -438,6 +465,15 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                         return RejectValidation(request, result, tileRejectReason);
                     }
                 }
+                else if (IsGateControlCardId(request.cardId))
+                {
+                    string gateRejectReason = ValidateGateControlCardEffect(request, result);
+
+                    if (!string.IsNullOrWhiteSpace(gateRejectReason))
+                    {
+                        return RejectValidation(request, result, gateRejectReason);
+                    }
+                }
                 break;
 
             default:
@@ -454,6 +490,14 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         else if (IsFreezeClaimCardId(request.cardId))
         {
             LogLandControlValidation("ValidateFreezeClaim", request, result, "(none)");
+        }
+        else if (IsLockGateCardId(request.cardId))
+        {
+            LogGateControlValidation("ValidateLockGate", request, result, "(none)");
+        }
+        else if (IsOpenGateCardId(request.cardId))
+        {
+            LogGateControlValidation("ValidateOpenGate", request, result, "(none)");
         }
 
         return result;
@@ -498,6 +542,10 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             else if (IsFreezeClaimCardId(normalizedCardId))
             {
                 ApplyFreezeClaimEffect(request, authoritativeHand, applyData);
+            }
+            else if (IsGateControlCardId(normalizedCardId))
+            {
+                ApplyGateControlEffect(request, authoritativeHand, applyData);
             }
             else
             {
@@ -844,6 +892,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
         ConsumeLocalTurnState(applyData);
         ApplySyncedTileState(applyData);
+        ApplySyncedGateState(applyData);
 
         if (playerManager != null)
         {
@@ -948,6 +997,25 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    private void ApplySyncedGateState(OnlineCardApplyData applyData)
+    {
+        if (applyData == null || !IsGateControlCardId(applyData.cardId))
+        {
+            return;
+        }
+
+        ApplyGateStateToScene(applyData);
+
+        Debug.Log(
+            (IsLockGateCardId(applyData.cardId) ? "ApplyLockGate" : "ApplyOpenGate") +
+            " actorPlayerId=" + applyData.actorPlayerId +
+            " targetGateId=" + applyData.targetGateId +
+            " previousGateState=" + applyData.previousGateState +
+            " newGateState=" + applyData.newGateState +
+            " accepted=true rejectedReason=(none)"
+        );
+    }
+
     private void ApplyTileStateToScene(OnlineCardApplyData applyData)
     {
         if (playerManager == null)
@@ -999,6 +1067,60 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             " actualOwned=" + targetTile.isOwned +
             " actualFrozen=" + targetTile.isFrozenOrSealed +
             " frozenBy=" + targetTile.frozenByPlayerId
+        );
+    }
+
+    private void ApplyGateStateToScene(OnlineCardApplyData applyData)
+    {
+        GateFrameAnimation targetGate = ResolveGateTargetById(applyData.targetGateId);
+
+        if (targetGate == null)
+        {
+            Debug.LogWarning("Online card gate apply failed. targetGateId=" + applyData.targetGateId);
+            return;
+        }
+
+        bool actionSucceeded = true;
+
+        if (IsLockGateCardId(applyData.cardId))
+        {
+            if (!targetGate.IsBlocking())
+            {
+                actionSucceeded = targetGate.LockGate();
+            }
+            else
+            {
+                PathGraphState.MarkDirty();
+            }
+        }
+        else if (IsOpenGateCardId(applyData.cardId))
+        {
+            if (targetGate.IsBlocking())
+            {
+                actionSucceeded = targetGate.OpenGate();
+            }
+            else
+            {
+                PathGraphState.MarkDirty();
+            }
+        }
+
+        if (!actionSucceeded)
+        {
+            Debug.LogWarning(
+                "Online gate state apply was rejected by local gate state" +
+                " targetGateId=" + applyData.targetGateId +
+                " cardId=" + applyData.cardId +
+                " expectedNewState=" + applyData.newGateState
+            );
+        }
+
+        Debug.Log(
+            "Applied online gate state" +
+            " targetGateId=" + applyData.targetGateId +
+            " actualOpen=" + !targetGate.IsBlocking() +
+            " actualLocked=" + targetGate.IsLocked() +
+            " expectedNewState=" + applyData.newGateState
         );
     }
 
@@ -1054,6 +1176,11 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         else if (applyData.actionType == OnlineCardActionType.Play)
         {
             turnManager.ApplyAuthoritativePlayConsumed(1);
+
+            if (IsGateControlCardId(applyData.cardId))
+            {
+                turnManager.ApplyAuthoritativeGateChangeConsumed();
+            }
         }
 
         Debug.Log(
@@ -1159,6 +1286,22 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             return;
         }
 
+        if (IsLockGateCardId(normalizedCardId))
+        {
+            onlineGameSceneManager.ShowOnlineToast(
+                isLocalActor ? "You locked a gate." : actorName + " locked a gate."
+            );
+            return;
+        }
+
+        if (IsOpenGateCardId(normalizedCardId))
+        {
+            onlineGameSceneManager.ShowOnlineToast(
+                isLocalActor ? "You opened a gate." : actorName + " opened a gate."
+            );
+            return;
+        }
+
         string playedCardName = string.IsNullOrWhiteSpace(applyData.cardName) ? "a card" : applyData.cardName;
         onlineGameSceneManager.ShowOnlineToast(isLocalActor
             ? "You played " + playedCardName + "."
@@ -1190,6 +1333,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
 
         RebuildTileTargetRegistryIfNeeded();
+        RebuildGateTargetRegistryIfNeeded();
     }
 
     private TowerBuildArea ResolveTileTargetById(string targetTileId)
@@ -1234,6 +1378,51 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             }
 
             tileTargetsById.Add(buildArea.name, buildArea);
+        }
+    }
+
+    private GateFrameAnimation ResolveGateTargetById(string targetGateId)
+    {
+        RebuildGateTargetRegistryIfNeeded();
+
+        if (string.IsNullOrWhiteSpace(targetGateId))
+        {
+            return null;
+        }
+
+        gateTargetsById.TryGetValue(targetGateId, out GateFrameAnimation targetGate);
+        return targetGate;
+    }
+
+    private void RebuildGateTargetRegistryIfNeeded()
+    {
+        if (gateTargetsById.Count > 0)
+        {
+            return;
+        }
+
+        RebuildGateTargetRegistry();
+    }
+
+    private void RebuildGateTargetRegistry()
+    {
+        gateTargetsById.Clear();
+        GateFrameAnimation[] gates = FindObjectsOfType<GateFrameAnimation>(true);
+
+        foreach (GateFrameAnimation gate in gates)
+        {
+            if (gate == null || string.IsNullOrWhiteSpace(gate.name))
+            {
+                continue;
+            }
+
+            if (gateTargetsById.ContainsKey(gate.name))
+            {
+                Debug.LogWarning("Duplicate online gate target id found: " + gate.name);
+                continue;
+            }
+
+            gateTargetsById.Add(gate.name, gate);
         }
     }
 
@@ -1382,6 +1571,14 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             {
                 LogLandControlValidation("ValidateFreezeClaim", request, result, rejectReason);
             }
+            else if (IsLockGateCardId(request.cardId))
+            {
+                LogGateControlValidation("ValidateLockGate", request, result, rejectReason);
+            }
+            else if (IsOpenGateCardId(request.cardId))
+            {
+                LogGateControlValidation("ValidateOpenGate", request, result, rejectReason);
+            }
         }
 
         return result;
@@ -1453,6 +1650,11 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return IsTakeOverCardId(cardId) || IsFreezeClaimCardId(cardId);
     }
 
+    private bool IsGateControlCardId(string cardId)
+    {
+        return IsLockGateCardId(cardId) || IsOpenGateCardId(cardId);
+    }
+
     private bool IsStealCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
@@ -1480,6 +1682,21 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
         return normalizedCardId == "freezeclaim" || normalizedCardId == "freeze claim";
+    }
+
+    private bool IsLockGateCardId(string cardId)
+    {
+        string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
+        return normalizedCardId == "lockgate" || normalizedCardId == "lock gate";
+    }
+
+    private bool IsOpenGateCardId(string cardId)
+    {
+        string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
+        return normalizedCardId == "opengate" ||
+            normalizedCardId == "open gate" ||
+            normalizedCardId == "redirectflow" ||
+            normalizedCardId == "redirect flow";
     }
 
     private string ValidateLandControlCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
@@ -1555,6 +1772,81 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
 
         return "Unsupported land-control card.";
+    }
+
+    private string ValidateGateControlCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
+    {
+        if (request == null)
+        {
+            return "Invalid request.";
+        }
+
+        GateFrameAnimation targetGate = ResolveGateTargetById(request.targetId);
+
+        if (targetGate == null)
+        {
+            return "Target gate is missing.";
+        }
+
+        result.targetGateId = request.targetId;
+        result.previousGateOpen = !targetGate.IsBlocking();
+        result.newGateOpen = !targetGate.IsBlocking();
+        result.previousGateLocked = targetGate.IsLocked();
+        result.newGateLocked = targetGate.IsLocked();
+        result.previousGateState = DescribeGateState(targetGate);
+        result.newGateState = result.previousGateState;
+
+        GateActionType actionType = IsLockGateCardId(request.cardId)
+            ? GateActionType.LockGate
+            : GateActionType.OpenGate;
+
+        GateTargetingManager gateTargetingManager = GateTargetingManager.Instance != null
+            ? GateTargetingManager.Instance
+            : FindObjectOfType<GateTargetingManager>();
+
+        if (gateTargetingManager == null)
+        {
+            return "Gate targeting manager is missing.";
+        }
+
+        List<GateFrameAnimation> validGates = gateTargetingManager.GetValidGatesForPlayer(
+            actionType,
+            request.actorPlayerId
+        );
+
+        bool targetIsValid = false;
+
+        if (validGates != null)
+        {
+            for (int i = 0; i < validGates.Count; i++)
+            {
+                if (validGates[i] == targetGate)
+                {
+                    targetIsValid = true;
+                    break;
+                }
+            }
+        }
+
+        if (!targetIsValid)
+        {
+            return IsLockGateCardId(request.cardId)
+                ? "This gate cannot be locked."
+                : "This gate cannot be opened.";
+        }
+
+        if (IsLockGateCardId(request.cardId))
+        {
+            result.newGateOpen = false;
+            result.newGateLocked = targetGate.IsLocked();
+            result.newGateState = "Closed";
+            return string.Empty;
+        }
+
+        result.newGateOpen = true;
+        result.newGateLocked = false;
+        result.newGateState = "Open";
+        return string.Empty;
     }
 
     private void ApplyStealCardEffect(
@@ -1725,6 +2017,43 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    private void ApplyGateControlEffect(
+        OnlineCardRequestData request,
+        List<string> actorHand,
+        OnlineCardApplyData applyData)
+    {
+        GateFrameAnimation targetGate = ResolveGateTargetById(request.targetId);
+
+        if (targetGate == null)
+        {
+            applyData.accepted = false;
+            applyData.rejectReason = "Target gate is missing.";
+            return;
+        }
+
+        RemoveCardIdFromHand(actorHand, request.cardId);
+
+        applyData.targetGateId = request.targetId;
+        applyData.previousGateOpen = !targetGate.IsBlocking();
+        applyData.previousGateLocked = targetGate.IsLocked();
+        applyData.previousGateState = DescribeGateState(targetGate);
+        applyData.newGateOpen = IsOpenGateCardId(request.cardId);
+        applyData.newGateLocked = IsOpenGateCardId(request.cardId) ? false : targetGate.IsLocked();
+        applyData.newGateState = applyData.newGateOpen ? "Open" : "Closed";
+        applyData.affectedPlayerHandCounts = BuildAffectedHandCounts(request.actorPlayerId);
+
+        ApplyGateStateToScene(applyData);
+
+        Debug.Log(
+            (IsLockGateCardId(request.cardId) ? "ApplyLockGate" : "ApplyOpenGate") +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetGateId=" + request.targetId +
+            " previousGateState=" + applyData.previousGateState +
+            " newGateState=" + applyData.newGateState +
+            " accepted=true rejectedReason=(none)"
+        );
+    }
+
     private List<OnlinePlayerHandCountState> BuildAffectedHandCounts(params int[] playerIds)
     {
         List<OnlinePlayerHandCountState> affectedCounts = new List<OnlinePlayerHandCountState>();
@@ -1815,6 +2144,34 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             " accepted=" + applyData.accepted +
             " rejectedReason=" + (string.IsNullOrWhiteSpace(reason) ? "(none)" : reason)
         );
+    }
+
+    private void LogGateControlValidation(string label, OnlineCardRequestData request, OnlineCardApplyData applyData, string reason)
+    {
+        if (request == null || applyData == null)
+        {
+            return;
+        }
+
+        Debug.Log(
+            label +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetGateId=" + request.targetId +
+            " previousGateState=" + applyData.previousGateState +
+            " newGateState=" + applyData.newGateState +
+            " accepted=" + applyData.accepted +
+            " rejectedReason=" + (string.IsNullOrWhiteSpace(reason) ? "(none)" : reason)
+        );
+    }
+
+    private string DescribeGateState(GateFrameAnimation gate)
+    {
+        if (gate == null)
+        {
+            return "Missing";
+        }
+
+        return gate.IsBlocking() ? "Closed" : "Open";
     }
 
     private int ResolveActorNumberForPlayerId(int playerId)

@@ -76,6 +76,13 @@ public class OnlineCardApplyData
     public int frozenByPlayerId = -1;
     public bool frozenUntilPlayerNextTurn;
     public bool removeTowerFromTile;
+    public string targetGateId;
+    public bool previousGateOpen;
+    public bool newGateOpen;
+    public bool previousGateLocked;
+    public bool newGateLocked;
+    public string previousGateState;
+    public string newGateState;
     public List<OnlinePlayerHandCountState> affectedPlayerHandCounts = new List<OnlinePlayerHandCountState>();
 }
 

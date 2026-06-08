@@ -235,6 +235,11 @@ public class TurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    public void ApplyAuthoritativeGateChangeConsumed()
+    {
+        hasChangedGate = true;
+    }
+
     public bool CanDiscardCard()
     {
         return !cardActionsBlockedThisTurn && !hasDiscardedCard;
