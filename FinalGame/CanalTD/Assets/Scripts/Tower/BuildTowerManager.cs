@@ -2,7 +2,7 @@
  * File: BuildTowerManager.cs
  *
  * Purpose:
- * Implements BuildTowerManager for the tower layer of Rail Rumble and supports the playable vertical slice of the project.
+ * Implements BuildTowerManager for the tower layer of CanalTD and supports the playable vertical slice of the project.
  *
  * Attached GameObject:
  * Tower prefabs, build spots, projectiles, or tower-related scene controllers.
@@ -19,7 +19,7 @@
  * - Changes scene state, gameplay data, or visual feedback in the active match.
  *
  * Authorship or assistance:
- * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
  * - This documentation header was expanded with AI assistance to match the assessment comment standard.
  *
  * Testing notes:

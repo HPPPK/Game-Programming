@@ -54,8 +54,16 @@ Protect your own castle, manage enemy pressure better than the other players, an
 - Local mode is playable.
 - AI mode includes three difficulty levels and playable turn logic.
 - Core card, tower, enemy, path, and result systems are integrated.
-- Online room flow and core sync are implemented and under active testing.
+- Online room flow and core sync are implemented as an experimental extension that still needs broader multiplayer validation.
 - Tutorial / guide flow exists through the dedicated Guide scene.
+
+## Final assessment route
+
+For marking, the primary assessment route is Local mode or AI mode:
+
+`BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI mode -> `GameScene` -> `ResultScene`
+
+Online mode is included as an implemented extension, but it is not the primary stable assessment path for final marking.
 
 ## Vertical slice coverage
 
@@ -65,17 +73,32 @@ Protect your own castle, manage enemy pressure better than the other players, an
 - Feedback through current-turn UI, status panels, targeting highlights, toasts, and result screens
 - Challenge and decision-making through shared enemy pressure, path control, and tactical card use
 
-## Planned features
+## Future work
 
-- Finish and stabilise the remaining online card-effect sync edge cases.
+- Broaden validation for online card-effect sync edge cases.
 - Continue balancing AI behaviour, card pacing, and multiplayer clarity.
-- Improve final presentation polish, testing coverage, and supporting documentation.
+- Add more regression coverage and playtesting evidence.
 
-## Known issues
+## Known limitations
 
-- Some online multiplayer card interactions are still being regression-tested.
-- Multiplayer room flow and late-match edge cases still need broader validation.
-- Balance, tutorial pacing, and final polish are still being tuned.
+- Online mode is an extension and still needs broader multi-device and late-match validation.
+- Balance and tutorial pacing can be improved with more playtesting.
+
+## Development tracking / Kanban evidence
+
+I used GitHub Issues as the main task-tracking method for CanalTD development. Issues were used to break down design, implementation, tutorial, UI, audio, online-mode, and bug-fix work into reviewable tasks.
+
+Most implementation tasks are now closed because the related work was completed before final submission. The GitHub tab may show `Issues 0`; this means there are currently zero open issues, not that issues were unused. Closed issues are positive process evidence because they show completed planning, progress, iteration, and bug-fix records.
+
+The GitHub Project/Kanban board was used to move tasks through planning, progress, and completion states. The main milestone is named `Initial game design`, but it contains both design and implementation tasks; this README and the linked final documentation are the authoritative final submission entry points.
+
+- GitHub Project board: https://github.com/users/HPPPK/projects/2
+- Closed development issues: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aclosed
+- Open remaining issues / limitations: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aopen
+- Main milestone: https://github.com/HPPPK/Game-Programming/milestone/2
+- Kanban and issue evidence summary: [FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md](./FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md)
+
+Known limitations are documented as future work above. If any limitation needs active tracking after submission, it should be represented by a separate open issue instead of reopening completed development tasks.
 
 ## Credits
 
@@ -99,8 +122,11 @@ Protect your own castle, manage enemy pressure better than the other players, an
   - `Roblox Minecraft Fortnite Video Game Music`
   - `Click Buttons - UI Menu Sounds Effects - Button 7`
   - `Taking Playing Card 3`
-  - `UI Button Click #5`
-- Additional local audio files are credited as Pixabay-sourced where the platform is known but the exact original file page is no longer fully traceable from the preserved filename.
+  - `Shoot 5`
+  - `Dramatic Death Collapse`
+  - `Gaming Victory`
+  - `Musical Victory Chime`
+- Full local audio-to-source mapping is listed in the resource reference document.
 
 ## Legal, ethical, accessibility, and process notes
 
@@ -135,6 +161,7 @@ Protect your own castle, manage enemy pressure better than the other players, an
 - Contribution notes: [FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md](./FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md)
 - Development log: [FinalGame/DEVELOPMENT_LOG.md](./FinalGame/DEVELOPMENT_LOG.md)
 - Prototype document: [FinalGame/prototype.md](./FinalGame/prototype.md)
+- Kanban and issue evidence: [FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md](./FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md)
 - Resource / asset / AI references: [FinalGame/CanalTD/Assets/Docs/ResourceReferences.md](./FinalGame/CanalTD/Assets/Docs/ResourceReferences.md)
 
 ## Scope note

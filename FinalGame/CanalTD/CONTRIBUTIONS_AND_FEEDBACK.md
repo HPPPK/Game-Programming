@@ -218,7 +218,7 @@ The scripts are structured into categories such as:
 This kind of organisation is important for:
 
 - maintainability
-- team collaboration
+- individual review and debugging
 - debugging
 - making contribution clearer during marking
 
@@ -324,7 +324,7 @@ I remained responsible for:
 - deciding which suggestions to accept or reject
 - testing and evaluating whether changes actually improved the project
 
-So although AI support was used, the creative and integrative direction of the project remained my own and my team’s contribution.
+So although AI support was used, the creative and integrative direction of the project remained my own contribution.
 
 ## Peer and tutor feedback, with my response
 
@@ -399,4 +399,4 @@ It includes:
 - online integration and debugging support
 - documentation and assessment preparation
 
-AI tools helped with some implementation and writing support, but the project direction, gameplay reasoning, system goals, and many integration decisions remained my own contribution and my team’s work.
+AI tools helped with some implementation and writing support, but the project direction, gameplay reasoning, system goals, and many integration decisions remained my own work.

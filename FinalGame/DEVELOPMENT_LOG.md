@@ -49,7 +49,7 @@ This log summarises the main development milestones for the CanalTD project and 
 
 - Added README content to explain how the game runs and how it should be assessed.
 - Standardised script header comments to improve assessability.
-- Added contribution notes, feedback response notes, and placeholder reference sections.
+- Added contribution notes, feedback response notes, and resource reference sections.
 
 ## Current focus
 

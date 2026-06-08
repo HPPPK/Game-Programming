@@ -16,7 +16,7 @@ Instead, it emphasizes:
 - Interaction
 - Unpredictable outcomes
 
-As long as actions are within the rules, all strategies are considered valid, including defensive play, aggressive interference, and even actions that may negatively affect teammates.
+As long as actions are within the rules, all strategies are considered valid, including defensive play, aggressive interference, and actions that may negatively affect other players.
 
 ---
 
@@ -35,7 +35,7 @@ Optional team mode (e.g. 2v2):
 - Team communication is allowed
 - Final results are based on team score
 
-The system does not restrict player behaviour (e.g. sabotaging teammates).
+The system does not restrict player behaviour (e.g. redirecting pressure toward another player).
 
 ### 2.3 Objective
 Players aim to:

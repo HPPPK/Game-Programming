@@ -2,7 +2,7 @@
  * File: WaypointPath.cs
  *
  * Purpose:
- * Implements WaypointPath for the map layer of Rail Rumble and supports the playable vertical slice of the project.
+ * Implements WaypointPath for the map layer of CanalTD and supports the playable vertical slice of the project.
  *
  * Attached GameObject:
  * Map props, gate visuals, or waypoint/path presentation objects.
@@ -19,7 +19,7 @@
  * - Changes scene state, gameplay data, or visual feedback in the active match.
  *
  * Authorship or assistance:
- * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
  * - This documentation header was expanded with AI assistance to match the assessment comment standard.
  *
  * Testing notes:

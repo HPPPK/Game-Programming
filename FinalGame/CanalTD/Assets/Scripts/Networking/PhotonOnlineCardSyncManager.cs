@@ -2,7 +2,7 @@
  * File: PhotonOnlineCardSyncManager.cs
  *
  * Purpose:
- * Implements PhotonOnlineCardSyncManager for the networking layer of Rail Rumble and supports the playable vertical slice of the project.
+ * Implements PhotonOnlineCardSyncManager for the networking layer of CanalTD and supports the playable vertical slice of the project.
  *
  * Attached GameObject:
  * Online scene managers or networking helper objects used during lobby and match flow.
@@ -22,7 +22,7 @@
  * - Sends, applies, or guards online sync operations without changing project-level Photon settings.
  *
  * Authorship or assistance:
- * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
  * - This documentation header was expanded with AI assistance to match the assessment comment standard.
  *
  * Testing notes:

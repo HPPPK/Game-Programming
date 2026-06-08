@@ -27,7 +27,7 @@ This file records the main external resources, AI-assisted support, and referenc
   - Assigned use: `backgroundMusic`
   - Pixabay title: `Roblox Minecraft Fortnite Video Game Music`
   - Creator: `BackgroundMusicForVideos`
-  - Link: `https://pixabay.com/music/search/gameplay%20background/`
+  - Link: `https://pixabay.com/music/video-games-roblox-minecraft-fortnite-video-game-music-358426/`
 - UI click:
   - Local file: `Assets/Art/Asset/Sound/skyscraper_seven-click-buttons-ui-menu-sounds-effects-button-7-203601.mp3`
   - Assigned use: `uiClickSound`
@@ -37,38 +37,40 @@ This file records the main external resources, AI-assisted support, and referenc
 - Card play:
   - Local file: `Assets/Art/Asset/Sound/oxidvideos-taking-playing-card-3-522513.mp3`
   - Assigned use: `cardPlaySound`
-  - Pixabay title: `Taking Playing Card 3`
+  - Pixabay title: `Taking Playing Card`
   - Creator: `OxidVideos`
-  - Link: `https://pixabay.com/hu/sound-effects/film-%C3%A9s-speci%C3%A1lis-effektusok-taking-playing-card-3-522513/`
+  - Link: `https://pixabay.com/sound-effects/film-special-effects-taking-playing-card-522520/`
+- Tower shooting:
+  - Local file: `Assets/Art/Asset/Sound/Gun.mp3`
+  - Assigned use: `towerShootSound`
+  - Pixabay title: `Shoot 5`
+  - Creator: `freesound_community`
+  - Link: `https://pixabay.com/sound-effects/film-special-effects-shoot-5-102360/`
+- Enemy death:
+  - Local file: `Assets/Art/Asset/Sound/death.mp3`
+  - Assigned use: `enemyDeathSound`
+  - Pixabay title: `Dramatic Death Collapse`
+  - Creator: `Universfield`
+  - Link: `https://pixabay.com/sound-effects/film-special-effects-dramatic-death-collapse-352720/`
+- Tower build:
+  - Local file: `Assets/Art/Asset/Sound/building.mp3`
+  - Assigned use: `buildSound`
+  - Pixabay title: `Gaming Victory`
+  - Creator: `EAGLAXLE`
+  - Link: `https://pixabay.com/sound-effects/gaming-victory-464016/`
+- Victory:
+  - Local file: `Assets/Art/Asset/Sound/Victory.mp3`
+  - Assigned use: `victorySound`
+  - Pixabay title: `Victory Chime`
+  - Creator: `Scratchonix`
+  - Link: `https://pixabay.com/sound-effects/musical-victory-chime-366449/`
 
 ### Other local audio files in the project
 
 - `Assets/Art/Asset/Sound/Gun.mp3`
 - `Assets/Art/Asset/Sound/Victory.mp3`
 - `Assets/Art/Asset/Sound/building.mp3`
-- `Assets/Art/Asset/Sound/buttonClick.mp3`
 - `Assets/Art/Asset/Sound/death.mp3`
-- `Assets/Art/Asset/Sound/audley_fergine-ui-button-click-5-327756.mp3`
-
-### Audio attribution note for files without preserved original names
-
-- The project also uses several local audio files that were renamed during import or later project cleanup:
-  - `Gun.mp3`
-  - `Victory.mp3`
-  - `building.mp3`
-  - `buttonClick.mp3`
-  - `death.mp3`
-- For these files, the source platform is confirmed as Pixabay.
-- However, the exact original Pixabay item pages cannot currently be verified from the preserved local filenames alone.
-- They are therefore credited honestly as Pixabay-sourced audio with incomplete file-level traceability.
-
-### Additional identified Pixabay file
-
-- Local file: `Assets/Art/Asset/Sound/audley_fergine-ui-button-click-5-327756.mp3`
-- Current status: present in project files but not currently assigned by the main `AudioManager`
-- Pixabay title: `UI Button Click #5`
-- Creator: `Audley_Fergine`
-- Link: `https://pixabay.com/sound-effects/ui-button-click-5-327756/`
 
 ## Tutorials and technical references
 
