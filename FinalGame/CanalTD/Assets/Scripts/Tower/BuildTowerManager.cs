@@ -21,7 +21,8 @@
  * - Creates or removes tower objects, updates resources, changes ownership state, and displays build feedback.
  *
  * Authorship / assistance:
- * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
+ * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan
+ * for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
  * - Manually verify land purchase, ownership checks, build, upgrade, sell, insufficient-resource feedback, and tutorial-gated build steps.

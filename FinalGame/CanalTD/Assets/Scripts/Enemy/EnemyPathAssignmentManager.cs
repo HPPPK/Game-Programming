@@ -21,7 +21,8 @@
  * - Assigns enemy path targets and influences which castles receive enemy pressure.
  *
  * Authorship / assistance:
- * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
+ * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan
+ * for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
  * - Manually verify valid path selection, blocked/gated paths, route recalculation, pressure distribution, and enemy destination assignment.

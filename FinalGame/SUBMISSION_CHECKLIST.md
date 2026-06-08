@@ -18,7 +18,7 @@ Local Mode and AI Mode are the primary assessment routes. Online Mode is an exte
 | Current status | Complete | [README.md](../README.md) | Local/AI primary routes and Online extension are documented. |
 | Known limitations | Complete | [README.md](../README.md), [ONLINE_STATUS.md](./CanalTD/ONLINE_STATUS.md) | Online validation and balance/pacing limitations are stated. |
 | Credits | Complete | [README.md](../README.md), [ResourceReferences.md](./CanalTD/Assets/Docs/ResourceReferences.md) | Assets, audio, Photon, TextMeshPro, and AI-assisted support are disclosed. |
-| AI / tutorial / template use | Complete | [README.md](../README.md), [ResourceReferences.md](./CanalTD/Assets/Docs/ResourceReferences.md) | AI support is disclosed without claiming full authorship transfer. |
+| AI / tutorial / template use | Complete | [README.md](../README.md), [ResourceReferences.md](./CanalTD/Assets/Docs/ResourceReferences.md) | AI support is disclosed; local planning templates are intentionally ignored by `.gitignore` and are not submitted evidence. |
 | Development log | Complete | [DEVELOPMENT_LOG.md](./DEVELOPMENT_LOG.md) | Process summary and timeline are documented. |
 | GitHub Project / Kanban evidence | Complete | [KANBAN_AND_ISSUE_EVIDENCE.md](./KANBAN_AND_ISSUE_EVIDENCE.md) | Board and process links are included. |
 | Closed issues evidence | Complete | [KANBAN_AND_ISSUE_EVIDENCE.md](./KANBAN_AND_ISSUE_EVIDENCE.md) | Closed issues are documented as completed tasks. |

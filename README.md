@@ -142,7 +142,9 @@ Known limitations are documented as future work above. If any limitation needs a
 - Final design choices, Unity integration, testing, and acceptance/rejection of AI suggestions remained my responsibility.
 - Main AI-assisted art support:
   - GPT-generated card visuals and card-slot visuals for this project
-- Coursework planning templates in [FinalGame/template](./FinalGame/template) were used as lightweight project-management support.
+- Local coursework planning templates were used as private planning support and are intentionally not committed because they are excluded by `.gitignore`.
+- The template folder is not required for running or assessing the final game.
+- Submitted assessment evidence is provided through the README, final design document, testing log, development log, Kanban evidence, contribution notes, and resource references.
 
 ## Development log
 
@@ -170,6 +172,12 @@ Known limitations are documented as future work above. If any limitation needs a
 - Kanban and issue evidence: [FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md](./FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md)
 - Prototype document: [FinalGame/prototype.md](./FinalGame/prototype.md)
 - Resource / asset / AI references: [FinalGame/CanalTD/Assets/Docs/ResourceReferences.md](./FinalGame/CanalTD/Assets/Docs/ResourceReferences.md)
+
+## Backup, draft, and support files
+
+- `FinalGame/CanalTD/Assets/Scenes/GameScene.unity.bak_before_layout_edit` is a scene-layout backup, not the final assessment scene.
+- `FinalGame/CanalTD/Assets/Docs/v3.docx` is a draft/report-like support file. The final assessment documentation is the Markdown documentation linked above.
+- UI debug/probe helper scripts may remain in `Assets/Scripts/UI` as development support, but they are not listed as main gameplay systems.
 
 ## Scope note
 

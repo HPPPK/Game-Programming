@@ -45,3 +45,9 @@ The milestone name `Initial game design` is historical. It contains both design 
 - Testing and validation: several issues include acceptance criteria such as no console errors, tutorial completion, correct synchronization goals, and scene compatibility. These are process criteria, not a claim that every runtime test has passed.
 - Bug fixing and iteration: online lifecycle work includes bug/enhancement tracking, and closed issues show completed development tasks.
 - Professionalism: closed issues, milestone completion, and final documentation give markers a direct route from process evidence to the submitted Unity systems.
+
+## Limitations of this evidence
+
+- Closed issues prove task tracking and completion records, but they do not replace Unity runtime testing.
+- The milestone name is historical, so the root README and final Markdown documents should be treated as the final submission entry point.
+- Any remaining limitation after submission should be tracked as a real open issue rather than reopening completed tasks.

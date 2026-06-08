@@ -4,12 +4,10 @@ This file records the main external resources, AI-assisted support, and referenc
 
 ## Game assets
 
-- Main asset pack / visual pack:
-  - Name: `Tiny Swords`
-  - Link: `https://pixelfrog-assets.itch.io/tiny-swords`
-- Additional art or icon source:
-  - Name: `Card art and card slot visuals generated with GPT`
-  - Link: `No separate public asset page. These visuals were generated specifically for this project.`
+| Resource type | Local / project use | Source / creator | Source link | Licence / attribution note | Traceability status |
+|---|---|---|---|---|---|
+| Main visual asset pack | Environment, castle, enemy, tower, and map-style assets | `Tiny Swords` / Pixel Frog | https://pixelfrog-assets.itch.io/tiny-swords | Source page for the asset pack | Source link recorded |
+| Project-specific generated visuals | Card art and card-slot presentation visuals | AI-assisted visual generation workflow | No separate public asset page; generated specifically for this project | Disclosed as AI-assisted project visuals | Disclosed in project documentation |
 
 ## Audio
 
@@ -32,50 +30,7 @@ This file records the main external resources, AI-assisted support, and referenc
 | Sound effect | `Assets/Art/Asset/Sound/building.mp3` | `Gaming Victory` / `EAGLAXLE` | https://pixabay.com/sound-effects/gaming-victory-464016/ | Pixabay source page | `buildSound` | Complete source link recorded |
 | Sound effect | `Assets/Art/Asset/Sound/Victory.mp3` | `Victory Chime` / `Scratchonix` | https://pixabay.com/sound-effects/musical-victory-chime-366449/ | Pixabay source page | `victorySound` | Complete source link recorded |
 
-- Background music:
-  - Local file: `Assets/Art/Asset/Sound/backgroundmusicforvideos-roblox-minecraft-fortnite-video-game-music-358426.mp3`
-  - Assigned use: `backgroundMusic`
-  - Pixabay title: `Roblox Minecraft Fortnite Video Game Music`
-  - Creator: `BackgroundMusicForVideos`
-  - Link: `https://pixabay.com/music/video-games-roblox-minecraft-fortnite-video-game-music-358426/`
-- UI click:
-  - Local file: `Assets/Art/Asset/Sound/skyscraper_seven-click-buttons-ui-menu-sounds-effects-button-7-203601.mp3`
-  - Assigned use: `uiClickSound`
-  - Pixabay title: `Click Buttons - UI Menu Sounds Effects - Button 7`
-  - Creator: `skyscraper_seven`
-  - Link: `https://pixabay.com/sound-effects/film-special-effects-click-buttons-ui-menu-sounds-effects-button-7-203601/`
-- Card play:
-  - Local file: `Assets/Art/Asset/Sound/oxidvideos-taking-playing-card-3-522513.mp3`
-  - Assigned use: `cardPlaySound`
-  - Pixabay title: `Taking Playing Card`
-  - Creator: `OxidVideos`
-  - Link: `https://pixabay.com/sound-effects/film-special-effects-taking-playing-card-522520/`
-- Tower shooting:
-  - Local file: `Assets/Art/Asset/Sound/Gun.mp3`
-  - Assigned use: `towerShootSound`
-  - Pixabay title: `Shoot 5`
-  - Creator: `freesound_community`
-  - Link: `https://pixabay.com/sound-effects/film-special-effects-shoot-5-102360/`
-- Enemy death:
-  - Local file: `Assets/Art/Asset/Sound/death.mp3`
-  - Assigned use: `enemyDeathSound`
-  - Pixabay title: `Dramatic Death Collapse`
-  - Creator: `Universfield`
-  - Link: `https://pixabay.com/sound-effects/film-special-effects-dramatic-death-collapse-352720/`
-- Tower build:
-  - Local file: `Assets/Art/Asset/Sound/building.mp3`
-  - Assigned use: `buildSound`
-  - Pixabay title: `Gaming Victory`
-  - Creator: `EAGLAXLE`
-  - Link: `https://pixabay.com/sound-effects/gaming-victory-464016/`
-- Victory:
-  - Local file: `Assets/Art/Asset/Sound/Victory.mp3`
-  - Assigned use: `victorySound`
-  - Pixabay title: `Victory Chime`
-  - Creator: `Scratchonix`
-  - Link: `https://pixabay.com/sound-effects/musical-victory-chime-366449/`
-
-### Other local audio files in the project
+### Short local audio filenames already covered above
 
 - `Assets/Art/Asset/Sound/Gun.mp3`
 - `Assets/Art/Asset/Sound/Victory.mp3`
@@ -96,19 +51,17 @@ This file records the main external resources, AI-assisted support, and referenc
 
 ## AI-assisted coding or documentation
 
-- AI coding support:
-  - Tool type: `AI-assisted coding and documentation tools`
-  - Notes: `Used for selected coding suggestions, debugging suggestions, refactoring suggestions, and documentation drafting.`
-  - Responsibility note: `Final design choices, Unity integration, testing, and acceptance/rejection of suggestions remained the student's responsibility.`
-- AI-generated or AI-assisted art reference:
-  - Tool: `GPT image / visual generation workflow for card and card-slot art`
-  - Link: `Used as project-specific generative support for card visuals; no separate asset-pack page is being cited here.`
-  - Notes: `Used to generate the card visuals and card-slot presentation assets for this project.`
+| Assistance area | Tool type | Used for | Responsibility note |
+|---|---|---|---|
+| Coding and debugging support | AI-assisted coding and documentation tools | Selected coding suggestions, debugging suggestions, refactoring suggestions, and documentation drafting | Final design choices, Unity integration, testing, and acceptance/rejection of suggestions remained the student's responsibility. |
+| Visual/card support | AI-assisted visual generation workflow | Project-specific card visuals and card-slot presentation assets | These visuals are disclosed as generated support rather than an external asset-pack source. |
 
 ## Templates or borrowed structure
 
-- Planning / feature / bug / integration template source:
-  - Link: `Templates are stored locally in FinalGame/template and were used as lightweight internal project-management support.`
+- Local coursework planning templates were used as private planning support.
+- `FinalGame/template` exists locally but is intentionally excluded by `.gitignore` through the `template/` rule.
+- The template folder is not committed GitHub evidence and is not required for running or assessing the final game.
+- Submitted assessment evidence is provided through the README, final design document, testing log, development log, Kanban evidence, contribution notes, and resource references.
 
 ## Items with incomplete traceability
 

@@ -30,6 +30,7 @@ Local Mode and AI Mode are the primary assessment routes.
 - Broader multi-device testing is required.
 - Late-match and disconnection edge cases require more validation.
 - Online card/build synchronization requires manual regression testing before claiming full stability.
+- Room joining should be checked with both clients using the same Photon AppId, fixed region, and game version.
 - Unity Editor compilation and runtime behavior must be manually verified.
 
 ## Related closed issues

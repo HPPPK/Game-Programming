@@ -22,7 +22,8 @@
  * - Shows warnings or feedback when card actions are invalid.
  *
  * Authorship / assistance:
- * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
+ * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan
+ * for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
  * - Manually verify draw-once-per-turn behavior, hand updates, play/discard flow, targeting confirm/cancel, and AP/turn restrictions.
