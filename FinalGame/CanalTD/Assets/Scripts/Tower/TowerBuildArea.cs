@@ -402,7 +402,7 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
 
     public void ClearFreezeIfPendingForPlayer(int playerId)
     {
-        if (isFrozenOrSealed && frozenByPlayerId == playerId)
+        if (isFrozenOrSealed && frozenUntilPlayerNextTurn && frozenByPlayerId == playerId)
         {
             ClearFreeze();
         }

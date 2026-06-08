@@ -48,6 +48,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviourPunCallbacks
 public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
 {
+    private const string DefaultGameVersion = "0.1";
     private const string DefaultFixedRegion = "asia";
     private const string OnlinePhotonMode = "OnlinePhotonPUN2";
     private const string PrivateRoomKind = "private";
@@ -68,7 +69,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     public TMP_Text connectionStatusText;
 
     [Header("Photon Settings")]
-    public string gameVersion = "0.1";
+    public string gameVersion = DefaultGameVersion;
     public string fixedRegion = DefaultFixedRegion;
     public byte maxPlayersPerRoom = 4;
     public byte minPlayersToStart = 2;
@@ -936,7 +937,11 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
     private void ApplyPhotonConnectionSettings()
     {
-        PhotonNetwork.GameVersion = gameVersion;
+        string normalizedGameVersion = string.IsNullOrWhiteSpace(gameVersion)
+            ? DefaultGameVersion
+            : gameVersion.Trim();
+
+        PhotonNetwork.GameVersion = normalizedGameVersion;
 
         if (PhotonNetwork.PhotonServerSettings == null || PhotonNetwork.PhotonServerSettings.AppSettings == null)
         {
@@ -947,6 +952,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             ? DefaultFixedRegion
             : fixedRegion.Trim().ToLowerInvariant();
 
+        PhotonNetwork.PhotonServerSettings.AppSettings.AppVersion = normalizedGameVersion;
         PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = normalizedFixedRegion;
     }
 

@@ -790,6 +790,13 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         PlayerResource activePlayer = playerManager != null ? playerManager.GetPlayerResource(currentTurnPlayerId) : null;
         bool disruptedThisTurn = activePlayer != null && activePlayer.HasPendingDisrupt();
 
+#if PHOTON_UNITY_NETWORKING
+        if (PhotonNetwork.IsMasterClient && PhotonOnlineBuildSyncManager.Instance != null)
+        {
+            PhotonOnlineBuildSyncManager.Instance.ClearExpiredFreezeClaimsForPlayer(currentTurnPlayerId);
+        }
+#endif
+
         if (gamePhaseManager != null)
         {
             gamePhaseManager.currentPhase = GamePhase.PlayerPhase;

@@ -22,8 +22,7 @@
  * - Triggers UI feedback through connected scene managers.
  *
  * Authorship / assistance:
- * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan
- * for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
+ * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
  * - Manually verify AP reset, turn start/end, draw/play/discard/gate flags, UI feedback, and invalid-action feedback in Local and AI modes.
@@ -88,6 +87,8 @@ public class TurnManager : MonoBehaviour, ITurnSource
 
     public void StartTurn(bool disruptedThisTurn)
     {
+        ClearExpiredFreezeClaimsForPlayer(currentPlayerId);
+
         currentAP = maxAP;
         cardActionsBlockedThisTurn = disruptedThisTurn;
 
@@ -108,6 +109,31 @@ public class TurnManager : MonoBehaviour, ITurnSource
         hasDiscardedCard = false;
 
         Debug.Log("Start turn. AP = " + currentAP + " / " + maxAP);
+    }
+
+    private void ClearExpiredFreezeClaimsForPlayer(int playerId)
+    {
+        TowerBuildArea[] buildAreas = FindObjectsOfType<TowerBuildArea>();
+        int clearedCount = 0;
+
+        foreach (TowerBuildArea buildArea in buildAreas)
+        {
+            if (buildArea == null ||
+                !buildArea.isFrozenOrSealed ||
+                !buildArea.frozenUntilPlayerNextTurn ||
+                buildArea.frozenByPlayerId != playerId)
+            {
+                continue;
+            }
+
+            buildArea.ClearFreeze();
+            clearedCount++;
+        }
+
+        if (clearedCount > 0)
+        {
+            Debug.Log("Cleared expired Freeze Claim tiles for playerId=" + playerId + ", count=" + clearedCount);
+        }
     }
 
     public void EndTurn()

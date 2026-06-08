@@ -274,16 +274,22 @@ public class TileTargetingManager : MonoBehaviour
                 return;
             }
 
+            string cardId = CardDrawManager.NormalizeCardId(pendingCardPrefab.name);
+            string cardName = pendingCardPrefab.name;
+            string targetTileId = selectedTile.name;
+
+            ExitWithoutConsumingCard();
+
             bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
-                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
-                pendingCardPrefab.name,
-                selectedTile.name,
+                cardId,
+                cardName,
+                targetTileId,
                 -1
             );
 
-            if (requested)
+            if (!requested)
             {
-                ExitWithoutConsumingCard();
+                cardDrawManager.CancelPendingCard();
             }
 
             return;
@@ -312,16 +318,22 @@ public class TileTargetingManager : MonoBehaviour
                 return;
             }
 
+            string cardId = CardDrawManager.NormalizeCardId(pendingCardPrefab.name);
+            string cardName = pendingCardPrefab.name;
+            string targetTileId = selectedTile.name;
+
+            ExitWithoutConsumingCard();
+
             bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
-                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
-                pendingCardPrefab.name,
-                selectedTile.name,
+                cardId,
+                cardName,
+                targetTileId,
                 -1
             );
 
-            if (requested)
+            if (!requested)
             {
-                ExitWithoutConsumingCard();
+                cardDrawManager.CancelPendingCard();
             }
 
             return;
