@@ -28,13 +28,17 @@ If someone opens the Unity project folder directly on GitHub, this file should h
 
 1. Official game README:
    - [../../README.md](../../README.md)
-2. Contribution and peer-feedback notes:
+2. Final game design:
+   - [../FINAL_GAME_DESIGN.md](../FINAL_GAME_DESIGN.md)
+3. Testing log:
+   - [../TESTING_LOG.md](../TESTING_LOG.md)
+4. Contribution and peer-feedback notes:
    - [./CONTRIBUTIONS_AND_FEEDBACK.md](./CONTRIBUTIONS_AND_FEEDBACK.md)
-3. Development log:
+5. Development log:
    - [../DEVELOPMENT_LOG.md](../DEVELOPMENT_LOG.md)
-4. Resource / asset / AI references:
+6. Resource / asset / AI references:
    - [./Assets/Docs/ResourceReferences.md](./Assets/Docs/ResourceReferences.md)
-5. Early concept document:
+7. Early concept document:
    - [../prototype.md](../prototype.md)
 
 ## Quick project facts
@@ -44,9 +48,36 @@ If someone opens the Unity project folder directly on GitHub, this file should h
 - Recommended entry scene: `Assets/Scenes/BootstrapScene.unity`
 - Project type: turn-based multiplayer strategy / tower-defense vertical slice
 
-## Final scene flow
+## Final playable scene flow
 
-The final assessment-facing flow starts from `BootstrapScene`, then uses `HomeScene` and `ModeSelectScene` to enter `GuideScene` or the main `GameScene`, with match outcomes shown through `ResultScene`.
+`BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI mode -> `GameScene` -> `ResultScene`
+
+`GuideScene` is the onboarding/help route for learning the rules and controls.
+
+## Primary assessment modes
+
+- Local Mode: primary assessment route.
+- AI Mode: primary assessment route when human opponents are not available.
+- Online Mode: implemented extension; broader multiplayer validation is required before treating it as the stable marking route.
+
+## Important documentation
+
+- Root README: [../../README.md](../../README.md)
+- Final game design: [../FINAL_GAME_DESIGN.md](../FINAL_GAME_DESIGN.md)
+- Testing log: [../TESTING_LOG.md](../TESTING_LOG.md)
+- Kanban and issue evidence: [../KANBAN_AND_ISSUE_EVIDENCE.md](../KANBAN_AND_ISSUE_EVIDENCE.md)
+- Development log: [../DEVELOPMENT_LOG.md](../DEVELOPMENT_LOG.md)
+- Submission checklist: [../SUBMISSION_CHECKLIST.md](../SUBMISSION_CHECKLIST.md)
+- Contribution and feedback notes: [./CONTRIBUTIONS_AND_FEEDBACK.md](./CONTRIBUTIONS_AND_FEEDBACK.md)
+- Unity system overview: [./SYSTEM_OVERVIEW.md](./SYSTEM_OVERVIEW.md)
+- Online mode status: [./ONLINE_STATUS.md](./ONLINE_STATUS.md)
+- Resource references: [./Assets/Docs/ResourceReferences.md](./Assets/Docs/ResourceReferences.md)
+
+## Prototype and draft files
+
+- `GameScene_AIPrototype.unity` is a prototype/AI development scene and is not the primary final route.
+- `GameScene.unity.bak_before_layout_edit` is a scene-layout backup and is not used for final assessment.
+- `Assets/Docs/v3.docx` is treated as a draft/report-like document. The assessment-facing Markdown documents linked above are the final documentation entry points.
 
 ## Why this structure is useful
 

@@ -93,7 +93,7 @@ public class ModeSelectSceneManager : MonoBehaviour
     public TMP_InputField usernameInput;
     [Tooltip("Old mixed room slot UI used only by the legacy combined room prototype.")]
     public RoomSlotUI[] roomSlots;
-    [Tooltip("Old placeholder status label used only by the legacy combined room prototype.")]
+    [Tooltip("Legacy status label used only by the combined room prototype.")]
     public TMP_Text placeholderMessageText;
     [Tooltip("Old Add AI button from the combined room prototype. Formal AI mode no longer adds/removes AI players.")]
     public Button addAIButton;
@@ -235,7 +235,7 @@ public class ModeSelectSceneManager : MonoBehaviour
         Debug.Log("Ready button listener bound once.");
     }
 
-    // Shows local four-player options and hides online/AI placeholder options.
+    // Shows local four-player options and hides legacy online/AI options.
     public void OpenLocalModePanel()
     {
         SetPanelActive(localModePanel, true, "Local mode panel");
@@ -300,14 +300,14 @@ public class ModeSelectSceneManager : MonoBehaviour
         SceneManager.LoadScene(gameSceneName);
     }
 
-    // Compatibility wrapper for older placeholder buttons from the mixed room prototype.
+    // Compatibility wrapper for older mixed-room prototype buttons.
     [System.Obsolete("Legacy combined room flow only. Formal AI mode does not add/remove AI slots.")]
     public void AddAIPlayerPlaceholder()
     {
         AddAIPlayer();
     }
 
-    // Compatibility wrapper for older placeholder buttons from the mixed room prototype.
+    // Compatibility wrapper for older mixed-room prototype buttons.
     [System.Obsolete("Use StartOnlineMatchmaking() or JoinOnlineRoomByCode() from the Online panel.")]
     public void CreateRoomPlaceholder()
     {
@@ -501,7 +501,7 @@ public class ModeSelectSceneManager : MonoBehaviour
         }
     }
 
-    // Compatibility wrapper for older placeholder buttons.
+    // Compatibility wrapper for older mixed-room prototype buttons.
     [System.Obsolete("Use StartOnlineMatchmaking() from the Online panel.")]
     public void StartMatchmakingPlaceholder()
     {
@@ -1169,7 +1169,7 @@ public class ModeSelectSceneManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    // Shows or clears the old mixed-room placeholder text only while the legacy combined panel is in use.
+    // Shows or clears the old mixed-room status text only while the legacy combined panel is in use.
     private void ShowPlaceholderMessage(string message)
     {
         if (!IsLegacyCombinedRoomPrototypeActive())
@@ -1183,7 +1183,7 @@ public class ModeSelectSceneManager : MonoBehaviour
         }
     }
 
-    // Shows lobby feedback through placeholder text and the optional toast UI.
+    // Shows lobby feedback through legacy status text and the optional toast UI.
     private void ShowLobbyMessage(string message)
     {
         Debug.Log(message);
@@ -1429,7 +1429,7 @@ public class ModeSelectSceneManager : MonoBehaviour
         ShowLobbyMessage(message);
     }
 
-    // Shared Photon/local placeholder text entrypoint.
+    // Shared Photon/local legacy status text entrypoint.
     public void ShowOnlinePlaceholderMessage(string message)
     {
         ShowPlaceholderMessage(message);

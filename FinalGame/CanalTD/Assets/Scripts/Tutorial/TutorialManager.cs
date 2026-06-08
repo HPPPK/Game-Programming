@@ -1769,7 +1769,7 @@ public class TutorialManager : MonoBehaviour
                 continue;
             }
 
-            bool isPlaceholder = part.steps == null || part.steps.Count == 0;
+            bool isEmptyStepGroup = part.steps == null || part.steps.Count == 0;
 
             if (part.partId == TutorialPartId.PlayerInfoAndScore ||
                 part.partId == TutorialPartId.LandTowerGold ||
@@ -1777,7 +1777,7 @@ public class TutorialManager : MonoBehaviour
                 part.partId == TutorialPartId.EndTurn ||
                 part.partId == TutorialPartId.EnemyWave ||
                 part.partId == TutorialPartId.PlayersTurnsScoring ||
-                isPlaceholder)
+                isEmptyStepGroup)
             {
                 parts.RemoveAt(i);
             }

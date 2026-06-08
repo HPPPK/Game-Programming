@@ -1,5 +1,7 @@
 # Game Design Document v2 (System Version)
 
+> This is a historical design iteration document. The final assessed design is summarised in [FinalGame/FINAL_GAME_DESIGN.md](./FINAL_GAME_DESIGN.md).
+
 ## 1. Game Positioning
 
 This game is a 2–4 player turn-based strategy tower defense game.

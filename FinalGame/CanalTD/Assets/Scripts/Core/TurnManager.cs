@@ -1,29 +1,31 @@
 /*
- * File: TurnManager.cs
+ * CanalTD - TurnManager
  *
  * Purpose:
- * Implements TurnManager for the core layer of CanalTD and supports the playable vertical slice of the project.
+ * Controls the active player turn, AP state, and per-turn action permissions for the main match flow.
  *
  * Attached GameObject:
- * Core gameplay managers, player objects, turn systems, or shared scene controllers.
+ * Configured in the Unity scene / Inspector as part of the core gameplay manager setup.
  *
  * Main responsibilities:
- * - Provide the runtime behaviour for TurnManager within the core system.
- * - Coordinate related objects, state changes, and cross-system communication.
+ * - Track current player, round/turn state, and remaining AP.
+ * - Reset draw, play, discard, and gate-action flags at turn boundaries.
+ * - Provide permission checks used by card, gate, tower, and UI systems.
+ * - Apply authoritative online turn updates when online mode is active.
  *
  * Inputs:
- * - Inspector references configured in Unity.
- * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Button/UI calls for turn progression and player actions.
+ * - Runtime calls from card, gate, tower, AI, and online synchronization systems.
  *
- * Outputs or effects:
- * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * Outputs / effects:
+ * - Updates turn/AP state and action availability.
+ * - Triggers UI feedback through connected scene managers.
  *
- * Authorship or assistance:
- * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
- * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ * Authorship / assistance:
+ * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
- * - Verify TurnManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Manually verify AP reset, turn start/end, draw/play/discard/gate flags, UI feedback, and invalid-action feedback in Local and AI modes.
  */
 using System.Reflection;
 using UnityEngine;

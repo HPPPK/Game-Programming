@@ -1,5 +1,7 @@
 # CanalTD
 
+> This is a historical design iteration document. The final assessed design is summarised in [FinalGame/FINAL_GAME_DESIGN.md](./FINAL_GAME_DESIGN.md).
+
 CanalTD is a turn-based multiplayer strategy game where players control canal gates and path direction to redirect enemy waves toward opponents.
 
 ---

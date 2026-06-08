@@ -1,29 +1,30 @@
 /*
- * File: BuildTowerManager.cs
+ * CanalTD - BuildTowerManager
  *
  * Purpose:
- * Implements BuildTowerManager for the tower layer of CanalTD and supports the playable vertical slice of the project.
+ * Coordinates land purchase, tower construction, tower upgrade, tower selling, and build feedback.
  *
  * Attached GameObject:
- * Tower prefabs, build spots, projectiles, or tower-related scene controllers.
+ * Configured in the Unity scene / Inspector with build areas, tower prefabs, UI, and resource references.
  *
  * Main responsibilities:
- * - Provide the runtime behaviour for BuildTowerManager within the tower system.
- * - Coordinate related objects, state changes, and cross-system communication.
+ * - Validate build-area ownership and resource costs.
+ * - Build, upgrade, and sell towers through the selected build area.
+ * - Coordinate tower UI, radial menu behavior, feedback messages, and tutorial gates.
+ * - Send online build synchronization requests when online mode is active.
  *
  * Inputs:
  * - Inspector references configured in Unity.
- * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Build-area clicks, tower selections, resource state, ownership state, and tutorial/online permissions.
  *
- * Outputs or effects:
- * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * Outputs / effects:
+ * - Creates or removes tower objects, updates resources, changes ownership state, and displays build feedback.
  *
- * Authorship or assistance:
- * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
- * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ * Authorship / assistance:
+ * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
- * - Verify BuildTowerManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Manually verify land purchase, ownership checks, build, upgrade, sell, insufficient-resource feedback, and tutorial-gated build steps.
  */
 using UnityEngine;
 using UnityEngine.EventSystems;

@@ -20,6 +20,23 @@ My work influenced the project at several levels:
 - system integration between cards, towers, players, enemies, and online flow
 - ongoing debugging and final documentation
 
+## Personal contribution evidence table
+
+| Area / system | Main files or scenes | What I personally did | AI assistance used? | Evidence / related issue or document |
+|---|---|---|---|---|
+| Game concept and core rules | `FinalGame/FINAL_GAME_DESIGN.md`, `FinalGame/prototype.md`, `FinalGame/gameCoreRule_version*.md` | Defined the core CanalTD idea, player goal, indirect pressure concept, and final scope distinction between final and historical design documents. | AI-assisted documentation support was used. | [FINAL_GAME_DESIGN.md](../FINAL_GAME_DESIGN.md) |
+| Card system | `Assets/Scripts/Card` | Integrated card draw/play/targeting behavior and documented how card interaction supports the vertical slice. | AI-assisted coding/debugging suggestions were used selectively. | [SYSTEM_OVERVIEW.md](./SYSTEM_OVERVIEW.md), issue [#95](https://github.com/HPPPK/Game-Programming/issues/95) |
+| Turn system / AP rules | `Assets/Scripts/Core`, `Assets/Scripts/UI` | Developed and integrated turn/AP restrictions, turn feedback, and active-player clarity. | AI-assisted debugging/refactoring suggestions were used selectively. | [TESTING_LOG.md](../TESTING_LOG.md), issue [#90](https://github.com/HPPPK/Game-Programming/issues/90) |
+| Tower building / upgrading / selling | `Assets/Scripts/Tower`, `Assets/Scenes/GameScene.unity` | Integrated tower build, upgrade, sell, ownership/resource checks, and tower defense behavior. | AI-assisted coding suggestions were used selectively. | [SYSTEM_OVERVIEW.md](./SYSTEM_OVERVIEW.md) |
+| Enemy routing / canal pressure | `Assets/Scripts/Enemy`, `Assets/Scripts/Path`, `Assets/Scripts/Map` | Designed and integrated route pressure as the main indirect competition mechanic. | AI-assisted explanation/debugging support was used selectively. | Issue [#29](https://github.com/HPPPK/Game-Programming/issues/29) |
+| AI mode difficulty structure | `Assets/Scripts/Core/AIPrototypeTurnManager.cs`, `Assets/Scripts/Core/AIDifficulty.cs` | Designed AI difficulty expectations and integrated AI route as a primary assessment mode. | AI-assisted coding/debugging suggestions were used selectively. | [FINAL_GAME_DESIGN.md](../FINAL_GAME_DESIGN.md) |
+| UI feedback / turn clarity | `Assets/Scripts/UI`, `Assets/Scenes/GameScene.unity` | Improved active-turn indication, player status readability, warnings/toasts, and result feedback. | AI-assisted documentation/refactoring suggestions were used selectively. | Issues [#90](https://github.com/HPPPK/Game-Programming/issues/90), [#93](https://github.com/HPPPK/Game-Programming/issues/93) |
+| Guide scene / onboarding | `Assets/Scripts/Tutorial`, `Assets/Scenes/GuideScene.unity` | Created and documented the beginner guide/onboarding route. | AI-assisted documentation support was used. | Issues [#92](https://github.com/HPPPK/Game-Programming/issues/92), [#95](https://github.com/HPPPK/Game-Programming/issues/95)-[#97](https://github.com/HPPPK/Game-Programming/issues/97) |
+| Online mode integration/debugging | `Assets/Scripts/Networking`, `Assets/Scenes/ModeSelectScene.unity` | Integrated online room/lobby/sync work and documented Online Mode as an extension. | AI-assisted debugging suggestions were used selectively. | [ONLINE_STATUS.md](./ONLINE_STATUS.md), issues [#62](https://github.com/HPPPK/Game-Programming/issues/62), [#89](https://github.com/HPPPK/Game-Programming/issues/89), [#91](https://github.com/HPPPK/Game-Programming/issues/91) |
+| Audio / feedback polish | `Assets/Scripts/UI/AudioManager.cs`, `Assets/Art/Asset/Sound` | Integrated and documented sourced audio feedback. | AI-assisted documentation support was used. | [ResourceReferences.md](./Assets/Docs/ResourceReferences.md), issue [#87](https://github.com/HPPPK/Game-Programming/issues/87) |
+| Documentation and submission preparation | `README.md`, `FinalGame/*.md`, `FinalGame/CanalTD/*.md` | Prepared assessment-facing docs, testing log, final design, process evidence, checklist, and system overview. | AI-assisted drafting and cleanup support was used. | [SUBMISSION_CHECKLIST.md](../SUBMISSION_CHECKLIST.md) |
+| GitHub Issues / Kanban process | `FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md` | Used Issues/Project board as process tracking and documented closed issues as completed work. | AI-assisted documentation support was used. | [KANBAN_AND_ISSUE_EVIDENCE.md](../KANBAN_AND_ISSUE_EVIDENCE.md) |
+
 ## Detailed contribution analysis
 
 ### 1. Enemy routing strategy and path-calculation contribution
@@ -325,6 +342,8 @@ I remained responsible for:
 - testing and evaluating whether changes actually improved the project
 
 So although AI support was used, the creative and integrative direction of the project remained my own contribution.
+
+Final design decisions, Unity integration, testing responsibility, accepting or rejecting AI suggestions, and final submission responsibility remained mine.
 
 ## Peer and tutor feedback, with my response
 

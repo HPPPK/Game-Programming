@@ -1,5 +1,7 @@
 # Game Design Document v1 (Concept Version)
 
+> This is a historical design iteration document. The final assessed design is summarised in [FinalGame/FINAL_GAME_DESIGN.md](./FINAL_GAME_DESIGN.md).
+
 ## 1. Game Positioning
 
 This game is a multiplayer turn-based tower defense party game.
