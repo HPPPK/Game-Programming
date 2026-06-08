@@ -50,17 +50,32 @@ This file records the main external resources, AI-assisted support, and referenc
 - `Assets/Art/Asset/Sound/death.mp3`
 - `Assets/Art/Asset/Sound/audley_fergine-ui-button-click-5-327756.mp3`
 
-### Audio attribution note for files without preserved original names
+### Audio source links still needed
 
-- The project also uses several local audio files that were renamed during import or later project cleanup:
-  - `Gun.mp3`
-  - `Victory.mp3`
-  - `building.mp3`
-  - `buttonClick.mp3`
-  - `death.mp3`
-- For these files, the source platform is confirmed as Pixabay.
-- However, the exact original Pixabay item pages cannot currently be verified from the preserved local filenames alone.
-- They are therefore credited honestly as Pixabay-sourced audio with incomplete file-level traceability.
+These files are assigned in `BootstrapScene` through the main `AudioManager`. The source platform is Pixabay; the exact item links should be added when they are matched.
+
+- Tower shooting:
+  - Local file: `Assets/Art/Asset/Sound/Gun.mp3`
+  - Assigned use: `towerShootSound`
+  - Source status: `Pixabay item source link to be added when matched`
+- Enemy death:
+  - Local file: `Assets/Art/Asset/Sound/death.mp3`
+  - Assigned use: `enemyDeathSound`
+  - Source status: `Pixabay item source link to be added when matched`
+- Tower build:
+  - Local file: `Assets/Art/Asset/Sound/building.mp3`
+  - Assigned use: `buildSound`
+  - Source status: `Pixabay item source link to be added when matched`
+- Victory:
+  - Local file: `Assets/Art/Asset/Sound/Victory.mp3`
+  - Assigned use: `victorySound`
+  - Source status: `Pixabay item source link to be added when matched`
+
+### Unassigned local audio file
+
+- Local file: `Assets/Art/Asset/Sound/buttonClick.mp3`
+- Current status: present in project files but not assigned in `BootstrapScene`
+- Source status: `Pixabay item source link to be added if this file is later used or confirmed`
 
 ### Additional identified Pixabay file
 
