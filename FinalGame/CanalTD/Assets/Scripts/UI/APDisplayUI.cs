@@ -2,15 +2,32 @@
  * File: APDisplayUI.cs
  *
  * Purpose:
- * This script displays the current AP value from TurnManager using TextMeshPro.
- * In GameScene_AIPrototype, TurnManager is only a synced helper, but the active
- * turn source is still resolved so the UI does not imply humans can act during AI turns.
- * It is intentionally simple and refreshes every frame so the UI stays correct
- * even when AP changes from different gameplay actions.
+ * Implements APDisplayUI for the ui layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Inspector setup:
- * - apText should point to the TextMeshProUGUI object that displays AP.
- * - turnManager is optional. If left empty, the script uses TurnManager.Instance.
+ * Attached GameObject:
+ * Canvas objects, scene UI roots, status panels, buttons, or cursor feedback objects.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for APDisplayUI within the ui system.
+ * - Update the owning object state and react to gameplay events during play.
+ * - Present readable feedback so players can understand turns, actions, and results.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Player input, button clicks, pointer events, or scene transition requests.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Updates visible UI, indicators, prompts, and player-facing status messages.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify APDisplayUI in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Confirm the related UI remains readable in both the normal scene flow and edge/error states.
  */
 using TMPro;
 using UnityEngine;

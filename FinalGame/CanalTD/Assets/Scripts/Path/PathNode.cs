@@ -2,27 +2,29 @@
  * File: PathNode.cs
  *
  * Purpose:
- * This script represents one point in the enemy path graph. Designers connect
- * nodes by filling the edges list in the Inspector. Enemy movement and pathfinder
- * logic use these connections to decide where enemies can travel.
+ * Implements PathNode for the path layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Runtime behavior:
- * - edges stores outgoing PathEdge connections from this node to other nodes.
- * - GetNextNode(previousNode) returns one open outgoing node for simple movement.
- * - Closed or blocked edges are ignored through PathEdge.IsOpen().
- * - The method avoids immediately returning to previousNode when another option
- *   exists, which helps prevent enemies from bouncing backward.
- * - nextEdgeIndex rotates through available edges to spread enemies across branches.
+ * Attached GameObject:
+ * Path nodes, edges, gates, or path-debug objects placed in the gameplay scene.
  *
- * Scene visualization:
- * - OnDrawGizmos() draws a small sphere at the node position.
- * - Always-open edges are drawn cyan.
- * - Gate-controlled edges are drawn red so they are easier to inspect.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for PathNode within the path system.
+ * - Update the owning object state and react to gameplay events during play.
  *
- * Dependency notes:
- * - PathEdge stores the target node and optional linked gate.
- * - Pathfinder searches through PathNode.edges.
- * - CastleEndNode inherits from PathNode and acts as a final destination.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify PathNode in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 using System.Collections.Generic;

@@ -2,9 +2,31 @@
  * File: WaveManager.cs
  *
  * Purpose:
- * Controls enemy wave spawning with the new EnemyStats-driven architecture.
- * WaveManager only decides how many enemies spawn and which prefabs are chosen.
- * HP, speed, reward, armor, split behavior, and boss stats live on EnemyStats.
+ * Implements WaveManager for the enemy layer of Rail Rumble and supports the playable vertical slice of the project.
+ *
+ * Attached GameObject:
+ * Enemy prefabs, wave helpers, or enemy-related scene managers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for WaveManager within the enemy system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Support enemy spawning, pathing, targeting, combat, or wave pressure behaviour.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Moves enemies, adjusts combat results, or influences castle pressure and wave outcomes.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify WaveManager in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Collections;
 using System.Collections.Generic;

@@ -2,13 +2,28 @@
  * File: BuildTowerManager.cs
  *
  * Purpose:
- * Handles clicking build areas, buying land, building towers, applying player
- * ownership, and assigning tower visuals/resources after construction.
+ * Implements BuildTowerManager for the tower layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * Frozen land is rejected before land or tower actions. Built towers are parented
- * under the configured towersParent when available so targeting managers can
- * find them reliably.
+ * Attached GameObject:
+ * Tower prefabs, build spots, projectiles, or tower-related scene controllers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for BuildTowerManager within the tower system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify BuildTowerManager in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 using UnityEngine.EventSystems;

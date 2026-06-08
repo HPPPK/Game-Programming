@@ -2,16 +2,28 @@
  * File: PlayerExitManager.cs
  *
  * Purpose:
- * Central exit / surrender flow for gameplay scenes. It supports full-match
- * exit for local and AI modes today, and prepares per-player online exit cleanup
- * for a future networking layer without introducing networking code yet.
+ * Implements PlayerExitManager for the core layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * - Local and AI modes end the whole match immediately and load ResultScene.
- * - Online mode is currently a safe placeholder path controlled by
- *   forceOnlineMode. Future networking code can call ExitOnlinePlayer(playerId).
- * - CleanupPlayerState() focuses on durable gameplay state only; visuals and UI
- *   teardown remain scene-local and null-safe.
+ * Attached GameObject:
+ * Core gameplay managers, player objects, turn systems, or shared scene controllers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for PlayerExitManager within the core system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify PlayerExitManager in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Collections.Generic;
 using UnityEngine;

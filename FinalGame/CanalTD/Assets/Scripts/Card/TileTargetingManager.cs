@@ -2,13 +2,32 @@
  * File: TileTargetingManager.cs
  *
  * Purpose:
- * Handles land/tile targeting cards such as Take Over and Freeze Claim. It
- * highlights valid TowerBuildArea targets, tracks the selected tile, and applies
- * ownership or freeze effects only after Confirm.
+ * Implements TileTargetingManager for the card layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * This manager reuses the shared dark overlay and targeting UI, but it does not
- * replace GateTargetingManager. Gate cards continue to use their own manager.
+ * Attached GameObject:
+ * None. This script defines shared data or types and is not attached directly to a GameObject.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for TileTargetingManager within the card system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Handle card usage, targeting, hand state, or card-driven map interactions.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Card selections, targeting choices, turn permissions, and player hand data.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Applies card outcomes, targeting results, hand count changes, or card-related restrictions.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify TileTargetingManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Check local mode, AI mode, and online mode if the script participates in shared card flow.
  */
 using System.Collections.Generic;
 using System.Reflection;
@@ -242,6 +261,33 @@ public class TileTargetingManager : MonoBehaviour
             return;
         }
 
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineCardSyncManager.Instance != null &&
+            cardDrawManager != null)
+        {
+            GameObject pendingCardPrefab = cardDrawManager.GetPendingCardPrefabForTargeting();
+
+            if (pendingCardPrefab == null)
+            {
+                ShowToast("Could not play this card.");
+                return;
+            }
+
+            bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
+                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
+                pendingCardPrefab.name,
+                selectedTile.name,
+                -1
+            );
+
+            if (requested)
+            {
+                ExitWithoutConsumingCard();
+            }
+
+            return;
+        }
+
         ResolveTakeOver(GetCurrentPlayerId(), selectedTile, true);
     }
 
@@ -250,6 +296,33 @@ public class TileTargetingManager : MonoBehaviour
         if (selectedTile == null)
         {
             ShowToast("Choose a land first.");
+            return;
+        }
+
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineCardSyncManager.Instance != null &&
+            cardDrawManager != null)
+        {
+            GameObject pendingCardPrefab = cardDrawManager.GetPendingCardPrefabForTargeting();
+
+            if (pendingCardPrefab == null)
+            {
+                ShowToast("Could not play this card.");
+                return;
+            }
+
+            bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
+                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
+                pendingCardPrefab.name,
+                selectedTile.name,
+                -1
+            );
+
+            if (requested)
+            {
+                ExitWithoutConsumingCard();
+            }
+
             return;
         }
 

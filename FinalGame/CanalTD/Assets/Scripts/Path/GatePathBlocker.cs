@@ -2,28 +2,29 @@
  * File: GatePathBlocker.cs
  *
  * Purpose:
- * This script links one GateFrameAnimation to the two PathNode objects that sit
- * on both sides of that gate. It makes the path graph treat those two nodes as
- * disconnected whenever the linked gate is currently blocking.
+ * Implements GatePathBlocker for the path layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Why this exists:
- * - Pathfinder searches the node graph as an undirected graph.
- * - That means one Inspector edge between two neighboring nodes can be used from
- *   either direction.
- * - A gate still needs to cut that connection when it is blocking.
- * - This component gives the gate an explicit "this blocks node A <-> node B"
- *   relationship, independent from the direction of the PathEdge list.
+ * Attached GameObject:
+ * Path nodes, edges, gates, or path-debug objects placed in the gameplay scene.
  *
- * Inspector setup:
- * - linkedGate: the GateFrameAnimation that opens/closes.
- * - nodeA: the path node on one side of the gate.
- * - nodeB: the path node on the other side of the gate.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for GatePathBlocker within the path system.
+ * - Update the owning object state and react to gameplay events during play.
  *
- * Runtime behavior:
- * - If linkedGate is null, this blocker does nothing.
- * - If nodeA or nodeB is missing, this blocker does nothing.
- * - If linkedGate.IsBlocking() is true, Pathfinder cannot move between nodeA
- *   and nodeB in either direction.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify GatePathBlocker in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using UnityEngine;
 

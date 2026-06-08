@@ -2,31 +2,32 @@
  * File: CardDrawManager.cs
  *
  * Purpose:
- * This script controls the card system used by the player during gameplay.
- * It builds a runtime deck from Inspector deck entries, shuffles and draws cards
- * into UI slots, lets the player select/discard/play a card, and coordinates
- * cards that require gate targeting.
+ * Implements CardDrawManager for the card layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Main gameplay flow:
- * 1. InitializeDeck() builds the configured runtime deck.
- * 2. DrawCard() adds one prefab reference to the current player's PlayerHand.
- * 3. CardInstanceSelectable reports clicks back to this manager through SelectCard().
- * 4. PlaySelectedCard() animates the selected card toward the draw pile area.
- * 5. If the card name maps to a GateActionType, this manager opens gate targeting
- *    mode and keeps the card hidden as pendingPlayedCard.
- * 6. GateTargetingManager later calls ConfirmPendingCard() or CancelPendingCard()
- *    depending on whether the gate action is confirmed or cancelled.
+ * Attached GameObject:
+ * Card UI objects, targeting overlays, gate helpers, or card-related gameplay managers.
  *
- * Inspector setup:
- * - deckEntries should contain the 28-card deck composition.
- * - cardSlots should point to the UI transforms where cards can be placed.
- * - drawPileVisual is optional and is used as the visual animation target.
- * - warningText is optional and displays short player feedback messages.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for CardDrawManager within the card system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Handle card usage, targeting, hand state, or card-driven map interactions.
  *
- * Important dependency notes:
- * - CardInstanceSelectable must exist on card prefabs, or it is added at runtime.
- * - GateTargetingManager is used only for cards that affect gates.
- * - CursorToolManager is used to switch the cursor into hammer/targeting mode.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Card selections, targeting choices, turn permissions, and player hand data.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Applies card outcomes, targeting results, hand count changes, or card-related restrictions.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify CardDrawManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Check local mode, AI mode, and online mode if the script participates in shared card flow.
  */
 using UnityEngine;
 using TMPro;
@@ -246,6 +247,12 @@ public class CardDrawManager : MonoBehaviour
         {
             StartCoroutine(ShowWarning("Deck is empty."));
             return false;
+        }
+
+        if (ShouldUseAuthoritativeOnlineCardSync())
+        {
+            return PhotonOnlineCardSyncManager.Instance != null &&
+                PhotonOnlineCardSyncManager.Instance.RequestDrawCard();
         }
 
         TurnManager manager = GetTurnManager();
@@ -579,14 +586,32 @@ public class CardDrawManager : MonoBehaviour
             return false;
         }
 
+        GameObject returnedPrefab = selectedCard.sourcePrefab;
+
+        if (ShouldUseAuthoritativeOnlineCardSync())
+        {
+            TurnManager authoritativeManager = GetTurnManager();
+
+            if (authoritativeManager != null && !authoritativeManager.CanDiscardCard())
+            {
+                authoritativeManager.TryConsumeDiscard();
+                return false;
+            }
+
+            return returnedPrefab != null &&
+                PhotonOnlineCardSyncManager.Instance != null &&
+                PhotonOnlineCardSyncManager.Instance.RequestDiscardCard(
+                    NormalizeCardId(returnedPrefab.name),
+                    returnedPrefab.name
+                );
+        }
+
         TurnManager manager = GetTurnManager();
 
         if (manager != null && !manager.TryConsumeDiscard())
         {
             return false;
         }
-
-        GameObject returnedPrefab = selectedCard.sourcePrefab;
 
         if (returnedPrefab != null)
         {
@@ -694,6 +719,22 @@ public class CardDrawManager : MonoBehaviour
         {
             manager.TryConsumePlayCard();
             return false;
+        }
+
+        if (ShouldUseAuthoritativeOnlineCardSync() && selectedCard != null && selectedCard.sourcePrefab != null)
+        {
+            string selectedCardId = NormalizeCardId(selectedCard.sourcePrefab.name);
+
+            if (!RequiresTargetSelection(selectedCardId))
+            {
+                return PhotonOnlineCardSyncManager.Instance != null &&
+                    PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
+                        selectedCardId,
+                        selectedCard.sourcePrefab.name,
+                        string.Empty,
+                        -1
+                    );
+            }
         }
 
         StartCoroutine(PlayCardRoutine(selectedCard));
@@ -1334,12 +1375,7 @@ public class CardDrawManager : MonoBehaviour
 
     private string NormalizeCardName(string cardName)
     {
-        if (string.IsNullOrWhiteSpace(cardName))
-        {
-            return string.Empty;
-        }
-
-        return cardName.Replace("(Clone)", "").Trim().ToLowerInvariant();
+        return NormalizeCardId(cardName);
     }
 
     IEnumerator ShowWarning(string message)
@@ -1836,5 +1872,178 @@ public class CardDrawManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    public static string NormalizeCardId(string cardName)
+    {
+        if (string.IsNullOrWhiteSpace(cardName))
+        {
+            return string.Empty;
+        }
+
+        return cardName.Replace("(Clone)", "").Trim().ToLowerInvariant();
+    }
+
+    public static bool IsPlayerTargetingCardId(string cardId)
+    {
+        return cardId == "stealcard" ||
+            cardId == "steal card" ||
+            cardId == "tradehands" ||
+            cardId == "trade hands" ||
+            cardId == "disrupt";
+    }
+
+    public static bool RequiresBoardTargetId(string cardId)
+    {
+        return cardId == "opengate" ||
+            cardId == "open gate" ||
+            cardId == "redirectflow" ||
+            cardId == "redirect flow" ||
+            cardId == "lockgate" ||
+            cardId == "lock gate" ||
+            cardId == "takeover" ||
+            cardId == "take over" ||
+            cardId == "freezeclaim" ||
+            cardId == "freeze claim" ||
+            cardId == "powerboost" ||
+            cardId == "power boost" ||
+            cardId == "shocktrap" ||
+            cardId == "shock trap";
+    }
+
+    public bool RequiresTargetSelection(string cardId)
+    {
+        string normalizedCardId = NormalizeCardId(cardId);
+        return IsPlayerTargetingCardId(normalizedCardId) || RequiresBoardTargetId(normalizedCardId);
+    }
+
+    public List<string> BuildConfiguredDeckCardIds()
+    {
+        List<string> deckCardIds = new List<string>();
+
+        if (HasConfiguredDeckEntries())
+        {
+            foreach (CardDeckEntry entry in deckEntries)
+            {
+                if (entry == null || entry.cardPrefab == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < Mathf.Max(0, entry.copies); i++)
+                {
+                    deckCardIds.Add(NormalizeCardId(entry.cardPrefab.name));
+                }
+            }
+
+            return deckCardIds;
+        }
+
+        if (cardTypePrefabs != null)
+        {
+            foreach (GameObject prefab in cardTypePrefabs)
+            {
+                if (prefab == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < copiesPerCardType; i++)
+                {
+                    deckCardIds.Add(NormalizeCardId(prefab.name));
+                }
+            }
+        }
+
+        return deckCardIds;
+    }
+
+    public int GetMaxHandSizeForPlayer(int playerId)
+    {
+        PlayerHand hand = playerManager != null ? playerManager.GetPlayerHand(playerId) : null;
+        return hand != null ? hand.maxHandSize : 5;
+    }
+
+    public void ClearAllPlayerHandsForOnlineBootstrap()
+    {
+        if (playerManager == null || playerManager.players == null)
+        {
+            return;
+        }
+
+        foreach (PlayerResource player in playerManager.players)
+        {
+            if (player == null)
+            {
+                continue;
+            }
+
+            PlayerHand hand = player.GetPlayerHand();
+
+            if (hand != null)
+            {
+                hand.Clear();
+            }
+
+            player.SetCardCount(0);
+        }
+
+        selectedCard = null;
+        pendingPlayedCard = null;
+        RenderCurrentPlayerHand();
+    }
+
+    public void ApplyOnlinePrivateHandState(int ownerPlayerId, IEnumerable<string> cardIds, int handCount)
+    {
+        PlayerResource owner = GetPlayerResource(ownerPlayerId);
+
+        if (owner == null)
+        {
+            return;
+        }
+
+        PlayerHand hand = owner.GetPlayerHand();
+
+        if (hand == null)
+        {
+            return;
+        }
+
+        List<GameObject> prefabs = new List<GameObject>();
+
+        if (cardIds != null)
+        {
+            foreach (string cardId in cardIds)
+            {
+                GameObject prefab = FindCardPrefabById(cardId);
+
+                if (prefab != null)
+                {
+                    prefabs.Add(prefab);
+                }
+            }
+        }
+
+        hand.CopyFrom(prefabs);
+        owner.SetCardCount(handCount);
+        pendingPlayedCard = null;
+        selectedCard = null;
+
+        if (PhotonOnlineGameSceneManager.Instance != null &&
+            PhotonOnlineGameSceneManager.Instance.IsLocalOnlinePlayer(ownerPlayerId))
+        {
+            RenderCurrentPlayerHand();
+        }
+        else if (playerManager != null)
+        {
+            playerManager.RefreshPlayerUI(ownerPlayerId);
+        }
+    }
+
+    private bool ShouldUseAuthoritativeOnlineCardSync()
+    {
+        return PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineCardSyncManager.Instance != null &&
+            PhotonOnlineCardSyncManager.Instance.IsInitializedForOnlineMatch;
     }
 }

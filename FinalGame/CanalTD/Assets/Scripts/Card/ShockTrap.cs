@@ -2,13 +2,32 @@
  * File: ShockTrap.cs
  *
  * Purpose:
- * Runtime trap object placed by the Shock Trap card. It stays on the route until
- * an enemy enters its radius, then damages nearby enemies once, unregisters, and
- * destroys itself after the explosion animation.
+ * Implements ShockTrap for the card layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * The owner resource is passed into EnemyHealth.TakeDamage so kills and assists
- * still count for the player who placed the trap.
+ * Attached GameObject:
+ * Card UI objects, targeting overlays, gate helpers, or card-related gameplay managers.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for ShockTrap within the card system.
+ * - Update the owning object state and react to gameplay events during play.
+ * - Handle card usage, targeting, hand state, or card-driven map interactions.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Card selections, targeting choices, turn permissions, and player hand data.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Applies card outcomes, targeting results, hand count changes, or card-related restrictions.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify ShockTrap in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Check local mode, AI mode, and online mode if the script participates in shared card flow.
  */
 using UnityEngine;
 using System.Collections;

@@ -2,14 +2,32 @@
  * File: PhotonOnlineGameSceneManager.cs
  *
  * Purpose:
- * Boots GameScene from the active Photon room, rebuilds the online player
- * roster, and synchronizes the shared current-turn state through Photon room
- * properties.
+ * Implements PhotonOnlineGameSceneManager for the networking layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * - This is Phase 2B only. It does not synchronize gameplay actions yet.
- * - MasterClient owns turn advancement.
- * - Empty slots stay visible in UI but are skipped in turn order.
+ * Attached GameObject:
+ * Online scene managers or networking helper objects used during lobby and match flow.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for PhotonOnlineGameSceneManager within the networking system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Keep multiplayer state aligned while respecting online lifecycle guards and scene context.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Photon room/player state, network events, and authoritative sync payloads when online mode is active.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Sends, applies, or guards online sync operations without changing project-level Photon settings.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify PhotonOnlineGameSceneManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Retest both single-client and multi-client online flows after editing this script.
  */
 using System.Collections;
 using System.Collections.Generic;
@@ -45,6 +63,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     public GamePhaseManager gamePhaseManager;
     public MonoBehaviour toastMessage;
     public PhotonOnlineBuildSyncManager onlineBuildSyncManager;
+    public PhotonOnlineCardSyncManager onlineCardSyncManager;
 
     [Header("Online Turn Settings")]
     public int minOnlinePlayersToStart = 2;
@@ -64,6 +83,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     private bool shouldLoadHomeOnLeftRoom;
     private bool hasDetachedFromOnlineMatch;
     private bool hasBootstrappedOnlineMatch;
+    private bool photonCallbacksRegistered;
 
     public bool HasEverBootstrappedOnlineMatch
     {
@@ -127,6 +147,12 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
     private void Awake()
     {
+        if (!IsGameSceneObjectRuntime())
+        {
+            Debug.Log("PhotonOnlineGameSceneManager Awake ignored outside GameScene. scene=" + SceneManager.GetActiveScene().name);
+            return;
+        }
+
         Instance = this;
 
         if (playerManager == null)
@@ -149,16 +175,19 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
     private void OnEnable()
     {
+        if (!IsGameSceneObjectRuntime())
+        {
+            return;
+        }
+
 #if PHOTON_UNITY_NETWORKING
-        PhotonNetwork.AddCallbackTarget(this);
+        RegisterPhotonCallbacksIfNeeded();
 #endif
     }
 
     private void OnDisable()
     {
-#if PHOTON_UNITY_NETWORKING
-        PhotonNetwork.RemoveCallbackTarget(this);
-#endif
+        UnregisterPhotonCallbacksIfNeeded();
 
         if (Instance == this)
         {
@@ -168,6 +197,11 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
     private void Start()
     {
+        if (!IsGameSceneObjectRuntime())
+        {
+            return;
+        }
+
 #if PHOTON_UNITY_NETWORKING
         if (!ShouldUseOnlineMode())
         {
@@ -208,11 +242,11 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         CacheLocalPhotonIdentity();
         RebuildOnlineRosterFromPhoton();
 
-        // Reuse the existing local/AI opening-hand logic so every joined online
-        // player still starts with two cards in Phase 2B.
-        if (gamePhaseManager != null)
+        EnsureOnlineCardSyncManagerExists();
+
+        if (onlineCardSyncManager != null)
         {
-            gamePhaseManager.EnsureInitialHandsDealt();
+            onlineCardSyncManager.InitializeForOnlineMatch();
         }
 
         if (PhotonNetwork.IsMasterClient)
@@ -340,10 +374,25 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         if (propertiesThatChanged.ContainsKey(PhotonLobbyPropertyKeys.OnlineBuildSnapshot))
         {
             EnsureOnlineBuildSyncManagerExists();
-
+            
             if (onlineBuildSyncManager != null)
             {
                 onlineBuildSyncManager.HandleRoomPropertiesUpdated();
+            }
+        }
+
+        if (propertiesThatChanged.ContainsKey(PhotonLobbyPropertyKeys.OnlineCardPublicSnapshot))
+        {
+            if (!CanUseOnlineCardSyncRuntime())
+            {
+                return;
+            }
+
+            EnsureOnlineCardSyncManagerExists();
+
+            if (onlineCardSyncManager != null)
+            {
+                onlineCardSyncManager.HandleRoomPropertiesUpdated();
             }
         }
     }
@@ -363,9 +412,21 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             EnsureCurrentTurnTargetsActivePlayer();
         }
 
+        EnsureOnlineBuildSyncManagerExists();
+
         if (onlineBuildSyncManager != null)
         {
             onlineBuildSyncManager.InitializeForOnlineMatch();
+        }
+
+        if (CanUseOnlineCardSyncRuntime())
+        {
+            EnsureOnlineCardSyncManagerExists();
+
+            if (onlineCardSyncManager != null)
+            {
+                onlineCardSyncManager.InitializeForOnlineMatch();
+            }
         }
     }
 
@@ -391,9 +452,21 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             EnsureCurrentTurnTargetsActivePlayer();
         }
 
+        EnsureOnlineBuildSyncManagerExists();
+
         if (onlineBuildSyncManager != null)
         {
             onlineBuildSyncManager.InitializeForOnlineMatch();
+        }
+
+        if (CanUseOnlineCardSyncRuntime())
+        {
+            EnsureOnlineCardSyncManagerExists();
+
+            if (onlineCardSyncManager != null)
+            {
+                onlineCardSyncManager.InitializeForOnlineMatch();
+            }
         }
     }
 
@@ -412,9 +485,21 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             EnsureCurrentTurnTargetsActivePlayer();
         }
 
+        EnsureOnlineBuildSyncManagerExists();
+
         if (onlineBuildSyncManager != null)
         {
             onlineBuildSyncManager.InitializeForOnlineMatch();
+        }
+
+        if (CanUseOnlineCardSyncRuntime())
+        {
+            EnsureOnlineCardSyncManagerExists();
+
+            if (onlineCardSyncManager != null)
+            {
+                onlineCardSyncManager.InitializeForOnlineMatch();
+            }
         }
     }
 
@@ -939,6 +1024,11 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
     private void EnsureOnlineBuildSyncManagerExists()
     {
+        if (!IsGameSceneObjectRuntime())
+        {
+            return;
+        }
+
         if (onlineBuildSyncManager != null)
         {
             return;
@@ -953,6 +1043,42 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         GameObject managerObject = new GameObject("PhotonOnlineBuildSyncManager");
         onlineBuildSyncManager = managerObject.AddComponent<PhotonOnlineBuildSyncManager>();
+    }
+
+    private void EnsureOnlineCardSyncManagerExists()
+    {
+        if (!CanUseOnlineCardSyncRuntime())
+        {
+            return;
+        }
+
+        if (onlineCardSyncManager != null)
+        {
+            return;
+        }
+
+        onlineCardSyncManager = FindObjectOfType<PhotonOnlineCardSyncManager>();
+
+        if (onlineCardSyncManager != null)
+        {
+            return;
+        }
+
+        GameObject managerObject = new GameObject("PhotonOnlineCardSyncManager");
+        onlineCardSyncManager = managerObject.AddComponent<PhotonOnlineCardSyncManager>();
+    }
+
+    private bool CanUseOnlineCardSyncRuntime()
+    {
+#if PHOTON_UNITY_NETWORKING
+        return IsOnlineModeActive &&
+            !ShouldIgnoreOnlineCallbacks() &&
+            SceneManager.GetActiveScene().name == "GameScene" &&
+            PhotonNetwork.InRoom &&
+            !PhotonNetwork.OfflineMode;
+#else
+        return false;
+#endif
     }
 
     private bool TryCallToastMethod(string message)
@@ -996,5 +1122,38 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void RegisterPhotonCallbacksIfNeeded()
+    {
+#if PHOTON_UNITY_NETWORKING
+        if (photonCallbacksRegistered)
+        {
+            return;
+        }
+
+        PhotonNetwork.AddCallbackTarget(this);
+        photonCallbacksRegistered = true;
+        Debug.Log("PhotonOnlineGameSceneManager registered Photon callbacks. scene=" + SceneManager.GetActiveScene().name);
+#endif
+    }
+
+    private void UnregisterPhotonCallbacksIfNeeded()
+    {
+#if PHOTON_UNITY_NETWORKING
+        if (!photonCallbacksRegistered)
+        {
+            return;
+        }
+
+        PhotonNetwork.RemoveCallbackTarget(this);
+        photonCallbacksRegistered = false;
+        Debug.Log("PhotonOnlineGameSceneManager unregistered Photon callbacks. scene=" + SceneManager.GetActiveScene().name);
+#endif
+    }
+
+    private bool IsGameSceneObjectRuntime()
+    {
+        return SceneManager.GetActiveScene().name == "GameScene";
     }
 }

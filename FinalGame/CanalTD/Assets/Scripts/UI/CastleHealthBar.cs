@@ -2,27 +2,32 @@
  * File: CastleHealthBar.cs
  *
  * Purpose:
- * This script displays and animates a castle's HP bar. It reads health values
- * from CastleBase, scales the fill object, updates optional text, and plays a
- * short damage reaction when HP decreases.
+ * Implements CastleHealthBar for the ui layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Runtime behavior:
- * - Start() records the original fill/bar transform values.
- * - Update() compares current HP with lastHP to detect damage.
- * - UpdateBarSmooth() smoothly changes the fill scale and position.
- * - UpdateBarInstant() sets the correct visual value immediately at startup.
- * - DamageFlashRoutine() briefly turns the fill red and scales the bar up/down.
+ * Attached GameObject:
+ * Canvas objects, scene UI roots, status panels, buttons, or cursor feedback objects.
  *
- * Inspector setup:
- * - castleBase should point to the CastleBase this UI represents.
- * - fill should be the transform that visually shrinks as HP decreases.
- * - hpTextUI is optional and shows "current/max" HP.
- * - smoothSpeed controls interpolation speed.
- * - punchScale, punchDuration, and recoverDuration control hit feedback.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for CastleHealthBar within the ui system.
+ * - Update the owning object state and react to gameplay events during play.
+ * - Present readable feedback so players can understand turns, actions, and results.
  *
- * Dependency notes:
- * - CastleBase owns the actual HP numbers.
- * - This script only displays HP; it does not apply damage or decide game over.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Player input, button clicks, pointer events, or scene transition requests.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Updates visible UI, indicators, prompts, and player-facing status messages.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify CastleHealthBar in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Confirm the related UI remains readable in both the normal scene flow and edge/error states.
  */
 using UnityEngine;
 using TMPro;

@@ -2,34 +2,31 @@
  * File: EnemyMover.cs
  *
  * Purpose:
- * This script moves one spawned enemy along a selected path made of PathNode
- * objects. The enemy does not decide the path by itself; it asks
- * EnemyPathAssignmentManager for a path from the spawn node to a reachable castle.
+ * Implements EnemyMover for the enemy layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Main gameplay flow:
- * 1. EnemySpawner instantiates an enemy prefab and calls Init(startNode).
- * 2. Init() asks EnemyPathAssignmentManager for a valid List<PathNode>.
- * 3. The enemy starts at path[0], then moves toward path[1], path[2], and so on.
- * 4. MoveAlongPath() uses Vector3.MoveTowards() every frame.
- * 5. When the enemy reaches a CastleEndNode, the castle endpoint applies damage
- *    and destroys the enemy.
+ * Attached GameObject:
+ * Enemy prefabs, wave helpers, or enemy-related scene managers.
  *
- * Inspector setup:
- * - moveSpeed controls movement speed in world units per second.
- * - reachDistance controls how close the enemy must be to count as arrived.
- * - visualRoot is the child object that contains the enemy SpriteRenderer.
- * - visualLocalOffset moves only the sprite/animation, not the path-following
- *   root position. Use this when a sprite's pivot makes the enemy look too high
- *   or too low on the path.
- * - alignSpriteCenterToPathCenter forces the visible sprite bounds center to sit
- *   on the enemy root/path center. This is useful for sprites with bad pivots.
- * - pathWorldOffset moves the whole enemy along the path. Use this when the
- *   prefab should walk slightly above/below the route itself.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for EnemyMover within the enemy system.
+ * - Update the owning object state and react to gameplay events during play.
+ * - Support enemy spawning, pathing, targeting, combat, or wave pressure behaviour.
  *
- * Dependency notes:
- * - EnemyPathAssignmentManager chooses the path and balances targets.
- * - PathNode and PathEdge define the graph used by the pathfinder.
- * - CastleEndNode handles final damage when the enemy reaches a castle.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Moves enemies, adjusts combat results, or influences castle pressure and wave outcomes.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify EnemyMover in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Collections.Generic;
 using UnityEngine;

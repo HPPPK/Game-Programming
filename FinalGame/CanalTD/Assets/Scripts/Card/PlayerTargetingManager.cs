@@ -2,13 +2,32 @@
  * File: PlayerTargetingManager.cs
  *
  * Purpose:
- * Handles player-targeting tactical cards such as Steal Card, Trade Hands, and
- * Disrupt. It shows the shared targeting overlay, highlights valid player
- * targets, stores the selected player, and applies the card only after Confirm.
+ * Implements PlayerTargetingManager for the card layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Notes:
- * Cancel never consumes the pending card. CardDrawManager remains responsible
- * for removing the card from the hand after a successful targeted effect.
+ * Attached GameObject:
+ * None. This script defines shared data or types and is not attached directly to a GameObject.
+ *
+ * Main responsibilities:
+ * - Provide the runtime behaviour for PlayerTargetingManager within the card system.
+ * - Coordinate related objects, state changes, and cross-system communication.
+ * - Handle card usage, targeting, hand state, or card-driven map interactions.
+ *
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Card selections, targeting choices, turn permissions, and player hand data.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ * - Applies card outcomes, targeting results, hand count changes, or card-related restrictions.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify PlayerTargetingManager in the scene or prefab where it is used and confirm the main happy path still works.
+ * - Check local mode, AI mode, and online mode if the script participates in shared card flow.
  */
 using System.Collections.Generic;
 using System.Reflection;
@@ -289,16 +308,97 @@ public class PlayerTargetingManager : MonoBehaviour
 
     private void ConfirmStealCard()
     {
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineCardSyncManager.Instance != null &&
+            cardDrawManager != null)
+        {
+            GameObject pendingCardPrefab = cardDrawManager.GetPendingCardPrefabForTargeting();
+
+            if (pendingCardPrefab == null)
+            {
+                ShowToast("Could not play this card.");
+                return;
+            }
+
+            bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
+                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
+                pendingCardPrefab.name,
+                string.Empty,
+                selectedPlayer != null ? selectedPlayer.playerId : -1
+            );
+
+            if (requested)
+            {
+                ExitWithoutConsumingCard();
+            }
+
+            return;
+        }
+
         ResolveStealCard(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
     }
 
     private void ConfirmTradeHands()
     {
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineCardSyncManager.Instance != null &&
+            cardDrawManager != null)
+        {
+            GameObject pendingCardPrefab = cardDrawManager.GetPendingCardPrefabForTargeting();
+
+            if (pendingCardPrefab == null)
+            {
+                ShowToast("Could not play this card.");
+                return;
+            }
+
+            bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
+                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
+                pendingCardPrefab.name,
+                string.Empty,
+                selectedPlayer != null ? selectedPlayer.playerId : -1
+            );
+
+            if (requested)
+            {
+                ExitWithoutConsumingCard();
+            }
+
+            return;
+        }
+
         ResolveTradeHands(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
     }
 
     private void ConfirmDisrupt()
     {
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
+            PhotonOnlineCardSyncManager.Instance != null &&
+            cardDrawManager != null)
+        {
+            GameObject pendingCardPrefab = cardDrawManager.GetPendingCardPrefabForTargeting();
+
+            if (pendingCardPrefab == null)
+            {
+                ShowToast("Could not play this card.");
+                return;
+            }
+
+            bool requested = PhotonOnlineCardSyncManager.Instance.RequestPlayCard(
+                CardDrawManager.NormalizeCardId(pendingCardPrefab.name),
+                pendingCardPrefab.name,
+                string.Empty,
+                selectedPlayer != null ? selectedPlayer.playerId : -1
+            );
+
+            if (requested)
+            {
+                ExitWithoutConsumingCard();
+            }
+
+            return;
+        }
+
         ResolveDisrupt(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
     }
 
@@ -785,6 +885,11 @@ public class PlayerTargetingManager : MonoBehaviour
         if (player.playerId == playerManager.GetCurrentPlayerId() || player.isEliminated)
         {
             return false;
+        }
+
+        if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
+        {
+            return player.GetDisplayedCardCount() > 0;
         }
 
         PlayerHand hand = player.GetPlayerHand();

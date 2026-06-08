@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/Map/WaypointPath.cs" />
+    <Compile Include="Assets/Scripts/Networking/OnlineCardSyncModels.cs" />
     <Compile Include="Assets/Photon/PhotonRealtime/Demos/DemoLoadBalancing/ConnectAndJoinRandomLb.cs" />
     <Compile Include="Assets/Scripts/UI/RoomSlotUI.cs" />
     <Compile Include="Assets/Scripts/Networking/PhotonOnlineGameSceneManager.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Assets/Scripts/Core/PlayerHand.cs" />
     <Compile Include="Assets/Scripts/Core/TurnSourceResolver.cs" />
     <Compile Include="Assets/Scripts/Map/GateActionType.cs" />
+    <Compile Include="Assets/Scripts/Networking/PhotonOnlineCardSyncManager.cs" />
     <Compile Include="Assets/Photon/PhotonChat/Demos/Demo Chat/Code/ChatSettings.cs" />
     <Compile Include="Assets/Scripts/Tutorial/TutorialEnemyDemoSpawner.cs" />
     <Compile Include="Assets/Scripts/Enemy/EnemyHealth.cs" />

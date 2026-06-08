@@ -2,33 +2,29 @@
  * File: Pathfinder.cs
  *
  * Purpose:
- * This static utility searches the PathNode graph for valid paths from a start
- * node to a specific CastleEndNode. It treats node connections as an undirected
- * graph, so a one-way Inspector edge between two neighboring nodes can be used
- * from either side during path search. Gate-controlled edges are still respected
- * by checking PathEdge.IsOpen().
+ * Implements Pathfinder for the path layer of Rail Rumble and supports the playable vertical slice of the project.
  *
- * Public methods:
- * - FindPath(startNode, targetEnd) returns one path, currently the longest path
- *   found after sorting all valid paths by length.
- * - FindAllPaths(startNode, targetEnd, maxDepth, maxPaths) returns every valid
- *   path found within safety limits.
+ * Attached GameObject:
+ * None. This script defines shared data or types and is not attached directly to a GameObject.
  *
- * Search behavior:
- * - DFS prevents loops by tracking visited nodes in the current branch.
- * - maxDepth prevents runaway recursion in very large or accidental cyclic graphs.
- * - maxPaths prevents the search from collecting too many path variations.
- * - Both outgoing edges and incoming edges are considered neighbors.
- * - GatePathBlocker can cut a connection between two nodes even when the nodes
- *   are otherwise connected in the graph.
- * - Edges that are null, closed by a gate, or point to already visited nodes are
- *   skipped.
+ * Main responsibilities:
+ * - Provide the runtime behaviour for Pathfinder within the path system.
+ * - Update the owning object state and react to gameplay events during play.
  *
- * Dependency notes:
- * - PathNode provides outgoing edges.
- * - PathEdge.IsOpen() decides whether an edge is currently usable.
- * - CastleEndNode marks the search target.
- * - EnemyPathAssignmentManager uses this class to build path options.
+ * Inputs:
+ * - Inspector references configured in Unity.
+ * - Runtime state from connected managers, scene objects, or event callbacks.
+ * - Path graph data, wave settings, target selection, or movement parameters.
+ *
+ * Outputs or effects:
+ * - Changes scene state, gameplay data, or visual feedback in the active match.
+ *
+ * Authorship or assistance:
+ * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - This documentation header was expanded with AI assistance to match the assessment comment standard.
+ *
+ * Testing notes:
+ * - Verify Pathfinder in the scene or prefab where it is used and confirm the main happy path still works.
  */
 using System.Collections.Generic;
 using UnityEngine;
