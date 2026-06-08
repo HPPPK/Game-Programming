@@ -84,16 +84,21 @@ Online mode is included as an implemented extension, but it is not the primary s
 - Online mode is an extension and still needs broader multi-device and late-match validation.
 - Balance and tutorial pacing can be improved with more playtesting.
 
-## Development tracking
+## Development tracking / Kanban evidence
 
-I used GitHub Issues throughout development to plan, track, and close tasks as features were completed.
+I used GitHub Issues as the main task-tracking method for CanalTD development. Issues were used to break down design, implementation, tutorial, UI, audio, online-mode, and bug-fix work into reviewable tasks.
 
-Most implementation tasks are now closed because they were completed before final submission. This is normal project-management evidence rather than missing process evidence.
+Most implementation tasks are now closed because the related work was completed before final submission. The GitHub tab may show `Issues 0`; this means there are currently zero open issues, not that issues were unused. Closed issues are positive process evidence because they show completed planning, progress, iteration, and bug-fix records.
 
-Useful links:
+The GitHub Project/Kanban board was used to move tasks through planning, progress, and completion states. The main milestone is named `Initial game design`, but it contains both design and implementation tasks; this README and the linked final documentation are the authoritative final submission entry points.
 
+- GitHub Project board: https://github.com/users/HPPPK/projects/2
 - Closed development issues: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aclosed
 - Open remaining issues / limitations: https://github.com/HPPPK/Game-Programming/issues?q=is%3Aissue%20is%3Aopen
+- Main milestone: https://github.com/HPPPK/Game-Programming/milestone/2
+- Kanban and issue evidence summary: [FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md](./FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md)
+
+Known limitations are documented as future work above. If any limitation needs active tracking after submission, it should be represented by a separate open issue instead of reopening completed development tasks.
 
 ## Credits
 
@@ -117,8 +122,11 @@ Useful links:
   - `Roblox Minecraft Fortnite Video Game Music`
   - `Click Buttons - UI Menu Sounds Effects - Button 7`
   - `Taking Playing Card 3`
-  - `UI Button Click #5`
-- Additional local audio files that need exact source links are listed in the resource reference document.
+  - `Shoot 5`
+  - `Dramatic Death Collapse`
+  - `Gaming Victory`
+  - `Musical Victory Chime`
+- Full local audio-to-source mapping is listed in the resource reference document.
 
 ## Legal, ethical, accessibility, and process notes
 
@@ -153,6 +161,7 @@ Useful links:
 - Contribution notes: [FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md](./FinalGame/CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md)
 - Development log: [FinalGame/DEVELOPMENT_LOG.md](./FinalGame/DEVELOPMENT_LOG.md)
 - Prototype document: [FinalGame/prototype.md](./FinalGame/prototype.md)
+- Kanban and issue evidence: [FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md](./FinalGame/KANBAN_AND_ISSUE_EVIDENCE.md)
 - Resource / asset / AI references: [FinalGame/CanalTD/Assets/Docs/ResourceReferences.md](./FinalGame/CanalTD/Assets/Docs/ResourceReferences.md)
 
 ## Scope note
