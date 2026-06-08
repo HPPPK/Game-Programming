@@ -2,7 +2,7 @@
  * File: CastleHealthBar.cs
  *
  * Purpose:
- * Implements CastleHealthBar for the ui layer of Rail Rumble and supports the playable vertical slice of the project.
+ * Implements CastleHealthBar for the ui layer of CanalTD and supports the playable vertical slice of the project.
  *
  * Attached GameObject:
  * Canvas objects, scene UI roots, status panels, buttons, or cursor feedback objects.
@@ -22,7 +22,7 @@
  * - Updates visible UI, indicators, prompts, and player-facing status messages.
  *
  * Authorship or assistance:
- * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
  * - This documentation header was expanded with AI assistance to match the assessment comment standard.
  *
  * Testing notes:

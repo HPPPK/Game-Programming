@@ -2,7 +2,7 @@
  * File: PlayerTargetingManager.cs
  *
  * Purpose:
- * Implements PlayerTargetingManager for the card layer of Rail Rumble and supports the playable vertical slice of the project.
+ * Implements PlayerTargetingManager for the card layer of CanalTD and supports the playable vertical slice of the project.
  *
  * Attached GameObject:
  * None. This script defines shared data or types and is not attached directly to a GameObject.
@@ -22,7 +22,7 @@
  * - Applies card outcomes, targeting results, hand count changes, or card-related restrictions.
  *
  * Authorship or assistance:
- * - Core gameplay design, Unity setup, and project integration were developed by Panjingyu and teammates.
+ * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
  * - This documentation header was expanded with AI assistance to match the assessment comment standard.
  *
  * Testing notes:
