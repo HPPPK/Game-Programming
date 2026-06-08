@@ -57,7 +57,7 @@ AI Mode is one of the primary stable assessment routes. It provides AI-controlle
 
 ## Online mode status
 
-Online Mode is implemented as an extension using Photon-related scripts and room/lobby flow. It is not the primary stable assessment path unless broader multiplayer validation is completed. See `FinalGame/CanalTD/ONLINE_STATUS.md`.
+Online Mode is implemented as an extension using Photon-related scripts and room/lobby flow. It is not the primary stable assessment path unless broader multiplayer validation is completed. The root README records the final online scope and known limitations.
 
 Manual validation of online room joining, scene transition, turn authority, and card/build synchronization must be recorded separately before Online Mode is described as fully stable.
 
@@ -99,9 +99,5 @@ External assets and AI-assisted support are disclosed in `FinalGame/CanalTD/Asse
 - Root README: [../README.md](../README.md)
 - Testing log: [TESTING_LOG.md](./TESTING_LOG.md)
 - Development log: [DEVELOPMENT_LOG.md](./DEVELOPMENT_LOG.md)
-- Kanban and issue evidence: [KANBAN_AND_ISSUE_EVIDENCE.md](./KANBAN_AND_ISSUE_EVIDENCE.md)
-- Submission checklist: [SUBMISSION_CHECKLIST.md](./SUBMISSION_CHECKLIST.md)
 - Contribution and feedback notes: [CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md](./CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md)
-- Unity system overview: [CanalTD/SYSTEM_OVERVIEW.md](./CanalTD/SYSTEM_OVERVIEW.md)
-- Online status: [CanalTD/ONLINE_STATUS.md](./CanalTD/ONLINE_STATUS.md)
 - Resource references: [CanalTD/Assets/Docs/ResourceReferences.md](./CanalTD/Assets/Docs/ResourceReferences.md)
