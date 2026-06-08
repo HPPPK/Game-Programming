@@ -48,6 +48,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviourPunCallbacks
 public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
 {
+    private const string DefaultFixedRegion = "asia";
     private const string OnlinePhotonMode = "OnlinePhotonPUN2";
     private const string PrivateRoomKind = "private";
     private const string MatchmakingRoomKind = "matchmaking";
@@ -68,6 +69,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
     [Header("Photon Settings")]
     public string gameVersion = "0.1";
+    public string fixedRegion = DefaultFixedRegion;
     public byte maxPlayersPerRoom = 4;
     public byte minPlayersToStart = 2;
 
@@ -191,7 +193,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         Debug.Log("Photon connect requested.");
         ApplyLocalDisplayName();
         PhotonNetwork.AutomaticallySyncScene = true;
-        PhotonNetwork.GameVersion = gameVersion;
+        ApplyPhotonConnectionSettings();
 
         if (PhotonNetwork.IsConnected)
         {
@@ -734,6 +736,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     private void EnsureConnectedAndLobbyReady()
     {
         ApplyLocalDisplayName();
+        ApplyPhotonConnectionSettings();
 
         if (!PhotonNetwork.IsConnected)
         {
@@ -761,6 +764,11 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     {
         if (!PhotonNetwork.IsConnected || (!PhotonNetwork.InLobby && !PhotonNetwork.InRoom))
         {
+            if (PhotonNetwork.IsConnected && !PhotonNetwork.InRoom && !PhotonNetwork.InLobby)
+            {
+                PhotonNetwork.JoinLobby();
+            }
+
             return;
         }
 
@@ -797,6 +805,8 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
                 ", isConnected=" + PhotonNetwork.IsConnected +
                 ", inLobby=" + PhotonNetwork.InLobby +
                 ", inRoom=" + PhotonNetwork.InRoom +
+                ", gameVersion=" + PhotonNetwork.GameVersion +
+                ", cloudRegion=" + PhotonNetwork.CloudRegion +
                 ", clientState=" + PhotonNetwork.NetworkClientState
             );
             PhotonNetwork.JoinRoom(pendingJoinRoomCode);
@@ -850,6 +860,8 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             ", activeScene=" + SceneManager.GetActiveScene().name +
             ", isConnected=" + PhotonNetwork.IsConnected +
             ", inLobby=" + PhotonNetwork.InLobby +
+            ", gameVersion=" + PhotonNetwork.GameVersion +
+            ", cloudRegion=" + PhotonNetwork.CloudRegion +
             ", clientState=" + PhotonNetwork.NetworkClientState
         );
         PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
@@ -880,6 +892,8 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             ", activeScene=" + SceneManager.GetActiveScene().name +
             ", isConnected=" + PhotonNetwork.IsConnected +
             ", inLobby=" + PhotonNetwork.InLobby +
+            ", gameVersion=" + PhotonNetwork.GameVersion +
+            ", cloudRegion=" + PhotonNetwork.CloudRegion +
             ", clientState=" + PhotonNetwork.NetworkClientState
         );
         PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
@@ -918,6 +932,22 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         };
 
         PhotonNetwork.LocalPlayer.SetCustomProperties(updatedProperties);
+    }
+
+    private void ApplyPhotonConnectionSettings()
+    {
+        PhotonNetwork.GameVersion = gameVersion;
+
+        if (PhotonNetwork.PhotonServerSettings == null || PhotonNetwork.PhotonServerSettings.AppSettings == null)
+        {
+            return;
+        }
+
+        string normalizedFixedRegion = string.IsNullOrWhiteSpace(fixedRegion)
+            ? DefaultFixedRegion
+            : fixedRegion.Trim().ToLowerInvariant();
+
+        PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = normalizedFixedRegion;
     }
 
     private void AssignSlotsAuthoritatively()
