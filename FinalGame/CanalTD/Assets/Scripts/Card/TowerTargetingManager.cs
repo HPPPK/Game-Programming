@@ -303,6 +303,22 @@ public class TowerTargetingManager : MonoBehaviour
         return true;
     }
 
+    public bool CanPlayerBoostTower(int playerId, CannonTower tower)
+    {
+        return IsValidPowerBoostTarget(tower, playerId);
+    }
+
+    public bool ApplyPowerBoostFromOnline(int playerId, CannonTower tower)
+    {
+        if (!IsValidPowerBoostTarget(tower, playerId))
+        {
+            return false;
+        }
+
+        tower.ApplyPowerBoostForNextWave();
+        return true;
+    }
+
     public void CancelSelection()
     {
         if (!isTargeting)

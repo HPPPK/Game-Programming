@@ -363,6 +363,44 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return true;
     }
 
+    public bool CanPlaceShockTrapAtNode(PathNode node)
+    {
+        return IsValidRouteNode(node) && shockTrapPrefab != null;
+    }
+
+    public bool ApplyShockTrapPlacementFromOnline(int playerId, PathNode node)
+    {
+        if (node == null || shockTrapPrefab == null)
+        {
+            return false;
+        }
+
+        if (IsRouteNodeOccupied(node))
+        {
+            return true;
+        }
+
+        if (!IsValidRouteNode(node))
+        {
+            return false;
+        }
+
+        PlayerResource currentPlayer = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        GameObject trapObject = Instantiate(shockTrapPrefab, node.transform.position, Quaternion.identity);
+        ShockTrap shockTrap = trapObject.GetComponent<ShockTrap>();
+
+        if (shockTrap == null)
+        {
+            shockTrap = trapObject.AddComponent<ShockTrap>();
+        }
+
+        shockTrap.Initialize(playerId, currentPlayer, node.transform);
+        shockTrap.ApplyOwnerVisual(playerManager);
+        EnsurePlacedTrapVisual(trapObject);
+        Debug.Log("Shock Trap placed online at node: " + node.name);
+        return true;
+    }
+
     public void CancelSelection()
     {
         if (!isTargeting)

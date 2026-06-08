@@ -65,6 +65,8 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
     private readonly Dictionary<int, List<string>> playerHandCardIds = new Dictionary<int, List<string>>();
     private readonly Dictionary<string, TowerBuildArea> tileTargetsById = new Dictionary<string, TowerBuildArea>();
     private readonly Dictionary<string, GateFrameAnimation> gateTargetsById = new Dictionary<string, GateFrameAnimation>();
+    private readonly Dictionary<string, CannonTower> towerTargetsById = new Dictionary<string, CannonTower>();
+    private readonly Dictionary<string, PathNode> pathNodesById = new Dictionary<string, PathNode>();
     private bool initializedForOnlineMatch;
     private bool photonCallbacksRegistered;
 
@@ -201,6 +203,28 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                 "RequestOpenGate" +
                 " actorPlayerId=" + (onlineGameSceneManager != null ? onlineGameSceneManager.LocalPlayerId : -1) +
                 " targetGateId=" + targetId +
+                " cardId=" + normalizedCardId +
+                " cardName=" + cardName
+            );
+        }
+        else if (IsPowerBoostCardId(normalizedCardId))
+        {
+            Debug.Log(
+                "RequestPowerBoost" +
+                " actorPlayerId=" + (onlineGameSceneManager != null ? onlineGameSceneManager.LocalPlayerId : -1) +
+                " targetTowerId=" + targetId +
+                " accepted=pending reason=(request)" +
+                " cardId=" + normalizedCardId +
+                " cardName=" + cardName
+            );
+        }
+        else if (IsShockTrapCardId(normalizedCardId))
+        {
+            Debug.Log(
+                "RequestShockTrap" +
+                " actorPlayerId=" + (onlineGameSceneManager != null ? onlineGameSceneManager.LocalPlayerId : -1) +
+                " targetNodeId=" + targetId +
+                " accepted=pending reason=(request)" +
                 " cardId=" + normalizedCardId +
                 " cardName=" + cardName
             );
@@ -363,6 +387,8 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             targetId = request.targetId,
             targetTileId = request.targetId,
             targetGateId = request.targetId,
+            targetTowerId = request.targetId,
+            targetNodeId = request.targetId,
             targetPlayerId = request.targetPlayerId,
             timestamp = request.timestamp,
             accepted = false
@@ -474,6 +500,24 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
                         return RejectValidation(request, result, gateRejectReason);
                     }
                 }
+                else if (IsPowerBoostCardId(request.cardId))
+                {
+                    string powerBoostRejectReason = ValidatePowerBoostCardEffect(request, result);
+
+                    if (!string.IsNullOrWhiteSpace(powerBoostRejectReason))
+                    {
+                        return RejectValidation(request, result, powerBoostRejectReason);
+                    }
+                }
+                else if (IsShockTrapCardId(request.cardId))
+                {
+                    string shockTrapRejectReason = ValidateShockTrapCardEffect(request, result);
+
+                    if (!string.IsNullOrWhiteSpace(shockTrapRejectReason))
+                    {
+                        return RejectValidation(request, result, shockTrapRejectReason);
+                    }
+                }
                 break;
 
             default:
@@ -498,6 +542,14 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         else if (IsOpenGateCardId(request.cardId))
         {
             LogGateControlValidation("ValidateOpenGate", request, result, "(none)");
+        }
+        else if (IsPowerBoostCardId(request.cardId))
+        {
+            LogPowerBoostValidation("ValidatePowerBoost", request, result, "(none)");
+        }
+        else if (IsShockTrapCardId(request.cardId))
+        {
+            LogShockTrapValidation("ValidateShockTrap", request, result, "(none)");
         }
 
         return result;
@@ -546,6 +598,14 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             else if (IsGateControlCardId(normalizedCardId))
             {
                 ApplyGateControlEffect(request, authoritativeHand, applyData);
+            }
+            else if (IsPowerBoostCardId(normalizedCardId))
+            {
+                ApplyPowerBoostEffect(request, authoritativeHand, applyData);
+            }
+            else if (IsShockTrapCardId(normalizedCardId))
+            {
+                ApplyShockTrapEffect(request, authoritativeHand, applyData);
             }
             else
             {
@@ -893,6 +953,8 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         ConsumeLocalTurnState(applyData);
         ApplySyncedTileState(applyData);
         ApplySyncedGateState(applyData);
+        ApplySyncedPowerBoostState(applyData);
+        ApplySyncedShockTrapState(applyData);
 
         if (playerManager != null)
         {
@@ -1016,6 +1078,43 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    private void ApplySyncedPowerBoostState(OnlineCardApplyData applyData)
+    {
+        if (applyData == null || !IsPowerBoostCardId(applyData.cardId))
+        {
+            return;
+        }
+
+        ApplyPowerBoostStateToScene(applyData);
+
+        Debug.Log(
+            "ApplyPowerBoost" +
+            " actorPlayerId=" + applyData.actorPlayerId +
+            " targetTowerId=" + applyData.targetTowerId +
+            " accepted=true reason=(none)" +
+            " boostState=" + applyData.boostState
+        );
+    }
+
+    private void ApplySyncedShockTrapState(OnlineCardApplyData applyData)
+    {
+        if (applyData == null || !IsShockTrapCardId(applyData.cardId))
+        {
+            return;
+        }
+
+        ApplyShockTrapStateToScene(applyData);
+
+        Debug.Log(
+            "ApplyShockTrap" +
+            " actorPlayerId=" + applyData.actorPlayerId +
+            " targetNodeId=" + applyData.targetNodeId +
+            " trapId=" + applyData.trapId +
+            " accepted=true reason=(none)" +
+            " trapState=" + applyData.trapState
+        );
+    }
+
     private void ApplyTileStateToScene(OnlineCardApplyData applyData)
     {
         if (playerManager == null)
@@ -1122,6 +1221,71 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             " actualLocked=" + targetGate.IsLocked() +
             " expectedNewState=" + applyData.newGateState
         );
+    }
+
+    private void ApplyPowerBoostStateToScene(OnlineCardApplyData applyData)
+    {
+        CannonTower targetTower = ResolveTowerTargetById(applyData.targetTowerId);
+
+        if (targetTower == null)
+        {
+            Debug.LogWarning("Online power boost apply failed. targetTowerId=" + applyData.targetTowerId);
+            return;
+        }
+
+        TowerTargetingManager towerTargetingManager = TowerTargetingManagerInstance();
+
+        if (towerTargetingManager == null)
+        {
+            Debug.LogWarning("Online power boost apply failed. TowerTargetingManager is missing.");
+            return;
+        }
+
+        bool actionSucceeded = targetTower.boostPendingForNextWave ||
+            targetTower.boostActive ||
+            towerTargetingManager.ApplyPowerBoostFromOnline(applyData.ownerPlayerId, targetTower);
+
+        if (!actionSucceeded)
+        {
+            Debug.LogWarning(
+                "Online power boost apply was rejected by local tower state" +
+                " targetTowerId=" + applyData.targetTowerId +
+                " ownerPlayerId=" + applyData.ownerPlayerId
+            );
+        }
+    }
+
+    private void ApplyShockTrapStateToScene(OnlineCardApplyData applyData)
+    {
+        PathNode targetNode = ResolvePathNodeById(applyData.targetNodeId);
+
+        if (targetNode == null)
+        {
+            Debug.LogWarning("Online shock trap apply failed. targetNodeId=" + applyData.targetNodeId);
+            return;
+        }
+
+        ShockTrapTargetingManager shockTrapTargetingManager = ShockTrapTargetingManagerInstance();
+
+        if (shockTrapTargetingManager == null)
+        {
+            Debug.LogWarning("Online shock trap apply failed. ShockTrapTargetingManager is missing.");
+            return;
+        }
+
+        bool actionSucceeded = shockTrapTargetingManager.ApplyShockTrapPlacementFromOnline(
+            applyData.ownerPlayerId,
+            targetNode
+        );
+
+        if (!actionSucceeded)
+        {
+            Debug.LogWarning(
+                "Online shock trap apply was rejected by local trap state" +
+                " targetNodeId=" + applyData.targetNodeId +
+                " ownerPlayerId=" + applyData.ownerPlayerId
+            );
+        }
     }
 
     private void UpdateBuildSnapshotForTileState(OnlineCardApplyData applyData)
@@ -1302,6 +1466,22 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             return;
         }
 
+        if (IsPowerBoostCardId(normalizedCardId))
+        {
+            onlineGameSceneManager.ShowOnlineToast(
+                isLocalActor ? "You boosted a tower." : actorName + " boosted a tower."
+            );
+            return;
+        }
+
+        if (IsShockTrapCardId(normalizedCardId))
+        {
+            onlineGameSceneManager.ShowOnlineToast(
+                isLocalActor ? "You placed a Shock Trap." : actorName + " placed a Shock Trap."
+            );
+            return;
+        }
+
         string playedCardName = string.IsNullOrWhiteSpace(applyData.cardName) ? "a card" : applyData.cardName;
         onlineGameSceneManager.ShowOnlineToast(isLocalActor
             ? "You played " + playedCardName + "."
@@ -1334,6 +1514,8 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
         RebuildTileTargetRegistryIfNeeded();
         RebuildGateTargetRegistryIfNeeded();
+        RebuildTowerTargetRegistryIfNeeded();
+        RebuildPathNodeRegistryIfNeeded();
     }
 
     private TowerBuildArea ResolveTileTargetById(string targetTileId)
@@ -1423,6 +1605,106 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             }
 
             gateTargetsById.Add(gate.name, gate);
+        }
+    }
+
+    private CannonTower ResolveTowerTargetById(string targetTowerId)
+    {
+        RebuildTowerTargetRegistryIfNeeded();
+
+        if (string.IsNullOrWhiteSpace(targetTowerId))
+        {
+            return null;
+        }
+
+        towerTargetsById.TryGetValue(targetTowerId, out CannonTower targetTower);
+        return targetTower;
+    }
+
+    private void RebuildTowerTargetRegistryIfNeeded()
+    {
+        if (towerTargetsById.Count > 0)
+        {
+            return;
+        }
+
+        RebuildTowerTargetRegistry();
+    }
+
+    private void RebuildTowerTargetRegistry()
+    {
+        towerTargetsById.Clear();
+        CannonTower[] towers = FindObjectsOfType<CannonTower>(true);
+
+        foreach (CannonTower tower in towers)
+        {
+            RegisterTowerTargetId(tower != null ? tower.gameObject.name : string.Empty, tower);
+
+            if (tower != null && tower.transform.parent != null)
+            {
+                RegisterTowerTargetId(tower.transform.parent.name + "_tower", tower);
+            }
+        }
+    }
+
+    private void RegisterTowerTargetId(string targetTowerId, CannonTower tower)
+    {
+        if (tower == null || string.IsNullOrWhiteSpace(targetTowerId))
+        {
+            return;
+        }
+
+        if (towerTargetsById.ContainsKey(targetTowerId))
+        {
+            Debug.LogWarning("Duplicate online tower target id found: " + targetTowerId);
+            return;
+        }
+
+        towerTargetsById.Add(targetTowerId, tower);
+    }
+
+    private PathNode ResolvePathNodeById(string targetNodeId)
+    {
+        RebuildPathNodeRegistryIfNeeded();
+
+        if (string.IsNullOrWhiteSpace(targetNodeId))
+        {
+            return null;
+        }
+
+        pathNodesById.TryGetValue(targetNodeId, out PathNode targetNode);
+        return targetNode;
+    }
+
+    private void RebuildPathNodeRegistryIfNeeded()
+    {
+        if (pathNodesById.Count > 0)
+        {
+            return;
+        }
+
+        RebuildPathNodeRegistry();
+    }
+
+    private void RebuildPathNodeRegistry()
+    {
+        pathNodesById.Clear();
+        PathNode[] pathNodes = FindObjectsOfType<PathNode>(true);
+
+        foreach (PathNode node in pathNodes)
+        {
+            if (node == null || string.IsNullOrWhiteSpace(node.name))
+            {
+                continue;
+            }
+
+            if (pathNodesById.ContainsKey(node.name))
+            {
+                Debug.LogWarning("Duplicate online path node target id found: " + node.name);
+                continue;
+            }
+
+            pathNodesById.Add(node.name, node);
         }
     }
 
@@ -1579,6 +1861,14 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             {
                 LogGateControlValidation("ValidateOpenGate", request, result, rejectReason);
             }
+            else if (IsPowerBoostCardId(request.cardId))
+            {
+                LogPowerBoostValidation("ValidatePowerBoost", request, result, rejectReason);
+            }
+            else if (IsShockTrapCardId(request.cardId))
+            {
+                LogShockTrapValidation("ValidateShockTrap", request, result, rejectReason);
+            }
         }
 
         return result;
@@ -1653,6 +1943,18 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
     private bool IsGateControlCardId(string cardId)
     {
         return IsLockGateCardId(cardId) || IsOpenGateCardId(cardId);
+    }
+
+    private bool IsPowerBoostCardId(string cardId)
+    {
+        string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
+        return normalizedCardId == "powerboost" || normalizedCardId == "power boost";
+    }
+
+    private bool IsShockTrapCardId(string cardId)
+    {
+        string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
+        return normalizedCardId == "shocktrap" || normalizedCardId == "shock trap";
     }
 
     private bool IsStealCardId(string cardId)
@@ -1846,6 +2148,81 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         result.newGateOpen = true;
         result.newGateLocked = false;
         result.newGateState = "Open";
+        return string.Empty;
+    }
+
+    private string ValidatePowerBoostCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
+    {
+        if (request == null)
+        {
+            return "Invalid request.";
+        }
+
+        CannonTower targetTower = ResolveTowerTargetById(request.targetId);
+
+        if (targetTower == null)
+        {
+            return "Target tower is missing.";
+        }
+
+        TowerTargetingManager towerTargetingManager = TowerTargetingManagerInstance();
+
+        if (towerTargetingManager == null)
+        {
+            return "Tower targeting manager is missing.";
+        }
+
+        result.targetTowerId = request.targetId;
+        result.ownerPlayerId = request.actorPlayerId;
+        result.boostPendingForNextWave = targetTower.boostPendingForNextWave;
+        result.boostActive = targetTower.boostActive;
+        result.boostState = DescribeBoostState(targetTower);
+
+        if (!towerTargetingManager.CanPlayerBoostTower(request.actorPlayerId, targetTower))
+        {
+            return "Target tower cannot be boosted.";
+        }
+
+        result.boostPendingForNextWave = true;
+        result.boostActive = false;
+        result.boostState = "PendingForNextWave";
+        result.boostStartTurn = -1;
+        result.boostEndTurn = -1;
+        return string.Empty;
+    }
+
+    private string ValidateShockTrapCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
+    {
+        if (request == null)
+        {
+            return "Invalid request.";
+        }
+
+        PathNode targetNode = ResolvePathNodeById(request.targetId);
+
+        if (targetNode == null)
+        {
+            return "Target node is missing.";
+        }
+
+        ShockTrapTargetingManager shockTrapTargetingManager = ShockTrapTargetingManagerInstance();
+
+        if (shockTrapTargetingManager == null)
+        {
+            return "Shock Trap targeting manager is missing.";
+        }
+
+        result.targetNodeId = request.targetId;
+        result.ownerPlayerId = request.actorPlayerId;
+        result.trapId = BuildTrapId(request.actorPlayerId, request.targetId);
+        result.trapState = "PendingPlacement";
+
+        if (!shockTrapTargetingManager.CanPlaceShockTrapAtNode(targetNode))
+        {
+            return "Target node cannot receive a Shock Trap.";
+        }
+
+        result.trapState = "Placed";
         return string.Empty;
     }
 
@@ -2054,6 +2431,76 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    private void ApplyPowerBoostEffect(
+        OnlineCardRequestData request,
+        List<string> actorHand,
+        OnlineCardApplyData applyData)
+    {
+        CannonTower targetTower = ResolveTowerTargetById(request.targetId);
+
+        if (targetTower == null)
+        {
+            applyData.accepted = false;
+            applyData.rejectReason = "Target tower is missing.";
+            return;
+        }
+
+        RemoveCardIdFromHand(actorHand, request.cardId);
+
+        applyData.targetTowerId = request.targetId;
+        applyData.ownerPlayerId = request.actorPlayerId;
+        applyData.boostStartTurn = -1;
+        applyData.boostEndTurn = -1;
+        applyData.boostPendingForNextWave = true;
+        applyData.boostActive = false;
+        applyData.boostState = "PendingForNextWave";
+        applyData.affectedPlayerHandCounts = BuildAffectedHandCounts(request.actorPlayerId);
+
+        ApplyPowerBoostStateToScene(applyData);
+
+        Debug.Log(
+            "ApplyPowerBoost" +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetTowerId=" + request.targetId +
+            " accepted=true reason=(none)" +
+            " boostState=" + applyData.boostState
+        );
+    }
+
+    private void ApplyShockTrapEffect(
+        OnlineCardRequestData request,
+        List<string> actorHand,
+        OnlineCardApplyData applyData)
+    {
+        PathNode targetNode = ResolvePathNodeById(request.targetId);
+
+        if (targetNode == null)
+        {
+            applyData.accepted = false;
+            applyData.rejectReason = "Target node is missing.";
+            return;
+        }
+
+        RemoveCardIdFromHand(actorHand, request.cardId);
+
+        applyData.targetNodeId = request.targetId;
+        applyData.ownerPlayerId = request.actorPlayerId;
+        applyData.trapId = BuildTrapId(request.actorPlayerId, request.targetId);
+        applyData.trapState = "Placed";
+        applyData.affectedPlayerHandCounts = BuildAffectedHandCounts(request.actorPlayerId);
+
+        ApplyShockTrapStateToScene(applyData);
+
+        Debug.Log(
+            "ApplyShockTrap" +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetNodeId=" + request.targetId +
+            " trapId=" + applyData.trapId +
+            " accepted=true reason=(none)" +
+            " trapState=" + applyData.trapState
+        );
+    }
+
     private List<OnlinePlayerHandCountState> BuildAffectedHandCounts(params int[] playerIds)
     {
         List<OnlinePlayerHandCountState> affectedCounts = new List<OnlinePlayerHandCountState>();
@@ -2164,6 +2611,41 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    private void LogPowerBoostValidation(string label, OnlineCardRequestData request, OnlineCardApplyData applyData, string reason)
+    {
+        if (request == null || applyData == null)
+        {
+            return;
+        }
+
+        Debug.Log(
+            label +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetTowerId=" + request.targetId +
+            " accepted=" + applyData.accepted +
+            " rejectedReason=" + (string.IsNullOrWhiteSpace(reason) ? "(none)" : reason) +
+            " boostState=" + applyData.boostState
+        );
+    }
+
+    private void LogShockTrapValidation(string label, OnlineCardRequestData request, OnlineCardApplyData applyData, string reason)
+    {
+        if (request == null || applyData == null)
+        {
+            return;
+        }
+
+        Debug.Log(
+            label +
+            " actorPlayerId=" + request.actorPlayerId +
+            " targetNodeId=" + request.targetId +
+            " trapId=" + applyData.trapId +
+            " accepted=" + applyData.accepted +
+            " rejectedReason=" + (string.IsNullOrWhiteSpace(reason) ? "(none)" : reason) +
+            " trapState=" + applyData.trapState
+        );
+    }
+
     private string DescribeGateState(GateFrameAnimation gate)
     {
         if (gate == null)
@@ -2172,6 +2654,36 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
 
         return gate.IsBlocking() ? "Closed" : "Open";
+    }
+
+    private string DescribeBoostState(CannonTower tower)
+    {
+        if (tower == null)
+        {
+            return "Missing";
+        }
+
+        if (tower.boostActive)
+        {
+            return "Active";
+        }
+
+        return tower.boostPendingForNextWave ? "PendingForNextWave" : "None";
+    }
+
+    private string BuildTrapId(int ownerPlayerId, string targetNodeId)
+    {
+        return "ShockTrap_P" + ownerPlayerId + "_" + (string.IsNullOrWhiteSpace(targetNodeId) ? "UnknownNode" : targetNodeId);
+    }
+
+    private TowerTargetingManager TowerTargetingManagerInstance()
+    {
+        return FindObjectOfType<TowerTargetingManager>();
+    }
+
+    private ShockTrapTargetingManager ShockTrapTargetingManagerInstance()
+    {
+        return FindObjectOfType<ShockTrapTargetingManager>();
     }
 
     private int ResolveActorNumberForPlayerId(int playerId)
