@@ -377,6 +377,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             propertiesThatChanged.ContainsKey(PhotonLobbyPropertyKeys.CurrentRound) ||
             propertiesThatChanged.ContainsKey(PhotonLobbyPropertyKeys.OnlineGameActive))
         {
+            LogOnlineRoomStateDiagnostics("OnRoomPropertiesUpdate");
             ApplyRoomTurnState(forceApply: false);
         }
 
@@ -415,6 +416,8 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         Debug.Log("Online GameScene player joined. actor=" + newPlayer.ActorNumber + ", name=" + newPlayer.NickName);
         RebuildOnlineRosterFromPhoton();
+        LogOnlineRoomStateDiagnostics("OnPlayerEnteredRoom");
+        ShowOnlineToast(GetPhotonPlayerDisplayName(newPlayer) + " joined the room.");
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -450,6 +453,8 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         bool wasCurrentTurnPlayer = leftPlayerId >= 0 && leftPlayerId == GetRoomCurrentTurnPlayerId();
         Debug.Log("Player left. actor=" + otherPlayer.ActorNumber + ", playerId=" + leftPlayerId + ", name=" + otherPlayer.NickName);
         RebuildOnlineRosterFromPhoton();
+        LogOnlineRoomStateDiagnostics("OnPlayerLeftRoom");
+        ShowOnlineToast(otherPlayer.IsMasterClient ? "Host left the match." : GetPhotonPlayerDisplayName(otherPlayer) + " left the game.");
 
         if (wasCurrentTurnPlayer)
         {
@@ -488,6 +493,8 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         Debug.Log("MasterClient switched. new actor=" + newMasterClient.ActorNumber + ", local actor=" + PhotonNetwork.LocalPlayer.ActorNumber);
         RebuildOnlineRosterFromPhoton();
+        LogOnlineRoomStateDiagnostics("OnMasterClientSwitched");
+        ShowOnlineToast("Host migrated.");
 
         if (PhotonNetwork.IsMasterClient)
         {
@@ -520,6 +527,18 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
 
         RebuildOnlineRosterFromPhoton();
+        LogOnlineRoomStateDiagnostics("OnPlayerPropertiesUpdate");
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        if (!IsOnlineModeActive || ShouldIgnoreOnlineCallbacks())
+        {
+            return;
+        }
+
+        Debug.LogWarning("Online GameScene disconnected. cause=" + cause);
+        ShowOnlineToast(GetDisconnectToastMessage(cause));
     }
 
     public override void OnLeftRoom()
@@ -552,6 +571,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         if (requestData == null || requestData.Length < 2)
         {
+            Debug.LogWarning("Invalid room state: rejected online end turn request because payload was missing.");
             return;
         }
 
@@ -560,6 +580,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         if (requestedPlayerId < 0)
         {
+            Debug.LogWarning("Invalid room state: rejected online end turn request because requestedPlayerId was invalid. senderActor=" + senderActorNumber);
             return;
         }
 
@@ -568,7 +589,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         if (currentTurnPlayerId != requestedPlayerId || resolvedSenderPlayerId != requestedPlayerId)
         {
-            Debug.Log("Rejected online end turn request. senderActor=" + senderActorNumber + ", requestedPlayerId=" + requestedPlayerId + ", resolvedSenderPlayerId=" + resolvedSenderPlayerId + ", currentTurnPlayerId=" + currentTurnPlayerId);
+            Debug.LogWarning("Turn mismatch/playerId mismatch: rejected online end turn request. senderActor=" + senderActorNumber + ", requestedPlayerId=" + requestedPlayerId + ", resolvedSenderPlayerId=" + resolvedSenderPlayerId + ", currentTurnPlayerId=" + currentTurnPlayerId);
             return;
         }
 
@@ -614,9 +635,22 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         foreach (Player photonPlayer in photonPlayers)
         {
             int playerId = GetPlayerIntProperty(photonPlayer, PhotonLobbyPropertyKeys.PlayerId, -1);
+            int slotIndex = GetPlayerIntProperty(photonPlayer, PhotonLobbyPropertyKeys.SlotIndex, -1);
 
             if (playerId < 0)
             {
+                Debug.LogWarning("Invalid room state: active Photon player has no playerId. actor=" + photonPlayer.ActorNumber + ", name=" + photonPlayer.NickName);
+                continue;
+            }
+
+            if (slotIndex != playerId)
+            {
+                Debug.LogWarning("PlayerId mismatch: actor=" + photonPlayer.ActorNumber + ", slotIndex=" + slotIndex + ", playerId=" + playerId + ", name=" + photonPlayer.NickName);
+            }
+
+            if (activePlayersById.ContainsKey(playerId))
+            {
+                Debug.LogWarning("Invalid room state: duplicate online playerId " + playerId + " for actor=" + photonPlayer.ActorNumber + ".");
                 continue;
             }
 
@@ -655,6 +689,58 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         playerManager.RefreshAllPlayerStatusPanels();
         Debug.Log(BuildActiveOnlinePlayerListLog(photonPlayers));
+    }
+
+    private void LogOnlineRoomStateDiagnostics(string context)
+    {
+        if (PhotonNetwork.CurrentRoom == null)
+        {
+            Debug.LogWarning("Invalid room state: no Photon room during " + context + ".");
+            return;
+        }
+
+        HashSet<int> seenPlayerIds = new HashSet<int>();
+        HashSet<int> seenSlots = new HashSet<int>();
+        List<int> activePlayerIds = GetActiveOnlinePlayerIds();
+        int currentTurnPlayerId = GetRoomCurrentTurnPlayerId();
+        int currentRound = GetRoomCurrentRound();
+
+        foreach (Player photonPlayer in PhotonNetwork.PlayerList)
+        {
+            int slotIndex = GetPlayerIntProperty(photonPlayer, PhotonLobbyPropertyKeys.SlotIndex, -1);
+            int playerId = GetPlayerIntProperty(photonPlayer, PhotonLobbyPropertyKeys.PlayerId, -1);
+
+            if (slotIndex < 0 || playerId < 0)
+            {
+                Debug.LogWarning("Invalid room state: missing slot/playerId during " + context + ". actor=" + photonPlayer.ActorNumber + ", slotIndex=" + slotIndex + ", playerId=" + playerId + ".");
+                continue;
+            }
+
+            if (slotIndex != playerId)
+            {
+                Debug.LogWarning("PlayerId mismatch during " + context + ". actor=" + photonPlayer.ActorNumber + ", slotIndex=" + slotIndex + ", playerId=" + playerId + ".");
+            }
+
+            if (!seenSlots.Add(slotIndex))
+            {
+                Debug.LogWarning("Invalid room state: duplicate slotIndex " + slotIndex + " during " + context + ".");
+            }
+
+            if (!seenPlayerIds.Add(playerId))
+            {
+                Debug.LogWarning("Invalid room state: duplicate playerId " + playerId + " during " + context + ".");
+            }
+        }
+
+        if (currentTurnPlayerId >= 0 && !activePlayerIds.Contains(currentTurnPlayerId))
+        {
+            Debug.LogWarning("Turn mismatch during " + context + ". currentTurnPlayerId=" + currentTurnPlayerId + " is not active. activePlayers=" + string.Join(",", activePlayerIds) + ", round=" + currentRound + ".");
+        }
+
+        if (currentTurnPlayerId < 0)
+        {
+            Debug.Log("Online room state during " + context + ": wave/blocked turn state. currentTurnPlayerId=" + currentTurnPlayerId + ", round=" + currentRound + ", activePlayers=" + string.Join(",", activePlayerIds) + ".");
+        }
     }
 
     private string BuildActiveOnlinePlayerListLog(List<Player> photonPlayers)
@@ -723,6 +809,12 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     {
         int currentTurnPlayerId = GetRoomCurrentTurnPlayerId();
 
+        if (currentTurnPlayerId < 0)
+        {
+            Debug.Log("Turn repair skipped because an online wave or blocked action phase is active.");
+            return;
+        }
+
         if (IsPlayerIdActive(currentTurnPlayerId))
         {
             return;
@@ -744,6 +836,13 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         if (activePlayerIds.Count == 0)
         {
+            Debug.LogWarning("Invalid room state: cannot advance turn because there are no active online players. reason=" + reason);
+            return;
+        }
+
+        if (currentTurnPlayerId < 0)
+        {
+            Debug.LogWarning("Turn mismatch: ignored AdvanceTurnAsMaster while currentTurnPlayerId=" + currentTurnPlayerId + ". This normally means the enemy wave is active. reason=" + reason);
             return;
         }
 
@@ -832,7 +931,17 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         if (currentTurnPlayerId < 0)
         {
+            if (PhotonOnlineWaveCombatSyncManager.Instance == null || !PhotonOnlineWaveCombatSyncManager.Instance.IsOnlineWaveRunning)
+            {
+                Debug.LogWarning("Invalid room state: currentTurnPlayerId is " + currentTurnPlayerId + " but no online wave manager reports an active wave.");
+            }
+
             return;
+        }
+
+        if (!IsPlayerIdActive(currentTurnPlayerId))
+        {
+            Debug.LogWarning("Turn mismatch: applying turn for inactive playerId=" + currentTurnPlayerId + ", round=" + currentRound + ".");
         }
 
         if (!forceApply &&
@@ -1026,6 +1135,29 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         object value = player.CustomProperties[key];
         return value is string stringValue ? stringValue : fallbackValue;
+    }
+
+    private string GetPhotonPlayerDisplayName(Player player)
+    {
+        return GetPlayerStringProperty(
+            player,
+            PhotonLobbyPropertyKeys.PlayerName,
+            player != null && !string.IsNullOrWhiteSpace(player.NickName) ? player.NickName : "Player"
+        );
+    }
+
+    private string GetDisconnectToastMessage(DisconnectCause cause)
+    {
+        switch (cause)
+        {
+            case DisconnectCause.Exception:
+            case DisconnectCause.ExceptionOnConnect:
+            case DisconnectCause.ServerTimeout:
+            case DisconnectCause.ClientTimeout:
+                return "Connection lost.";
+            default:
+                return "Disconnected from server.";
+        }
     }
 #endif
 

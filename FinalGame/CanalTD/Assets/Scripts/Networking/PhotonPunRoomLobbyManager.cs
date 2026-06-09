@@ -358,6 +358,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
 
         AssignSlotsAuthoritatively();
+        LogLobbyRoomStateDiagnostics("TryStartOnlineMatch");
 
         if (!CanStartMatch())
         {
@@ -560,10 +561,10 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             return;
         }
 
-        Debug.Log("Create room failed: " + message);
+        Debug.Log("Create room failed: " + message + ", returnCode=" + returnCode);
         ClearPendingLobbyState();
         ClearPersistentLobbyMessage();
-        ShowLobbyMessage("Create room failed: " + message);
+        ShowLobbyMessage(GetCreateRoomFailedMessage(returnCode, message));
         UpdateLobbyUIState();
     }
 
@@ -582,10 +583,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         );
         ClearPendingLobbyState();
         ClearPersistentLobbyMessage();
-        ShowLobbyMessage(
-            "Join room failed: " + message +
-            ". Check that the host is still in the room, both clients use the same Photon settings, and enter only the shown room code."
-        );
+        ShowLobbyMessage(GetJoinRoomFailedMessage(returnCode, message));
         UpdateLobbyUIState();
     }
 
@@ -607,7 +605,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
         ClearPendingLobbyState();
         ClearPersistentLobbyMessage();
-        ShowLobbyMessage("Matchmaking failed: " + message);
+        ShowLobbyMessage("Matchmaking failed.");
         UpdateLobbyUIState();
     }
 
@@ -629,14 +627,14 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         {
             ClearPendingLobbyState();
             SetConnectionStatus("Disconnected");
-            ShowLobbyMessage("Photon connection failed: " + cause);
+            ShowLobbyMessage(GetDisconnectMessage(cause));
             UpdateLobbyUIState();
             return;
         }
 
         if (wasMatchmaking || pendingLobbyAction != PendingLobbyAction.None)
         {
-            ShowLobbyMessage("Photon connection failed: " + cause);
+            ShowLobbyMessage(GetDisconnectMessage(cause));
         }
 
         ClearPendingLobbyState();
@@ -658,6 +656,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
 
         RefreshLobbySnapshot();
+        LogLobbyRoomStateDiagnostics("OnJoinedRoom");
         ShowLobbyMessage(joinedMatchmaking ? "Joined matchmaking room." : "Joined room " + GetCurrentRoomCode() + ".");
         ClearPendingLobbyState();
         UpdateLobbyUIState();
@@ -690,7 +689,8 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
 
         RefreshLobbySnapshot();
-        ShowLobbyMessage(newPlayer.NickName + " joined.");
+        LogLobbyRoomStateDiagnostics("OnPlayerEnteredRoom");
+        ShowLobbyMessage(GetPhotonPlayerDisplayName(newPlayer) + " joined the room.");
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -701,7 +701,8 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
 
         RefreshLobbySnapshot();
-        ShowLobbyMessage(otherPlayer.NickName + " left.");
+        LogLobbyRoomStateDiagnostics("OnPlayerLeftRoom");
+        ShowLobbyMessage(GetPhotonPlayerDisplayName(otherPlayer) + " left the room.");
     }
 
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
@@ -712,6 +713,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
 
         RefreshLobbySnapshot();
+        LogLobbyRoomStateDiagnostics("OnPlayerPropertiesUpdate");
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)
@@ -722,6 +724,72 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
 
         RefreshLobbySnapshot();
+        LogLobbyRoomStateDiagnostics("OnMasterClientSwitched");
+        ShowLobbyMessage("Host migrated.");
+    }
+
+    private string GetCreateRoomFailedMessage(short returnCode, string message)
+    {
+        string normalizedMessage = string.IsNullOrWhiteSpace(message) ? string.Empty : message.ToLowerInvariant();
+
+        if (normalizedMessage.Contains("full"))
+        {
+            return "Room is full.";
+        }
+
+        if (normalizedMessage.Contains("already") || normalizedMessage.Contains("exists"))
+        {
+            return "Room code is already in use.";
+        }
+
+        return "Create room failed.";
+    }
+
+    private string GetJoinRoomFailedMessage(short returnCode, string message)
+    {
+        string normalizedMessage = string.IsNullOrWhiteSpace(message) ? string.Empty : message.ToLowerInvariant();
+
+        if (normalizedMessage.Contains("does not exist") || normalizedMessage.Contains("not exist") || normalizedMessage.Contains("not found"))
+        {
+            return "Room not found.";
+        }
+
+        if (normalizedMessage.Contains("full"))
+        {
+            return "Room is full.";
+        }
+
+        if (normalizedMessage.Contains("closed"))
+        {
+            return "Room is closed.";
+        }
+
+        return "Join room failed. Check the room code, Photon region, AppId, and game version.";
+    }
+
+    private string GetDisconnectMessage(DisconnectCause cause)
+    {
+        switch (cause)
+        {
+            case DisconnectCause.DisconnectByClientLogic:
+                return "Disconnected from server.";
+            case DisconnectCause.Exception:
+            case DisconnectCause.ExceptionOnConnect:
+            case DisconnectCause.ServerTimeout:
+            case DisconnectCause.ClientTimeout:
+                return "Connection lost.";
+            default:
+                return "Disconnected from server.";
+        }
+    }
+
+    private string GetPhotonPlayerDisplayName(Player player)
+    {
+        return GetPlayerStringProperty(
+            player,
+            PhotonLobbyPropertyKeys.PlayerName,
+            player != null && !string.IsNullOrWhiteSpace(player.NickName) ? player.NickName : "Player"
+        );
     }
 
     private void RequestAutoCreatePrivateRoom()
@@ -995,6 +1063,17 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             {
                 occupiedSlots[claimedSlot] = true;
                 slotOwners[claimedSlot] = player;
+                continue;
+            }
+
+            if (claimedSlot >= 0 && slotOwners.ContainsKey(claimedSlot))
+            {
+                Debug.LogWarning("Invalid room state: duplicate claimed slot " + claimedSlot + " before authoritative reassignment. actor=" + player.ActorNumber + ".");
+            }
+
+            if (claimedSlot >= 0 && claimedPlayerId != claimedSlot)
+            {
+                Debug.LogWarning("PlayerId mismatch before authoritative reassignment. actor=" + player.ActorNumber + ", slotIndex=" + claimedSlot + ", playerId=" + claimedPlayerId + ".");
             }
         }
 
@@ -1152,6 +1231,73 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
         PersistRoomSnapshotToPlayerPrefs(snapshot, localSlotIndex);
         UpdateLobbyUIState();
+    }
+
+    private void LogLobbyRoomStateDiagnostics(string context)
+    {
+        if (!PhotonNetwork.InRoom || PhotonNetwork.CurrentRoom == null)
+        {
+            Debug.LogWarning("Invalid room state: lobby diagnostics requested outside a Photon room. context=" + context);
+            return;
+        }
+
+        HashSet<int> seenSlots = new HashSet<int>();
+        HashSet<int> seenPlayerIds = new HashSet<int>();
+        int readyCount = 0;
+
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            int slotIndex = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.SlotIndex, -1);
+            int playerId = GetPlayerIntProperty(player, PhotonLobbyPropertyKeys.PlayerId, -1);
+            bool isReady = GetPlayerBoolProperty(player, PhotonLobbyPropertyKeys.Ready, false);
+            string displayName = GetPlayerStringProperty(
+                player,
+                PhotonLobbyPropertyKeys.PlayerName,
+                string.IsNullOrWhiteSpace(player.NickName) ? "Player" : player.NickName
+            );
+
+            if (isReady)
+            {
+                readyCount += 1;
+            }
+
+            if (slotIndex < 0 || slotIndex >= maxPlayersPerRoom)
+            {
+                Debug.LogWarning("Invalid room state: slotIndex out of range during " + context + ". actor=" + player.ActorNumber + ", slotIndex=" + slotIndex + ", name=" + displayName + ".");
+                continue;
+            }
+
+            if (playerId < 0 || playerId >= maxPlayersPerRoom)
+            {
+                Debug.LogWarning("Invalid room state: playerId out of range during " + context + ". actor=" + player.ActorNumber + ", playerId=" + playerId + ", name=" + displayName + ".");
+                continue;
+            }
+
+            if (slotIndex != playerId)
+            {
+                Debug.LogWarning("PlayerId mismatch during " + context + ". actor=" + player.ActorNumber + ", slotIndex=" + slotIndex + ", playerId=" + playerId + ", name=" + displayName + ".");
+            }
+
+            if (!seenSlots.Add(slotIndex))
+            {
+                Debug.LogWarning("Invalid room state: duplicate slotIndex " + slotIndex + " during " + context + ".");
+            }
+
+            if (!seenPlayerIds.Add(playerId))
+            {
+                Debug.LogWarning("Invalid room state: duplicate playerId " + playerId + " during " + context + ".");
+            }
+        }
+
+        Debug.Log(
+            "Lobby validation " + context +
+            ": players=" + PhotonNetwork.PlayerList.Length +
+            ", ready=" + readyCount +
+            ", maxPlayers=" + maxPlayersPerRoom +
+            ", roomOpen=" + PhotonNetwork.CurrentRoom.IsOpen +
+            ", masterActor=" + (PhotonNetwork.MasterClient != null ? PhotonNetwork.MasterClient.ActorNumber : -1) +
+            ", roomCode=" + GetCurrentRoomCode()
+        );
     }
 
     private void PersistCurrentRoomSnapshotToPlayerPrefs()
