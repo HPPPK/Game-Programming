@@ -58,7 +58,7 @@ No downloadable release is currently provided. The assessed project should be op
 - Local mode is playable.
 - AI mode includes three difficulty levels and playable turn logic.
 - Core card, tower, enemy, path, and result systems are integrated.
-- Online room-code flow and core sync are implemented as an experimental extension prepared for 2-4 player demonstration testing.
+- Online multiplayer uses room-code inviting. Players create or join a private room using a room code, with core sync implemented as an experimental extension prepared for 2-4 player demonstration testing.
 - Tutorial / guide flow exists through the dedicated Guide scene.
 
 ## Final assessment route
@@ -76,7 +76,7 @@ Use this as the live presentation flow if Online mode is shown:
 1. Start from `BootstrapScene` and open the Guide Tutorial.
 2. Run an AI match to show the main playable route.
 3. Open Online mode from `ModeSelectScene`.
-4. Host creates a room and shares the room code.
+4. Host creates a private room and shares the room code.
 5. 2-4 players join, set names, ready up, and host starts the match.
 6. Demonstrate build synchronization through buy land, build tower, upgrade, and sell.
 7. Demonstrate card synchronization with one player-interaction card and one map-control card.
@@ -100,7 +100,7 @@ Use this as the live presentation flow if Online mode is shown:
 
 ## Known limitations
 
-- Online mode is room-code multiplayer only; there is no public matchmaking flow for final assessment.
+- Online mode is room-code invitation multiplayer only; random player pairing is not part of the final design.
 - There is no reconnect, late-join recovery, spectator mode, ranked mode, database persistence, or dedicated server.
 - Host migration has diagnostic support, but long late-match migration should still be manually checked before presentation.
 - Online room joining requires clients to use the same Photon AppId, fixed region, game version, and compatible build.

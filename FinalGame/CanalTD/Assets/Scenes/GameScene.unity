@@ -60881,7 +60881,7 @@ MonoBehaviour:
   playerId: 0
   displayName: Kate
   playerType: 0
-  money: 20
+  money: 12
   score: 0
   cardCount: 0
   playerHand: {fileID: 910001006}
@@ -61075,7 +61075,7 @@ MonoBehaviour:
   playerId: 1
   displayName: Tom
   playerType: 0
-  money: 20
+  money: 12
   score: 0
   cardCount: 0
   playerHand: {fileID: 910002006}
@@ -72841,6 +72841,8 @@ MonoBehaviour:
   gamePhaseManager: {fileID: 163762666}
   toastMessage: {fileID: 848080698}
   onlineBuildSyncManager: {fileID: 0}
+  onlineCardSyncManager: {fileID: 0}
+  onlineWaveCombatSyncManager: {fileID: 0}
   minOnlinePlayersToStart: 2
   homeSceneName: HomeScene
 --- !u!1 &1586250674

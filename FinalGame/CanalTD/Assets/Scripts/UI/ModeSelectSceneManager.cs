@@ -70,7 +70,6 @@ public class ModeSelectSceneManager : MonoBehaviour
     [FormerlySerializedAs("roomCodeInput")]
     public TMP_InputField onlineRoomCodeInput;
     public Button onlineJoinRoomButton;
-    public Button onlineMatchmakingButton;
     public Button onlineReadyButton;
     public TMP_Text onlineReadyButtonText;
     public Button onlineStartButton;
@@ -125,7 +124,6 @@ public class ModeSelectSceneManager : MonoBehaviour
     private bool onlineReadyButtonListenerBound;
     private bool onlineStartButtonListenerBound;
     private bool onlineJoinButtonListenerBound;
-    private bool onlineMatchmakingButtonListenerBound;
     private bool onlineCloseButtonListenerBound;
     private Coroutine toastHideCoroutine;
     private bool persistentToastVisible;
@@ -162,7 +160,6 @@ public class ModeSelectSceneManager : MonoBehaviour
         BindOptionalButton(ref onlineReadyButtonListenerBound, onlineReadyButton, ToggleOnlineReady);
         BindOptionalButton(ref onlineStartButtonListenerBound, onlineStartButton, StartOnlineModeGame);
         BindOptionalButton(ref onlineJoinButtonListenerBound, onlineJoinRoomButton, JoinOnlineRoomByCode);
-        BindOptionalButton(ref onlineMatchmakingButtonListenerBound, onlineMatchmakingButton, StartOnlineMatchmaking);
         BindOptionalButton(ref onlineCloseButtonListenerBound, onlineCloseButton, CloseOnlineModePanel);
 
         BindOptionalInputListener(aiPrototypeUsernameInput);
@@ -198,7 +195,6 @@ public class ModeSelectSceneManager : MonoBehaviour
         UnbindOptionalButton(ref onlineReadyButtonListenerBound, onlineReadyButton, ToggleOnlineReady);
         UnbindOptionalButton(ref onlineStartButtonListenerBound, onlineStartButton, StartOnlineModeGame);
         UnbindOptionalButton(ref onlineJoinButtonListenerBound, onlineJoinRoomButton, JoinOnlineRoomByCode);
-        UnbindOptionalButton(ref onlineMatchmakingButtonListenerBound, onlineMatchmakingButton, StartOnlineMatchmaking);
         UnbindOptionalButton(ref onlineCloseButtonListenerBound, onlineCloseButton, CloseOnlineModePanel);
 
         UnbindOptionalInputListener(aiPrototypeUsernameInput);
@@ -308,10 +304,10 @@ public class ModeSelectSceneManager : MonoBehaviour
     }
 
     // Compatibility wrapper for older mixed-room prototype buttons.
-    [System.Obsolete("Use StartOnlineMatchmaking() or JoinOnlineRoomByCode() from the Online panel.")]
+    [System.Obsolete("Use OpenOnlineModePanel() and the room-code join flow from the Online panel.")]
     public void CreateRoomPlaceholder()
     {
-        StartMatchmakingPlaceholder();
+        OpenOnlineModePanel();
     }
 
     public void CloseAIPrototypePanel()
@@ -498,21 +494,6 @@ public class ModeSelectSceneManager : MonoBehaviour
         if (photonRoomLobbyManager != null)
         {
             photonRoomLobbyManager.TryStartOnlineMatch();
-        }
-    }
-
-    // Compatibility wrapper for older mixed-room prototype buttons.
-    [System.Obsolete("Use StartOnlineMatchmaking() from the Online panel.")]
-    public void StartMatchmakingPlaceholder()
-    {
-        StartOnlineMatchmaking();
-    }
-
-    public void StartOnlineMatchmaking()
-    {
-        if (photonRoomLobbyManager != null)
-        {
-            photonRoomLobbyManager.StartMatchmaking();
         }
     }
 
@@ -1197,7 +1178,7 @@ public class ModeSelectSceneManager : MonoBehaviour
         ShowToastInternal(message, false);
     }
 
-    // Shows a persistent toast for long-running operations like connect or matchmaking.
+    // Shows a persistent toast for long-running connection and room-code join operations.
     public void ShowPersistentToast(string message)
     {
         ShowToastInternal(message, true);

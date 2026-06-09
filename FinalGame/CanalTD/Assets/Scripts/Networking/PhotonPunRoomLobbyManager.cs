@@ -52,7 +52,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     private const string DefaultFixedRegion = "asia";
     private const string OnlinePhotonMode = "OnlinePhotonPUN2";
     private const string PrivateRoomKind = "private";
-    private const string MatchmakingRoomKind = "matchmaking";
 
     [Header("Scene Integration")]
     public ModeSelectSceneManager modeSelectSceneManager;
@@ -62,7 +61,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     public Button joinRoomButton;
     public Button readyButton;
     public Button startMatchButton;
-    public Button matchmakingButton;
     public Button leaveRoomButton;
 
     [Header("Optional Debug UI")]
@@ -79,20 +77,17 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     private bool joinRoomButtonBound;
     private bool readyButtonBound;
     private bool startButtonBound;
-    private bool matchmakingButtonBound;
     private bool leaveButtonBound;
     private bool usernameListenerBound;
     private bool isConnectingToPhoton;
     private bool isCreatingOrJoiningRoom;
-    private bool isMatchmaking;
 
 #if PHOTON_UNITY_NETWORKING
     private enum PendingLobbyAction
     {
         None,
         AutoCreatePrivateRoom,
-        JoinPrivateRoomByCode,
-        JoinRandomMatchmaking
+        JoinPrivateRoomByCode
     }
 
     private PendingLobbyAction pendingLobbyAction = PendingLobbyAction.None;
@@ -116,7 +111,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         BindOptionalButton(ref joinRoomButtonBound, joinRoomButton, OnClickJoinRoom);
         BindOptionalButton(ref readyButtonBound, readyButton, ToggleReady);
         BindOptionalButton(ref startButtonBound, startMatchButton, TryStartOnlineMatch);
-        BindOptionalButton(ref matchmakingButtonBound, matchmakingButton, StartMatchmaking);
         BindOptionalButton(ref leaveButtonBound, leaveRoomButton, LeaveRoom);
         BindUsernameListener();
 
@@ -134,7 +128,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UnbindOptionalButton(ref joinRoomButtonBound, joinRoomButton, OnClickJoinRoom);
         UnbindOptionalButton(ref readyButtonBound, readyButton, ToggleReady);
         UnbindOptionalButton(ref startButtonBound, startMatchButton, TryStartOnlineMatch);
-        UnbindOptionalButton(ref matchmakingButtonBound, matchmakingButton, StartMatchmaking);
         UnbindOptionalButton(ref leaveButtonBound, leaveRoomButton, LeaveRoom);
         UnbindUsernameListener();
     }
@@ -243,33 +236,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         pendingJoinRoomCode = normalizedRoomCode;
         pendingLobbyAction = PendingLobbyAction.JoinPrivateRoomByCode;
         ShowPersistentLobbyMessage("Joining room " + pendingJoinRoomCode + "...");
-
-        if (PhotonNetwork.InRoom)
-        {
-            PhotonNetwork.LeaveRoom();
-            return;
-        }
-
-        EnsureConnectedAndLobbyReady();
-#else
-        ShowLobbyMessage("Photon PUN2 is not installed. Import Photon PUN2 first.");
-#endif
-    }
-
-    public void StartMatchmaking()
-    {
-#if PHOTON_UNITY_NETWORKING
-        if (!IsLocalPlayerReady())
-        {
-            ShowLobbyMessage("Ready up before matchmaking.");
-            return;
-        }
-
-        pendingLobbyAction = PendingLobbyAction.JoinRandomMatchmaking;
-        pendingJoinRoomCode = string.Empty;
-        isMatchmaking = true;
-        ShowPersistentLobbyMessage("Matchmaking...");
-        UpdateLobbyUIState();
 
         if (PhotonNetwork.InRoom)
         {
@@ -463,11 +429,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             readyButton.interactable = inRoom;
         }
 
-        if (matchmakingButton != null)
-        {
-            matchmakingButton.interactable = !busy;
-        }
-
         if (startMatchButton != null)
         {
             startMatchButton.interactable = inRoom && masterClient;
@@ -587,32 +548,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {
-        Debug.Log(
-            "Matchmaking join-random failed: " + message +
-            ", returnCode=" + returnCode +
-            ", isMatchmaking=" + isMatchmaking +
-            ", pendingLobbyAction=" + pendingLobbyAction
-        );
-
-        if (isMatchmaking || pendingLobbyAction == PendingLobbyAction.JoinRandomMatchmaking)
-        {
-            ShowPersistentLobbyMessage("No open matchmaking room found. Creating one...");
-            CreatePublicMatchmakingRoom();
-            return;
-        }
-
-        ClearPendingLobbyState();
-        ClearPersistentLobbyMessage();
-        ShowLobbyMessage("Matchmaking failed.");
-        UpdateLobbyUIState();
-    }
-
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected with cause: " + cause);
-        bool wasMatchmaking = isMatchmaking;
         ClearPersistentLobbyMessage();
 
         if (leaveRoomWhenPanelCloses)
@@ -632,7 +570,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             return;
         }
 
-        if (wasMatchmaking || pendingLobbyAction != PendingLobbyAction.None)
+        if (pendingLobbyAction != PendingLobbyAction.None)
         {
             ShowLobbyMessage(GetDisconnectMessage(cause));
         }
@@ -645,8 +583,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     {
         IsOnlineRoomFlowActive = true;
         isCreatingOrJoiningRoom = false;
-        bool joinedMatchmaking = isMatchmaking || pendingLobbyAction == PendingLobbyAction.JoinRandomMatchmaking;
-        isMatchmaking = false;
         ClearPersistentLobbyMessage();
         ApplyLocalDisplayName();
 
@@ -657,7 +593,7 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
         RefreshLobbySnapshot();
         LogLobbyRoomStateDiagnostics("OnJoinedRoom");
-        ShowLobbyMessage(joinedMatchmaking ? "Joined matchmaking room." : "Joined room " + GetCurrentRoomCode() + ".");
+        ShowLobbyMessage("Joined room " + GetCurrentRoomCode() + ".");
         ClearPendingLobbyState();
         UpdateLobbyUIState();
     }
@@ -882,24 +818,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             return;
         }
 
-        if (pendingLobbyAction == PendingLobbyAction.JoinRandomMatchmaking)
-        {
-            Hashtable expectedProperties = new Hashtable
-            {
-                { PhotonLobbyPropertyKeys.RoomKind, MatchmakingRoomKind },
-                { PhotonLobbyPropertyKeys.MatchMode, OnlinePhotonMode }
-            };
-
-            isCreatingOrJoiningRoom = true;
-            Debug.Log(
-                "Attempting JoinRandomRoom for matchmaking. activeScene=" + SceneManager.GetActiveScene().name +
-                ", isConnected=" + PhotonNetwork.IsConnected +
-                ", inLobby=" + PhotonNetwork.InLobby +
-                ", inRoom=" + PhotonNetwork.InRoom +
-                ", clientState=" + PhotonNetwork.NetworkClientState
-            );
-            PhotonNetwork.JoinRandomRoom(expectedProperties, maxPlayersPerRoom);
-        }
     }
 
     private void CreatePrivateFriendRoom(string roomCode)
@@ -913,7 +831,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             CleanupCacheOnLeave = true,
             CustomRoomProperties = new Hashtable
             {
-                { PhotonLobbyPropertyKeys.MatchMode, OnlinePhotonMode },
                 { PhotonLobbyPropertyKeys.RoomKind, PrivateRoomKind },
                 { PhotonLobbyPropertyKeys.RoomCode, roomCode }
             }
@@ -937,38 +854,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
-    private void CreatePublicMatchmakingRoom()
-    {
-        isCreatingOrJoiningRoom = true;
-        string roomCode = GenerateShortRoomCode();
-
-        RoomOptions roomOptions = new RoomOptions
-        {
-            MaxPlayers = maxPlayersPerRoom,
-            IsVisible = true,
-            IsOpen = true,
-            CleanupCacheOnLeave = true,
-            CustomRoomProperties = new Hashtable
-            {
-                { PhotonLobbyPropertyKeys.MatchMode, OnlinePhotonMode },
-                { PhotonLobbyPropertyKeys.RoomKind, MatchmakingRoomKind },
-                { PhotonLobbyPropertyKeys.RoomCode, roomCode }
-            }
-        };
-
-        Debug.Log(
-            "Creating public matchmaking room. roomCode=" + roomCode +
-            ", activeScene=" + SceneManager.GetActiveScene().name +
-            ", isConnected=" + PhotonNetwork.IsConnected +
-            ", inLobby=" + PhotonNetwork.InLobby +
-            ", gameVersion=" + PhotonNetwork.GameVersion +
-            ", cloudRegion=" + PhotonNetwork.CloudRegion +
-            ", clientState=" + PhotonNetwork.NetworkClientState
-        );
-        PhotonNetwork.CreateRoom(roomCode, roomOptions, TypedLobby.Default);
-        UpdateLobbyUIState();
-    }
-
     private void ClearPendingLobbyState()
     {
         pendingLobbyAction = PendingLobbyAction.None;
@@ -976,7 +861,6 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         pendingPrivateRoomCode = string.Empty;
         privateRoomCreateAttempts = 0;
         isCreatingOrJoiningRoom = false;
-        isMatchmaking = false;
         isConnectingToPhoton = false;
         UpdateLobbyUIState();
     }

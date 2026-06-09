@@ -36,7 +36,6 @@ public static class PhotonLobbyPropertyKeys
     public const string Ready = "ready";
     public const string IsAI = "isAI";
     public const string SlotIndex = "slotIndex";
-    public const string MatchMode = "matchMode";
     public const string RoomCode = "roomCode";
     public const string RoomKind = "roomKind";
     public const string CurrentTurnPlayerId = "currentTurnPlayerId";

@@ -1995,7 +1995,7 @@ MonoBehaviour:
       Areas .......... 9\n\tControl Routes .......... 10\t\n\tBuild Tower ..........
       11\n\tEnemyWave .......... 12\n\nModes Select ............. 13\n          Local
       Mode ............. 14\n          AI Player Mode ................ 15\n         
-      Networking Matching .......... 16"
+	      Online Room Code .......... 16"
     image: {fileID: 5518510184476666543, guid: 2273a3e93d6b64a8fa283a03f28ee913, type: 3}
   - title: Contents II
     body: "Cards Overview ......... 16\n\tOpen Gate ............. 17\t\t\n\tLock
@@ -2119,8 +2119,8 @@ MonoBehaviour:
       mode: add the AI player in your game room and be ready to play.
 
 
-      Network
-      Matching: click the matching button and match the human players to play together.'
+	      Online:
+	      create or join a private room with a room code.'
     image: {fileID: 21300000, guid: 63e14d521fe0f406b969c283b535646b, type: 3}
   - title: Local Mode
     body: 'Input all of your name here. (Optional)
@@ -2133,9 +2133,9 @@ MonoBehaviour:
       the selection box in the upper right corner\u3002\n\nAnd click ready button
       for your own, than , start the game."
     image: {fileID: 21300000, guid: 2a19e2ce6ba1d4168b893939e335a944, type: 3}
-  - title: Network Matching
-    body: Click "start matching" button to match the human player, and click your
-      "Ready" button before click start game.
+  - title: Online Room Code
+    body: Create a private room, share the room code, or enter another player's room
+      code. Click "Ready" before the host starts the game.
     image: {fileID: 21300000, guid: 0abaf9b26b691477a829301f3c227a3b, type: 3}
   - title: Cards
     body: 'Cards provide special actions.
