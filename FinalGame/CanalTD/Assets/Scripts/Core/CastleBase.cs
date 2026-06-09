@@ -67,6 +67,11 @@ public class CastleBase : MonoBehaviour
             return;
         }
 
+        if (PhotonOnlineWaveCombatSyncManager.ShouldBlockLocalCastleDamage())
+        {
+            return;
+        }
+
         currentHP -= damage;
 
         if (currentHP < 0)
@@ -86,10 +91,22 @@ public class CastleBase : MonoBehaviour
             statusPanel.Refresh();
         }
 
+        PhotonOnlineWaveCombatSyncManager.NotifyCastleDamagedByMaster(this, damage);
+
         if (currentHP <= 0)
         {
             Debug.Log(GetDisplayName() + " GAME OVER");
             OnGameOver();
+        }
+    }
+
+    public void ApplyOnlineHealthState(int syncedCurrentHP)
+    {
+        currentHP = Mathf.Clamp(syncedCurrentHP, 0, maxHP);
+
+        if (statusPanel != null)
+        {
+            statusPanel.Refresh();
         }
     }
 

@@ -58,7 +58,7 @@ No downloadable release is currently provided. The assessed project should be op
 - Local mode is playable.
 - AI mode includes three difficulty levels and playable turn logic.
 - Core card, tower, enemy, path, and result systems are integrated.
-- Online room flow and core sync are implemented as an experimental extension that still needs broader multiplayer validation.
+- Online room-code flow and core sync are implemented as an experimental extension prepared for 2-4 player demonstration testing.
 - Tutorial / guide flow exists through the dedicated Guide scene.
 
 ## Final assessment route
@@ -67,7 +67,22 @@ For marking, the primary assessment route is Local mode or AI mode:
 
 `BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI mode -> `GameScene` -> `ResultScene`
 
-Online mode is included as an implemented extension, but it is not the primary stable assessment path for final marking.
+Online mode is included as an implemented extension. Local and AI modes remain the primary assessment routes, while Online mode can be demonstrated as additional multiplayer work when Photon connectivity is available.
+
+## Final multiplayer demo checklist
+
+Use this as the live presentation flow if Online mode is shown:
+
+1. Start from `BootstrapScene` and open the Guide Tutorial.
+2. Run an AI match to show the main playable route.
+3. Open Online mode from `ModeSelectScene`.
+4. Host creates a room and shares the room code.
+5. 2-4 players join, set names, ready up, and host starts the match.
+6. Demonstrate build synchronization through buy land, build tower, upgrade, and sell.
+7. Demonstrate card synchronization with one player-interaction card and one map-control card.
+8. Demonstrate gate synchronization with Lock Gate or Open Gate.
+9. End all player turns and show the synchronized enemy wave.
+10. Continue to victory/result flow where time allows.
 
 ## Vertical slice coverage
 
@@ -79,14 +94,16 @@ Online mode is included as an implemented extension, but it is not the primary s
 
 ## Future work
 
-- Broaden validation for online card-effect sync edge cases.
+- Continue manual validation for online card-effect sync and host-migration edge cases.
 - Continue balancing AI behaviour, card pacing, and multiplayer clarity.
 - Add more regression coverage and playtesting evidence.
 
 ## Known limitations
 
-- Online mode is an implemented extension and still needs broader multi-device, late-match, disconnection, and card/build synchronization validation.
-- Online room joining should be checked with both clients using the same Photon AppId, fixed region, and game version.
+- Online mode is room-code multiplayer only; there is no public matchmaking flow for final assessment.
+- There is no reconnect, late-join recovery, spectator mode, ranked mode, database persistence, or dedicated server.
+- Host migration has diagnostic support, but long late-match migration should still be manually checked before presentation.
+- Online room joining requires clients to use the same Photon AppId, fixed region, game version, and compatible build.
 - Balance and tutorial pacing can be improved with more playtesting.
 
 ## Development tracking / Kanban evidence
