@@ -6,9 +6,9 @@ This document records testing coverage for the CanalTD playable vertical slice: 
 
 ## Primary assessment route
 
-`BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI mode -> `GameScene` -> `ResultScene`
+`BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI / Online mode -> `GameScene` -> `ResultScene`
 
-Local Mode and AI Mode are the main assessment routes. Online Mode is treated as an implemented extension unless broader multiplayer validation is completed separately.
+Local Mode, AI Mode, and Online Mode are documented assessment routes. Online Mode uses Photon room-code multiplayer and requires compatible clients, Photon settings, and network connectivity.
 
 ## Current verification status
 
@@ -16,7 +16,8 @@ Local Mode and AI Mode are the main assessment routes. Online Mode is treated as
 - The batchmode check did not reach project compilation because Unity LicensingClient IPC timed out.
 - This result is an environment/licensing blocker, not evidence that C# compilation passed or failed.
 - Local and AI gameplay route checks were reported as manually verified by the student in Unity Editor on 2026-06-08.
-- Online Mode remains documented as an implemented extension and is not claimed as fully stable multiplayer gameplay.
+- Online gameplay route checks were reported by the student as manually verified in Unity Editor on 2026-06-08 and 2026-06-09.
+- Online limitations are scope limitations: room-code multiplayer only, no matchmaking, no reconnect system, and no dedicated server.
 
 ## Testing summary table
 
@@ -45,34 +46,46 @@ Local Mode and AI Mode are the main assessment routes. Online Mode is treated as
 | T21 | AI Easy | AI Easy turn logic check. | Easy AI takes simple valid turns. | Passed in Unity Editor on 2026-06-08, based on student-reported manual verification. | Pass | `Assets/Scripts/Core/AIPrototypeTurnManager.cs` | No change required |
 | T22 | AI Medium | AI Medium turn logic check. | Medium AI takes valid turns with stronger choices. | Passed in Unity Editor on 2026-06-08, based on student-reported manual verification. | Pass | `Assets/Scripts/Core/AIPrototypeTurnManager.cs` | No change required |
 | T23 | AI Hard | AI Hard turn logic check. | Hard AI takes valid turns with higher pressure. | Passed in Unity Editor on 2026-06-08, based on student-reported manual verification. | Pass | `Assets/Scripts/Core/AIPrototypeTurnManager.cs` | No change required |
-| T24 | Online extension | Online room flow is treated as an extension if not fully validated. | Online is documented in the README and not required as the core marking route. | Passed as a scope/documentation check on 2026-06-08. Online remains an implemented extension and is not claimed as fully stable multiplayer gameplay. | Pass | `README.md`, issues [#62](https://github.com/HPPPK/Game-Programming/issues/62), [#89](https://github.com/HPPPK/Game-Programming/issues/89), [#91](https://github.com/HPPPK/Game-Programming/issues/91) | Local/AI route prioritised as stable assessment path |
+| T24 | Online mode scope | Online mode is documented as implemented Photon room-code multiplayer. | README, design, and testing log describe Online consistently as implemented Photon room-code multiplayer. | Passed as a scope/documentation check after student-reported online validation on 2026-06-08 and 2026-06-09. | Pass | `README.md`, issues [#62](https://github.com/HPPPK/Game-Programming/issues/62), [#89](https://github.com/HPPPK/Game-Programming/issues/89), [#91](https://github.com/HPPPK/Game-Programming/issues/91), [#114](https://github.com/HPPPK/Game-Programming/issues/114), [#115](https://github.com/HPPPK/Game-Programming/issues/115), [#116](https://github.com/HPPPK/Game-Programming/issues/116) | Online wording updated to final room-code multiplayer status |
 | T25 | Console | Local/AI assessment route has no console-breaking errors after manual check. | No console-breaking errors appear during the checked route. | Passed in Unity Editor on 2026-06-08, based on student-reported manual verification. | Pass | Unity Editor console | No change required |
+| T26 | Online room creation | Host creates a Photon room from `ModeSelectScene`. | A room code is generated and displayed; the host remains in the online lobby. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `Assets/Scripts/Networking/PhotonPunRoomLobbyManager.cs`, issue [#115](https://github.com/HPPPK/Game-Programming/issues/115) | Room-code flow documented as final multiplayer route |
+| T27 | Online room join | A second client joins using the shown room code. | The joining client enters the same lobby and sees synchronized player slots. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `Assets/Scripts/Networking/PhotonPunRoomLobbyManager.cs`, issue [#115](https://github.com/HPPPK/Game-Programming/issues/115) | Photon room-code and version/region safeguards retained |
+| T28 | Online 2-4 player readiness | Online lobby supports the final 2-4 player room flow. | Connected players keep names, colors, slot assignment, ready state, and start flow synchronized. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `ModeSelectScene`, `Assets/Scripts/Networking`, issue [#115](https://github.com/HPPPK/Game-Programming/issues/115) | Final wording records Online as implemented |
+| T29 | Online scene transition | Host starts the match after players ready up. | All connected clients transition from lobby to `GameScene` consistently. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `PhotonOnlineGameSceneManager.cs`, issue [#89](https://github.com/HPPPK/Game-Programming/issues/89) | Scene transition treated as completed online behavior |
+| T30 | Online turn sync | Players end turns in Online mode. | Current player, AP reset, draw/play limits, and turn indicator remain synchronized. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `PhotonOnlineGameSceneManager.cs`, `OnlineTurnPermissionManager.cs`, issue [#91](https://github.com/HPPPK/Game-Programming/issues/91) | Turn authority documented as synchronized |
+| T31 | Online build sync | Player buys land, builds, upgrades, and sells a tower. | Ownership, tower state, resources, and visuals update on all connected clients. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `PhotonOnlineBuildSyncManager.cs`, `OnlineBuildSyncData.cs`, issue [#115](https://github.com/HPPPK/Game-Programming/issues/115) | Build sync recorded as runtime-tested |
+| T32 | Online card hand sync | Online players receive and use synchronized hand state. | Starting hands, card consumption, draw state, and private hand UI remain consistent for the local owner. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `PhotonOnlineCardSyncManager.cs`, issue [#115](https://github.com/HPPPK/Game-Programming/issues/115) | Hand sync recorded as runtime-tested |
+| T33 | Online card effects | Online cards such as Steal Card, Trade Hands, Disrupt, Take Over, and Freeze Claim are used. | Master validates requests, consumes cards, and broadcasts synchronized player/tile state. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `PhotonOnlineCardSyncManager.cs`, `TileTargetingManager.cs`, issues [#115](https://github.com/HPPPK/Game-Programming/issues/115), [#116](https://github.com/HPPPK/Game-Programming/issues/116) | Card sync recorded as runtime-tested |
+| T34 | Online gate sync | Lock Gate / Open Gate actions are used in Online mode. | Gate state, path availability, feedback, and resulting route pressure remain synchronized. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `Assets/Scripts/Networking`, `Assets/Scripts/Path`, issue [#115](https://github.com/HPPPK/Game-Programming/issues/115) | Gate sync recorded as runtime-tested |
+| T35 | Online wave and combat sync | All online players end turns and trigger an enemy wave. | Enemy spawn, movement, health/death, castle damage, gold rewards, and wave progression remain synchronized without duplicate or phantom enemies. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `Assets/Scripts/Networking`, `Assets/Scripts/Enemy`, issue [#114](https://github.com/HPPPK/Game-Programming/issues/114) | Wave/combat sync recorded as runtime-tested |
+| T36 | Online result sync | Online match reaches result flow. | Ranking/result state is shown consistently to connected clients. | Passed in Unity Editor on 2026-06-08 and 2026-06-09, based on student-reported online manual validation. | Pass | `ResultScene`, `ResultSceneManager.cs`, issues [#114](https://github.com/HPPPK/Game-Programming/issues/114), [#115](https://github.com/HPPPK/Game-Programming/issues/115) | Result sync recorded as runtime-tested |
 
 ## Bugs and improvements
 
 | Problem found | Evidence / issue | Change made | Why it improved playability | Current status |
 |---|---|---|---|---|
-| Online scene transition needed synchronization work. | [Online Match Start Does Not Synchronize Scene Transition #89](https://github.com/HPPPK/Game-Programming/issues/89) | Online mode documented as extension; related networking scripts retained. | Avoids making online mode the primary assessment route without broader validation. | Online remains extension; broader multiplayer validation still required |
+| Online scene transition needed synchronization work. | [Online Match Start Does Not Synchronize Scene Transition #89](https://github.com/HPPPK/Game-Programming/issues/89) | Online scene transition and multiplayer synchronization were completed and recorded through final online validation. | Supports Online as a demonstrated Photon room-code multiplayer route. | Student-reported online validation recorded on 2026-06-08 and 2026-06-09 |
 | Active player / turn indication needed clearer feedback. | [Turn Marker Animation - User Indication #90](https://github.com/HPPPK/Game-Programming/issues/90) | Current-turn and marker UI documented as feedback improvements. | Helps players identify whose turn is active. | Student manual Local/AI verification recorded |
 | Guide needed step-by-step onboarding. | [Step by step instruction guidance #92](https://github.com/HPPPK/Game-Programming/issues/92), tutorial issues [#95](https://github.com/HPPPK/Game-Programming/issues/95)-[#97](https://github.com/HPPPK/Game-Programming/issues/97) | Guide scene and tutorial flow documented as the onboarding path. | Makes controls and rules easier for first-time players. | Student manual verification recorded |
 | Player information and score needed to be readable. | [Player Information, Color, HUD, and Score #93](https://github.com/HPPPK/Game-Programming/issues/93) | HUD/status systems documented as assessment-facing feedback. | Supports player goal clarity and result understanding. | Student manual Local/AI verification recorded |
 | Audio feedback needed centralized integration. | [Audio System Integration and Sound Effects Implementation #87](https://github.com/HPPPK/Game-Programming/issues/87) | AudioManager and audio source references documented. | Supports interaction feedback and presentation polish. | Student manual Local/AI verification recorded |
 
-## How to complete this log before final submission
+## How to extend this log before final submission
 
 1. Open `FinalGame/CanalTD` in Unity `2022.3.62f3`.
 2. Run the Local Mode route:
    `BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local mode -> `GameScene` -> `ResultScene`.
 3. Run the AI Mode route:
    `BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> AI mode -> `GameScene` -> `ResultScene`.
-4. Fill `Manual result` with the real outcome observed in Unity.
-5. Set each status to `Pass`, `Partial`, or `Fail` based only on the observed result.
-6. Record any change made after testing in the final column.
-7. Do not mark tests as passed without checking them in Unity.
+4. Run the Online Mode route with compatible clients where Photon connectivity is available.
+5. Fill any new `Manual result` with the real outcome observed in Unity.
+6. Set each status to `Pass`, `Partial`, or `Fail` based only on the observed result.
+7. Record any change made after testing in the final column.
+8. Do not mark tests as passed without checking them in Unity.
 
 ## Remaining limitations
 
-- Online multiplayer edge cases require broader validation.
+- Online scope limitations remain: room-code multiplayer only, no matchmaking, no reconnect system, no spectator mode, no ranked mode, no database persistence, and no dedicated server.
 - Balance and tutorial pacing may need further polish after more playtesting.
 - Unity batchmode compilation was attempted but blocked by Unity licensing IPC before compilation.
 - Local and AI route checks are recorded above based on student-reported Unity Editor manual verification.
