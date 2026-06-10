@@ -27,6 +27,9 @@
  */
 public static class TurnSourceResolver
 {
+    /// <summary>
+    /// Returns active turn source from the current scene or gameplay state.
+    /// </summary>
     public static ITurnSource GetActiveTurnSource(TurnManager fallbackTurnManager = null)
     {
         AIPrototypeTurnManager aiTurnManager = AIPrototypeTurnManager.ActiveInstance;
@@ -44,6 +47,9 @@ public static class TurnSourceResolver
         return TurnManager.Instance;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether AI prototype active is true.
+    /// </summary>
     public static bool IsAIPrototypeActive()
     {
         AIPrototypeTurnManager aiTurnManager = AIPrototypeTurnManager.ActiveInstance;

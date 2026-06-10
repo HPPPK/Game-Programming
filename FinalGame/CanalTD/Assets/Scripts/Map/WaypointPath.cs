@@ -41,6 +41,9 @@ public class WaypointPath : MonoBehaviour
     public string PathId => pathId;
     public int Count => waypoints.Count;
 
+    /// <summary>
+    /// Returns waypoint from the current scene or gameplay state.
+    /// </summary>
     public Transform GetWaypoint(int index)
     {
         if (index < 0 || index >= waypoints.Count)
@@ -51,22 +54,34 @@ public class WaypointPath : MonoBehaviour
         return waypoints[index];
     }
 
+    /// <summary>
+    /// Returns waypoint position from the current scene or gameplay state.
+    /// </summary>
     public Vector3 GetWaypointPosition(int index)
     {
         Transform point = GetWaypoint(index);
         return point != null ? point.position : transform.position;
     }
 
+    /// <summary>
+    /// Returns next path for direction a used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public WaypointPath GetNextPathForDirectionA()
     {
         return nextPathForDirectionA;
     }
 
+    /// <summary>
+    /// Returns next path for direction b used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public WaypointPath GetNextPathForDirectionB()
     {
         return nextPathForDirectionB;
     }
 
+    /// <summary>
+    /// Draws editor-only gizmos that show this object in the Scene view.
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (waypoints == null || waypoints.Count == 0)

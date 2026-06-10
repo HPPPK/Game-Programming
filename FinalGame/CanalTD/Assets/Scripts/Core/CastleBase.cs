@@ -37,6 +37,9 @@ public class CastleBase : MonoBehaviour
     public PlayerStatusPanelUI statusPanel;
     private bool eliminationHandled = false;
 
+    /// <summary>
+    /// Sets up castle base when this scene object starts running.
+    /// </summary>
     void Start()
     {
         currentHP = maxHP;
@@ -45,21 +48,33 @@ public class CastleBase : MonoBehaviour
         Debug.Log(GetDisplayName() + " base ready. HP = " + currentHP);
     }
 
+    /// <summary>
+    /// Returns current HP from the current scene or gameplay state.
+    /// </summary>
     public int GetCurrentHP()
     {
         return currentHP;
     }
 
+    /// <summary>
+    /// Returns max HP from the current scene or gameplay state.
+    /// </summary>
     public int GetMaxHP()
     {
         return maxHP;
     }
 
+    /// <summary>
+    /// Returns owner player ID from the current scene or gameplay state.
+    /// </summary>
     public int GetOwnerPlayerId()
     {
         return ownerResource != null ? ownerResource.playerId : ownerPlayerId;
     }
 
+    /// <summary>
+    /// Handles take damage for this gameplay system.
+    /// </summary>
     public void TakeDamage(int damage)
     {
         if (eliminationHandled || ownerResource != null && ownerResource.isEliminated)
@@ -100,6 +115,9 @@ public class CastleBase : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies online health state to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOnlineHealthState(int syncedCurrentHP)
     {
         currentHP = Mathf.Clamp(syncedCurrentHP, 0, maxHP);
@@ -110,6 +128,9 @@ public class CastleBase : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns display name from the current scene or gameplay state.
+    /// </summary>
     public string GetDisplayName()
     {
         if (ownerResource != null)
@@ -120,6 +141,9 @@ public class CastleBase : MonoBehaviour
         return playerName;
     }
 
+    /// <summary>
+    /// Handles sync player name from owner for this gameplay system.
+    /// </summary>
     public void SyncPlayerNameFromOwner()
     {
         if (ownerResource != null)
@@ -129,6 +153,9 @@ public class CastleBase : MonoBehaviour
     }
 
     // Loads a saved name only when this castle does not have a PlayerResource supplying the display name.
+    /// <summary>
+    /// Loads player name from player prefs from saved settings, room data, or scene references.
+    /// </summary>
     private void LoadPlayerNameFromPlayerPrefs()
     {
         if (ownerResource != null)
@@ -151,6 +178,9 @@ public class CastleBase : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles castle defeat by notifying the game flow that this player lost.
+    /// </summary>
     void OnGameOver()
     {
         if (eliminationHandled)

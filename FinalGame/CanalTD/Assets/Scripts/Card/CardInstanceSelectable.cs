@@ -41,6 +41,9 @@ public class CardInstanceSelectable : MonoBehaviour, IPointerClickHandler
     private Vector2 originalPos;
     private float moveUp;
 
+    /// <summary>
+    /// Handles init for card state, hand state, or targeting.
+    /// </summary>
     public void Init(CardDrawManager m, GameObject prefab, float moveDistance)
     {
         manager = m;
@@ -51,6 +54,9 @@ public class CardInstanceSelectable : MonoBehaviour, IPointerClickHandler
         originalPos = rect.anchoredPosition;
     }
 
+    /// <summary>
+    /// Responds to a UI click and forwards it to the related menu or gameplay action.
+    /// </summary>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (manager != null)
@@ -59,6 +65,9 @@ public class CardInstanceSelectable : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    /// <summary>
+    /// Sets selected and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetSelected(bool selected)
     {
         if (rect == null)
@@ -76,6 +85,9 @@ public class CardInstanceSelectable : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    /// <summary>
+    /// Checks whether select is allowed before enabling that action.
+    /// </summary>
     public bool CanSelect()
     {
         return manager != null && manager.CanSelectCards();

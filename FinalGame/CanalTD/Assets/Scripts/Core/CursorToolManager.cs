@@ -37,31 +37,49 @@ public class CursorToolManager : MonoBehaviour
         get { return isHammerMode; }
     }
 
+    /// <summary>
+    /// Finds and stores cursor tool manager references before scene gameplay begins.
+    /// </summary>
     void Awake()
     {
         Instance = this;
     }
 
+    /// <summary>
+    /// Handles enter hammer mode for UI display, input, or player feedback.
+    /// </summary>
     public void EnterHammerMode()
     {
         SetHammerMode(true);
     }
 
+    /// <summary>
+    /// Handles exit hammer mode for UI display, input, or player feedback.
+    /// </summary>
     public void ExitHammerMode()
     {
         SetHammerMode(false);
     }
 
+    /// <summary>
+    /// Handles toggle hammer mode for UI display, input, or player feedback.
+    /// </summary>
     public void ToggleHammerMode()
     {
         SetHammerMode(!isHammerMode);
     }
 
+    /// <summary>
+    /// Sets hammer mode and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetHammerMode(bool enabled)
     {
         isHammerMode = enabled;
     }
 
+    /// <summary>
+    /// Handles exit tool mode for UI display, input, or player feedback.
+    /// </summary>
     public void ExitToolMode()
     {
         ExitHammerMode();

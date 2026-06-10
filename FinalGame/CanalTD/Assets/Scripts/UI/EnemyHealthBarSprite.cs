@@ -53,6 +53,9 @@ public class EnemyHealthBarSprite : MonoBehaviour
     private Vector3 originalLocalPosition;
     private Coroutine flashCoroutine;
 
+    /// <summary>
+    /// Finds and stores enemy health bar sprite references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (fillTransform != null)
@@ -84,6 +87,9 @@ public class EnemyHealthBarSprite : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets health and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetHealth(int currentHP, int maxHP)
     {
         if (fillTransform == null)
@@ -113,6 +119,9 @@ public class EnemyHealthBarSprite : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Plays damage flash in the current scene context.
+    /// </summary>
     public void PlayDamageFlash()
     {
         if (fillRenderer == null)
@@ -128,9 +137,15 @@ public class EnemyHealthBarSprite : MonoBehaviour
         flashCoroutine = StartCoroutine(DamageFlashRoutine());
     }
 
+    /// <summary>
+    /// Handles damage flash routine for UI display, input, or player feedback.
+    /// </summary>
     private IEnumerator DamageFlashRoutine()
     {
         fillRenderer.color = damageColor;
+        /// <summary>
+        /// Handles wait for seconds for enemy health bar sprite.
+        /// </summary>
         yield return new WaitForSeconds(flashTime);
         fillRenderer.color = normalColor;
     }

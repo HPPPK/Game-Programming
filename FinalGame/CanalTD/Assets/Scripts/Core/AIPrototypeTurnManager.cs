@@ -102,6 +102,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         get { return isHumanTurnWaiting && !isWaveRunning && IsCurrentPlayerHuman; }
     }
 
+    /// <summary>
+    /// Updates turn indicator so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateTurnIndicator(int playerId)
     {
         if (CurrentTurnIndicatorManager.Instance != null)
@@ -111,12 +114,18 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         
     }
 
+    /// <summary>
+    /// Subscribes AI prototype turn manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         ActiveInstance = this;
         Debug.Log("Using AIPrototypeTurnManager as turn source.");
     }
 
+    /// <summary>
+    /// Unsubscribes AI prototype turn manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         if (ActiveInstance == this)
@@ -125,6 +134,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         }
     }
 
+    /// <summary>
+    /// Finds and stores AI prototype turn manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         FindMissingReferences();
@@ -132,6 +144,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         ConnectWaveManager();
     }
 
+    /// <summary>
+    /// Sets up AI prototype turn manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         LoadPlayerTypesFromPrefs();
@@ -148,6 +163,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
     // Rebinds every AI prototype player panel to the real PlayerResource/Castle
     // pair after PlayerPrefs setup has loaded names and player types.
+    /// <summary>
+    /// Handles rebind player status panels for this gameplay system.
+    /// </summary>
     private void RebindPlayerStatusPanels()
     {
         if (playerManager == null || playerManager.players == null)
@@ -219,12 +237,18 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Called by the End Turn button during a human player's turn.
+    /// <summary>
+    /// Responds to on end turn button clicked and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnEndTurnButtonClicked()
     {
         EndHumanTurn();
     }
 
     // Lets external systems remove a player slot mid-match without rewriting the prototype turn loop.
+    /// <summary>
+    /// Responds to player exit and updates the affected gameplay or UI systems.
+    /// </summary>
     public void HandlePlayerExit(int playerId)
     {
         Debug.Log("AIPrototypeTurnManager handling player exit for player " + playerId + ".");
@@ -256,6 +280,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         StartCurrentPlayerTurn();
     }
 
+    /// <summary>
+    /// Handles are all players inactive or eliminated for this gameplay system.
+    /// </summary>
     public bool AreAllPlayersInactiveOrEliminated()
     {
         BuildActivePlayerList();
@@ -263,11 +290,17 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Scene-safe end-turn method for UI buttons in GameScene_AIPrototype.
+    /// <summary>
+    /// Handles end human turn for this gameplay system.
+    /// </summary>
     public void EndHumanTurn()
     {
         EndCurrentTurn();
     }
 
+    /// <summary>
+    /// Handles end current turn for this gameplay system.
+    /// </summary>
     public void EndCurrentTurn()
     {
         if (!isHumanTurnWaiting || isWaveRunning)
@@ -280,6 +313,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Called by WaveManager when all enemies are gone.
+    /// <summary>
+    /// Responds to on wave finished and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnWaveFinished()
     {
         isWaveRunning = false;
@@ -299,6 +335,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Ends the AI prototype match after the final configured wave.
+    /// <summary>
+    /// Handles end game for this gameplay system.
+    /// </summary>
     private void EndGame()
     {
         List<PlayerResultEntry> results = BuildResultEntries();
@@ -316,6 +355,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Builds final ranking data from every non-empty player slot.
+    /// <summary>
+    /// Builds result entries from configured scene objects and runtime state.
+    /// </summary>
     private List<PlayerResultEntry> BuildResultEntries()
     {
         List<PlayerResultEntry> results = new List<PlayerResultEntry>();
@@ -349,6 +391,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Finds the castle linked to a player for final HP display.
+    /// <summary>
+    /// Returns castle for player from the current scene or gameplay state.
+    /// </summary>
     private CastleBase GetCastleForPlayer(PlayerResource player)
     {
         if (player == null)
@@ -381,6 +426,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Sorts active players first, then score, castle HP, money, and playerId.
+    /// <summary>
+    /// Handles sort results by score for this gameplay system.
+    /// </summary>
     private void SortResultsByScore(List<PlayerResultEntry> results)
     {
         results.Sort((a, b) =>
@@ -421,6 +469,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Assigns final ranks. Eliminated players are placed at the bottom.
+    /// <summary>
+    /// Handles assign ranks for this gameplay system.
+    /// </summary>
     private void AssignRanks(List<PlayerResultEntry> results)
     {
         int activeRank = 1;
@@ -440,6 +491,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Finds optional scene references so the prototype can work with minimal Inspector wiring.
+    /// <summary>
+    /// Searches scene objects or cached lists to find missing references.
+    /// </summary>
     private void FindMissingReferences()
     {
         if (playerManager == null) playerManager = FindObjectOfType<PlayerManager>();
@@ -452,6 +506,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Prevents the original GamePhaseManager from also running turns in the AI prototype scene.
+    /// <summary>
+    /// Handles disable legacy phase manager for this gameplay system.
+    /// </summary>
     private void DisableLegacyPhaseManager()
     {
         if (legacyGamePhaseManager != null)
@@ -461,6 +518,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Lets WaveManager report wave completion back to this prototype manager.
+    /// <summary>
+    /// Handles connect wave manager for enemy movement, health, waves, or routing.
+    /// </summary>
     private void ConnectWaveManager()
     {
         if (waveManager == null)
@@ -473,6 +533,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Reads PlayerPrefs created by ModeSelectScene and assigns each PlayerResource a prototype slot type.
+    /// <summary>
+    /// Loads player types from prefs from saved settings, room data, or scene references.
+    /// </summary>
     private void LoadPlayerTypesFromPrefs()
     {
         if (playerManager == null || playerManager.players == null)
@@ -534,6 +597,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Rebuilds the active turn list and skips Empty or eliminated players.
+    /// <summary>
+    /// Builds active player list from configured scene objects and runtime state.
+    /// </summary>
     private void BuildActivePlayerList()
     {
         activePlayers.Clear();
@@ -553,6 +619,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Starts a round from the first active Human or AI player.
+    /// <summary>
+    /// Starts round from first active player and enables its related gameplay flow.
+    /// </summary>
     private void StartRoundFromFirstActivePlayer()
     {
         BuildActivePlayerList();
@@ -570,6 +639,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Starts a human turn or an automated AI turn based on PlayerType.
+    /// <summary>
+    /// Starts current player turn and enables its related gameplay flow.
+    /// </summary>
     private void StartCurrentPlayerTurn()
     {
         if (activePlayers.Count == 0)
@@ -615,22 +687,34 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Runs the full AI turn sequence. Every path ends by advancing the turn.
+    /// <summary>
+    /// Handles run AI turn for this gameplay system.
+    /// </summary>
     private IEnumerator RunAITurn(PlayerResource aiPlayer)
     {
         isHumanTurnWaiting = false;
         AIDifficulty difficulty = GetDifficulty(aiPlayer.playerId);
 
         ShowToast(aiPlayer.GetDisplayName() + " is thinking...");
+        /// <summary>
+        /// Handles wait for seconds for AI prototype turn manager.
+        /// </summary>
         yield return new WaitForSeconds(aiThinkDelay);
 
         TryAIDraw(aiPlayer);
         RefreshAIResourceDisplays(aiPlayer);
+        /// <summary>
+        /// Handles wait for seconds for AI prototype turn manager.
+        /// </summary>
         yield return new WaitForSeconds(aiActionMessageDelay);
 
         bool usedCard = TryAIUseCard(aiPlayer, difficulty);
 
         if (usedCard)
         {
+            /// <summary>
+            /// Handles wait for seconds for AI prototype turn manager.
+            /// </summary>
             yield return new WaitForSeconds(aiActionMessageDelay);
         }
 
@@ -638,6 +722,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         if (upgradedTower)
         {
+            /// <summary>
+            /// Handles wait for seconds for AI prototype turn manager.
+            /// </summary>
             yield return new WaitForSeconds(aiActionMessageDelay);
         }
 
@@ -647,29 +734,47 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         if (builtTower)
         {
+            /// <summary>
+            /// Handles wait for seconds for AI prototype turn manager.
+            /// </summary>
             yield return new WaitForSeconds(aiActionMessageDelay);
         }
         else if (TryAIBuyOneLand(aiPlayer, difficulty))
         {
+            /// <summary>
+            /// Handles wait for seconds for AI prototype turn manager.
+            /// </summary>
             yield return new WaitForSeconds(aiActionMessageDelay);
             // Tower construction has higher priority than land banking, so try to build immediately after buying.
             if (TryAIBuildOneTower(aiPlayer, difficulty))
             {
+                /// <summary>
+                /// Handles wait for seconds for AI prototype turn manager.
+                /// </summary>
                 yield return new WaitForSeconds(aiActionMessageDelay);
             }
         }
 
         if (!usedCard && TryAIDiscardWeakCard(aiPlayer, difficulty))
         {
+            /// <summary>
+            /// Handles wait for seconds for AI prototype turn manager.
+            /// </summary>
             yield return new WaitForSeconds(aiActionMessageDelay);
         }
 
+        /// <summary>
+        /// Handles wait for seconds for AI prototype turn manager.
+        /// </summary>
         yield return new WaitForSeconds(aiTurnEndDelay);
         Debug.Log("AI turn ended: Player " + aiPlayer.playerId);
         AdvanceToNextTurnOrWave();
     }
 
     // Returns the active PlayerResource using the prototype source of truth.
+    /// <summary>
+    /// Returns current player resource from the current scene or gameplay state.
+    /// </summary>
     private PlayerResource GetCurrentPlayerResource()
     {
         if (playerManager == null)
@@ -681,6 +786,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Uses the normal draw limit when possible, so AI follows the same turn rules.
+    /// <summary>
+    /// Attempts to AI draw and returns false if rules, resources, or references block it.
+    /// </summary>
     private void TryAIDraw(PlayerResource aiPlayer)
     {
         if (cardDrawManager == null)
@@ -693,6 +801,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Chooses one card from hand based on difficulty and simple board conditions.
+    /// <summary>
+    /// Attempts to AI use card and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIUseCard(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         if (turnManager == null || turnManager.IsCardActionsBlockedThisTurn())
@@ -744,6 +855,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Discards clearly weak cards only when the hand is full and the AI did not find a useful play.
+    /// <summary>
+    /// Attempts to AI discard weak card and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIDiscardWeakCard(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         if (turnManager == null || turnManager.IsCardActionsBlockedThisTurn())
@@ -795,6 +909,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Returns a rough priority so strategic cards are considered before weak or unusable cards.
+    /// <summary>
+    /// Returns card priority used by card handling or target selection.
+    /// </summary>
     private int GetCardPriority(GameObject cardPrefab, PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         string cardName = NormalizeCardName(cardPrefab.name);
@@ -813,6 +930,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Applies supported AI card effects directly, without using visual targeting UI.
+    /// <summary>
+    /// Attempts to resolve AI card and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryResolveAICard(PlayerResource aiPlayer, GameObject cardPrefab, AIDifficulty difficulty)
     {
         if (turnManager == null || !turnManager.CanPlayCard())
@@ -839,10 +959,16 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         }
 
         bool gateActionCard = cardName.Contains("lockgate") || cardName.Contains("opengate");
+        /// <summary>
+        /// Handles consume AI card after resolution for AI prototype turn manager.
+        /// </summary>
         return ConsumeAICardAfterResolution(aiPlayer, cardPrefab, !gateActionCard);
     }
 
     // Power Boost targets the best owned tower and boosts it for the next wave.
+    /// <summary>
+    /// Attempts to AI power boost and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIPowerBoost(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         TowerTargetingManager towerTargetingManager = FindObjectOfType<TowerTargetingManager>();
@@ -889,6 +1015,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Freeze Claim blocks a valuable claimable tile until the AI's next turn.
+    /// <summary>
+    /// Attempts to AI freeze claim and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIFreezeClaim(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         TileTargetingManager tileTargetingManager = FindObjectOfType<TileTargetingManager>();
@@ -916,6 +1045,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Take Over buys an opponent land at the card discount and removes its tower.
+    /// <summary>
+    /// Attempts to AI take over and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAITakeOver(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         TileTargetingManager tileTargetingManager = FindObjectOfType<TileTargetingManager>();
@@ -943,6 +1075,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Shock Trap places a trap on a strong route node so it can trigger in a future wave.
+    /// <summary>
+    /// Attempts to AI shock trap and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIShockTrap(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         ShockTrapTargetingManager shockTrapTargetingManager = FindObjectOfType<ShockTrapTargetingManager>();
@@ -969,6 +1104,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Disrupt targets a valid opponent while avoiding repeated focus on the same player.
+    /// <summary>
+    /// Attempts to AI disrupt and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIDisrupt(PlayerResource aiPlayer)
     {
         PlayerTargetingManager playerTargetingManager = FindObjectOfType<PlayerTargetingManager>();
@@ -996,6 +1134,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Steal Card takes one random card from the opponent with the largest hand.
+    /// <summary>
+    /// Attempts to AI steal card and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIStealCard(PlayerResource aiPlayer)
     {
         PlayerTargetingManager playerTargetingManager = FindObjectOfType<PlayerTargetingManager>();
@@ -1024,6 +1165,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Trade Hands swaps with a target only when the AI has fewer cards.
+    /// <summary>
+    /// Attempts to AI trade hands and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAITradeHands(PlayerResource aiPlayer)
     {
         PlayerTargetingManager playerTargetingManager = FindObjectOfType<PlayerTargetingManager>();
@@ -1051,6 +1195,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Gate changes are card-only. AI uses this only after resolving an actual Open Gate or Lock Gate card.
+    /// <summary>
+    /// Attempts to AI gate card and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIGateCard(PlayerResource aiPlayer, AIDifficulty difficulty, GateActionType actionType)
     {
         List<GateFrameAnimation> validGates = GetValidAIGateTargets(aiPlayer, actionType);
@@ -1087,11 +1234,17 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    /// <summary>
+    /// Checks whether valid AI gate target is present before the code depends on it.
+    /// </summary>
     private bool HasValidAIGateTarget(PlayerResource aiPlayer, GateActionType actionType)
     {
         return GetValidAIGateTargets(aiPlayer, actionType).Count > 0;
     }
 
+    /// <summary>
+    /// Returns valid AI gate targets used by card handling or target selection.
+    /// </summary>
     private List<GateFrameAnimation> GetValidAIGateTargets(PlayerResource aiPlayer, GateActionType actionType)
     {
         GateTargetingManager gateTargetingManager = GateTargetingManager.Instance != null
@@ -1108,6 +1261,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Keeps all visible resource panels correct after AI-only hand changes.
+    /// <summary>
+    /// Refreshes AI resource displays from the latest gameplay data.
+    /// </summary>
     private void RefreshAIResourceDisplays(params PlayerResource[] changedPlayers)
     {
         if (changedPlayers != null)
@@ -1143,6 +1299,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
     // AI buys one affordable unowned claimable land, scored by difficulty.
     // It reserves tower gold whenever possible because building towers is higher priority than buying land.
+    /// <summary>
+    /// Attempts to AI buy one land and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIBuyOneLand(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         if (buildTowerManager == null)
@@ -1183,6 +1342,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // AI upgrades a strong owned tower before buying more land. Higher difficulty upgrades more deliberately.
+    /// <summary>
+    /// Attempts to AI upgrade one tower and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIUpgradeOneTower(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         if (buildTowerManager == null)
@@ -1244,6 +1406,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // AI builds one tower on an owned active empty tile using the prefab for its playerId.
+    /// <summary>
+    /// Attempts to AI build one tower and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIBuildOneTower(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         if (buildTowerManager != null && GetAffordableTowerTypes(aiPlayer.playerId, aiPlayer.money).Count == 0)
@@ -1289,9 +1454,15 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             return built;
         }
 
+        /// <summary>
+        /// Attempts to AI build one tower legacy and reports whether it succeeded.
+        /// </summary>
         return TryAIBuildOneTowerLegacy(aiPlayer, bestArea);
     }
 
+    /// <summary>
+    /// Handles choose tower type for area for land ownership, tower actions, or build UI.
+    /// </summary>
     private TowerType ChooseTowerTypeForArea(TowerBuildArea area, PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         List<TowerType> affordableTypes = GetAffordableTowerTypes(aiPlayer.playerId, aiPlayer.money);
@@ -1303,6 +1474,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
 
         if (difficulty == AIDifficulty.Easy)
         {
+            /// <summary>
+            /// Handles choose easy tower type for AI prototype turn manager.
+            /// </summary>
             return ChooseEasyTowerType(affordableTypes);
         }
 
@@ -1323,6 +1497,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return bestType;
     }
 
+    /// <summary>
+    /// Handles choose easy tower type for land ownership, tower actions, or build UI.
+    /// </summary>
     private TowerType ChooseEasyTowerType(List<TowerType> affordableTypes)
     {
         if (affordableTypes == null || affordableTypes.Count == 0)
@@ -1355,6 +1532,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return affordableTypes[Random.Range(0, affordableTypes.Count)];
     }
 
+    /// <summary>
+    /// Returns affordable tower types used by land, tower, cost, or build decisions.
+    /// </summary>
     private List<TowerType> GetAffordableTowerTypes(int playerId, int gold)
     {
         List<TowerType> affordableTypes = new List<TowerType>();
@@ -1389,6 +1569,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return affordableTypes;
     }
 
+    /// <summary>
+    /// Returns minimum affordable tower cost used by land, tower, cost, or build decisions.
+    /// </summary>
     private int GetMinimumAffordableTowerCost(int playerId)
     {
         if (buildTowerManager == null)
@@ -1414,6 +1597,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return minCost == int.MaxValue ? cannonTowerCost : minCost;
     }
 
+    /// <summary>
+    /// Handles score tower type for area for land ownership, tower actions, or build UI.
+    /// </summary>
     private float ScoreTowerTypeForArea(TowerType towerType, TowerBuildArea area, AIDifficulty difficulty, int playerId)
     {
         float routeDistance = DistanceToNearestRouteNode(area != null ? area.transform.position : Vector3.zero);
@@ -1455,6 +1641,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return score;
     }
 
+    /// <summary>
+    /// Handles count owned towers of type for land ownership, tower actions, or build UI.
+    /// </summary>
     private int CountOwnedTowersOfType(TowerType towerType, int playerId)
     {
         int count = 0;
@@ -1472,6 +1661,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return count;
     }
 
+    /// <summary>
+    /// Handles choose tower upgrade area for land ownership, tower actions, or build UI.
+    /// </summary>
     private TowerBuildArea ChooseTowerUpgradeArea(List<TowerBuildArea> candidates, AIDifficulty difficulty)
     {
         if (candidates == null || candidates.Count == 0)
@@ -1501,6 +1693,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return bestArea;
     }
 
+    /// <summary>
+    /// Handles score tower for upgrade for land ownership, tower actions, or build UI.
+    /// </summary>
     private float ScoreTowerForUpgrade(TowerBuildArea area, AIDifficulty difficulty)
     {
         TowerStats stats = GetTowerStatsFromArea(area);
@@ -1533,6 +1728,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return score;
     }
 
+    /// <summary>
+    /// Returns tower stats from area used by land, tower, cost, or build decisions.
+    /// </summary>
     private TowerStats GetTowerStatsFromArea(TowerBuildArea area)
     {
         if (area == null || area.currentTower == null)
@@ -1544,6 +1742,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return stats != null ? stats : area.currentTower.GetComponentInChildren<TowerStats>();
     }
 
+    /// <summary>
+    /// Attempts to AI build one tower legacy and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAIBuildOneTowerLegacy(PlayerResource aiPlayer, TowerBuildArea bestArea)
     {
         GameObject towerPrefab = GetTowerPrefabForPlayerId(aiPlayer.playerId);
@@ -1577,6 +1778,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    /// <summary>
+    /// Consumes AI card after resolution and records that the player has used that action.
+    /// </summary>
     private bool ConsumeAICardAfterResolution(PlayerResource aiPlayer, GameObject cardPrefab, bool consumePlayAction)
     {
         if (cardDrawManager == null || aiPlayer == null || cardPrefab == null)
@@ -1595,6 +1799,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Checks whether the AI has an existing valid place to build before spending gold on more land.
+    /// <summary>
+    /// Checks whether any buildable tower area is present before the code depends on it.
+    /// </summary>
     private bool HasAnyBuildableTowerArea(int playerId)
     {
         foreach (TowerBuildArea area in FindObjectsOfType<TowerBuildArea>())
@@ -1612,8 +1819,14 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Chooses a land/tower area with random, medium, or stronger heuristic behavior.
+    /// <summary>
+    /// Handles choose build area for land ownership, tower actions, or build UI.
+    /// </summary>
     private TowerBuildArea ChooseBuildArea(List<TowerBuildArea> candidates, AIDifficulty difficulty, int aiGold, bool buyingLand)
     {
+        /// <summary>
+        /// Handles choose build area for AI prototype turn manager.
+        /// </summary>
         return ChooseBuildArea(candidates, difficulty, aiGold, buyingLand, null);
     }
 
@@ -1665,6 +1878,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Scores a build area using route proximity, linked gates, center control, and occupancy potential.
+    /// <summary>
+    /// Handles score build area for land ownership, tower actions, or build UI.
+    /// </summary>
     private float ScoreBuildArea(TowerBuildArea area, AIDifficulty difficulty)
     {
         if (area == null)
@@ -1692,6 +1908,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Scores any map position with route and center heuristics.
+    /// <summary>
+    /// Handles score world position for this gameplay system.
+    /// </summary>
     private float ScoreWorldPosition(Vector3 position, AIDifficulty difficulty)
     {
         float score = Mathf.Max(0f, 30f - DistanceToNearestRouteNode(position));
@@ -1706,6 +1925,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Finds a strong freeze target: opponent-owned or high-value unowned claimable land.
+    /// <summary>
+    /// Searches scene objects or cached lists to find best freeze target.
+    /// </summary>
     private TowerBuildArea FindBestFreezeTarget(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         List<TowerBuildArea> candidates = new List<TowerBuildArea>();
@@ -1718,10 +1940,16 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             }
         }
 
+        /// <summary>
+        /// Handles choose build area for AI prototype turn manager.
+        /// </summary>
         return ChooseBuildArea(candidates, difficulty, aiPlayer.money, false, aiPlayer);
     }
 
     // Finds an affordable opponent tile worth taking over.
+    /// <summary>
+    /// Searches scene objects or cached lists to find best take over target.
+    /// </summary>
     private TowerBuildArea FindBestTakeOverTarget(PlayerResource aiPlayer, AIDifficulty difficulty)
     {
         List<TowerBuildArea> candidates = new List<TowerBuildArea>();
@@ -1736,10 +1964,16 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
             }
         }
 
+        /// <summary>
+        /// Handles choose build area for AI prototype turn manager.
+        /// </summary>
         return ChooseBuildArea(candidates, difficulty, aiPlayer.money, false, aiPlayer);
     }
 
     // Finds the best route node for a shock trap.
+    /// <summary>
+    /// Searches scene objects or cached lists to find best trap node.
+    /// </summary>
     private PathNode FindBestTrapNode(AIDifficulty difficulty)
     {
         PathNode[] nodes = routeNodesParent != null
@@ -1770,6 +2004,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Finds a disrupt target by score while spreading harmful card pressure across players.
+    /// <summary>
+    /// Searches scene objects or cached lists to find balanced disrupt target.
+    /// </summary>
     private PlayerResource FindBalancedDisruptTarget(PlayerResource aiPlayer)
     {
         return FindBalancedOpponentTarget(
@@ -1780,8 +2017,14 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Finds the opponent with the highest score.
+    /// <summary>
+    /// Returns leading opponent from the current scene or gameplay state.
+    /// </summary>
     private PlayerResource GetLeadingOpponent(PlayerResource aiPlayer)
     {
+        /// <summary>
+        /// Handles find balanced opponent target for AI prototype turn manager.
+        /// </summary>
         return FindBalancedOpponentTarget(aiPlayer, player => true, player => player.score);
     }
 
@@ -1822,6 +2065,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Finds the opponent with the most cards for Steal Card.
+    /// <summary>
+    /// Searches scene objects or cached lists to find player with most cards.
+    /// </summary>
     private PlayerResource FindPlayerWithMostCards(PlayerResource aiPlayer)
     {
         return FindBalancedOpponentTarget(
@@ -1832,6 +2078,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Finds a trade target only if the AI receives a larger hand.
+    /// <summary>
+    /// Searches scene objects or cached lists to find trade hands target.
+    /// </summary>
     private PlayerResource FindTradeHandsTarget(PlayerResource aiPlayer)
     {
         int aiCards = aiPlayer.GetHandCardCount();
@@ -1861,6 +2110,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Checks whether AI has at least one tower.
+    /// <summary>
+    /// Checks whether owned tower is present before the code depends on it.
+    /// </summary>
     private bool HasOwnedTower(int playerId)
     {
         foreach (CannonTower tower in FindObjectsOfType<CannonTower>())
@@ -1875,12 +2127,18 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Checks whether Take Over has at least one affordable target.
+    /// <summary>
+    /// Checks whether affordable take over target is present before the code depends on it.
+    /// </summary>
     private bool HasAffordableTakeOverTarget(PlayerResource aiPlayer)
     {
         return FindBestTakeOverTarget(aiPlayer, GetDifficulty(aiPlayer.playerId)) != null;
     }
 
     // Selects a controllable gate by position score.
+    /// <summary>
+    /// Returns best gate by position from the current scene or gameplay state.
+    /// </summary>
     private GateFrameAnimation GetBestGateByPosition(List<GateFrameAnimation> gates, AIDifficulty difficulty)
     {
         GateFrameAnimation bestGate = gates[0];
@@ -1901,6 +2159,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Uses GateOwnershipManager when available, otherwise allows only unlinked fallback behavior.
+    /// <summary>
+    /// Checks whether AI control gate is allowed before enabling that action.
+    /// </summary>
     private bool CanAIControlGate(int playerId, GateFrameAnimation gate)
     {
         if (gate == null)
@@ -1917,6 +2178,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Distance to closest route node. Lower distance means stronger path control.
+    /// <summary>
+    /// Handles distance to nearest route node for this gameplay system.
+    /// </summary>
     private float DistanceToNearestRouteNode(Vector3 position)
     {
         PathNode[] nodes = FindObjectsOfType<PathNode>();
@@ -1936,6 +2200,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Counts route nodes near a position as a rough high-traffic estimate.
+    /// <summary>
+    /// Handles count route nodes near for this gameplay system.
+    /// </summary>
     private int CountRouteNodesNear(Vector3 position, float radius)
     {
         int count = 0;
@@ -1953,6 +2220,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Counts castles near a position so Hard AI can value defensive/offensive areas.
+    /// <summary>
+    /// Handles count castles near for this gameplay system.
+    /// </summary>
     private int CountCastlesNear(Vector3 position, float radius)
     {
         int count = 0;
@@ -1969,6 +2239,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Tracks harmful card pressure so AI players do not all focus the same target in one round.
+    /// <summary>
+    /// Registers negative card target so later callbacks, lookups, or sync messages can use it.
+    /// </summary>
     private void RegisterNegativeCardTarget(PlayerResource target)
     {
         if (target == null)
@@ -1982,6 +2255,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Tracks owner-directed pressure for harmful land cards when the land has an opponent owner.
+    /// <summary>
+    /// Registers land negative target so later callbacks, lookups, or sync messages can use it.
+    /// </summary>
     private void RegisterLandNegativeTarget(PlayerResource aiPlayer, TowerBuildArea area)
     {
         if (aiPlayer == null || area == null || !area.isOwned || area.ownerPlayerId == aiPlayer.playerId)
@@ -1994,6 +2270,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Returns how many harmful cards have targeted a player this round.
+    /// <summary>
+    /// Returns negative card target count used by card handling or target selection.
+    /// </summary>
     private int GetNegativeCardTargetCount(int playerId)
     {
         int count = negativeCardTargetCountsThisRound.TryGetValue(playerId, out int currentRoundCount) ? currentRoundCount : 0;
@@ -2007,6 +2286,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Publicly announces AI card use so human players can understand what happened.
+    /// <summary>
+    /// Shows AI card announcement with the correct current context.
+    /// </summary>
     private void ShowAICardAnnouncement(PlayerResource actor, string cardName, string targetDescription)
     {
         string actorName = actor != null ? actor.GetDisplayName() : "AI";
@@ -2022,6 +2304,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Reads configured difficulty by playerId with safe fallback.
+    /// <summary>
+    /// Returns difficulty from the current scene or gameplay state.
+    /// </summary>
     private AIDifficulty GetDifficulty(int playerId)
     {
         if (aiDifficultiesByPlayerId == null || playerId < 0 || playerId >= aiDifficultiesByPlayerId.Length)
@@ -2033,6 +2318,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Loads one AI difficulty from the lobby PlayerPrefs and stores it in the per-player difficulty array.
+    /// <summary>
+    /// Loads AI difficulty from player prefs from saved settings, room data, or scene references.
+    /// </summary>
     private void LoadAIDifficultyFromPlayerPrefs(int playerId)
     {
         if (aiDifficultiesByPlayerId == null || playerId < 0 || playerId >= aiDifficultiesByPlayerId.Length)
@@ -2056,6 +2344,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Minimum useful-card score by difficulty. Easy only uses obvious cards; Hard uses tactical cards aggressively.
+    /// <summary>
+    /// Returns minimum card priority to use used by card handling or target selection.
+    /// </summary>
     private int GetMinimumCardPriorityToUse(AIDifficulty difficulty)
     {
         if (difficulty == AIDifficulty.Hard) return 25;
@@ -2063,6 +2354,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         return 60;
     }
 
+    /// <summary>
+    /// Returns card use chance used by card handling or target selection.
+    /// </summary>
     private float GetCardUseChance(AIDifficulty difficulty)
     {
         if (difficulty == AIDifficulty.Hard) return hardCardUseChance;
@@ -2071,6 +2365,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Maximum card score the AI is willing to discard when its hand is full.
+    /// <summary>
+    /// Returns maximum discard priority from the current scene or gameplay state.
+    /// </summary>
     private int GetMaximumDiscardPriority(AIDifficulty difficulty)
     {
         if (difficulty == AIDifficulty.Hard) return 20;
@@ -2079,6 +2376,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Selects tower prefab strictly by playerId so each slot keeps its own color/style.
+    /// <summary>
+    /// Returns tower prefab for player ID used by land, tower, cost, or build decisions.
+    /// </summary>
     private GameObject GetTowerPrefabForPlayerId(int playerId)
     {
         if (towerPrefabsByPlayerId == null ||
@@ -2100,6 +2400,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Removes spaces, underscores, hyphens, and clone suffixes from card prefab names.
+    /// <summary>
+    /// Handles normalize card name for card state, hand state, or targeting.
+    /// </summary>
     private string NormalizeCardName(string cardName)
     {
         if (string.IsNullOrEmpty(cardName))
@@ -2116,6 +2419,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Moves to the next active player, or starts the wave after every active player has acted.
+    /// <summary>
+    /// Advances to next turn or wave to the next turn, wave, player, or tutorial step.
+    /// </summary>
     private void AdvanceToNextTurnOrWave()
     {
         BuildActivePlayerList();
@@ -2137,6 +2443,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Allows a human end-turn click to finish after the current UI frame.
+    /// <summary>
+    /// Advances after short delay to the next turn, wave, player, or tutorial step.
+    /// </summary>
     private IEnumerator AdvanceAfterShortDelay()
     {
         yield return null;
@@ -2144,6 +2453,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Starts the enemy wave and notifies wave-based tower/trap effects.
+    /// <summary>
+    /// Starts wave phase and enables its related gameplay flow.
+    /// </summary>
     private void StartWavePhase()
     {
         isWaveRunning = true;
@@ -2167,6 +2479,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Enables human UI controls during human turns and blocks them during AI/wave automation.
+    /// <summary>
+    /// Sets human controls enabled and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetHumanControlsEnabled(bool enabled)
     {
         if (normalGameplayUI == null)
@@ -2182,6 +2497,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Notifies all towers that a wave started so temporary effects can activate.
+    /// <summary>
+    /// Notifies connected systems that towers wave started occurred.
+    /// </summary>
     private void NotifyTowersWaveStarted()
     {
         foreach (CannonTower tower in FindObjectsOfType<CannonTower>())
@@ -2194,6 +2512,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Notifies all towers that a wave ended so temporary effects can expire.
+    /// <summary>
+    /// Notifies connected systems that towers wave ended occurred.
+    /// </summary>
     private void NotifyTowersWaveEnded()
     {
         foreach (CannonTower tower in FindObjectsOfType<CannonTower>())
@@ -2206,6 +2527,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Notifies all shock traps that enemy waves are active.
+    /// <summary>
+    /// Notifies connected systems that shock traps wave started occurred.
+    /// </summary>
     private void NotifyShockTrapsWaveStarted()
     {
         foreach (ShockTrap trap in FindObjectsOfType<ShockTrap>())
@@ -2218,6 +2542,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Notifies all shock traps that the wave is no longer active.
+    /// <summary>
+    /// Notifies connected systems that shock traps wave ended occurred.
+    /// </summary>
     private void NotifyShockTrapsWaveEnded()
     {
         foreach (ShockTrap trap in FindObjectsOfType<ShockTrap>())
@@ -2230,6 +2557,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Shows a toast through the assigned toast component, global UI, or CardDrawManager warning UI.
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -2258,6 +2588,9 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     }
 
     // Calls common toast method names without requiring a specific ToastMessage class.
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

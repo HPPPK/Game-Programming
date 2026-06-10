@@ -36,11 +36,17 @@ public class UIButtonSoundBinder : MonoBehaviour
 {
     private Button[] buttons;
 
+    /// <summary>
+    /// Sets up UI button sound binder when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         BindAllButtons();
     }
 
+    /// <summary>
+    /// Handles bind all buttons for UI display, input, or player feedback.
+    /// </summary>
     private void BindAllButtons()
     {
         buttons = GetComponentsInChildren<Button>(true);
@@ -57,6 +63,9 @@ public class UIButtonSoundBinder : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Removes UI button sound binder listeners and temporary references before destruction.
+    /// </summary>
     private void OnDestroy()
     {
         if (buttons == null)
@@ -73,6 +82,9 @@ public class UIButtonSoundBinder : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Plays the click sound audio feedback.
+    /// </summary>
     private void PlayClickSound()
     {
         if (AudioManager.Instance != null)

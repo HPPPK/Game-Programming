@@ -40,6 +40,9 @@ public class ResultRowUI : MonoBehaviour
     public TextMeshProUGUI hpText;
     public TextMeshProUGUI moneyText;
 
+    /// <summary>
+    /// Sets data and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetData(PlayerResultEntry entry)
     {
         if (entry == null)

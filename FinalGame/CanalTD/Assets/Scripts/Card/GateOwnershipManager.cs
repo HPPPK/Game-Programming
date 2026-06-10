@@ -48,6 +48,9 @@ public class GateOwnershipManager : MonoBehaviour
     [Header("Fallback")]
     public bool allowUnlinkedGates = false;
 
+    /// <summary>
+    /// Checks whether player control gate is allowed before enabling that action.
+    /// </summary>
     public bool CanPlayerControlGate(int playerId, GameObject gate)
     {
         playerId = GetEffectivePlayerId(playerId);
@@ -77,6 +80,9 @@ public class GateOwnershipManager : MonoBehaviour
         return !foundLinkedArea && allowUnlinkedGates;
     }
 
+    /// <summary>
+    /// Returns gate block reason used by card handling or target selection.
+    /// </summary>
     public string GetGateBlockReason(int playerId, GameObject gate)
     {
         playerId = GetEffectivePlayerId(playerId);
@@ -142,6 +148,9 @@ public class GateOwnershipManager : MonoBehaviour
         return "This gate is not controllable.";
     }
 
+    /// <summary>
+    /// Returns effective player ID used by card handling or target selection.
+    /// </summary>
     private int GetEffectivePlayerId(int fallbackPlayerId)
     {
         if (fallbackPlayerId >= 0)
@@ -157,6 +166,9 @@ public class GateOwnershipManager : MonoBehaviour
         return fallbackPlayerId;
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     public void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -175,6 +187,9 @@ public class GateOwnershipManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

@@ -52,11 +52,17 @@ public class TowerStats : MonoBehaviour
     public float chainRange = 1.5f;
     public TargetPriority targetPriority = TargetPriority.Closest;
 
+    /// <summary>
+    /// Checks whether upgrade is allowed before enabling that action.
+    /// </summary>
     public bool CanUpgrade()
     {
         return level < maxLevel;
     }
 
+    /// <summary>
+    /// Returns upgrade cost used by land, tower, cost, or build decisions.
+    /// </summary>
     public int GetUpgradeCost()
     {
         if (!CanUpgrade())
@@ -77,6 +83,9 @@ public class TowerStats : MonoBehaviour
         return upgradeCostLevel3;
     }
 
+    /// <summary>
+    /// Handles upgrade for land ownership, tower actions, or build UI.
+    /// </summary>
     public bool Upgrade()
     {
         if (!CanUpgrade())
@@ -99,6 +108,9 @@ public class TowerStats : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Returns sell value used by land, tower, cost, or build decisions.
+    /// </summary>
     public int GetSellValue()
     {
         return Mathf.FloorToInt(Mathf.Max(0, totalGoldInvested) * 0.8f);

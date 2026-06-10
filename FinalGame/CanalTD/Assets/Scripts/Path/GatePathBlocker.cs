@@ -37,6 +37,9 @@ public class GatePathBlocker : MonoBehaviour
     public PathNode nodeA;
     public PathNode nodeB;
 
+    /// <summary>
+    /// Handles blocks connection for this gameplay system.
+    /// </summary>
     public bool BlocksConnection(PathNode firstNode, PathNode secondNode)
     {
         if (linkedGate == null || nodeA == null || nodeB == null)
@@ -49,17 +52,29 @@ public class GatePathBlocker : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Handles is same connection for gate path blocker.
+        /// </summary>
         return IsSameConnection(firstNode, secondNode);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether same connection is true.
+    /// </summary>
     private bool IsSameConnection(PathNode firstNode, PathNode secondNode)
     {
         return (firstNode == nodeA && secondNode == nodeB) ||
                (firstNode == nodeB && secondNode == nodeA);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether connection blocked is true.
+    /// </summary>
     public static bool IsConnectionBlocked(PathNode firstNode, PathNode secondNode)
     {
+        /// <summary>
+        /// Handles is connection blocked for gate path blocker.
+        /// </summary>
         return IsConnectionBlocked(firstNode, secondNode, FindObjectsOfType<GatePathBlocker>());
     }
 
@@ -90,6 +105,9 @@ public class GatePathBlocker : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Draws editor-only gizmos that show this object in the Scene view.
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (nodeA == null || nodeB == null)

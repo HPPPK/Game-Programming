@@ -30,5 +30,8 @@ public interface ITurnSource
     int CurrentPlayerId { get; }
     bool IsCurrentPlayerHuman { get; }
     bool CanHumanAct { get; }
+    /// <summary>
+    /// Ends the active turn for this turn source and advances to the next valid state.
+    /// </summary>
     void EndCurrentTurn();
 }

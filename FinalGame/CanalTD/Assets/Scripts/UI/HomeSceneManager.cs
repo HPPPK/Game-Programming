@@ -42,6 +42,9 @@ public class HomeSceneManager : MonoBehaviour
     public GameObject instructionPanel;
     public GameObject settingPanel;
 
+    /// <summary>
+    /// Sets up home scene manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         HidePanelOnStart(instructionPanel, "Instruction panel");
@@ -49,18 +52,27 @@ public class HomeSceneManager : MonoBehaviour
     }
 
     // Loads the scene where the player chooses local, AI, or future online setup.
+    /// <summary>
+    /// Handles open mode select scene for UI display, input, or player feedback.
+    /// </summary>
     public void OpenModeSelectScene()
     {
         SceneManager.LoadScene(modeSelectSceneName);
     }
 
     // Loads the interactive tutorial scene from the Home menu Guide button.
+    /// <summary>
+    /// Handles open guide for UI display, input, or player feedback.
+    /// </summary>
     public void OpenGuide()
     {
         SceneManager.LoadScene(guideSceneName);
     }
 
     // Opens the instruction panel and closes the setting panel so only one popup is visible.
+    /// <summary>
+    /// Handles open instruction for UI display, input, or player feedback.
+    /// </summary>
     public void OpenInstruction()
     {
         if (instructionPanel == null)
@@ -74,6 +86,9 @@ public class HomeSceneManager : MonoBehaviour
     }
 
     // Closes the instruction panel without changing the rest of the menu.
+    /// <summary>
+    /// Handles close instruction for UI display, input, or player feedback.
+    /// </summary>
     public void CloseInstruction()
     {
         if (instructionPanel == null)
@@ -86,6 +101,9 @@ public class HomeSceneManager : MonoBehaviour
     }
 
     // Opens the setting panel and closes the instruction panel so panels do not overlap.
+    /// <summary>
+    /// Handles open setting for UI display, input, or player feedback.
+    /// </summary>
     public void OpenSetting()
     {
         if (settingPanel == null)
@@ -99,6 +117,9 @@ public class HomeSceneManager : MonoBehaviour
     }
 
     // Closes the setting panel without changing the rest of the menu.
+    /// <summary>
+    /// Handles close setting for UI display, input, or player feedback.
+    /// </summary>
     public void CloseSetting()
     {
         if (settingPanel == null)
@@ -111,6 +132,9 @@ public class HomeSceneManager : MonoBehaviour
     }
 
     // Quits the game. In the Unity Editor this only logs a message.
+    /// <summary>
+    /// Handles quit game for UI display, input, or player feedback.
+    /// </summary>
     public void QuitGame()
     {
         Debug.Log("QuitGame called. Application will quit in a build.");
@@ -118,24 +142,36 @@ public class HomeSceneManager : MonoBehaviour
     }
 
     // Kept for older button references; New Game now opens mode selection.
+    /// <summary>
+    /// Starts new game and enables its related gameplay flow.
+    /// </summary>
     public void StartNewGame()
     {
         OpenModeSelectScene();
     }
 
     // Kept for older button references that used the previous How To Play method name.
+    /// <summary>
+    /// Handles open how to play for UI display, input, or player feedback.
+    /// </summary>
     public void OpenHowToPlay()
     {
         OpenInstruction();
     }
 
     // Kept for older button references that used the previous How To Play method name.
+    /// <summary>
+    /// Handles close how to play for UI display, input, or player feedback.
+    /// </summary>
     public void CloseHowToPlay()
     {
         CloseInstruction();
     }
 
     // Hides an optional panel when the scene starts and warns if it is missing.
+    /// <summary>
+    /// Hides panel on start and clears temporary visual state.
+    /// </summary>
     private void HidePanelOnStart(GameObject panel, string panelName)
     {
         if (panel == null)
@@ -148,6 +184,9 @@ public class HomeSceneManager : MonoBehaviour
     }
 
     // Safely changes panel visibility from public button methods.
+    /// <summary>
+    /// Sets panel active and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetPanelActive(GameObject panel, bool active, string panelName)
     {
         if (panel == null)

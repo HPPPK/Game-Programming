@@ -64,10 +64,16 @@ public class InstructionBookController : MonoBehaviour
     private int currentPageIndex = 0;
     private bool listenersBound;
 
+    /// <summary>
+    /// Finds and stores instruction book controller references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         BindListenersOnce();
     }
+    /// <summary>
+    /// Sets up instruction book controller when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         // Keep the book hidden until the Instruction button opens it.
@@ -77,12 +83,18 @@ public class InstructionBookController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Removes instruction book controller listeners and temporary references before destruction.
+    /// </summary>
     private void OnDestroy()
     {
         UnbindListeners();
     }
 
     // Button listeners are registered once so UI buttons can work without extra wrapper scripts.
+    /// <summary>
+    /// Handles bind listeners once for UI display, input, or player feedback.
+    /// </summary>
     private void BindListenersOnce()
     {
         if (listenersBound)
@@ -112,6 +124,9 @@ public class InstructionBookController : MonoBehaviour
     }
 
     // Remove listeners to avoid duplicate calls if the object is recreated.
+    /// <summary>
+    /// Handles unbind listeners for UI display, input, or player feedback.
+    /// </summary>
     private void UnbindListeners()
     {
         if (!listenersBound)
@@ -138,12 +153,18 @@ public class InstructionBookController : MonoBehaviour
     }
 
     // Returns whether the instruction book panel is currently open.
+    /// <summary>
+    /// Checks the current state to decide whether open is true.
+    /// </summary>
     public bool IsOpen()
     {
         return instructionPanel != null && instructionPanel.activeSelf;
     }
 
     // Opens the instruction book and always starts from the first page.
+    /// <summary>
+    /// Handles open book for UI display, input, or player feedback.
+    /// </summary>
     public void OpenBook()
     {
         if (instructionPanel == null)
@@ -157,6 +178,9 @@ public class InstructionBookController : MonoBehaviour
     }
 
     // Closes the instruction book popup.
+    /// <summary>
+    /// Handles close book for UI display, input, or player feedback.
+    /// </summary>
     public void CloseBook()
     {
         if (instructionPanel == null)
@@ -169,18 +193,27 @@ public class InstructionBookController : MonoBehaviour
     }
 
     // Moves to the next instruction page when one exists.
+    /// <summary>
+    /// Handles next page for UI display, input, or player feedback.
+    /// </summary>
     public void NextPage()
     {
         ShowPage(currentPageIndex + 1);
     }
 
     // Moves to the previous instruction page when one exists.
+    /// <summary>
+    /// Handles previous page for UI display, input, or player feedback.
+    /// </summary>
     public void PreviousPage()
     {
         ShowPage(currentPageIndex - 1);
     }
 
     // Displays the requested page and updates image, text, page count, and button states.
+    /// <summary>
+    /// Shows page with the correct current context.
+    /// </summary>
     public void ShowPage(int index)
     {
         if (pages == null || pages.Length == 0)
@@ -217,6 +250,9 @@ public class InstructionBookController : MonoBehaviour
     }
 
     // Shows readable fallback text instead of throwing errors when no pages are configured.
+    /// <summary>
+    /// Shows empty book warning with the correct current context.
+    /// </summary>
     private void ShowEmptyBookWarning()
     {
         currentPageIndex = 0;
@@ -247,6 +283,9 @@ public class InstructionBookController : MonoBehaviour
     }
 
     // Enables or disables navigation buttons based on the current page.
+    /// <summary>
+    /// Updates button states so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateButtonStates()
     {
         bool hasPages = pages != null && pages.Length > 0;

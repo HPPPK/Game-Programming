@@ -85,6 +85,9 @@ public class PlayerTargetingManager : MonoBehaviour
     private PlayerTargetingMode currentMode = PlayerTargetingMode.None;
     private bool isTargeting = false;
 
+    /// <summary>
+    /// Finds and stores player targeting manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (playerManager == null)
@@ -103,6 +106,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Subscribes player targeting manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         if (confirmButton != null)
@@ -116,6 +122,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Unsubscribes player targeting manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         if (confirmButton != null)
@@ -129,11 +138,17 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up player targeting manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         ExitTargetingMode();
     }
 
+    /// <summary>
+    /// Checks player targeting manager input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!isTargeting)
@@ -147,6 +162,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles begin steal card targeting for card state, hand state, or targeting.
+    /// </summary>
     public bool BeginStealCardTargeting()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.StealCard, null))
@@ -159,9 +177,15 @@ public class PlayerTargetingManager : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Handles begin targeting for player targeting manager.
+        /// </summary>
         return BeginTargeting(PlayerTargetingMode.StealCard, "No player has cards to steal.");
     }
 
+    /// <summary>
+    /// Handles begin trade hands targeting for card state, hand state, or targeting.
+    /// </summary>
     public bool BeginTradeHandsTargeting()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TradeHands, null))
@@ -174,9 +198,15 @@ public class PlayerTargetingManager : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Handles begin targeting for player targeting manager.
+        /// </summary>
         return BeginTargeting(PlayerTargetingMode.TradeHands, "No player available to trade hands.");
     }
 
+    /// <summary>
+    /// Handles begin disrupt targeting for card state, hand state, or targeting.
+    /// </summary>
     public bool BeginDisruptTargeting()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.Disrupt, null))
@@ -189,9 +219,15 @@ public class PlayerTargetingManager : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Handles begin targeting for player targeting manager.
+        /// </summary>
         return BeginTargeting(PlayerTargetingMode.Disrupt, "No player available to disrupt.");
     }
 
+    /// <summary>
+    /// Handles begin targeting for card state, hand state, or targeting.
+    /// </summary>
     private bool BeginTargeting(PlayerTargetingMode mode, string noTargetMessage)
     {
         if (playerManager == null)
@@ -275,6 +311,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Confirms selection and applies the selected action if it is valid.
+    /// </summary>
     public void ConfirmSelection()
     {
         if (!isTargeting)
@@ -307,6 +346,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Confirms steal card and applies the selected action if it is valid.
+    /// </summary>
     private void ConfirmStealCard()
     {
         if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
@@ -339,6 +381,9 @@ public class PlayerTargetingManager : MonoBehaviour
         ResolveStealCard(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
     }
 
+    /// <summary>
+    /// Confirms trade hands and applies the selected action if it is valid.
+    /// </summary>
     private void ConfirmTradeHands()
     {
         if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
@@ -371,6 +416,9 @@ public class PlayerTargetingManager : MonoBehaviour
         ResolveTradeHands(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
     }
 
+    /// <summary>
+    /// Confirms disrupt and applies the selected action if it is valid.
+    /// </summary>
     private void ConfirmDisrupt()
     {
         if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
@@ -403,11 +451,20 @@ public class PlayerTargetingManager : MonoBehaviour
         ResolveDisrupt(GetCurrentPlayerId(), selectedPlayer != null ? selectedPlayer.playerId : -1, true);
     }
 
+    /// <summary>
+    /// Looks up the target for steal card and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolveStealCard(int playerId, int targetPlayerId)
     {
+        /// <summary>
+        /// Handles resolve steal card for player targeting manager.
+        /// </summary>
         return ResolveStealCard(playerId, targetPlayerId, false);
     }
 
+    /// <summary>
+    /// Looks up the target for steal card and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolveStealCard(int playerId, int targetPlayerId, bool consumePendingCard)
     {
         PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
@@ -492,11 +549,20 @@ public class PlayerTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Looks up the target for trade hands and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolveTradeHands(int playerId, int targetPlayerId)
     {
+        /// <summary>
+        /// Handles resolve trade hands for player targeting manager.
+        /// </summary>
         return ResolveTradeHands(playerId, targetPlayerId, false);
     }
 
+    /// <summary>
+    /// Looks up the target for trade hands and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolveTradeHands(int playerId, int targetPlayerId, bool consumePendingCard)
     {
         PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
@@ -569,11 +635,20 @@ public class PlayerTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Looks up the target for disrupt and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolveDisrupt(int playerId, int targetPlayerId)
     {
+        /// <summary>
+        /// Handles resolve disrupt for player targeting manager.
+        /// </summary>
         return ResolveDisrupt(playerId, targetPlayerId, false);
     }
 
+    /// <summary>
+    /// Looks up the target for disrupt and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolveDisrupt(int playerId, int targetPlayerId, bool consumePendingCard)
     {
         PlayerResource tutorialTarget = GetPlayerResource(targetPlayerId);
@@ -627,6 +702,9 @@ public class PlayerTargetingManager : MonoBehaviour
     }
 
     // Shows a public card announcement so every player can see who used a player-targeting card.
+    /// <summary>
+    /// Shows public card toast with the correct current context.
+    /// </summary>
     private void ShowPublicCardToast(PlayerResource actor, string cardName, PlayerResource target)
     {
         string actorName = actor != null ? actor.GetDisplayName() : "Current player";
@@ -634,6 +712,9 @@ public class PlayerTargetingManager : MonoBehaviour
         ShowToast(actorName + " used " + cardName + " on " + targetName + ".");
     }
 
+    /// <summary>
+    /// Checks whether confirm targeting card is allowed before enabling that action.
+    /// </summary>
     private bool CanConfirmTargetingCard()
     {
         if (cardDrawManager == null)
@@ -651,21 +732,33 @@ public class PlayerTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Returns player resource used by card handling or target selection.
+    /// </summary>
     private PlayerResource GetPlayerResource(int playerId)
     {
         return playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
     }
 
+    /// <summary>
+    /// Returns current player ID used by card handling or target selection.
+    /// </summary>
     private int GetCurrentPlayerId()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerId() : -1;
     }
 
+    /// <summary>
+    /// Decides whether should block online action should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldBlockOnlineAction()
     {
         return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
+    /// <summary>
+    /// Handles sync and refresh players for card state, hand state, or targeting.
+    /// </summary>
     private void SyncAndRefreshPlayers(params PlayerResource[] players)
     {
         if (players != null)
@@ -693,6 +786,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes visible hand after player interaction from the latest gameplay data.
+    /// </summary>
     private void RefreshVisibleHandAfterPlayerInteraction()
     {
         if (cardDrawManager != null)
@@ -701,6 +797,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks whether selection is allowed before enabling that action.
+    /// </summary>
     public void CancelSelection()
     {
         if (!isTargeting)
@@ -716,16 +815,25 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether targeting is true.
+    /// </summary>
     public bool IsTargeting()
     {
         return isTargeting;
     }
 
+    /// <summary>
+    /// Handles exit without consuming card for card state, hand state, or targeting.
+    /// </summary>
     public void ExitWithoutConsumingCard()
     {
         ExitTargetingMode();
     }
 
+    /// <summary>
+    /// Attempts to select player at mouse and returns false if rules, resources, or references block it.
+    /// </summary>
     private void TrySelectPlayerAtMouse()
     {
         if (ShouldBlockOnlineAction())
@@ -782,6 +890,9 @@ public class PlayerTargetingManager : MonoBehaviour
         Debug.Log("Selected player: " + selectedPlayer.GetDisplayName());
     }
 
+    /// <summary>
+    /// Returns player under mouse used by card handling or target selection.
+    /// </summary>
     private PlayerResource GetPlayerUnderMouse()
     {
         if (targetCamera == null)
@@ -797,6 +908,9 @@ public class PlayerTargetingManager : MonoBehaviour
         Vector3 mouseScreenPosition = Input.mousePosition;
         float distanceFromCamera = Mathf.Abs(targetCamera.transform.position.z);
         Vector3 worldPosition = targetCamera.ScreenToWorldPoint(
+            /// <summary>
+            /// Handles vector3 for player targeting manager.
+            /// </summary>
             new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, distanceFromCamera)
         );
 
@@ -840,6 +954,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Returns target candidates used by card handling or target selection.
+    /// </summary>
     private List<PlayerResource> GetTargetCandidates(int currentPlayerId)
     {
         List<PlayerResource> candidates = new List<PlayerResource>();
@@ -867,6 +984,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return playerManager != null ? playerManager.GetOtherPlayers(currentPlayerId) : candidates;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether configured castle target is true.
+    /// </summary>
     private bool IsConfiguredCastleTarget(CastleBase castle)
     {
         if (castle == null)
@@ -882,6 +1002,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return playerTargets.Contains(castle);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid steal target is true.
+    /// </summary>
     private bool IsValidStealTarget(PlayerResource player)
     {
         if (player == null || playerManager == null)
@@ -903,6 +1026,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return hand != null && hand.GetCardCount() > 0;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid other player target is true.
+    /// </summary>
     private bool IsValidOtherPlayerTarget(PlayerResource player)
     {
         return player != null &&
@@ -911,26 +1037,41 @@ public class PlayerTargetingManager : MonoBehaviour
             !player.isEliminated;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid target for mode is true.
+    /// </summary>
     private bool IsValidTargetForMode(PlayerResource player, PlayerTargetingMode mode)
     {
         if (mode == PlayerTargetingMode.StealCard)
         {
+            /// <summary>
+            /// Handles is valid steal target for player targeting manager.
+            /// </summary>
             return IsValidStealTarget(player);
         }
 
         if (mode == PlayerTargetingMode.TradeHands)
         {
+            /// <summary>
+            /// Handles is valid other player target for player targeting manager.
+            /// </summary>
             return IsValidOtherPlayerTarget(player);
         }
 
         if (mode == PlayerTargetingMode.Disrupt)
         {
+            /// <summary>
+            /// Handles is valid other player target for player targeting manager.
+            /// </summary>
             return IsValidOtherPlayerTarget(player) && !player.HasPendingDisrupt();
         }
 
         return false;
     }
 
+    /// <summary>
+    /// Returns invalid target message used by card handling or target selection.
+    /// </summary>
     private string GetInvalidTargetMessage(PlayerResource player)
     {
         if (player == null)
@@ -956,6 +1097,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return "Choose another player.";
     }
 
+    /// <summary>
+    /// Returns target renderer used by card handling or target selection.
+    /// </summary>
     private SpriteRenderer GetTargetRenderer(PlayerResource player)
     {
         if (player == null)
@@ -986,6 +1130,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return targetObject.GetComponentInChildren<SpriteRenderer>();
     }
 
+    /// <summary>
+    /// Returns configured castle for player used by card handling or target selection.
+    /// </summary>
     private CastleBase GetConfiguredCastleForPlayer(int playerId)
     {
         if (playerTargets == null)
@@ -1004,6 +1151,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Handles store original visual for card state, hand state, or targeting.
+    /// </summary>
     private void StoreOriginalVisual(SpriteRenderer renderer)
     {
         if (renderer == null)
@@ -1022,6 +1172,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies target visual to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyTargetVisual(SpriteRenderer renderer, Color color, int sortingOrder)
     {
         if (renderer == null)
@@ -1035,6 +1188,9 @@ public class PlayerTargetingManager : MonoBehaviour
         renderer.sortingOrder = sortingOrder;
     }
 
+    /// <summary>
+    /// Sets targeting visuals and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetTargetingVisuals(bool active)
     {
         if (active && BuildTowerManager.Instance != null)
@@ -1082,6 +1238,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets normal gameplay UI enabled and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetNormalGameplayUIEnabled(bool enabled)
     {
         ResolveNormalGameplayUI();
@@ -1095,6 +1254,9 @@ public class PlayerTargetingManager : MonoBehaviour
         normalGameplayUI.blocksRaycasts = enabled;
     }
 
+    /// <summary>
+    /// Sets overlay raycast blocking and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetOverlayRaycastBlocking(bool blocking)
     {
         if (darkOverlay == null)
@@ -1110,11 +1272,20 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over targeting controls is true.
+    /// </summary>
     private bool IsPointerOverTargetingControls()
     {
+        /// <summary>
+        /// Handles is pointer over button for player targeting manager.
+        /// </summary>
         return IsPointerOverButton(confirmButton) || IsPointerOverButton(cancelButton);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over button is true.
+    /// </summary>
     private bool IsPointerOverButton(Button button)
     {
         if (button == null)
@@ -1140,6 +1311,9 @@ public class PlayerTargetingManager : MonoBehaviour
         return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, uiCamera);
     }
 
+    /// <summary>
+    /// Looks up the target for normal gameplay UI and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveNormalGameplayUI()
     {
         if (normalGameplayUI != null)
@@ -1159,6 +1333,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles exit targeting mode for card state, hand state, or targeting.
+    /// </summary>
     private void ExitTargetingMode()
     {
         RestoreTargetVisuals();
@@ -1175,6 +1352,9 @@ public class PlayerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Updates confirm button state so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateConfirmButtonState()
     {
         if (confirmButton == null)
@@ -1191,6 +1371,9 @@ public class PlayerTargetingManager : MonoBehaviour
         confirmButton.interactable = isTargeting && selectedPlayer != null;
     }
 
+    /// <summary>
+    /// Handles restore target visuals for card state, hand state, or targeting.
+    /// </summary>
     private void RestoreTargetVisuals()
     {
         foreach (KeyValuePair<SpriteRenderer, Color> entry in originalColors)
@@ -1215,6 +1398,9 @@ public class PlayerTargetingManager : MonoBehaviour
         originalSortingOrders.Clear();
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -1231,6 +1417,9 @@ public class PlayerTargetingManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

@@ -62,6 +62,9 @@ public class GamePhaseManager : MonoBehaviour
     private Coroutine waveStartCoroutine;
     private PhotonOnlineGameSceneManager photonOnlineGameSceneManager;
 
+    /// <summary>
+    /// Sets up game phase manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         photonOnlineGameSceneManager = FindObjectOfType<PhotonOnlineGameSceneManager>();
@@ -76,16 +79,25 @@ public class GamePhaseManager : MonoBehaviour
         StartPlayerPhase();
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether player phase is true.
+    /// </summary>
     public bool IsPlayerPhase()
     {
         return currentPhase == GamePhase.PlayerPhase;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether wave phase is true.
+    /// </summary>
     public bool IsWavePhase()
     {
         return currentPhase == GamePhase.WavePhase;
     }
 
+    /// <summary>
+    /// Starts player phase and enables its related gameplay flow.
+    /// </summary>
     public void StartPlayerPhase()
     {
         currentPhase = GamePhase.PlayerPhase;
@@ -133,6 +145,9 @@ public class GamePhaseManager : MonoBehaviour
         UpdateTurnIndicator();
     }
 
+    /// <summary>
+    /// Updates turn indicator so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateTurnIndicator()
     {
         if (CurrentTurnIndicatorManager.Instance != null)
@@ -142,6 +157,9 @@ public class GamePhaseManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Starts wave phase and enables its related gameplay flow.
+    /// </summary>
     public void StartWavePhase()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.WaveStarted, null))
@@ -160,6 +178,9 @@ public class GamePhaseManager : MonoBehaviour
         waveStartCoroutine = StartCoroutine(StartWaveAfterIncomingToast());
     }
 
+     /// <summary>
+     /// Starts wave after incoming toast and enables its related gameplay flow.
+     /// </summary>
      private IEnumerator StartWaveAfterIncomingToast()
      {
          BuildTowerManager buildTowerManager = BuildTowerManager.Instance != null
@@ -177,6 +198,9 @@ public class GamePhaseManager : MonoBehaviour
              ShowToast("Wave " + currentWaveIndex + " incoming!");
          }
 
+         /// <summary>
+         /// Handles wait for seconds for game phase manager.
+         /// </summary>
          yield return new WaitForSeconds(waveIncomingDelay);
 
          // Hide turn markers when wave starts
@@ -196,6 +220,9 @@ public class GamePhaseManager : MonoBehaviour
          waveStartCoroutine = null;
      }
 
+    /// <summary>
+    /// Responds to on end turn button clicked and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnEndTurnButtonClicked()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.EndTurnClicked, null))
@@ -245,6 +272,9 @@ public class GamePhaseManager : MonoBehaviour
         StartWavePhase();
     }
 
+    /// <summary>
+    /// Responds to on wave finished and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnWaveFinished()
     {
         NotifyTowersWaveEnded();
@@ -270,6 +300,9 @@ public class GamePhaseManager : MonoBehaviour
         StartPlayerPhase();
     }
 
+    /// <summary>
+    /// Handles end game for this gameplay system.
+    /// </summary>
     private void EndGame()
     {
         List<PlayerResultEntry> results = BuildResultEntries();
@@ -286,6 +319,9 @@ public class GamePhaseManager : MonoBehaviour
         SceneManager.LoadScene(resultSceneName);
     }
 
+    /// <summary>
+    /// Builds result entries from configured scene objects and runtime state.
+    /// </summary>
     private List<PlayerResultEntry> BuildResultEntries()
     {
         List<PlayerResultEntry> results = new List<PlayerResultEntry>();
@@ -319,6 +355,9 @@ public class GamePhaseManager : MonoBehaviour
         return results;
     }
 
+    /// <summary>
+    /// Returns castle for player from the current scene or gameplay state.
+    /// </summary>
     private CastleBase GetCastleForPlayer(PlayerResource player)
     {
         CastleBase castle = player.GetComponent<CastleBase>();
@@ -345,6 +384,9 @@ public class GamePhaseManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Handles sort results by score for this gameplay system.
+    /// </summary>
     private void SortResultsByScore(List<PlayerResultEntry> results)
     {
         results.Sort((a, b) =>
@@ -384,6 +426,9 @@ public class GamePhaseManager : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Handles assign ranks for this gameplay system.
+    /// </summary>
     private void AssignRanks(List<PlayerResultEntry> results)
     {
         int activeRank = 1;
@@ -402,6 +447,9 @@ public class GamePhaseManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -412,6 +460,9 @@ public class GamePhaseManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)
@@ -450,6 +501,9 @@ public class GamePhaseManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Deals initial hands once to players and refreshes their hand state.
+    /// </summary>
     private void DealInitialHandsOnce()
     {
         if (initialHandsDealt)
@@ -467,11 +521,17 @@ public class GamePhaseManager : MonoBehaviour
     }
 
     // Online GameScene bootstrap reuses the same initial hand setup as local/AI.
+    /// <summary>
+    /// Ensures initial hands dealt exists or is initialized before the flow continues.
+    /// </summary>
     public void EnsureInitialHandsDealt()
     {
         DealInitialHandsOnce();
     }
 
+    /// <summary>
+    /// Returns card draw manager used by card handling or target selection.
+    /// </summary>
     private CardDrawManager GetCardDrawManager()
     {
         if (cardDrawManager == null)
@@ -482,6 +542,9 @@ public class GamePhaseManager : MonoBehaviour
         return cardDrawManager;
     }
 
+    /// <summary>
+    /// Activates pending takeover land once its pending condition is satisfied.
+    /// </summary>
     private void ActivatePendingTakeoverLand()
     {
         if (playerManager == null)
@@ -502,6 +565,9 @@ public class GamePhaseManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Notifies connected systems that towers wave started occurred.
+    /// </summary>
     private void NotifyTowersWaveStarted()
     {
         CannonTower[] towers = FindObjectsOfType<CannonTower>();
@@ -515,6 +581,9 @@ public class GamePhaseManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Notifies connected systems that towers wave ended occurred.
+    /// </summary>
     private void NotifyTowersWaveEnded()
     {
         CannonTower[] towers = FindObjectsOfType<CannonTower>();
@@ -528,6 +597,9 @@ public class GamePhaseManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Notifies connected systems that shock traps wave started occurred.
+    /// </summary>
     private void NotifyShockTrapsWaveStarted()
     {
         ShockTrap[] traps = FindObjectsOfType<ShockTrap>();
@@ -541,6 +613,9 @@ public class GamePhaseManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Notifies connected systems that shock traps wave ended occurred.
+    /// </summary>
     private void NotifyShockTrapsWaveEnded()
     {
         ShockTrap[] traps = FindObjectsOfType<ShockTrap>();

@@ -41,6 +41,9 @@ public class BootstrapSceneLoader : MonoBehaviour
     [Header("Loading")]
     public bool loadOnStart = true;
 
+    /// <summary>
+    /// Sets up bootstrap scene loader when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         if (loadOnStart)
@@ -50,6 +53,9 @@ public class BootstrapSceneLoader : MonoBehaviour
     }
 
     // Waits one frame so Awake/Start on GlobalUIRoot can run before changing scenes.
+    /// <summary>
+    /// Loads home after global UI init from saved settings, room data, or scene references.
+    /// </summary>
     private IEnumerator LoadHomeAfterGlobalUIInit()
     {
         yield return null;

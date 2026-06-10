@@ -41,6 +41,9 @@ public class TutorialEnemyDemoSpawner : MonoBehaviour
     private readonly List<GameObject> activeTutorialEnemies = new List<GameObject>();
     private Coroutine trackRoutine;
 
+    /// <summary>
+    /// Spawns tutorial weak enemies into the scene and initializes its runtime state.
+    /// </summary>
     public void SpawnTutorialWeakEnemies(int count)
     {
         ClearTutorialEnemies();
@@ -54,11 +57,17 @@ public class TutorialEnemyDemoSpawner : MonoBehaviour
         StartCoroutine(SpawnRoutine(Mathf.Max(1, count)));
     }
 
+    /// <summary>
+    /// Notifies connected systems that tutorial wave completed occurred.
+    /// </summary>
     public void NotifyTutorialWaveCompleted()
     {
         TutorialManager.Instance?.NotifyTutorialWaveCompleted();
     }
 
+    /// <summary>
+    /// Clears tutorial enemies and removes its temporary gameplay or visual effect.
+    /// </summary>
     public void ClearTutorialEnemies()
     {
         if (trackRoutine != null)
@@ -78,6 +87,9 @@ public class TutorialEnemyDemoSpawner : MonoBehaviour
         activeTutorialEnemies.Clear();
     }
 
+    /// <summary>
+    /// Spawns routine into the scene and initializes its runtime state.
+    /// </summary>
     private IEnumerator SpawnRoutine(int count)
     {
         for (int i = 0; i < count; i++)
@@ -95,6 +107,9 @@ public class TutorialEnemyDemoSpawner : MonoBehaviour
 
             if (spawnIntervalSeconds > 0f)
             {
+                /// <summary>
+                /// Handles wait for seconds for tutorial enemy demo spawner.
+                /// </summary>
                 yield return new WaitForSeconds(spawnIntervalSeconds);
             }
         }
@@ -102,6 +117,9 @@ public class TutorialEnemyDemoSpawner : MonoBehaviour
         trackRoutine = StartCoroutine(TrackWaveCompletionRoutine());
     }
 
+    /// <summary>
+    /// Handles track wave completion routine for enemy movement, health, waves, or routing.
+    /// </summary>
     private IEnumerator TrackWaveCompletionRoutine()
     {
         while (true)

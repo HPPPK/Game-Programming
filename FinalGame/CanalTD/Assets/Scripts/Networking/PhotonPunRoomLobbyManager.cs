@@ -97,6 +97,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     private int privateRoomCreateAttempts;
 #endif
 
+    /// <summary>
+    /// Finds and stores Photon pun room lobby manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (modeSelectSceneManager == null)
@@ -123,6 +126,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Removes Photon pun room lobby manager listeners and temporary references before destruction.
+    /// </summary>
     private void OnDestroy()
     {
         UnbindOptionalButton(ref joinRoomButtonBound, joinRoomButton, OnClickJoinRoom);
@@ -133,12 +139,18 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     }
 
     // Called when OnlineModePanel is opened. The final design auto-enters a private room.
+    /// <summary>
+    /// Responds to on online panel opened and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnOnlinePanelOpened()
     {
         HandleOnlinePanelOpened();
     }
 
     // Called when OnlineModePanel is opened. The final design auto-enters a private room.
+    /// <summary>
+    /// Responds to online panel opened and updates the affected gameplay or UI systems.
+    /// </summary>
     public void HandleOnlinePanelOpened()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -162,6 +174,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     }
 
     // Closing the online panel safely leaves any current room so the friend room does not linger.
+    /// <summary>
+    /// Responds to online panel closed and updates the affected gameplay or UI systems.
+    /// </summary>
     public void HandleOnlinePanelClosed()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -180,6 +195,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Coordinates connect to Photon for Photon synchronization and local scene state.
+    /// </summary>
     public void ConnectToPhoton()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -219,6 +237,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Responds to on click join room and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickJoinRoom()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -249,6 +270,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Coordinates leave room for Photon synchronization and local scene state.
+    /// </summary>
     public void LeaveRoom()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -267,6 +291,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Coordinates toggle ready for Photon synchronization and local scene state.
+    /// </summary>
     public void ToggleReady()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -298,6 +325,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Attempts to start online match and returns false if rules, resources, or references block it.
+    /// </summary>
     public void TryStartOnlineMatch()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -342,11 +372,17 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Responds to on click start match and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickStartMatch()
     {
         TryStartOnlineMatch();
     }
 
+    /// <summary>
+    /// Coordinates bind username listener for Photon synchronization and local scene state.
+    /// </summary>
     private void BindUsernameListener()
     {
         if (modeSelectSceneManager == null ||
@@ -360,6 +396,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         usernameListenerBound = true;
     }
 
+    /// <summary>
+    /// Coordinates unbind username listener for Photon synchronization and local scene state.
+    /// </summary>
     private void UnbindUsernameListener()
     {
         if (modeSelectSceneManager == null ||
@@ -373,6 +412,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         usernameListenerBound = false;
     }
 
+    /// <summary>
+    /// Responds to on online username changed and updates the affected gameplay or UI systems.
+    /// </summary>
     private void OnOnlineUsernameChanged(string _)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -385,6 +427,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Coordinates bind optional button for Photon synchronization and local scene state.
+    /// </summary>
     private void BindOptionalButton(ref bool boundFlag, Button button, UnityEngine.Events.UnityAction action)
     {
         if (button == null || boundFlag)
@@ -402,6 +447,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         boundFlag = true;
     }
 
+    /// <summary>
+    /// Coordinates unbind optional button for Photon synchronization and local scene state.
+    /// </summary>
     private void UnbindOptionalButton(ref bool boundFlag, Button button, UnityEngine.Events.UnityAction action)
     {
         if (button == null || !boundFlag)
@@ -413,6 +461,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         boundFlag = false;
     }
 
+    /// <summary>
+    /// Updates lobby UI state so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateLobbyUIState()
     {
         bool inRoom = IsInPhotonRoom();
@@ -441,6 +492,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets connection status and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetConnectionStatus(string message)
     {
         if (connectionStatusText != null)
@@ -449,6 +503,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows lobby message with the correct current context.
+    /// </summary>
     private void ShowLobbyMessage(string message)
     {
         Debug.Log(message);
@@ -461,6 +518,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         SetConnectionStatus(message);
     }
 
+    /// <summary>
+    /// Shows persistent lobby message with the correct current context.
+    /// </summary>
     private void ShowPersistentLobbyMessage(string message)
     {
         Debug.Log(message);
@@ -474,6 +534,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         SetConnectionStatus(message);
     }
 
+    /// <summary>
+    /// Clears persistent lobby message and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearPersistentLobbyMessage()
     {
         if (modeSelectSceneManager != null)
@@ -482,6 +545,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Clears online lobby UI and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearOnlineLobbyUI()
     {
         if (modeSelectSceneManager != null)
@@ -495,6 +561,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     }
 
 #if PHOTON_UNITY_NETWORKING
+    /// <summary>
+    /// Responds to on connected to master and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnConnectedToMaster()
     {
         Debug.Log("Connected to Master.");
@@ -505,6 +574,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         PhotonNetwork.JoinLobby();
     }
 
+    /// <summary>
+    /// Responds to on joined lobby and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnJoinedLobby()
     {
         ShowLobbyMessage("Connected to Photon");
@@ -512,6 +584,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         ExecutePendingLobbyActionIfReady();
     }
 
+    /// <summary>
+    /// Responds to on create room failed and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
         if (pendingLobbyAction == PendingLobbyAction.AutoCreatePrivateRoom && privateRoomCreateAttempts < 5)
@@ -529,6 +604,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
+    /// <summary>
+    /// Responds to on join room failed and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnJoinRoomFailed(short returnCode, string message)
     {
         Debug.Log(
@@ -548,6 +626,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
+    /// <summary>
+    /// Responds to on disconnected and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("Disconnected with cause: " + cause);
@@ -579,6 +660,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
+    /// <summary>
+    /// Responds to on joined room and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnJoinedRoom()
     {
         IsOnlineRoomFlowActive = true;
@@ -598,6 +682,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
+    /// <summary>
+    /// Responds to on left room and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnLeftRoom()
     {
         if (leaveRoomWhenPanelCloses)
@@ -617,6 +704,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         ShowLobbyMessage("Left room.");
     }
 
+    /// <summary>
+    /// Responds to on player entered room and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         if (PhotonNetwork.IsMasterClient)
@@ -629,6 +719,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         ShowLobbyMessage(GetPhotonPlayerDisplayName(newPlayer) + " joined the room.");
     }
 
+    /// <summary>
+    /// Responds to on player left room and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         if (PhotonNetwork.IsMasterClient)
@@ -641,6 +734,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         ShowLobbyMessage(GetPhotonPlayerDisplayName(otherPlayer) + " left the room.");
     }
 
+    /// <summary>
+    /// Responds to on player properties update and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
         if (PhotonNetwork.IsMasterClient)
@@ -652,6 +748,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         LogLobbyRoomStateDiagnostics("OnPlayerPropertiesUpdate");
     }
 
+    /// <summary>
+    /// Responds to on master client switched and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         if (PhotonNetwork.IsMasterClient)
@@ -664,6 +763,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         ShowLobbyMessage("Host migrated.");
     }
 
+    /// <summary>
+    /// Returns create room failed message from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetCreateRoomFailedMessage(short returnCode, string message)
     {
         string normalizedMessage = string.IsNullOrWhiteSpace(message) ? string.Empty : message.ToLowerInvariant();
@@ -681,6 +783,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return "Create room failed.";
     }
 
+    /// <summary>
+    /// Returns join room failed message from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetJoinRoomFailedMessage(short returnCode, string message)
     {
         string normalizedMessage = string.IsNullOrWhiteSpace(message) ? string.Empty : message.ToLowerInvariant();
@@ -703,6 +808,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return "Join room failed. Check the room code, Photon region, AppId, and game version.";
     }
 
+    /// <summary>
+    /// Returns disconnect message from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetDisconnectMessage(DisconnectCause cause)
     {
         switch (cause)
@@ -719,6 +827,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns Photon player display name from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetPhotonPlayerDisplayName(Player player)
     {
         return GetPlayerStringProperty(
@@ -728,6 +839,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Sends a Photon request for auto create private room so the Master Client can validate it.
+    /// </summary>
     private void RequestAutoCreatePrivateRoom()
     {
         pendingLobbyAction = PendingLobbyAction.AutoCreatePrivateRoom;
@@ -738,6 +852,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         EnsureConnectedAndLobbyReady();
     }
 
+    /// <summary>
+    /// Ensures connected and lobby ready exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureConnectedAndLobbyReady()
     {
         ApplyLocalDisplayName();
@@ -765,6 +882,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         ExecutePendingLobbyActionIfReady();
     }
 
+    /// <summary>
+    /// Coordinates execute pending lobby action if ready for Photon synchronization and local scene state.
+    /// </summary>
     private void ExecutePendingLobbyActionIfReady()
     {
         if (!PhotonNetwork.IsConnected || (!PhotonNetwork.InLobby && !PhotonNetwork.InRoom))
@@ -820,6 +940,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Creates private friend room and configures it for the current scene or interaction.
+    /// </summary>
     private void CreatePrivateFriendRoom(string roomCode)
     {
         isCreatingOrJoiningRoom = true;
@@ -854,6 +977,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
+    /// <summary>
+    /// Clears pending lobby state and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearPendingLobbyState()
     {
         pendingLobbyAction = PendingLobbyAction.None;
@@ -865,6 +991,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
+    /// <summary>
+    /// Applies synchronized local display name to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyLocalDisplayName()
     {
         string displayName = modeSelectSceneManager != null
@@ -887,6 +1016,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         PhotonNetwork.LocalPlayer.SetCustomProperties(updatedProperties);
     }
 
+    /// <summary>
+    /// Applies synchronized Photon connection settings to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyPhotonConnectionSettings()
     {
         string normalizedGameVersion = string.IsNullOrWhiteSpace(gameVersion)
@@ -908,6 +1040,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = normalizedFixedRegion;
     }
 
+    /// <summary>
+    /// Coordinates assign slots authoritatively for Photon synchronization and local scene state.
+    /// </summary>
     private void AssignSlotsAuthoritatively()
     {
         if (!PhotonNetwork.InRoom || !PhotonNetwork.IsMasterClient)
@@ -1000,6 +1135,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         Debug.Log(BuildSlotAssignmentDebugString(sortedPlayers));
     }
 
+    /// <summary>
+    /// Checks whether start match is allowed before enabling that action.
+    /// </summary>
     private bool CanStartMatch()
     {
         List<Player> joinedPlayers = GetSlottedPlayers();
@@ -1022,6 +1160,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether local player ready is true.
+    /// </summary>
     private bool IsLocalPlayerReady()
     {
         if (!PhotonNetwork.InRoom)
@@ -1029,9 +1170,15 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Returns player bool property needed by this gameplay system.
+        /// </summary>
         return GetPlayerBoolProperty(PhotonNetwork.LocalPlayer, PhotonLobbyPropertyKeys.Ready, false);
     }
 
+    /// <summary>
+    /// Returns slotted players from Photon, room data, or the online player cache.
+    /// </summary>
     private List<Player> GetSlottedPlayers()
     {
         List<Player> players = new List<Player>();
@@ -1054,6 +1201,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return players;
     }
 
+    /// <summary>
+    /// Refreshes lobby snapshot from the latest gameplay data.
+    /// </summary>
     private void RefreshLobbySnapshot()
     {
         PlayerSetupData[] snapshot = new PlayerSetupData[maxPlayersPerRoom];
@@ -1117,6 +1267,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         UpdateLobbyUIState();
     }
 
+    /// <summary>
+    /// Writes lobby room state diagnostics details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogLobbyRoomStateDiagnostics(string context)
     {
         if (!PhotonNetwork.InRoom || PhotonNetwork.CurrentRoom == null)
@@ -1184,6 +1337,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Coordinates persist current room snapshot to player prefs for Photon synchronization and local scene state.
+    /// </summary>
     private void PersistCurrentRoomSnapshotToPlayerPrefs()
     {
         PlayerSetupData[] snapshot = new PlayerSetupData[maxPlayersPerRoom];
@@ -1217,6 +1373,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         PersistRoomSnapshotToPlayerPrefs(snapshot, localSlotIndex);
     }
 
+    /// <summary>
+    /// Coordinates persist room snapshot to player prefs for Photon synchronization and local scene state.
+    /// </summary>
     private void PersistRoomSnapshotToPlayerPrefs(PlayerSetupData[] snapshot, int localSlotIndex)
     {
         for (int playerId = 0; playerId < maxPlayersPerRoom; playerId++)
@@ -1244,6 +1403,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    /// <summary>
+    /// Returns current room code from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetCurrentRoomCode()
     {
         if (!PhotonNetwork.InRoom || PhotonNetwork.CurrentRoom == null)
@@ -1265,6 +1427,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return PhotonNetwork.CurrentRoom.Name;
     }
 
+    /// <summary>
+    /// Coordinates normalize room code for Photon synchronization and local scene state.
+    /// </summary>
     private string NormalizeRoomCode(string roomCode)
     {
         if (string.IsNullOrWhiteSpace(roomCode))
@@ -1295,11 +1460,17 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return roomCodeBuilder.ToString();
     }
 
+    /// <summary>
+    /// Coordinates generate short room code for Photon synchronization and local scene state.
+    /// </summary>
     private string GenerateShortRoomCode()
     {
         return Random.Range(1000, 9999).ToString();
     }
 
+    /// <summary>
+    /// Searches scene objects or cached lists to find first free slot.
+    /// </summary>
     private int FindFirstFreeSlot(bool[] occupiedSlots)
     {
         if (occupiedSlots == null)
@@ -1318,6 +1489,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return -1;
     }
 
+    /// <summary>
+    /// Returns player int property from Photon, room data, or the online player cache.
+    /// </summary>
     private int GetPlayerIntProperty(Player player, string key, int fallbackValue)
     {
         if (player == null || player.CustomProperties == null || !player.CustomProperties.ContainsKey(key))
@@ -1350,6 +1524,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return fallbackValue;
     }
 
+    /// <summary>
+    /// Returns player bool property from Photon, room data, or the online player cache.
+    /// </summary>
     private bool GetPlayerBoolProperty(Player player, string key, bool fallbackValue)
     {
         if (player == null || player.CustomProperties == null || !player.CustomProperties.ContainsKey(key))
@@ -1361,6 +1538,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return value is bool boolValue ? boolValue : fallbackValue;
     }
 
+    /// <summary>
+    /// Returns player string property from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetPlayerStringProperty(Player player, string key, string fallbackValue)
     {
         if (player == null || player.CustomProperties == null || !player.CustomProperties.ContainsKey(key))
@@ -1372,6 +1552,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return value is string stringValue ? stringValue : fallbackValue;
     }
 
+    /// <summary>
+    /// Builds slot assignment debug string for Photon messages, room properties, or debug logs.
+    /// </summary>
     private string BuildSlotAssignmentDebugString(List<Player> sortedPlayers)
     {
         StringBuilder builder = new StringBuilder();
@@ -1401,6 +1584,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
         return builder.ToString();
     }
 
+    /// <summary>
+    /// Builds snapshot debug string for Photon messages, room properties, or debug logs.
+    /// </summary>
     private string BuildSnapshotDebugString(PlayerSetupData[] snapshot)
     {
         StringBuilder builder = new StringBuilder();
@@ -1431,6 +1617,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     }
 #endif
 
+    /// <summary>
+    /// Checks the current state to decide whether in Photon room is true.
+    /// </summary>
     private bool IsInPhotonRoom()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -1440,6 +1629,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether Photon master client is true.
+    /// </summary>
     private bool IsPhotonMasterClient()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -1450,6 +1642,9 @@ public class PhotonPunRoomLobbyManager : MonoBehaviour
     }
 
 #if PHOTON_UNITY_NETWORKING
+    /// <summary>
+    /// Writes Photon connection request diagnostics details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogPhotonConnectionRequestDiagnostics(string source)
     {
         PhotonOnlineGameSceneManager[] onlineManagers = Resources.FindObjectsOfTypeAll<PhotonOnlineGameSceneManager>();

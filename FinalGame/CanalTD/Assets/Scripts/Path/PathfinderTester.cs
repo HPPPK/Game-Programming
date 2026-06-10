@@ -34,6 +34,9 @@ public class PathfinderTester : MonoBehaviour
     public PathNode startNode;
     public CastleEndNode[] castleEnds;
 
+    /// <summary>
+    /// Checks pathfinder tester input, timing, animation, or UI state once per frame.
+    /// </summary>
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
@@ -42,6 +45,9 @@ public class PathfinderTester : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Executes the configured debug pathfinding check and prints the result.
+    /// </summary>
     void TestPaths()
     {
         Debug.Log("===== PATHFINDER TEST START =====");

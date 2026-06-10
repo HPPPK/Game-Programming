@@ -41,6 +41,9 @@ public class VisualCursorFollower : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private bool wasHammerMode = false;
 
+    /// <summary>
+    /// Finds and stores visual cursor follower references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         Instance = this;
@@ -56,11 +59,17 @@ public class VisualCursorFollower : MonoBehaviour
         SetNormalCursor();
     }
 
+    /// <summary>
+    /// Subscribes visual cursor follower to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         Cursor.visible = false;
     }
 
+    /// <summary>
+    /// Checks visual cursor follower input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         Cursor.visible = false;
@@ -68,6 +77,9 @@ public class VisualCursorFollower : MonoBehaviour
         FollowMouse();
     }
 
+    /// <summary>
+    /// Handles follow mouse for UI display, input, or player feedback.
+    /// </summary>
     private void FollowMouse()
     {
         if (targetCamera == null)
@@ -91,18 +103,27 @@ public class VisualCursorFollower : MonoBehaviour
         transform.position = worldPosition;
     }
 
+    /// <summary>
+    /// Sets normal cursor and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetNormalCursor()
     {
         SetHammerMode(false);
         ApplyNormalCursorVisual();
     }
 
+    /// <summary>
+    /// Sets hammer cursor and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetHammerCursor()
     {
         SetHammerMode(true);
         ApplyHammerCursorVisual();
     }
 
+    /// <summary>
+    /// Handles toggle hammer cursor for UI display, input, or player feedback.
+    /// </summary>
     public void ToggleHammerCursor()
     {
         bool nextHammerMode = !IsHammerMode();
@@ -118,6 +139,9 @@ public class VisualCursorFollower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether hammer mode is true.
+    /// </summary>
     public bool IsHammerMode()
     {
         if (CursorToolManager.Instance != null)
@@ -128,6 +152,9 @@ public class VisualCursorFollower : MonoBehaviour
         return wasHammerMode;
     }
 
+    /// <summary>
+    /// Applies normal cursor visual to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyNormalCursorVisual()
     {
         wasHammerMode = false;
@@ -138,6 +165,9 @@ public class VisualCursorFollower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies hammer cursor visual to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyHammerCursorVisual()
     {
         wasHammerMode = true;
@@ -148,6 +178,9 @@ public class VisualCursorFollower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets hammer mode and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetHammerMode(bool enabled)
     {
         if (CursorToolManager.Instance != null)
@@ -158,6 +191,9 @@ public class VisualCursorFollower : MonoBehaviour
         wasHammerMode = enabled;
     }
 
+    /// <summary>
+    /// Refreshes cursor sprite from the latest gameplay data.
+    /// </summary>
     private void RefreshCursorSprite()
     {
         bool shouldUseHammer = CursorToolManager.Instance != null
@@ -179,6 +215,9 @@ public class VisualCursorFollower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on application focus and updates the affected gameplay or UI systems.
+    /// </summary>
     private void OnApplicationFocus(bool hasFocus)
     {
         if (hasFocus)
@@ -187,6 +226,9 @@ public class VisualCursorFollower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Unsubscribes visual cursor follower from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         Cursor.visible = false;

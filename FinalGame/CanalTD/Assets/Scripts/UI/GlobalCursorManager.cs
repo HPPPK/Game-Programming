@@ -40,6 +40,9 @@ public class GlobalCursorManager : MonoBehaviour
     public RectTransform cursorImage;
     public Image cursorGraphic;
 
+    /// <summary>
+    /// Finds and stores global cursor manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         // Keep exactly one global cursor object across scene loads.
@@ -59,12 +62,18 @@ public class GlobalCursorManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    /// <summary>
+    /// Sets up global cursor manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         Cursor.visible = false;
         MakeCursorIgnoreRaycasts();
     }
 
+    /// <summary>
+    /// Checks global cursor manager input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         Cursor.visible = false;
@@ -76,6 +85,9 @@ public class GlobalCursorManager : MonoBehaviour
     }
 
     // Ensures the cursor image never blocks buttons, sliders, or other UI clicks.
+    /// <summary>
+    /// Handles make cursor ignore raycasts for UI display, input, or player feedback.
+    /// </summary>
     private void MakeCursorIgnoreRaycasts()
     {
         if (cursorGraphic == null && cursorImage != null)

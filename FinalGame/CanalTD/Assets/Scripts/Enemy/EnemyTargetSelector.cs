@@ -33,6 +33,9 @@ using UnityEngine;
 
 public static class EnemyTargetSelector
 {
+    /// <summary>
+    /// Handles choose target for card state, hand state, or targeting.
+    /// </summary>
     public static CastleEndNode ChooseTarget(PathNode start, CastleEndNode[] castles)
     {
         List<CastleEndNode> reachable = new List<CastleEndNode>();

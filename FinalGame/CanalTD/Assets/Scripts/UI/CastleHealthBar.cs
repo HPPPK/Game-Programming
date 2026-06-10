@@ -55,6 +55,9 @@ public class CastleHealthBar : MonoBehaviour
     private int lastHP;
     private Coroutine damageRoutine;
 
+    /// <summary>
+    /// Sets up castle health bar when this scene object starts running.
+    /// </summary>
     void Start()
     {
         originalFillScale = fill.localScale;
@@ -80,6 +83,9 @@ public class CastleHealthBar : MonoBehaviour
         UpdateBarInstant();
     }
 
+    /// <summary>
+    /// Checks castle health bar input, timing, animation, or UI state once per frame.
+    /// </summary>
     void Update()
     {
         if (castleBase == null || fill == null) return;
@@ -99,6 +105,9 @@ public class CastleHealthBar : MonoBehaviour
         UpdateBarSmooth();
     }
 
+    /// <summary>
+    /// Smoothly animates the castle health bar toward the current HP value.
+    /// </summary>
     void UpdateBarSmooth()
     {
         float ratio = (float)castleBase.currentHP / castleBase.maxHP;
@@ -131,6 +140,9 @@ public class CastleHealthBar : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Immediately sets the castle health bar to the current HP value.
+    /// </summary>
     void UpdateBarInstant()
     {
         if (castleBase == null || fill == null) return;
@@ -153,6 +165,9 @@ public class CastleHealthBar : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Briefly flashes the health bar to show that damage was taken.
+    /// </summary>
     IEnumerator DamageFlashRoutine()
     {
         if (fillRenderer != null)
@@ -162,6 +177,9 @@ public class CastleHealthBar : MonoBehaviour
 
         transform.localScale = originalBarScale * punchScale;
 
+        /// <summary>
+        /// Handles wait for seconds for castle health bar.
+        /// </summary>
         yield return new WaitForSeconds(punchDuration);
 
         float elapsed = 0f;

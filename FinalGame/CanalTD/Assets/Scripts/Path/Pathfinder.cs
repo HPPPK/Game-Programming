@@ -31,6 +31,9 @@ using UnityEngine;
 
 public static class Pathfinder
 {
+    /// <summary>
+    /// Searches scene objects or cached lists to find path.
+    /// </summary>
     public static List<PathNode> FindPath(PathNode startNode, CastleEndNode targetEnd)
     {
         List<List<PathNode>> paths = FindAllPaths(startNode, targetEnd, 80, 300);

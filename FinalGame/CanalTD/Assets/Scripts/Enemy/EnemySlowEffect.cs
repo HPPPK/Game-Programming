@@ -38,6 +38,9 @@ public class EnemySlowEffect : MonoBehaviour
     private float originalSpeed;
     private bool hasOriginalSpeed = false;
 
+    /// <summary>
+    /// Applies slow to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplySlow(float percent, float duration)
     {
         if (duration <= 0f)
@@ -71,8 +74,14 @@ public class EnemySlowEffect : MonoBehaviour
         slowCoroutine = StartCoroutine(RestoreAfterDelay(duration));
     }
 
+    /// <summary>
+    /// Handles restore after delay for enemy movement, health, waves, or routing.
+    /// </summary>
     private IEnumerator RestoreAfterDelay(float duration)
     {
+        /// <summary>
+        /// Handles wait for seconds for enemy slow effect.
+        /// </summary>
         yield return new WaitForSeconds(duration);
 
         if (mover != null && hasOriginalSpeed)

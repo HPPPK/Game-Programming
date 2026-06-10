@@ -81,6 +81,9 @@ public class TutorialHighlightController : MonoBehaviour
     private Image[] borderBarImages;
     private string currentTargetId;
 
+    /// <summary>
+    /// Finds and stores tutorial highlight controller references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         EnsureReferences();
@@ -90,6 +93,9 @@ public class TutorialHighlightController : MonoBehaviour
         HideHighlight();
     }
 
+    /// <summary>
+    /// Keeps tutorial highlight controller visuals aligned after normal frame updates finish.
+    /// </summary>
     private void LateUpdate()
     {
         if (!followTargetEveryFrame || currentTarget == null)
@@ -100,6 +106,9 @@ public class TutorialHighlightController : MonoBehaviour
         UpdateHighlightVisual();
     }
 
+    /// <summary>
+    /// Shows highlight with the correct current context.
+    /// </summary>
     public void ShowHighlight(GameObject target, string targetId = null)
     {
         currentTarget = target;
@@ -107,6 +116,9 @@ public class TutorialHighlightController : MonoBehaviour
         UpdateHighlightVisual();
     }
 
+    /// <summary>
+    /// Hides highlight and clears temporary visual state.
+    /// </summary>
     public void HideHighlight()
     {
         currentTarget = null;
@@ -133,6 +145,9 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Updates highlight visual so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateHighlightVisual()
     {
         EnsureReferences();
@@ -200,6 +215,9 @@ public class TutorialHighlightController : MonoBehaviour
         UpdateArrow(localRect, isUITarget, useWorldSpaceLayout);
     }
 
+    /// <summary>
+    /// Ensures references exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureReferences()
     {
         if (targetCanvas == null)
@@ -217,6 +235,9 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Builds overlay panels from configured scene objects and runtime state.
+    /// </summary>
     private void BuildOverlayPanels()
     {
         if (overlayObject == null)
@@ -268,6 +289,9 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Builds border bars from configured scene objects and runtime state.
+    /// </summary>
     private void BuildBorderBars()
     {
         if (highlightFrame == null)
@@ -319,6 +343,9 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Updates border bars so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateBorderBars(Vector2 localSize, bool isUITarget, bool useWorldSpaceLayout)
     {
         if (borderBars == null || borderBars.Length < 4)
@@ -338,6 +365,9 @@ public class TutorialHighlightController : MonoBehaviour
         SetBar(borderBars[3], new Vector2(halfWidth - thickness * 0.5f, 0f), new Vector2(thickness, localSize.y));
     }
 
+    /// <summary>
+    /// Updates dim panels so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateDimPanels(Rect canvasRect, Rect holeRect)
     {
         if (dimPanels == null || dimPanels.Length < 4)
@@ -361,6 +391,9 @@ public class TutorialHighlightController : MonoBehaviour
         SetPanel(dimPanels[3], new Rect(holeRight, holeBottom, Mathf.Max(0f, canvasRight - holeRight), Mathf.Max(0f, holeTop - holeBottom)));
     }
 
+    /// <summary>
+    /// Updates message panel so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateMessagePanel(Rect targetRect, RectTransform canvasRect, bool isUITarget, bool useWorldSpaceLayout)
     {
         if (messagePanel == null)
@@ -478,6 +511,9 @@ public class TutorialHighlightController : MonoBehaviour
     }
     
 
+    /// <summary>
+    /// Updates arrow so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateArrow(Rect targetRect, bool isUITarget, bool useWorldSpaceLayout)
     {
         if (highlightArrow == null)
@@ -508,6 +544,9 @@ public class TutorialHighlightController : MonoBehaviour
         highlightArrow.localRotation = Quaternion.Euler(0f, 0f, angle);
     }
 
+    /// <summary>
+    /// Handles bring foreground elements to front for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private void BringForegroundElementsToFront()
     {
         if (overlayObject != null)
@@ -559,6 +598,9 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles sanitize world space settings for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private void SanitizeWorldSpaceSettings()
     {
         if (targetCanvas == null || targetCanvas.renderMode != RenderMode.WorldSpace)
@@ -584,6 +626,9 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles clamp panel inside canvas for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private Vector2 ClampPanelInsideCanvas(Rect canvasRect, Vector2 desiredPosition, Vector2 panelSize)
     {
         float halfWidth = panelSize.x * 0.5f;
@@ -591,9 +636,15 @@ public class TutorialHighlightController : MonoBehaviour
 
         float x = Mathf.Clamp(desiredPosition.x, canvasRect.xMin + halfWidth, canvasRect.xMax - halfWidth);
         float y = Mathf.Clamp(desiredPosition.y, canvasRect.yMin + halfHeight, canvasRect.yMax - halfHeight);
+        /// <summary>
+        /// Handles vector2 for tutorial highlight controller.
+        /// </summary>
         return new Vector2(x, y);
     }
 
+    /// <summary>
+    /// Decides whether should place message on right should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldPlaceMessageOnRight()
     {
         switch (currentTargetId)
@@ -621,6 +672,9 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Decides whether should place message on left should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldPlaceMessageOnLeft()
     {
         switch (currentTargetId)
@@ -635,6 +689,9 @@ public class TutorialHighlightController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Decides whether should place message at top left should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldPlaceMessageAtTopLeft(bool isUITarget, bool useWorldSpaceLayout)
     {
         TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
@@ -651,6 +708,9 @@ public class TutorialHighlightController : MonoBehaviour
                (currentTargetId == "PlayButton" || currentTargetId == "EndTurnButton");
     }
 
+    /// <summary>
+    /// Decides whether should use part5 top left message gap should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldUsePart5TopLeftMessageGap()
     {
         TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
@@ -659,6 +719,9 @@ public class TutorialHighlightController : MonoBehaviour
                (currentStep.stepId == "part5_step_1" || currentStep.stepId == "part5_step_2");
     }
 
+    /// <summary>
+    /// Decides whether should place message on left bottom should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldPlaceMessageOnLeftBottom()
     {
         TutorialStep currentStep = TutorialManager.Instance != null ? TutorialManager.Instance.CurrentStep : null;
@@ -668,6 +731,9 @@ public class TutorialHighlightController : MonoBehaviour
                currentTargetId == "TurnIndicator";
     }
 
+    /// <summary>
+    /// Decides whether should place message at right should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldPlaceMessageAtRight(bool isUITarget, bool useWorldSpaceLayout)
     {
         return isUITarget &&
@@ -675,6 +741,9 @@ public class TutorialHighlightController : MonoBehaviour
                (currentTargetId == "TargetingConfirmButton" || currentTargetId == "ConfirmButton");
     }
 
+    /// <summary>
+    /// Decides whether should use exact UI frame should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldUseExactUIFrame(bool isUITarget, bool useWorldSpaceLayout)
     {
         return isUITarget &&
@@ -682,6 +751,9 @@ public class TutorialHighlightController : MonoBehaviour
                (currentTargetId == "SellButton" || currentTargetId == "UpgradeButton");
     }
 
+    /// <summary>
+    /// Decides whether should use land message spacing should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldUseLandMessageSpacing()
     {
         return currentTargetId == "ClaimableLand" ||
@@ -693,6 +765,9 @@ public class TutorialHighlightController : MonoBehaviour
                currentTargetId == "ConfirmButton";
     }
 
+    /// <summary>
+    /// Decides whether should anchor message to radial menu should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldAnchorMessageToRadialMenu()
     {
         return currentTargetId == "ClaimableLand" ||
@@ -703,6 +778,9 @@ public class TutorialHighlightController : MonoBehaviour
                currentTargetId == "ConfirmButton";
     }
 
+    /// <summary>
+    /// Attempts to get radial menu canvas local rect and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryGetRadialMenuCanvasLocalRect(RectTransform canvasRect, out Rect localRect)
     {
         localRect = default;
@@ -737,9 +815,15 @@ public class TutorialHighlightController : MonoBehaviour
 
         Vector3[] corners = new Vector3[4];
         menuRect.GetWorldCorners(corners);
+        /// <summary>
+        /// Attempts to build canvas local rect from world corners and reports whether it succeeded.
+        /// </summary>
         return TryBuildCanvasLocalRectFromWorldCorners(canvasRect, corners, out localRect);
     }
 
+    /// <summary>
+    /// Attempts to get target canvas local rect and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryGetTargetCanvasLocalRect(RectTransform canvasRect, GameObject target, bool isUITarget, out Rect localRect)
     {
         localRect = default;
@@ -766,6 +850,9 @@ public class TutorialHighlightController : MonoBehaviour
 
             Vector3[] corners = new Vector3[4];
             targetRect.GetWorldCorners(corners);
+            /// <summary>
+            /// Attempts to build canvas local rect from world corners and reports whether it succeeded.
+            /// </summary>
             return TryBuildCanvasLocalRectFromWorldCorners(canvasRect, corners, out localRect);
         }
 
@@ -774,9 +861,15 @@ public class TutorialHighlightController : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Attempts to build canvas local rect from world corners and reports whether it succeeded.
+        /// </summary>
         return TryBuildCanvasLocalRectFromWorldCorners(canvasRect, worldCorners, out localRect);
     }
 
+    /// <summary>
+    /// Attempts to get selected card area rect and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryGetSelectedCardAreaRect(RectTransform canvasRect, out Rect localRect)
     {
         localRect = default;
@@ -817,9 +910,15 @@ public class TutorialHighlightController : MonoBehaviour
             mergedCorners[slotCorners.Length + i] = cardCorners[i];
         }
 
+        /// <summary>
+        /// Attempts to build canvas local rect from world corners and reports whether it succeeded.
+        /// </summary>
         return TryBuildCanvasLocalRectFromWorldCorners(canvasRect, mergedCorners, out localRect);
     }
 
+    /// <summary>
+    /// Attempts to build canvas local rect from world corners and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryBuildCanvasLocalRectFromWorldCorners(RectTransform canvasRect, Vector3[] worldCorners, out Rect localRect)
     {
         localRect = default;
@@ -848,6 +947,9 @@ public class TutorialHighlightController : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Attempts to get target world corners and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryGetTargetWorldCorners(GameObject target, out Vector3[] corners)
     {
         corners = null;
@@ -892,6 +994,9 @@ public class TutorialHighlightController : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Handles rect transform to viewport for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private Vector3 RectTransformToViewport(RectTransform canvasRect, Vector2 anchoredPosition)
     {
         if (canvasRect == null)
@@ -904,6 +1009,9 @@ public class TutorialHighlightController : MonoBehaviour
         return cameraToUse != null ? cameraToUse.WorldToViewportPoint(world) : Vector3.zero;
     }
 
+    /// <summary>
+    /// Sets panel and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetPanel(RectTransform panel, Rect rect)
     {
         if (panel == null)
@@ -926,6 +1034,9 @@ public class TutorialHighlightController : MonoBehaviour
         panel.sizeDelta = rect.size;
     }
 
+    /// <summary>
+    /// Sets bar and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetBar(RectTransform bar, Vector2 anchoredPosition, Vector2 size)
     {
         if (bar == null)

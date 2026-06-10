@@ -116,6 +116,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         get { return hasDetachedFromOnlineMatch; }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether online Photon game scene active is true.
+    /// </summary>
     public static bool IsOnlinePhotonGameSceneActive()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -132,6 +135,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether live online game scene context is true.
+    /// </summary>
     public static bool IsLiveOnlineGameSceneContext()
     {
         return SceneManager.GetActiveScene().name == "GameScene" && IsOnlinePhotonGameSceneActive();
@@ -140,12 +146,18 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 #if PHOTON_UNITY_NETWORKING
     // Shared gameplay entry points use this to block local interaction while
     // online turn authority belongs to another player.
+    /// <summary>
+    /// Decides whether should block local gameplay action should happen in the current mode and turn state.
+    /// </summary>
     public static bool ShouldBlockLocalGameplayAction(bool showToast = true)
     {
         return OnlineTurnPermissionManager.ShouldBlockLocalGameplayAction(showToast);
     }
 #endif
 
+    /// <summary>
+    /// Finds and stores Photon online game scene manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (!IsGameSceneObjectRuntime())
@@ -175,6 +187,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         EnsureOnlineWaveCombatSyncManagerExists();
     }
 
+    /// <summary>
+    /// Subscribes Photon online game scene manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         if (!IsGameSceneObjectRuntime())
@@ -187,6 +202,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Unsubscribes Photon online game scene manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         UnregisterPhotonCallbacksIfNeeded();
@@ -197,6 +215,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up Photon online game scene manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         if (!IsGameSceneObjectRuntime())
@@ -217,12 +238,18 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     }
 
 #if PHOTON_UNITY_NETWORKING
+    /// <summary>
+    /// Coordinates bootstrap online game scene next frame for Photon synchronization and local scene state.
+    /// </summary>
     private IEnumerator BootstrapOnlineGameSceneNextFrame()
     {
         yield return null;
         BootstrapOnlineGameScene();
     }
 
+    /// <summary>
+    /// Decides whether should use online mode should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldUseOnlineMode()
     {
         return PhotonNetwork.InRoom &&
@@ -230,6 +257,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             PlayerPrefs.GetString("GameMode", string.Empty) == OnlinePhotonMode;
     }
 
+    /// <summary>
+    /// Coordinates bootstrap online game scene for Photon synchronization and local scene state.
+    /// </summary>
     public void BootstrapOnlineGameScene()
     {
         if (!ShouldUseOnlineMode() || ShouldIgnoreOnlineCallbacks())
@@ -271,11 +301,17 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         bootstrapComplete = true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether local online player is true.
+    /// </summary>
     public bool IsLocalOnlinePlayer(int playerId)
     {
         return IsOnlineModeActive && playerId >= 0 && playerId == LocalPlayerId;
     }
 
+    /// <summary>
+    /// Checks whether live online match session is present before the code depends on it.
+    /// </summary>
     public bool HasLiveOnlineMatchSession()
     {
         return !hasDetachedFromOnlineMatch &&
@@ -285,11 +321,17 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
              (PhotonNetwork.InRoom && !PhotonNetwork.OfflineMode));
     }
 
+    /// <summary>
+    /// Coordinates was online match scene for Photon synchronization and local scene state.
+    /// </summary>
     public bool WasOnlineMatchScene()
     {
         return hasBootstrappedOnlineMatch || isLocalLeavingMatch || hasDetachedFromOnlineMatch;
     }
 
+    /// <summary>
+    /// Sends a Photon request for local exit to home so the Master Client can validate it.
+    /// </summary>
     public void RequestLocalExitToHome()
     {
         if (hasDetachedFromOnlineMatch || isLocalLeavingMatch)
@@ -317,11 +359,17 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
     // Returns whether this local client is allowed to perform gameplay actions
     // during the current synchronized online turn.
+    /// <summary>
+    /// Checks the current state to decide whether local player allowed to act is true.
+    /// </summary>
     public bool IsLocalPlayerAllowedToAct(bool showToast = true)
     {
         return OnlineTurnPermissionManager.CanLocalPlayerAct(showToast);
     }
 
+    /// <summary>
+    /// Coordinates detach from online match state for Photon synchronization and local scene state.
+    /// </summary>
     public void DetachFromOnlineMatchState()
     {
         hasDetachedFromOnlineMatch = true;
@@ -340,6 +388,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         ClearOnlineRuntimePlayerPrefs();
     }
 
+    /// <summary>
+    /// Responds to end turn button clicked and updates the affected gameplay or UI systems.
+    /// </summary>
     public bool HandleEndTurnButtonClicked()
     {
         if (!IsOnlineModeActive || ShouldIgnoreOnlineCallbacks())
@@ -366,6 +417,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Responds to on room properties update and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnRoomPropertiesUpdate(PhotonHashtable propertiesThatChanged)
     {
         if (!IsOnlineModeActive || ShouldIgnoreOnlineCallbacks())
@@ -407,6 +461,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on player entered room and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         if (!IsOnlineModeActive || ShouldIgnoreOnlineCallbacks())
@@ -442,6 +499,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on player left room and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         if (!IsOnlineModeActive || ShouldIgnoreOnlineCallbacks())
@@ -484,6 +544,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on master client switched and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         if (!IsOnlineModeActive || ShouldIgnoreOnlineCallbacks())
@@ -519,6 +582,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on player properties update and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, PhotonHashtable changedProps)
     {
         if (!IsOnlineModeActive || ShouldIgnoreOnlineCallbacks())
@@ -530,6 +596,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         LogOnlineRoomStateDiagnostics("OnPlayerPropertiesUpdate");
     }
 
+    /// <summary>
+    /// Responds to on disconnected and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnDisconnected(DisconnectCause cause)
     {
         if (!IsOnlineModeActive || ShouldIgnoreOnlineCallbacks())
@@ -541,6 +610,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         ShowOnlineToast(GetDisconnectToastMessage(cause));
     }
 
+    /// <summary>
+    /// Responds to on left room and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnLeftRoom()
     {
         Debug.Log("OnLeftRoom");
@@ -555,6 +627,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         SceneManager.LoadScene(homeSceneName);
     }
 
+    /// <summary>
+    /// Responds to on event and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnEvent(EventData photonEvent)
     {
         if (!IsOnlineModeActive || !PhotonNetwork.IsMasterClient || ShouldIgnoreOnlineCallbacks())
@@ -596,6 +671,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         AdvanceTurnAsMaster("Received end turn request from actor " + senderActorNumber);
     }
 
+    /// <summary>
+    /// Caches local Photon identity so later code can use it without scanning the scene again.
+    /// </summary>
     private void CacheLocalPhotonIdentity()
     {
         LocalActorNumber = PhotonNetwork.LocalPlayer != null ? PhotonNetwork.LocalPlayer.ActorNumber : -1;
@@ -610,6 +688,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         Debug.Log("Online local player id = " + LocalPlayerId + ", actor = " + LocalActorNumber + ", slot = " + LocalSlotIndex + ", name = " + LocalPlayerName);
     }
 
+    /// <summary>
+    /// Rebuilds online roster from Photon from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildOnlineRosterFromPhoton()
     {
         if (playerManager == null || playerManager.players == null)
@@ -691,6 +772,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         Debug.Log(BuildActiveOnlinePlayerListLog(photonPlayers));
     }
 
+    /// <summary>
+    /// Writes online room state diagnostics details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogOnlineRoomStateDiagnostics(string context)
     {
         if (PhotonNetwork.CurrentRoom == null)
@@ -743,6 +827,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Builds active online player list log for Photon messages, room properties, or debug logs.
+    /// </summary>
     private string BuildActiveOnlinePlayerListLog(List<Player> photonPlayers)
     {
         StringBuilder builder = new StringBuilder();
@@ -772,6 +859,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         return builder.ToString();
     }
 
+    /// <summary>
+    /// Ensures room turn state initialized exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureRoomTurnStateInitialized()
     {
         if (PhotonNetwork.CurrentRoom == null)
@@ -805,6 +895,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         Debug.Log("Current turn set. playerId=" + firstActivePlayerId + ", round=1");
     }
 
+    /// <summary>
+    /// Ensures current turn targets active player exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureCurrentTurnTargetsActivePlayer()
     {
         int currentTurnPlayerId = GetRoomCurrentTurnPlayerId();
@@ -823,6 +916,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         AdvanceTurnAsMaster("Current turn player left or became inactive");
     }
 
+    /// <summary>
+    /// Advances turn as master to the next turn, wave, player, or tutorial step.
+    /// </summary>
     private void AdvanceTurnAsMaster(string reason)
     {
         if (!PhotonNetwork.IsMasterClient)
@@ -897,6 +993,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         Debug.Log("Turn advanced. reason=" + reason + ", nextPlayerId=" + nextPlayerId + ", round=" + nextRound);
     }
 
+    /// <summary>
+    /// Coordinates begin next online round after wave as master for Photon synchronization and local scene state.
+    /// </summary>
     public void BeginNextOnlineRoundAfterWaveAsMaster(int nextRound)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -924,6 +1023,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Applies synchronized room turn state to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyRoomTurnState(bool forceApply)
     {
         int currentTurnPlayerId = GetRoomCurrentTurnPlayerId();
@@ -998,11 +1100,17 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         Debug.Log("Current turn set. playerId=" + currentTurnPlayerId + ", round=" + currentRound);
     }
 
+    /// <summary>
+    /// Decides whether should ignore online callbacks should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldIgnoreOnlineCallbacks()
     {
         return hasDetachedFromOnlineMatch || isLocalLeavingMatch;
     }
 
+    /// <summary>
+    /// Clears online runtime player prefs and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearOnlineRuntimePlayerPrefs()
     {
         PlayerPrefs.DeleteKey("OnlineLocalPlayerId");
@@ -1011,10 +1119,16 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    /// <summary>
+    /// Returns room current turn player ID from Photon, room data, or the online player cache.
+    /// </summary>
     private int GetRoomCurrentTurnPlayerId()
     {
         if (PhotonNetwork.CurrentRoom == null)
         {
+            /// <summary>
+            /// Returns first active online player ID needed by this gameplay system.
+            /// </summary>
             return GetFirstActiveOnlinePlayerId();
         }
 
@@ -1022,12 +1136,21 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(PhotonLobbyPropertyKeys.CurrentTurnPlayerId))
         {
             object value = PhotonNetwork.CurrentRoom.CustomProperties[PhotonLobbyPropertyKeys.CurrentTurnPlayerId];
+            /// <summary>
+            /// Handles convert to int for Photon online game scene manager.
+            /// </summary>
             return ConvertToInt(value, GetFirstActiveOnlinePlayerId());
         }
 
+        /// <summary>
+        /// Returns first active online player ID needed by this gameplay system.
+        /// </summary>
         return GetFirstActiveOnlinePlayerId();
     }
 
+    /// <summary>
+    /// Returns room current round from Photon, room data, or the online player cache.
+    /// </summary>
     private int GetRoomCurrentRound()
     {
         if (PhotonNetwork.CurrentRoom == null)
@@ -1045,12 +1168,18 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         return 1;
     }
 
+    /// <summary>
+    /// Returns first active online player ID from Photon, room data, or the online player cache.
+    /// </summary>
     private int GetFirstActiveOnlinePlayerId()
     {
         List<int> activePlayerIds = GetActiveOnlinePlayerIds();
         return activePlayerIds.Count > 0 ? activePlayerIds[0] : -1;
     }
 
+    /// <summary>
+    /// Returns active online player IDs from Photon, room data, or the online player cache.
+    /// </summary>
     private List<int> GetActiveOnlinePlayerIds()
     {
         List<int> activePlayerIds = new List<int>();
@@ -1071,11 +1200,20 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         return activePlayerIds;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether player ID active is true.
+    /// </summary>
     private bool IsPlayerIdActive(int playerId)
     {
+        /// <summary>
+        /// Returns active online player IDs needed by this gameplay system.
+        /// </summary>
         return GetActiveOnlinePlayerIds().Contains(playerId);
     }
 
+    /// <summary>
+    /// Returns player ID by actor number from Photon, room data, or the online player cache.
+    /// </summary>
     private int GetPlayerIdByActorNumber(int actorNumber)
     {
         foreach (Player photonPlayer in PhotonNetwork.PlayerList)
@@ -1085,12 +1223,18 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
                 continue;
             }
 
+            /// <summary>
+            /// Returns player int property needed by this gameplay system.
+            /// </summary>
             return GetPlayerIntProperty(photonPlayer, PhotonLobbyPropertyKeys.PlayerId, -1);
         }
 
         return -1;
     }
 
+    /// <summary>
+    /// Converts to int into the expected value type and falls back safely if needed.
+    /// </summary>
     private int ConvertToInt(object value, int fallbackValue)
     {
         if (value is int intValue)
@@ -1116,6 +1260,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         return fallbackValue;
     }
 
+    /// <summary>
+    /// Returns player int property from Photon, room data, or the online player cache.
+    /// </summary>
     private int GetPlayerIntProperty(Player player, string key, int fallbackValue)
     {
         if (player == null || player.CustomProperties == null || !player.CustomProperties.ContainsKey(key))
@@ -1123,9 +1270,15 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             return fallbackValue;
         }
 
+        /// <summary>
+        /// Handles convert to int for Photon online game scene manager.
+        /// </summary>
         return ConvertToInt(player.CustomProperties[key], fallbackValue);
     }
 
+    /// <summary>
+    /// Returns player string property from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetPlayerStringProperty(Player player, string key, string fallbackValue)
     {
         if (player == null || player.CustomProperties == null || !player.CustomProperties.ContainsKey(key))
@@ -1137,6 +1290,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         return value is string stringValue ? stringValue : fallbackValue;
     }
 
+    /// <summary>
+    /// Returns Photon player display name from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetPhotonPlayerDisplayName(Player player)
     {
         return GetPlayerStringProperty(
@@ -1146,6 +1302,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Returns disconnect toast message from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetDisconnectToastMessage(DisconnectCause cause)
     {
         switch (cause)
@@ -1161,6 +1320,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
     }
 #endif
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -1193,11 +1355,17 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Shows online toast with the correct current context.
+    /// </summary>
     public void ShowOnlineToast(string message)
     {
         ShowToast(message);
     }
 
+    /// <summary>
+    /// Returns online turn owner display name from Photon, room data, or the online player cache.
+    /// </summary>
     public string GetOnlineTurnOwnerDisplayName(int playerId)
     {
         if (playerManager != null)
@@ -1208,15 +1376,24 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         return "Player " + playerId;
     }
 
+    /// <summary>
+    /// Returns online player ID by actor number from Photon, room data, or the online player cache.
+    /// </summary>
     public int GetOnlinePlayerIdByActorNumber(int actorNumber)
     {
 #if PHOTON_UNITY_NETWORKING
+        /// <summary>
+        /// Returns player ID by actor number needed by this gameplay system.
+        /// </summary>
         return GetPlayerIdByActorNumber(actorNumber);
 #else
         return -1;
 #endif
     }
 
+    /// <summary>
+    /// Ensures online build sync manager exists exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureOnlineBuildSyncManagerExists()
     {
         if (!IsGameSceneObjectRuntime())
@@ -1240,6 +1417,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         onlineBuildSyncManager = managerObject.AddComponent<PhotonOnlineBuildSyncManager>();
     }
 
+    /// <summary>
+    /// Ensures online card sync manager exists exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureOnlineCardSyncManagerExists()
     {
         if (!CanUseOnlineCardSyncRuntime())
@@ -1263,6 +1443,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         onlineCardSyncManager = managerObject.AddComponent<PhotonOnlineCardSyncManager>();
     }
 
+    /// <summary>
+    /// Ensures online wave combat sync manager exists exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureOnlineWaveCombatSyncManagerExists()
     {
         if (!CanUseOnlineCardSyncRuntime())
@@ -1286,6 +1469,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         onlineWaveCombatSyncManager = managerObject.AddComponent<PhotonOnlineWaveCombatSyncManager>();
     }
 
+    /// <summary>
+    /// Checks whether use online card sync runtime is allowed before enabling that action.
+    /// </summary>
     private bool CanUseOnlineCardSyncRuntime()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -1299,11 +1485,20 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
+        /// <summary>
+        /// Attempts to call toast method and reports whether it succeeded.
+        /// </summary>
         return TryCallToastMethod(toastMessage, message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(MonoBehaviour toastSource, string message)
     {
         if (toastSource == null)
@@ -1342,6 +1537,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Registers Photon callbacks if needed so later callbacks, lookups, or sync messages can use it.
+    /// </summary>
     private void RegisterPhotonCallbacksIfNeeded()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -1356,6 +1554,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Unregisters Photon callbacks if needed so old callbacks or duplicate listeners cannot fire.
+    /// </summary>
     private void UnregisterPhotonCallbacksIfNeeded()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -1370,6 +1571,9 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether game scene object runtime is true.
+    /// </summary>
     private bool IsGameSceneObjectRuntime()
     {
         return SceneManager.GetActiveScene().name == "GameScene";

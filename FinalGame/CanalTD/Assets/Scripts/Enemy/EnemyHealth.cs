@@ -86,6 +86,9 @@ public class EnemyHealth : MonoBehaviour
         get { return isDead; }
     }
 
+    /// <summary>
+    /// Finds and stores enemy health references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         enemyStats = GetComponent<EnemyStats>();
@@ -107,6 +110,9 @@ public class EnemyHealth : MonoBehaviour
         ResolveOptionalAnimator();
     }
 
+    /// <summary>
+    /// Sets up enemy health when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         if (currentHP <= 0)
@@ -121,16 +127,25 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Keeps enemy health visuals aligned after normal frame updates finish.
+    /// </summary>
     private void LateUpdate()
     {
         PositionHealthBarAboveSprite();
     }
 
+    /// <summary>
+    /// Initializes from stats and prepares the references needed before use.
+    /// </summary>
     public void InitializeFromStats(int round)
     {
         InitializeFromStats(round, appliedHpScalePerRound, appliedSpeedScalePerRound);
     }
 
+    /// <summary>
+    /// Initializes from stats and prepares the references needed before use.
+    /// </summary>
     public void InitializeFromStats(int round, float hpScalePerRound, float speedScalePerRound)
     {
         enemyStats = GetComponent<EnemyStats>();
@@ -165,6 +180,9 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Searches scene objects or cached lists to find enemy sprite renderer.
+    /// </summary>
     private SpriteRenderer FindEnemySpriteRenderer()
     {
         SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>(true);
@@ -187,6 +205,9 @@ public class EnemyHealth : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Handles position health bar above sprite for enemy movement, health, waves, or routing.
+    /// </summary>
     private void PositionHealthBarAboveSprite()
     {
         if (!autoPositionHealthBar || healthBar == null || spriteRenderer == null)
@@ -204,6 +225,9 @@ public class EnemyHealth : MonoBehaviour
         healthBar.transform.localPosition = transform.InverseTransformPoint(worldPosition);
     }
 
+    /// <summary>
+    /// Handles take damage for enemy movement, health, waves, or routing.
+    /// </summary>
     public void TakeDamage(int damage, PlayerResource damageOwner)
     {
         if (isDead)
@@ -244,6 +268,9 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies online health state to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOnlineHealthState(int syncedCurrentHP, int syncedMaxHP)
     {
         maxHP = Mathf.Max(1, syncedMaxHP);
@@ -256,6 +283,9 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies online killed state to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOnlineKilledState()
     {
         if (isDead)
@@ -296,6 +326,9 @@ public class EnemyHealth : MonoBehaviour
         StartCoroutine(DestroyAfterDelay());
     }
 
+    /// <summary>
+    /// Handles die for enemy movement, health, waves, or routing.
+    /// </summary>
     private void Die()
     {
         if (isDead)
@@ -355,6 +388,9 @@ public class EnemyHealth : MonoBehaviour
         StartCoroutine(DestroyAfterDelay());
     }
 
+    /// <summary>
+    /// Looks up the target for optional animator and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveOptionalAnimator()
     {
         if (animator != null)
@@ -370,6 +406,9 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Spawns split enemies into the scene and initializes its runtime state.
+    /// </summary>
     private void SpawnSplitEnemies()
     {
         if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
@@ -420,8 +459,14 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles destroy after delay for enemy movement, health, waves, or routing.
+    /// </summary>
     private IEnumerator DestroyAfterDelay()
     {
+        /// <summary>
+        /// Handles wait for seconds for enemy health.
+        /// </summary>
         yield return new WaitForSeconds(destroyDelay);
         Destroy(gameObject);
     }

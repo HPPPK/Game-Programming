@@ -57,17 +57,26 @@ public class PlayerManager : MonoBehaviour
 
     public event System.Action<int> OnCurrentPlayerChanged;
 
+    /// <summary>
+    /// Sets up player manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         ConnectPlayerResources();
         RefreshCurrentPlayerUI();
     }
 
+    /// <summary>
+    /// Returns current player ID from the current scene or gameplay state.
+    /// </summary>
     public int GetCurrentPlayerId()
     {
         return currentPlayerId;
     }
 
+    /// <summary>
+    /// Returns current player resource from the current scene or gameplay state.
+    /// </summary>
     public PlayerResource GetCurrentPlayerResource()
     {
         foreach (PlayerResource player in players)
@@ -81,6 +90,9 @@ public class PlayerManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Returns player display name from the current scene or gameplay state.
+    /// </summary>
     public string GetPlayerDisplayName(int playerId)
     {
         PlayerResource player = GetPlayerResource(playerId);
@@ -93,11 +105,20 @@ public class PlayerManager : MonoBehaviour
         return "Player " + playerId;
     }
 
+    /// <summary>
+    /// Returns current player hand used by card handling or target selection.
+    /// </summary>
     public PlayerHand GetCurrentPlayerHand()
     {
+        /// <summary>
+        /// Returns player hand needed by this gameplay system.
+        /// </summary>
         return GetPlayerHand(currentPlayerId);
     }
 
+    /// <summary>
+    /// Returns player hand used by card handling or target selection.
+    /// </summary>
     public PlayerHand GetPlayerHand(int playerId)
     {
         foreach (PlayerResource player in players)
@@ -119,6 +140,9 @@ public class PlayerManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Returns other players from the current scene or gameplay state.
+    /// </summary>
     public List<PlayerResource> GetOtherPlayers(int currentPlayerId)
     {
         List<PlayerResource> otherPlayers = new List<PlayerResource>();
@@ -139,11 +163,17 @@ public class PlayerManager : MonoBehaviour
         return otherPlayers;
     }
 
+    /// <summary>
+    /// Sets current player and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetCurrentPlayer(int playerId)
     {
         SetCurrentPlayer(playerId, true);
     }
 
+    /// <summary>
+    /// Sets current player and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetCurrentPlayer(int playerId, bool showTurnToast)
     {
         PlayerResource requestedPlayer = GetPlayerResource(playerId);
@@ -170,6 +200,9 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Advances to next player to the next turn, wave, player, or tutorial step.
+    /// </summary>
     public void AdvanceToNextPlayer()
     {
         if (players == null || players.Count == 0)
@@ -205,6 +238,9 @@ public class PlayerManager : MonoBehaviour
         SetCurrentPlayer(currentPlayerId);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether last player is true.
+    /// </summary>
     public bool IsLastPlayer()
     {
         if (players == null || players.Count == 0)
@@ -223,6 +259,9 @@ public class PlayerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Resets to first player for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetToFirstPlayer()
     {
         if (players == null || players.Count == 0)
@@ -243,6 +282,9 @@ public class PlayerManager : MonoBehaviour
         SetCurrentPlayer(0);
     }
 
+    /// <summary>
+    /// Refreshes current player UI from the latest gameplay data.
+    /// </summary>
     public void RefreshCurrentPlayerUI()
     {
         PlayerResource presentNumberPlayer = GetPresentNumberTargetResource();
@@ -255,6 +297,9 @@ public class PlayerManager : MonoBehaviour
         RefreshPlayerUI(currentPlayerId);
     }
 
+    /// <summary>
+    /// Refreshes player UI from the latest gameplay data.
+    /// </summary>
     public void RefreshPlayerUI(int playerId)
     {
         PlayerResource player = GetPlayerResource(playerId);
@@ -279,6 +324,9 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes all player status panels from the latest gameplay data.
+    /// </summary>
     public void RefreshAllPlayerStatusPanels()
     {
         foreach (PlayerResource player in players)
@@ -290,12 +338,18 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether player eliminated is true.
+    /// </summary>
     public bool IsPlayerEliminated(int playerId)
     {
         PlayerResource player = GetPlayerResource(playerId);
         return player != null && player.isEliminated;
     }
 
+    /// <summary>
+    /// Handles eliminate player for this gameplay system.
+    /// </summary>
     public void EliminatePlayer(int playerId)
     {
         PlayerResource player = GetPlayerResource(playerId);
@@ -312,6 +366,9 @@ public class PlayerManager : MonoBehaviour
         ShowToast(player.GetDisplayName() + " has been eliminated.");
     }
 
+    /// <summary>
+    /// Returns visual config from the current scene or gameplay state.
+    /// </summary>
     public PlayerVisualConfig GetVisualConfig(int playerId)
     {
         foreach (PlayerVisualConfig config in playerVisualConfigs)
@@ -325,6 +382,9 @@ public class PlayerManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Returns player color from the current scene or gameplay state.
+    /// </summary>
     public Color GetPlayerColor(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
@@ -333,6 +393,9 @@ public class PlayerManager : MonoBehaviour
 
     // Existing color source for tower prefabs. BuildTowerManager uses this as
     // the fallback for every tower type until type-specific colored prefabs exist.
+    /// <summary>
+    /// Returns tower prefab for player used by land, tower, cost, or build decisions.
+    /// </summary>
     public GameObject GetTowerPrefabForPlayer(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
@@ -341,30 +404,45 @@ public class PlayerManager : MonoBehaviour
 
     // Optional sprite fallback for generic tower prefabs that are not already
     // colored per player.
+    /// <summary>
+    /// Returns tower sprite for player used by land, tower, cost, or build decisions.
+    /// </summary>
     public Sprite GetTowerSpriteForPlayer(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
         return config != null ? config.towerSprite : null;
     }
 
+    /// <summary>
+    /// Returns shock trap sprite for player from the current scene or gameplay state.
+    /// </summary>
     public Sprite GetShockTrapSpriteForPlayer(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
         return config != null ? config.shockTrapSprite : null;
     }
 
+    /// <summary>
+    /// Returns owned land color used by land, tower, cost, or build decisions.
+    /// </summary>
     public Color GetOwnedLandColor(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
         return config != null ? config.ownedLandColor : Color.white;
     }
 
+    /// <summary>
+    /// Returns owned land sprite used by land, tower, cost, or build decisions.
+    /// </summary>
     public Sprite GetOwnedLandSprite(int playerId)
     {
         PlayerVisualConfig config = GetVisualConfig(playerId);
         return config != null ? config.ownedLandSprite : null;
     }
 
+    /// <summary>
+    /// Handles connect player resources for this gameplay system.
+    /// </summary>
     private void ConnectPlayerResources()
     {
         foreach (PlayerResource player in players)
@@ -384,6 +462,9 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns player resource from the current scene or gameplay state.
+    /// </summary>
     public PlayerResource GetPlayerResource(int playerId)
     {
         foreach (PlayerResource player in players)
@@ -397,6 +478,9 @@ public class PlayerManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Returns first active player from the current scene or gameplay state.
+    /// </summary>
     private PlayerResource GetFirstActivePlayer()
     {
         foreach (PlayerResource player in players)
@@ -412,6 +496,9 @@ public class PlayerManager : MonoBehaviour
 
     // Local mode keeps PresentTheNumber synced with the active player, but AI
     // mode and online mode should pin it to the local visible hand owner.
+    /// <summary>
+    /// Returns present number target resource used by card handling or target selection.
+    /// </summary>
     private PlayerResource GetPresentNumberTargetResource()
     {
         if (players == null || players.Count == 0)
@@ -444,9 +531,15 @@ public class PlayerManager : MonoBehaviour
             }
         }
 
+        /// <summary>
+        /// Returns current player resource needed by this gameplay system.
+        /// </summary>
         return GetCurrentPlayerResource();
     }
 
+    /// <summary>
+    /// Clears player land and towers and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearPlayerLandAndTowers(int playerId)
     {
         TowerBuildArea[] buildAreas = FindObjectsOfType<TowerBuildArea>();
@@ -470,6 +563,9 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -488,6 +584,9 @@ public class PlayerManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

@@ -44,6 +44,9 @@ public static class OnlineTurnPermissionManager
     private static int lastAnnouncedRound = int.MinValue;
     private static string lastAnnouncedSceneName = string.Empty;
 
+    /// <summary>
+    /// Checks whether local player act is allowed before enabling that action.
+    /// </summary>
     public static bool CanLocalPlayerAct(bool showBlockedToast = true)
     {
         if (!PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
@@ -83,11 +86,17 @@ public static class OnlineTurnPermissionManager
         return true;
     }
 
+    /// <summary>
+    /// Decides whether should block local gameplay action should happen in the current mode and turn state.
+    /// </summary>
     public static bool ShouldBlockLocalGameplayAction(bool showBlockedToast = true)
     {
         return !CanLocalPlayerAct(showBlockedToast);
     }
 
+    /// <summary>
+    /// Notifies connected systems that turn state applied occurred.
+    /// </summary>
     public static void NotifyTurnStateApplied(PhotonOnlineGameSceneManager manager, int currentTurnPlayerId, int currentRound)
     {
         if (manager == null || !manager.HasLiveOnlineMatchSession())
@@ -121,6 +130,9 @@ public static class OnlineTurnPermissionManager
         manager.ShowOnlineToast(message);
     }
 
+    /// <summary>
+    /// Resets runtime state for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public static void ResetRuntimeState()
     {
         lastBlockedToastTime = -10f;
@@ -130,6 +142,9 @@ public static class OnlineTurnPermissionManager
         lastAnnouncedSceneName = string.Empty;
     }
 
+    /// <summary>
+    /// Attempts to show blocked toast and returns false if rules, resources, or references block it.
+    /// </summary>
     private static void TryShowBlockedToast(PhotonOnlineGameSceneManager manager, string message)
     {
         if (manager == null)

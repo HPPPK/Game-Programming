@@ -49,6 +49,9 @@ public class UIRaycastCleaner : MonoBehaviour
         "HammerButton"
     };
 
+    /// <summary>
+    /// Sets up UI raycast cleaner when this scene object starts running.
+    /// </summary>
     void Start()
     {
         if (runOnStart)
@@ -58,6 +61,9 @@ public class UIRaycastCleaner : MonoBehaviour
     }
 
     [ContextMenu("Clean Raycast Targets")]
+    /// <summary>
+    /// Cleans raycast targets from scene state, UI state, or saved runtime data.
+    /// </summary>
     public void CleanRaycastTargets()
     {
         Canvas canvas = ResolveCanvas();
@@ -91,6 +97,9 @@ public class UIRaycastCleaner : MonoBehaviour
     }
 
     [ContextMenu("Print Active Raycast Targets")]
+    /// <summary>
+    /// Handles print active raycast targets for card state, hand state, or targeting.
+    /// </summary>
     public void PrintActiveRaycastTargets()
     {
         Canvas canvas = ResolveCanvas();
@@ -121,6 +130,9 @@ public class UIRaycastCleaner : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Decides whether should disable raycast target should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldDisableRaycastTarget(Graphic graphic)
     {
         if (IsClickableGraphic(graphic))
@@ -141,6 +153,9 @@ public class UIRaycastCleaner : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether clickable graphic is true.
+    /// </summary>
     private bool IsClickableGraphic(Graphic graphic)
     {
         GameObject targetObject = graphic.gameObject;
@@ -193,6 +208,9 @@ public class UIRaycastCleaner : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether known clickable name is true.
+    /// </summary>
     private bool IsKnownClickableName(string objectName)
     {
         foreach (string clickableName in ClickableObjectNames)
@@ -206,6 +224,9 @@ public class UIRaycastCleaner : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Looks up the target for canvas and applies the resolved gameplay result.
+    /// </summary>
     private Canvas ResolveCanvas()
     {
         if (targetCanvas != null)
@@ -231,6 +252,9 @@ public class UIRaycastCleaner : MonoBehaviour
         return targetCanvas;
     }
 
+    /// <summary>
+    /// Returns object path used to update UI text, layout, or feedback.
+    /// </summary>
     private string GetObjectPath(Transform target)
     {
         if (target == null)

@@ -57,12 +57,18 @@ public class PlayerResource : MonoBehaviour
     public PlayerManager playerManager;
     public PlayerStatusPanelUI statusPanel;
 
+    /// <summary>
+    /// Finds and stores player resource references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         LoadSetupFromPlayerPrefs();
         EnsurePlayerHand();
     }
 
+    /// <summary>
+    /// Sets up player resource when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         LoadSetupFromPlayerPrefs();
@@ -71,31 +77,52 @@ public class PlayerResource : MonoBehaviour
         LogOnlineLocalPlayerLoad();
     }
 
+    /// <summary>
+    /// Checks whether afford is allowed before enabling that action.
+    /// </summary>
     public bool CanAfford(int cost)
     {
         return !isEliminated && money >= cost;
     }
 
+    /// <summary>
+    /// Returns money from the current scene or gameplay state.
+    /// </summary>
     public int GetMoney()
     {
         return money;
     }
 
+    /// <summary>
+    /// Returns score from the current scene or gameplay state.
+    /// </summary>
     public int GetScore()
     {
         return score;
     }
 
+    /// <summary>
+    /// Returns card count used by card handling or target selection.
+    /// </summary>
     public int GetCardCount()
     {
+        /// <summary>
+        /// Returns hand card count needed by this gameplay system.
+        /// </summary>
         return GetHandCardCount();
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether eliminated is true.
+    /// </summary>
     public bool IsEliminated()
     {
         return isEliminated;
     }
 
+    /// <summary>
+    /// Returns display name from the current scene or gameplay state.
+    /// </summary>
     public string GetDisplayName()
     {
         if (!string.IsNullOrWhiteSpace(displayName))
@@ -107,6 +134,9 @@ public class PlayerResource : MonoBehaviour
     }
 
     // Loads a ModeSelectScene name and AI flag for this player, while preserving Inspector names when no saved name exists.
+    /// <summary>
+    /// Loads setup from player prefs from saved settings, room data, or scene references.
+    /// </summary>
     public void LoadSetupFromPlayerPrefs()
     {
         string key = "PlayerName_" + playerId;
@@ -138,11 +168,17 @@ public class PlayerResource : MonoBehaviour
     }
 
     // Kept for older callers that only need display-name loading.
+    /// <summary>
+    /// Loads display name from player prefs from saved settings, room data, or scene references.
+    /// </summary>
     public void LoadDisplayNameFromPlayerPrefs()
     {
         LoadSetupFromPlayerPrefs();
     }
 
+    /// <summary>
+    /// Writes online local player load details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogOnlineLocalPlayerLoad()
     {
         string mode = PlayerPrefs.GetString("GameMode", "");
@@ -175,23 +211,35 @@ public class PlayerResource : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Checks whether pending disrupt is present before the code depends on it.
+    /// </summary>
     public bool HasPendingDisrupt()
     {
         return disruptedNextTurn || disruptedTurnsRemaining > 0;
     }
 
+    /// <summary>
+    /// Applies disrupt next turn to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyDisruptNextTurn()
     {
         disruptedNextTurn = true;
         disruptedTurnsRemaining = Mathf.Max(disruptedTurnsRemaining, 1);
     }
 
+    /// <summary>
+    /// Clears pending disrupt and removes its temporary gameplay or visual effect.
+    /// </summary>
     public void ClearPendingDisrupt()
     {
         disruptedNextTurn = false;
         disruptedTurnsRemaining = 0;
     }
 
+    /// <summary>
+    /// Consumes disrupt for this turn and records that the player has used that action.
+    /// </summary>
     public void ConsumeDisruptForThisTurn()
     {
         if (disruptedTurnsRemaining > 0)
@@ -202,6 +250,9 @@ public class PlayerResource : MonoBehaviour
         disruptedNextTurn = disruptedTurnsRemaining > 0;
     }
 
+    /// <summary>
+    /// Handles spend money for this gameplay system.
+    /// </summary>
     public bool SpendMoney(int cost)
     {
         if (isEliminated)
@@ -219,6 +270,9 @@ public class PlayerResource : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Adds money to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public void AddMoney(int amount)
     {
         if (isEliminated)
@@ -230,6 +284,9 @@ public class PlayerResource : MonoBehaviour
         RefreshUI();
     }
 
+    /// <summary>
+    /// Adds score to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public void AddScore(int amount)
     {
         if (isEliminated)
@@ -241,6 +298,9 @@ public class PlayerResource : MonoBehaviour
         RefreshUI();
     }
 
+    /// <summary>
+    /// Sets card count and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetCardCount(int count)
     {
         if (isEliminated)
@@ -252,12 +312,18 @@ public class PlayerResource : MonoBehaviour
         RefreshUI();
     }
 
+    /// <summary>
+    /// Returns hand card count used by card handling or target selection.
+    /// </summary>
     public int GetHandCardCount()
     {
         EnsurePlayerHand();
         return playerHand != null ? playerHand.GetCardCount() : cardCount;
     }
 
+    /// <summary>
+    /// Returns displayed card count used by card handling or target selection.
+    /// </summary>
     public int GetDisplayedCardCount()
     {
         if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
@@ -272,9 +338,15 @@ public class PlayerResource : MonoBehaviour
             return Mathf.Max(0, cardCount);
         }
 
+        /// <summary>
+        /// Returns hand card count needed by this gameplay system.
+        /// </summary>
         return GetHandCardCount();
     }
 
+    /// <summary>
+    /// Adds card to hand to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public void AddCardToHand(GameObject cardPrefab)
     {
         if (isEliminated)
@@ -297,6 +369,9 @@ public class PlayerResource : MonoBehaviour
         SetCardCount(GetHandCardCount());
     }
 
+    /// <summary>
+    /// Removes card from hand from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public bool RemoveCardFromHand(GameObject cardPrefab)
     {
         if (isEliminated)
@@ -321,17 +396,26 @@ public class PlayerResource : MonoBehaviour
         return removed;
     }
 
+    /// <summary>
+    /// Handles sync card count from hand for card state, hand state, or targeting.
+    /// </summary>
     public void SyncCardCountFromHand()
     {
         SetCardCount(GetHandCardCount());
     }
 
+    /// <summary>
+    /// Returns player hand used by card handling or target selection.
+    /// </summary>
     public PlayerHand GetPlayerHand()
     {
         EnsurePlayerHand();
         return playerHand;
     }
 
+    /// <summary>
+    /// Adds kill reward to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public void AddKillReward(int goldReward, int scoreReward)
     {
         if (isEliminated)
@@ -344,6 +428,9 @@ public class PlayerResource : MonoBehaviour
         RefreshUI();
     }
 
+    /// <summary>
+    /// Marks eliminated so later turns or systems can react to it.
+    /// </summary>
     public void MarkEliminated()
     {
         isEliminated = true;
@@ -351,6 +438,9 @@ public class PlayerResource : MonoBehaviour
         RefreshUI();
     }
 
+    /// <summary>
+    /// Refreshes UI from the latest gameplay data.
+    /// </summary>
     public void RefreshUI()
     {
         if (playerManager != null)
@@ -368,6 +458,9 @@ public class PlayerResource : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensures player hand exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsurePlayerHand()
     {
         if (playerHand == null)

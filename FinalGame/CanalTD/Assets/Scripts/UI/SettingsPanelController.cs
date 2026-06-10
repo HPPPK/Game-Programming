@@ -50,27 +50,42 @@ public class SettingsPanelController : MonoBehaviour
 
     private bool listenersBound;
 
+    /// <summary>
+    /// Finds and stores settings panel controller references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         LoadSettings();
         BindListenersOnce();
     }
 
+    /// <summary>
+    /// Sets up settings panel controller when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         CloseSettings();
     }
 
+    /// <summary>
+    /// Removes settings panel controller listeners and temporary references before destruction.
+    /// </summary>
     private void OnDestroy()
     {
         UnbindListeners();
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether open is true.
+    /// </summary>
     public bool IsOpen()
     {
         return settingsPanel != null && settingsPanel.activeSelf;
     }
 
+    /// <summary>
+    /// Handles open settings for UI display, input, or player feedback.
+    /// </summary>
     public void OpenSettings()
     {
         LoadSettings();
@@ -85,6 +100,9 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles close settings for UI display, input, or player feedback.
+    /// </summary>
     public void CloseSettings()
     {
         if (settingsPanel != null)
@@ -93,6 +111,9 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles toggle settings for UI display, input, or player feedback.
+    /// </summary>
     public void ToggleSettings()
     {
         if (IsOpen())
@@ -105,6 +126,9 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Loads settings from saved settings, room data, or scene references.
+    /// </summary>
     public void LoadSettings()
     {
         bool musicEnabled = PlayerPrefs.GetInt(MusicEnabledKey, 1) == 1;
@@ -146,6 +170,9 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Saves settings so it persists after the current UI or scene update.
+    /// </summary>
     public void SaveSettings()
     {
         bool musicEnabled = musicToggle == null || musicToggle.isOn;
@@ -160,6 +187,9 @@ public class SettingsPanelController : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    /// <summary>
+    /// Responds to on music toggle changed and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnMusicToggleChanged(bool enabled)
     {
         PlayerPrefs.SetInt(MusicEnabledKey, enabled ? 1 : 0);
@@ -171,6 +201,9 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on SFX toggle changed and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnSfxToggleChanged(bool enabled)
     {
         PlayerPrefs.SetInt(SfxEnabledKey, enabled ? 1 : 0);
@@ -182,6 +215,9 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on fullscreen toggle changed and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnFullscreenToggleChanged(bool fullscreen)
     {
         Screen.fullScreen = fullscreen;
@@ -189,6 +225,9 @@ public class SettingsPanelController : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    /// <summary>
+    /// Responds to on master volume changed and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnMasterVolumeChanged(float volume)
     {
         PlayerPrefs.SetFloat(MasterVolumeKey, volume);
@@ -204,6 +243,9 @@ public class SettingsPanelController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles bind listeners once for UI display, input, or player feedback.
+    /// </summary>
     private void BindListenersOnce()
     {
         if (listenersBound)
@@ -238,6 +280,9 @@ public class SettingsPanelController : MonoBehaviour
         listenersBound = true;
     }
 
+    /// <summary>
+    /// Handles unbind listeners for UI display, input, or player feedback.
+    /// </summary>
     private void UnbindListeners()
     {
         if (!listenersBound)

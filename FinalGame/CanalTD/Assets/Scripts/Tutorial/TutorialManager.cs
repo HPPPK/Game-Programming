@@ -118,6 +118,9 @@ public class TutorialManager : MonoBehaviour
     public bool IsTutorialGameplayActive => tutorialStarted && !tutorialCompleted && CurrentStep != null && IsGuideScene();
     public TutorialStep CurrentStep => GetCurrentStep();
 
+    /// <summary>
+    /// Finds and stores tutorial manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         Instance = this;
@@ -145,6 +148,9 @@ public class TutorialManager : MonoBehaviour
         messageController?.Initialize(this);
     }
 
+    /// <summary>
+    /// Sets up tutorial manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         EnsureGuideSceneTutorialConfigured();
@@ -155,6 +161,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Starts tutorial and enables its related gameplay flow.
+    /// </summary>
     public void StartTutorial()
     {
         tutorialCompleted = false;
@@ -182,6 +191,9 @@ public class TutorialManager : MonoBehaviour
         ApplyCurrentStep();
     }
 
+    /// <summary>
+    /// Handles next step for tutorial guidance, highlights, or step progression.
+    /// </summary>
     public void NextStep()
     {
         if (!tutorialStarted || tutorialCompleted)
@@ -199,6 +211,9 @@ public class TutorialManager : MonoBehaviour
         AdvanceToNextStep();
     }
 
+    /// <summary>
+    /// Handles previous step for tutorial guidance, highlights, or step progression.
+    /// </summary>
     public void PreviousStep()
     {
         if (!tutorialStarted || tutorialCompleted)
@@ -238,6 +253,9 @@ public class TutorialManager : MonoBehaviour
         Debug.Log("Already at the beginning.");
     }
 
+    /// <summary>
+    /// Handles skip current part for tutorial guidance, highlights, or step progression.
+    /// </summary>
     public void SkipCurrentPart()
     {
         if (!tutorialStarted || tutorialCompleted)
@@ -259,11 +277,17 @@ public class TutorialManager : MonoBehaviour
         ApplyCurrentStep();
     }
 
+    /// <summary>
+    /// Handles skip tutorial for tutorial guidance, highlights, or step progression.
+    /// </summary>
     public void SkipTutorial()
     {
         CompleteTutorial();
     }
 
+    /// <summary>
+    /// Handles complete tutorial for tutorial guidance, highlights, or step progression.
+    /// </summary>
     public void CompleteTutorial()
     {
         if (tutorialCompleted)
@@ -287,6 +311,9 @@ public class TutorialManager : MonoBehaviour
         guideSceneWaveTutorialEnemiesSpawned = false;
     }
 
+    /// <summary>
+    /// Responds to on click practice vs AI and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickPracticeVsAI()
     {
         PlayerPrefs.SetInt("TutorialCompleted", 1);
@@ -294,6 +321,9 @@ public class TutorialManager : MonoBehaviour
         SceneManager.LoadScene(practiceVsAISceneName);
     }
 
+    /// <summary>
+    /// Responds to on click open mode select and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickOpenModeSelect()
     {
         PlayerPrefs.SetInt("TutorialCompleted", 1);
@@ -301,6 +331,9 @@ public class TutorialManager : MonoBehaviour
         SceneManager.LoadScene(modeSelectSceneName);
     }
 
+    /// <summary>
+    /// Responds to on click return to menu and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickReturnToMenu()
     {
         PlayerPrefs.SetInt("TutorialCompleted", 1);
@@ -308,6 +341,9 @@ public class TutorialManager : MonoBehaviour
         SceneManager.LoadScene(homeSceneName);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether action allowed is true.
+    /// </summary>
     public bool IsActionAllowed(TutorialActionType actionType, GameObject target)
     {
         if (!IsTutorialGameplayActive)
@@ -357,6 +393,9 @@ public class TutorialManager : MonoBehaviour
         return expectedTarget == null || expectedTarget == target;
     }
 
+    /// <summary>
+    /// Returns blocked action message from the current scene or gameplay state.
+    /// </summary>
     public string GetBlockedActionMessage(TutorialActionType actionType)
     {
         TutorialStep step = CurrentStep;
@@ -374,28 +413,49 @@ public class TutorialManager : MonoBehaviour
         return "Read the tutorial step and press Next.";
     }
 
+    /// <summary>
+    /// Returns wave interaction blocked message or default used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public string GetWaveInteractionBlockedMessageOrDefault(string fallbackMessage)
     {
+        /// <summary>
+        /// Handles is guide scene tutorial wave interaction blocked for tutorial manager.
+        /// </summary>
         return IsGuideSceneTutorialWaveInteractionBlocked()
             ? TutorialWaveBlockedMessage
             : fallbackMessage;
     }
 
+    /// <summary>
+    /// Returns bound target object used by card handling or target selection.
+    /// </summary>
     public GameObject GetBoundTargetObject(string targetId)
     {
+        /// <summary>
+        /// Handles resolve binding target for tutorial manager.
+        /// </summary>
         return ResolveBindingTarget(targetId);
     }
 
+    /// <summary>
+    /// Notifies connected systems that land purchased occurred.
+    /// </summary>
     public void NotifyLandPurchased(GameObject target)
     {
         NotifyAction(TutorialActionType.BuyLand, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that build area selected occurred.
+    /// </summary>
     public void NotifyBuildAreaSelected(TutorialActionType actionType, GameObject target)
     {
         NotifyAction(actionType, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that tutorial action occurred.
+    /// </summary>
     public void NotifyTutorialAction(TutorialActionType actionType, GameObject target)
     {
         if (actionType == TutorialActionType.SelectCard && target != null)
@@ -411,46 +471,73 @@ public class TutorialManager : MonoBehaviour
         NotifyAction(actionType, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that tower built occurred.
+    /// </summary>
     public void NotifyTowerBuilt(GameObject target)
     {
         NotifyAction(TutorialActionType.BuildTower, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that tower upgraded occurred.
+    /// </summary>
     public void NotifyTowerUpgraded(GameObject target)
     {
         NotifyAction(TutorialActionType.UpgradeTower, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that tower sold occurred.
+    /// </summary>
     public void NotifyTowerSold(GameObject target)
     {
         NotifyAction(TutorialActionType.SellTower, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that card drawn occurred.
+    /// </summary>
     public void NotifyCardDrawn(GameObject target)
     {
         NotifyAction(TutorialActionType.DrawCard, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that card discarded occurred.
+    /// </summary>
     public void NotifyCardDiscarded(GameObject target)
     {
         NotifyAction(TutorialActionType.DiscardCard, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that card played occurred.
+    /// </summary>
     public void NotifyCardPlayed(TutorialActionType actionType, GameObject target)
     {
         NotifyAction(actionType, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that end turn clicked occurred.
+    /// </summary>
     public void NotifyEndTurnClicked()
     {
         NotifyAction(TutorialActionType.EndTurnClicked, null);
     }
 
+    /// <summary>
+    /// Notifies connected systems that tutorial wave started occurred.
+    /// </summary>
     public void NotifyTutorialWaveStarted()
     {
         NotifyAction(TutorialActionType.WaveStarted, null);
     }
 
+    /// <summary>
+    /// Notifies connected systems that tutorial wave completed occurred.
+    /// </summary>
     public void NotifyTutorialWaveCompleted()
     {
         if (IsGuideScenePart5WaveStepActive())
@@ -461,6 +548,9 @@ public class TutorialManager : MonoBehaviour
         NotifyAction(TutorialActionType.WaveCompleted, null);
     }
 
+    /// <summary>
+    /// Spawns tutorial weak enemies into the scene and initializes its runtime state.
+    /// </summary>
     public void SpawnTutorialWeakEnemies(int count)
     {
         if (tutorialEnemyDemoSpawner != null)
@@ -472,6 +562,9 @@ public class TutorialManager : MonoBehaviour
         Debug.LogWarning("TutorialEnemyDemoSpawner is not assigned.");
     }
 
+    /// <summary>
+    /// Registers runtime built tower so later callbacks, lookups, or sync messages can use it.
+    /// </summary>
     public void RegisterRuntimeBuiltTower(GameObject buildAreaObject, GameObject towerObject)
     {
         lastTutorialBuildAreaObject = buildAreaObject;
@@ -488,36 +581,57 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles force give tutorial card for card state, hand state, or targeting.
+    /// </summary>
     public bool ForceGiveTutorialCard(string cardId)
     {
         return cardDrawManager != null && cardDrawManager.ForceGiveTutorialCard(cardId);
     }
 
+    /// <summary>
+    /// Handles force single tutorial card for card state, hand state, or targeting.
+    /// </summary>
     public bool ForceSingleTutorialCard(string cardId)
     {
         return cardDrawManager != null && cardDrawManager.ForceSingleTutorialCard(cardId);
     }
 
+    /// <summary>
+    /// Handles force tutorial hand for card state, hand state, or targeting.
+    /// </summary>
     public bool ForceTutorialHand(IEnumerable<string> cardIds)
     {
         return cardDrawManager != null && cardDrawManager.ForceTutorialHand(cardIds);
     }
 
+    /// <summary>
+    /// Resets tutorial card action for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetTutorialCardAction()
     {
         cardDrawManager?.ResetTutorialCardAction();
     }
 
+    /// <summary>
+    /// Handles prepare tutorial card demo for card state, hand state, or targeting.
+    /// </summary>
     public bool PrepareTutorialCardDemo(string cardId)
     {
         return cardDrawManager != null && cardDrawManager.PrepareTutorialCardDemo(cardId);
     }
 
+    /// <summary>
+    /// Handles prepare tutorial card demo for card state, hand state, or targeting.
+    /// </summary>
     public bool PrepareTutorialCardDemo(string cardId, IEnumerable<string> handCardIds)
     {
         return cardDrawManager != null && cardDrawManager.PrepareTutorialCardDemo(cardId, handCardIds);
     }
 
+    /// <summary>
+    /// Notifies connected systems that action occurred.
+    /// </summary>
     private void NotifyAction(TutorialActionType actionType, GameObject target)
     {
         if (!IsTutorialGameplayActive)
@@ -546,6 +660,9 @@ public class TutorialManager : MonoBehaviour
         AdvanceToNextStep();
     }
 
+    /// <summary>
+    /// Advances to next step to the next turn, wave, player, or tutorial step.
+    /// </summary>
     private void AdvanceToNextStep()
     {
         currentStepIndex += 1;
@@ -568,6 +685,9 @@ public class TutorialManager : MonoBehaviour
         CompleteTutorial();
     }
 
+    /// <summary>
+    /// Applies current step to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyCurrentStep()
     {
         StopCurrentStepRoutine();
@@ -615,6 +735,9 @@ public class TutorialManager : MonoBehaviour
         HandleStepEnterEffects(step);
     }
 
+    /// <summary>
+    /// Handles prepare step bindings for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private void PrepareStepBindings(TutorialStep step)
     {
         if (step == null)
@@ -628,11 +751,17 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether at first step is true.
+    /// </summary>
     public bool IsAtFirstStep()
     {
         return currentPartIndex <= 0 && currentStepIndex <= 0;
     }
 
+    /// <summary>
+    /// Returns current step from the current scene or gameplay state.
+    /// </summary>
     private TutorialStep GetCurrentStep()
     {
         if (parts == null || currentPartIndex < 0 || currentPartIndex >= parts.Count)
@@ -650,6 +779,9 @@ public class TutorialManager : MonoBehaviour
         return part.steps[currentStepIndex];
     }
 
+    /// <summary>
+    /// Looks up the target for highlight target and applies the resolved gameplay result.
+    /// </summary>
     private GameObject ResolveHighlightTarget(TutorialStep step)
     {
         if (step == null)
@@ -687,6 +819,9 @@ public class TutorialManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether action compatible is true.
+    /// </summary>
     private bool IsActionCompatible(TutorialActionType actual, TutorialActionType expected)
     {
         if (expected == TutorialActionType.None)
@@ -735,6 +870,9 @@ public class TutorialManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether allowed action for step is true.
+    /// </summary>
     private bool IsAllowedActionForStep(TutorialStep step, TutorialActionType actualAction)
     {
         if (step == null)
@@ -755,9 +893,15 @@ public class TutorialManager : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Handles is action compatible for tutorial manager.
+        /// </summary>
         return IsActionCompatible(actualAction, step.expectedActionType);
     }
 
+    /// <summary>
+    /// Handles does action advance step for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private bool DoesActionAdvanceStep(TutorialStep step, TutorialActionType actualAction)
     {
         if (step == null)
@@ -778,6 +922,9 @@ public class TutorialManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether specific card action is true.
+    /// </summary>
     private bool IsSpecificCardAction(TutorialActionType actionType)
     {
         return actionType == TutorialActionType.OpenGate ||
@@ -791,6 +938,9 @@ public class TutorialManager : MonoBehaviour
                actionType == TutorialActionType.PlaceShockTrap;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether step already satisfied is true.
+    /// </summary>
     private bool IsStepAlreadySatisfied(TutorialStep step)
     {
         if (step == null || !step.requiresPlayerAction)
@@ -841,12 +991,18 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for bound build area and applies the resolved gameplay result.
+    /// </summary>
     private TowerBuildArea ResolveBoundBuildArea(string targetId)
     {
         GameObject targetObject = ResolveBindingTarget(targetId);
         return targetObject != null ? targetObject.GetComponent<TowerBuildArea>() : null;
     }
 
+    /// <summary>
+    /// Looks up the target for binding target and applies the resolved gameplay result.
+    /// </summary>
     private GameObject ResolveBindingTarget(string targetId)
     {
         if (targetBindings == null || string.IsNullOrWhiteSpace(targetId))
@@ -867,6 +1023,9 @@ public class TutorialManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Looks up the target for tutorial tower highlight target and applies the resolved gameplay result.
+    /// </summary>
     private GameObject ResolveTutorialTowerHighlightTarget(GameObject towerObject)
     {
         if (towerObject == null)
@@ -883,11 +1042,17 @@ public class TutorialManager : MonoBehaviour
         return towerObject;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether guide scene is true.
+    /// </summary>
     private bool IsGuideScene()
     {
         return SceneManager.GetActiveScene().name == guideSceneName;
     }
 
+    /// <summary>
+    /// Returns current part title from the current scene or gameplay state.
+    /// </summary>
     private string GetCurrentPartTitle()
     {
         if (parts == null || currentPartIndex < 0 || currentPartIndex >= parts.Count)
@@ -905,11 +1070,20 @@ public class TutorialManager : MonoBehaviour
         return part != null ? part.partId.ToString() : string.Empty;
     }
 
+    /// <summary>
+    /// Returns current part title for UI from the current scene or gameplay state.
+    /// </summary>
     public string GetCurrentPartTitleForUI()
     {
+        /// <summary>
+        /// Returns current part title needed by this gameplay system.
+        /// </summary>
         return GetCurrentPartTitle();
     }
 
+    /// <summary>
+    /// Checks whether advance current step manually is allowed before enabling that action.
+    /// </summary>
     public bool CanAdvanceCurrentStepManually()
     {
         TutorialStep step = CurrentStep;
@@ -922,6 +1096,9 @@ public class TutorialManager : MonoBehaviour
         return !step.requiresPlayerAction || IsStepAlreadySatisfied(step);
     }
 
+    /// <summary>
+    /// Ensures guide scene tutorial configured exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureGuideSceneTutorialConfigured()
     {
         if (!IsGuideScene())
@@ -952,6 +1129,9 @@ public class TutorialManager : MonoBehaviour
         BuildDefaultPart5Definition();
     }
 
+    /// <summary>
+    /// Ensures guide scene starting resources exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureGuideSceneStartingResources()
     {
         if (!IsGuideScene() || guideSceneStartingGold <= 0)
@@ -980,6 +1160,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether part1 configured correctly is true.
+    /// </summary>
     public bool IsPart1ConfiguredCorrectly()
     {
         TutorialPartDefinition part1 = FindPartDefinition(TutorialPartId.PlayerInfoAndScore);
@@ -1023,6 +1206,9 @@ public class TutorialManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether part2 configured correctly is true.
+    /// </summary>
     public bool IsPart2ConfiguredCorrectly()
     {
         TutorialPartDefinition part2 = FindPartDefinition(TutorialPartId.LandTowerGold);
@@ -1062,6 +1248,9 @@ public class TutorialManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether part4 configured correctly is true.
+    /// </summary>
     public bool IsPart4ConfiguredCorrectly()
     {
         TutorialPartDefinition part4 = FindPartDefinition(TutorialPartId.Cards);
@@ -1098,6 +1287,9 @@ public class TutorialManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether part5 configured correctly is true.
+    /// </summary>
     public bool IsPart5ConfiguredCorrectly()
     {
         TutorialPartDefinition part5 = FindPartDefinition(TutorialPartId.EndTurn);
@@ -1134,6 +1326,9 @@ public class TutorialManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Builds default part1 bindings from configured scene objects and runtime state.
+    /// </summary>
     private void BuildDefaultPart1Bindings()
     {
         if (targetBindings == null)
@@ -1156,6 +1351,9 @@ public class TutorialManager : MonoBehaviour
         AddBinding("Player4Panel", player4PanelPath);
     }
 
+    /// <summary>
+    /// Builds default part2 bindings from configured scene objects and runtime state.
+    /// </summary>
     private void BuildDefaultPart2Bindings()
     {
         if (targetBindings == null)
@@ -1175,6 +1373,9 @@ public class TutorialManager : MonoBehaviour
         SetOrAddBinding("BuiltTower", builtTowerFallback);
     }
 
+    /// <summary>
+    /// Builds default part4 bindings from configured scene objects and runtime state.
+    /// </summary>
     private void BuildDefaultPart4Bindings()
     {
         if (targetBindings == null)
@@ -1193,6 +1394,9 @@ public class TutorialManager : MonoBehaviour
         AddBinding("OpponentCastle", tutorialOpponentCastlePath);
     }
 
+    /// <summary>
+    /// Builds default part5 bindings from configured scene objects and runtime state.
+    /// </summary>
     private void BuildDefaultPart5Bindings()
     {
         if (targetBindings == null)
@@ -1205,6 +1409,9 @@ public class TutorialManager : MonoBehaviour
         AddBinding("RoundText", roundTextPath);
     }
 
+    /// <summary>
+    /// Builds default part1 definition from configured scene objects and runtime state.
+    /// </summary>
     private void BuildDefaultPart1Definition()
     {
         if (parts == null)
@@ -1241,6 +1448,9 @@ public class TutorialManager : MonoBehaviour
         parts.Insert(0, part1);
     }
 
+    /// <summary>
+    /// Builds default part2 definition from configured scene objects and runtime state.
+    /// </summary>
     private void BuildDefaultPart2Definition()
     {
         if (parts == null)
@@ -1275,6 +1485,9 @@ public class TutorialManager : MonoBehaviour
         parts.Add(part2);
     }
 
+    /// <summary>
+    /// Builds default part4 definition from configured scene objects and runtime state.
+    /// </summary>
     private void BuildDefaultPart4Definition()
     {
         if (parts == null)
@@ -1331,6 +1544,9 @@ public class TutorialManager : MonoBehaviour
         parts.Add(part4);
     }
 
+    /// <summary>
+    /// Builds default part5 definition from configured scene objects and runtime state.
+    /// </summary>
     private void BuildDefaultPart5Definition()
     {
         if (parts == null)
@@ -1421,6 +1637,9 @@ public class TutorialManager : MonoBehaviour
             resolutionActionType));
     }
 
+    /// <summary>
+    /// Sets tutorial hand and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetTutorialHand(TutorialStep step, params string[] cardIds)
     {
         if (step == null)
@@ -1433,6 +1652,9 @@ public class TutorialManager : MonoBehaviour
             : new List<string>();
     }
 
+    /// <summary>
+    /// Creates info step and configures it for the current scene or interaction.
+    /// </summary>
     private TutorialStep CreateInfoStep(TutorialPartId partId, string stepId, string message, string highlightTargetId)
     {
         return new TutorialStep
@@ -1446,8 +1668,14 @@ public class TutorialManager : MonoBehaviour
         };
     }
 
+    /// <summary>
+    /// Creates info step and configures it for the current scene or interaction.
+    /// </summary>
     private TutorialStep CreateInfoStep(string stepId, string message, string highlightTargetId)
     {
+        /// <summary>
+        /// Handles create info step for tutorial manager.
+        /// </summary>
         return CreateInfoStep(TutorialPartId.PlayerInfoAndScore, stepId, message, highlightTargetId);
     }
 
@@ -1537,6 +1765,9 @@ public class TutorialManager : MonoBehaviour
             allowedActions);
     }
 
+    /// <summary>
+    /// Creates enemy demo step and configures it for the current scene or interaction.
+    /// </summary>
     private TutorialStep CreateEnemyDemoStep(TutorialPartId partId, string stepId, string message, string highlightTargetId, int enemyCount)
     {
         TutorialStep step = CreateInfoStep(partId, stepId, message, highlightTargetId);
@@ -1544,6 +1775,9 @@ public class TutorialManager : MonoBehaviour
         return step;
     }
 
+    /// <summary>
+    /// Creates wave lock step and configures it for the current scene or interaction.
+    /// </summary>
     private TutorialStep CreateWaveLockStep()
     {
         TutorialStep step = CreateActionStep(
@@ -1573,6 +1807,9 @@ public class TutorialManager : MonoBehaviour
         return step;
     }
 
+    /// <summary>
+    /// Creates hidden enemy wave step and configures it for the current scene or interaction.
+    /// </summary>
     private TutorialStep CreateHiddenEnemyWaveStep(TutorialPartId partId, string stepId, int enemyCount, float fallbackAutoAdvanceSeconds)
     {
         TutorialStep step = CreateWaitStep(partId, stepId, string.Empty, TutorialActionType.WaveCompleted, fallbackAutoAdvanceSeconds);
@@ -1581,6 +1818,9 @@ public class TutorialManager : MonoBehaviour
         return step;
     }
 
+    /// <summary>
+    /// Creates wait step and configures it for the current scene or interaction.
+    /// </summary>
     private TutorialStep CreateWaitStep(TutorialPartId partId, string stepId, string message, TutorialActionType completionActionType, float fallbackAutoAdvanceSeconds)
     {
         TutorialStep step = CreateInfoStep(partId, stepId, message, null);
@@ -1591,6 +1831,9 @@ public class TutorialManager : MonoBehaviour
         return step;
     }
 
+    /// <summary>
+    /// Creates wait step and configures it for the current scene or interaction.
+    /// </summary>
     private TutorialStep CreateWaitStep(string stepId, string message, TutorialActionType completionActionType, float fallbackAutoAdvanceSeconds)
     {
         return CreateWaitStep(
@@ -1601,6 +1844,9 @@ public class TutorialManager : MonoBehaviour
             fallbackAutoAdvanceSeconds);
     }
 
+    /// <summary>
+    /// Adds binding to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     private void AddBinding(string targetId, string hierarchyPath)
     {
         if (targetBindings == null)
@@ -1625,6 +1871,9 @@ public class TutorialManager : MonoBehaviour
         SetOrAddBinding(targetId, targetObject);
     }
 
+    /// <summary>
+    /// Sets or add binding and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetOrAddBinding(string targetId, GameObject targetObject)
     {
         if (targetBindings == null)
@@ -1650,6 +1899,9 @@ public class TutorialManager : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Searches scene objects or cached lists to find scene object by path.
+    /// </summary>
     private GameObject FindSceneObjectByPath(string hierarchyPath)
     {
         if (string.IsNullOrWhiteSpace(hierarchyPath))
@@ -1682,6 +1934,9 @@ public class TutorialManager : MonoBehaviour
         return current;
     }
 
+    /// <summary>
+    /// Returns hierarchy path used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private string GetHierarchyPath(GameObject target)
     {
         if (target == null)
@@ -1702,6 +1957,9 @@ public class TutorialManager : MonoBehaviour
         return string.Join("/", segments.ToArray());
     }
 
+    /// <summary>
+    /// Searches scene objects or cached lists to find part definition.
+    /// </summary>
     private TutorialPartDefinition FindPartDefinition(TutorialPartId partId)
     {
         if (parts == null)
@@ -1722,6 +1980,9 @@ public class TutorialManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Checks whether valid target binding is present before the code depends on it.
+    /// </summary>
     private bool HasValidTargetBinding(string targetId)
     {
         if (targetBindings == null || string.IsNullOrWhiteSpace(targetId))
@@ -1744,6 +2005,9 @@ public class TutorialManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Handles does binding match path for enemy movement, health, waves, or routing.
+    /// </summary>
     private bool DoesBindingMatchPath(string targetId, string hierarchyPath)
     {
         GameObject expectedObject = FindSceneObjectByPath(hierarchyPath);
@@ -1751,6 +2015,9 @@ public class TutorialManager : MonoBehaviour
         return expectedObject != null && actualObject == expectedObject;
     }
 
+    /// <summary>
+    /// Removes invalid tutorial parts from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     private void RemoveInvalidTutorialParts()
     {
         if (parts == null)
@@ -1784,6 +2051,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Removes invalid target bindings from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     private void RemoveInvalidTargetBindings()
     {
         if (targetBindings == null)
@@ -1805,6 +2075,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Marks current part completed so later turns or systems can react to it.
+    /// </summary>
     private void MarkCurrentPartCompleted()
     {
         if (currentPartIndex < 0 || currentPartIndex == lastCompletedPartIndex)
@@ -1816,6 +2089,9 @@ public class TutorialManager : MonoBehaviour
         lastCompletedPartIndex = currentPartIndex;
     }
 
+    /// <summary>
+    /// Responds to step enter effects and updates the affected gameplay or UI systems.
+    /// </summary>
     private void HandleStepEnterEffects(TutorialStep step)
     {
         if (step == null)
@@ -1878,6 +2154,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensures guide scene card demo board state exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureGuideSceneCardDemoBoardState(TutorialStep step)
     {
         if (!IsGuideScene() || step == null || step.partId != TutorialPartId.Cards)
@@ -1949,6 +2228,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensures guide scene part5 state exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureGuideScenePart5State(TutorialStep step)
     {
         if (!IsGuideScene() || step == null || step.partId != TutorialPartId.EndTurn)
@@ -1990,6 +2272,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensures guide scene wave tutorial board state exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureGuideSceneWaveTutorialBoardState()
     {
         PlayerManager playerManager = FindObjectOfType<PlayerManager>();
@@ -2037,6 +2322,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Resets guide scene part5 state to player turn for a new turn, wave, player, scene, or match state.
+    /// </summary>
     private void ResetGuideScenePart5StateToPlayerTurn()
     {
         guideSceneWaveTutorialStarted = false;
@@ -2063,6 +2351,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles simulate guide scene remaining turns for wave tutorial for enemy movement, health, waves, or routing.
+    /// </summary>
     private void SimulateGuideSceneRemainingTurnsForWaveTutorial()
     {
         if (guideSceneWaveTutorialRemainingTurnsSimulated)
@@ -2083,6 +2374,9 @@ public class TutorialManager : MonoBehaviour
         guideSceneWaveTutorialRemainingTurnsSimulated = true;
     }
 
+    /// <summary>
+    /// Starts guide scene tutorial wave state and enables its related gameplay flow.
+    /// </summary>
     private void StartGuideSceneTutorialWaveState()
     {
         if (guideSceneWaveTutorialStarted)
@@ -2115,6 +2409,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles complete guide scene tutorial wave state for enemy movement, health, waves, or routing.
+    /// </summary>
     private void CompleteGuideSceneTutorialWaveState(bool forceClearEnemies)
     {
         if (!guideSceneWaveTutorialStarted || guideSceneWaveTutorialCompleted)
@@ -2154,6 +2451,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets guide scene current player and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetGuideSceneCurrentPlayer(int playerId, PlayerManager playerManager, TurnManager turnManager, bool restartTurn)
     {
         if (playerManager == null)
@@ -2177,6 +2477,9 @@ public class TutorialManager : MonoBehaviour
         CurrentTurnIndicatorManager.Instance?.UpdateCurrentTurnIndicator(playerId);
     }
 
+    /// <summary>
+    /// Updates guide scene part5 turn indicator binding so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateGuideScenePart5TurnIndicatorBinding(string stepId)
     {
         if (string.IsNullOrWhiteSpace(stepId))
@@ -2214,6 +2517,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether guide scene part5 wave step active is true.
+    /// </summary>
     private bool IsGuideScenePart5WaveStepActive()
     {
         TutorialStep step = CurrentStep;
@@ -2224,6 +2530,9 @@ public class TutorialManager : MonoBehaviour
                step.stepId.StartsWith("part5_step_");
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether guide scene tutorial wave interaction blocked is true.
+    /// </summary>
     private bool IsGuideSceneTutorialWaveInteractionBlocked()
     {
         return IsGuideScenePart5WaveStepActive() &&
@@ -2231,6 +2540,9 @@ public class TutorialManager : MonoBehaviour
                !guideSceneWaveTutorialCompleted;
     }
 
+    /// <summary>
+    /// Handles infer tutorial card ID from step for card state, hand state, or targeting.
+    /// </summary>
     private string InferTutorialCardIdFromStep(string stepId)
     {
         if (string.IsNullOrWhiteSpace(stepId))
@@ -2253,6 +2565,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns first other active player from the current scene or gameplay state.
+    /// </summary>
     private PlayerResource GetFirstOtherActivePlayer(PlayerManager playerManager, int currentPlayerId)
     {
         if (playerManager == null || playerManager.players == null)
@@ -2271,6 +2586,9 @@ public class TutorialManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Returns first active player from the current scene or gameplay state.
+    /// </summary>
     private PlayerResource GetFirstActivePlayer(PlayerManager playerManager)
     {
         if (playerManager == null || playerManager.players == null)
@@ -2289,6 +2607,9 @@ public class TutorialManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Returns last active player from the current scene or gameplay state.
+    /// </summary>
     private PlayerResource GetLastActivePlayer(PlayerManager playerManager)
     {
         if (playerManager == null || playerManager.players == null)
@@ -2309,12 +2630,18 @@ public class TutorialManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Looks up the target for build area by path and applies the resolved gameplay result.
+    /// </summary>
     private TowerBuildArea ResolveBuildAreaByPath(string hierarchyPath)
     {
         GameObject areaObject = FindSceneObjectByPath(hierarchyPath);
         return areaObject != null ? areaObject.GetComponent<TowerBuildArea>() : null;
     }
 
+    /// <summary>
+    /// Ensures build area owned by player exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureBuildAreaOwnedByPlayer(TowerBuildArea buildArea, int playerId, PlayerManager playerManager, bool preserveTower)
     {
         if (buildArea == null)
@@ -2337,6 +2664,9 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensures tower for player exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureTowerForPlayer(TowerBuildArea buildArea, int playerId, BuildTowerManager buildTowerManager)
     {
         if (buildArea == null || buildTowerManager == null)
@@ -2356,8 +2686,14 @@ public class TutorialManager : MonoBehaviour
         buildTowerManager.TryBuildTowerForPlayer(buildArea, TowerType.Cannon, playerId, false);
     }
 
+    /// <summary>
+    /// Handles fallback advance routine for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private IEnumerator FallbackAdvanceRoutine(TutorialStep expectedStep, float delaySeconds)
     {
+        /// <summary>
+        /// Handles wait for seconds for tutorial manager.
+        /// </summary>
         yield return new WaitForSeconds(delaySeconds);
 
         if (tutorialCompleted || !tutorialStarted || CurrentStep != expectedStep)
@@ -2376,6 +2712,9 @@ public class TutorialManager : MonoBehaviour
         AdvanceToNextStep();
     }
 
+    /// <summary>
+    /// Marks step completed so later turns or systems can react to it.
+    /// </summary>
     private void MarkStepCompleted(TutorialStep step)
     {
         if (step == null || string.IsNullOrWhiteSpace(step.stepId))
@@ -2386,6 +2725,9 @@ public class TutorialManager : MonoBehaviour
         completedStepIds.Add(step.stepId);
     }
 
+    /// <summary>
+    /// Stops current step routine and disables its related gameplay flow.
+    /// </summary>
     private void StopCurrentStepRoutine()
     {
         if (currentStepRoutine != null)

@@ -37,6 +37,9 @@ public class APDisplayUI : MonoBehaviour
     public TurnManager turnManager;
     public TextMeshProUGUI apText;
 
+    /// <summary>
+    /// Finds and stores AP display UI references before scene gameplay begins.
+    /// </summary>
     void Awake()
     {
         if (apText == null)
@@ -45,11 +48,17 @@ public class APDisplayUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks AP display UI input, timing, animation, or UI state once per frame.
+    /// </summary>
     void Update()
     {
         Refresh();
     }
 
+    /// <summary>
+    /// Refreshes this display from the latest gameplay data.
+    /// </summary>
     public void Refresh()
     {
         TurnManager manager = turnManager != null ? turnManager : TurnManager.Instance;

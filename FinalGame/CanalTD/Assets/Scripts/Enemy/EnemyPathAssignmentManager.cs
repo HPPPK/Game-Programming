@@ -50,12 +50,18 @@ public class EnemyPathAssignmentManager : MonoBehaviour
     private int cachedVersion = -1;
     private int fallbackWaveEnemyCount = 1;
 
+    /// <summary>
+    /// Finds and stores enemy path assignment manager references before scene gameplay begins.
+    /// </summary>
     void Awake()
     {
         Instance = this;
         ResetAssignments();
     }
 
+    /// <summary>
+    /// Resets assignments for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetAssignments()
     {
         assignedCounts.Clear();
@@ -76,6 +82,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Resets assignments for wave for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetAssignmentsForWave(int totalEnemyCount, EnemySpawner[] spawners)
     {
         ResetAssignments();
@@ -105,6 +114,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns path to least assigned reachable castle used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public List<PathNode> GetPathToLeastAssignedReachableCastle(PathNode startNode)
     {
         if (startNode == null)
@@ -142,6 +154,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         return selectedPath;
     }
 
+    /// <summary>
+    /// Builds path plan for start node from configured scene objects and runtime state.
+    /// </summary>
     private void BuildPathPlanForStartNode(PathNode startNode)
     {
         List<CastlePathOptions> reachableOptions = GetReachableCastlePathOptions(startNode);
@@ -225,6 +240,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         plannedPathsByStart[startNode] = new Queue<List<PathNode>>(plannedPaths);
     }
 
+    /// <summary>
+    /// Returns reachable castle path options used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private List<CastlePathOptions> GetReachableCastlePathOptions(PathNode startNode)
     {
         List<CastlePathOptions> reachableOptions = new List<CastlePathOptions>();
@@ -261,6 +279,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         return reachableOptions;
     }
 
+    /// <summary>
+    /// Returns valid paths used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private List<List<PathNode>> GetValidPaths(PathNode startNode, CastleEndNode castle)
     {
         List<List<PathNode>> validPaths = GetCachedPaths(startNode, castle);
@@ -268,6 +289,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         return validPaths;
     }
 
+    /// <summary>
+    /// Returns cached paths used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private List<List<PathNode>> GetCachedPaths(PathNode startNode, CastleEndNode castle)
     {
         InvalidateCacheIfNeeded();
@@ -282,6 +306,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         return cachedPaths[key];
     }
 
+    /// <summary>
+    /// Returns planned enemy count for start node used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private int GetPlannedEnemyCountForStartNode(PathNode startNode)
     {
         if (plannedEnemyCountsByStart.ContainsKey(startNode))
@@ -292,6 +319,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         return fallbackWaveEnemyCount;
     }
 
+    /// <summary>
+    /// Handles allocate quotas for enemy movement, health, waves, or routing.
+    /// </summary>
     private List<int> AllocateQuotas(int totalCount, List<float> weights, bool guaranteeOneIfPossible)
     {
         List<int> quotas = new List<int>();
@@ -372,6 +402,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         return quotas;
     }
 
+    /// <summary>
+    /// Returns path castle used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private CastleEndNode GetPathCastle(List<PathNode> path)
     {
         if (path == null || path.Count == 0)
@@ -382,6 +415,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         return path[path.Count - 1] as CastleEndNode;
     }
 
+    /// <summary>
+    /// Handles invalidate cache if needed for enemy movement, health, waves, or routing.
+    /// </summary>
     private void InvalidateCacheIfNeeded()
     {
         if (cachedVersion != PathGraphState.Version)
@@ -400,6 +436,9 @@ public class EnemyPathAssignmentManager : MonoBehaviour
         public int ShortestPathLength { get; private set; }
         public float AveragePathLength { get; private set; }
 
+        /// <summary>
+        /// Handles castle path options for enemy movement, health, waves, or routing.
+        /// </summary>
         public CastlePathOptions(CastleEndNode castle, List<List<PathNode>> paths)
         {
             Castle = castle;

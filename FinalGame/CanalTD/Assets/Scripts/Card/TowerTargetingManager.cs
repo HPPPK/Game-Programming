@@ -71,6 +71,9 @@ public class TowerTargetingManager : MonoBehaviour
     private CannonTower selectedTower;
     private bool isTargeting = false;
 
+    /// <summary>
+    /// Finds and stores tower targeting manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (playerManager == null)
@@ -89,6 +92,9 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Subscribes tower targeting manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         if (confirmButton != null)
@@ -102,6 +108,9 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Unsubscribes tower targeting manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         if (confirmButton != null)
@@ -115,11 +124,17 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up tower targeting manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         ExitTargetingMode();
     }
 
+    /// <summary>
+    /// Checks tower targeting manager input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!isTargeting)
@@ -133,6 +148,9 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles begin power boost targeting for card state, hand state, or targeting.
+    /// </summary>
     public bool BeginPowerBoostTargeting()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PowerBoost, null))
@@ -196,6 +214,9 @@ public class TowerTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Confirms selection and applies the selected action if it is valid.
+    /// </summary>
     public void ConfirmSelection()
     {
         if (!isTargeting)
@@ -247,11 +268,20 @@ public class TowerTargetingManager : MonoBehaviour
         ResolvePowerBoost(playerManager != null ? playerManager.GetCurrentPlayerId() : 0, selectedTower, true);
     }
 
+    /// <summary>
+    /// Looks up the target for power boost and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolvePowerBoost(int playerId, CannonTower tower)
     {
+        /// <summary>
+        /// Handles resolve power boost for tower targeting manager.
+        /// </summary>
         return ResolvePowerBoost(playerId, tower, false);
     }
 
+    /// <summary>
+    /// Looks up the target for power boost and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolvePowerBoost(int playerId, CannonTower tower, bool consumePendingCard)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PowerBoost, tower != null ? tower.gameObject : null))
@@ -303,11 +333,20 @@ public class TowerTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks whether player boost tower is allowed before enabling that action.
+    /// </summary>
     public bool CanPlayerBoostTower(int playerId, CannonTower tower)
     {
+        /// <summary>
+        /// Handles is valid power boost target for tower targeting manager.
+        /// </summary>
         return IsValidPowerBoostTarget(tower, playerId);
     }
 
+    /// <summary>
+    /// Applies power boost from online to gameplay data and updates visible feedback.
+    /// </summary>
     public bool ApplyPowerBoostFromOnline(int playerId, CannonTower tower)
     {
         if (!IsValidPowerBoostTarget(tower, playerId))
@@ -319,6 +358,9 @@ public class TowerTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks whether selection is allowed before enabling that action.
+    /// </summary>
     public void CancelSelection()
     {
         if (!isTargeting)
@@ -334,21 +376,33 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether targeting is true.
+    /// </summary>
     public bool IsTargeting()
     {
         return isTargeting;
     }
 
+    /// <summary>
+    /// Handles exit without consuming card for card state, hand state, or targeting.
+    /// </summary>
     public void ExitWithoutConsumingCard()
     {
         ExitTargetingMode();
     }
 
+    /// <summary>
+    /// Decides whether should block online action should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldBlockOnlineAction()
     {
         return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
+    /// <summary>
+    /// Attempts to select tower at mouse and returns false if rules, resources, or references block it.
+    /// </summary>
     private void TrySelectTowerAtMouse()
     {
         if (ShouldBlockOnlineAction())
@@ -404,6 +458,9 @@ public class TowerTargetingManager : MonoBehaviour
         Debug.Log("Selected tower: " + selectedTower.name);
     }
 
+    /// <summary>
+    /// Returns tower under mouse used by card handling or target selection.
+    /// </summary>
     private CannonTower GetTowerUnderMouse()
     {
         if (targetCamera == null)
@@ -419,6 +476,9 @@ public class TowerTargetingManager : MonoBehaviour
         Vector3 mouseScreenPosition = Input.mousePosition;
         float distanceFromCamera = Mathf.Abs(targetCamera.transform.position.z);
         Vector3 worldPosition = targetCamera.ScreenToWorldPoint(
+            /// <summary>
+            /// Handles vector3 for tower targeting manager.
+            /// </summary>
             new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, distanceFromCamera)
         );
 
@@ -475,6 +535,9 @@ public class TowerTargetingManager : MonoBehaviour
         return firstOwnedTower != null ? firstOwnedTower : firstTower;
     }
 
+    /// <summary>
+    /// Returns towers used by card handling or target selection.
+    /// </summary>
     private List<CannonTower> GetTowers()
     {
         List<CannonTower> towers = new List<CannonTower>();
@@ -491,6 +554,9 @@ public class TowerTargetingManager : MonoBehaviour
         return towers;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid power boost target is true.
+    /// </summary>
     private bool IsValidPowerBoostTarget(CannonTower tower, int currentPlayerId)
     {
         return tower != null &&
@@ -500,6 +566,9 @@ public class TowerTargetingManager : MonoBehaviour
             !tower.IsDisabledByFreeze();
     }
 
+    /// <summary>
+    /// Returns target renderer used by card handling or target selection.
+    /// </summary>
     private SpriteRenderer GetTargetRenderer(CannonTower tower)
     {
         if (tower == null)
@@ -515,6 +584,9 @@ public class TowerTargetingManager : MonoBehaviour
         return tower.GetComponentInChildren<SpriteRenderer>();
     }
 
+    /// <summary>
+    /// Handles store original visual for card state, hand state, or targeting.
+    /// </summary>
     private void StoreOriginalVisual(SpriteRenderer renderer)
     {
         if (renderer == null)
@@ -533,6 +605,9 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies target visual to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyTargetVisual(SpriteRenderer renderer, Color color, int sortingOrder)
     {
         if (renderer == null)
@@ -546,6 +621,9 @@ public class TowerTargetingManager : MonoBehaviour
         renderer.sortingOrder = sortingOrder;
     }
 
+    /// <summary>
+    /// Sets targeting visuals and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetTargetingVisuals(bool active)
     {
         if (active && BuildTowerManager.Instance != null)
@@ -593,6 +671,9 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets normal gameplay UI enabled and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetNormalGameplayUIEnabled(bool enabled)
     {
         ResolveNormalGameplayUI();
@@ -606,6 +687,9 @@ public class TowerTargetingManager : MonoBehaviour
         normalGameplayUI.blocksRaycasts = enabled;
     }
 
+    /// <summary>
+    /// Sets overlay raycast blocking and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetOverlayRaycastBlocking(bool blocking)
     {
         if (darkOverlay == null)
@@ -621,11 +705,20 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over targeting controls is true.
+    /// </summary>
     private bool IsPointerOverTargetingControls()
     {
+        /// <summary>
+        /// Handles is pointer over button for tower targeting manager.
+        /// </summary>
         return IsPointerOverButton(confirmButton) || IsPointerOverButton(cancelButton);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over button is true.
+    /// </summary>
     private bool IsPointerOverButton(Button button)
     {
         if (button == null)
@@ -651,6 +744,9 @@ public class TowerTargetingManager : MonoBehaviour
         return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, uiCamera);
     }
 
+    /// <summary>
+    /// Looks up the target for normal gameplay UI and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveNormalGameplayUI()
     {
         if (normalGameplayUI != null)
@@ -670,6 +766,9 @@ public class TowerTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles exit targeting mode for card state, hand state, or targeting.
+    /// </summary>
     private void ExitTargetingMode()
     {
         RestoreTargetVisuals();
@@ -679,6 +778,9 @@ public class TowerTargetingManager : MonoBehaviour
         UpdateConfirmButtonState();
     }
 
+    /// <summary>
+    /// Updates confirm button state so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateConfirmButtonState()
     {
         if (confirmButton == null)
@@ -695,6 +797,9 @@ public class TowerTargetingManager : MonoBehaviour
         confirmButton.interactable = isTargeting && selectedTower != null;
     }
 
+    /// <summary>
+    /// Handles restore target visuals for card state, hand state, or targeting.
+    /// </summary>
     private void RestoreTargetVisuals()
     {
         foreach (KeyValuePair<SpriteRenderer, Color> entry in originalColors)
@@ -719,6 +824,9 @@ public class TowerTargetingManager : MonoBehaviour
         originalSortingOrders.Clear();
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -735,6 +843,9 @@ public class TowerTargetingManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

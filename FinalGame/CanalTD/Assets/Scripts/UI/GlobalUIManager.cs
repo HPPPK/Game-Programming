@@ -48,6 +48,9 @@ public class GlobalUIManager : MonoBehaviour
 
     private Coroutine toastCoroutine;
 
+    /// <summary>
+    /// Finds and stores global UI manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         // Prevent duplicate GlobalUIRoot objects when returning to BootstrapScene.
@@ -67,6 +70,9 @@ public class GlobalUIManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    /// <summary>
+    /// Sets up global UI manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         CloseInstruction();
@@ -79,6 +85,9 @@ public class GlobalUIManager : MonoBehaviour
     }
 
     // Opens the instruction panel if closed, otherwise closes it.
+    /// <summary>
+    /// Handles toggle instruction for UI display, input, or player feedback.
+    /// </summary>
     public void ToggleInstruction()
     {
         if (instructionBook == null)
@@ -98,6 +107,9 @@ public class GlobalUIManager : MonoBehaviour
     }
 
     // Closes the instruction panel without affecting other UI.
+    /// <summary>
+    /// Handles close instruction for UI display, input, or player feedback.
+    /// </summary>
     public void CloseInstruction()
     {
         if (instructionBook != null)
@@ -107,6 +119,9 @@ public class GlobalUIManager : MonoBehaviour
     }
 
     // Opens the settings panel if closed, otherwise closes it.
+    /// <summary>
+    /// Handles toggle settings for UI display, input, or player feedback.
+    /// </summary>
     public void ToggleSettings()
     {
         if (settingsPanel == null)
@@ -126,6 +141,9 @@ public class GlobalUIManager : MonoBehaviour
     }
 
     // Closes the settings panel without affecting other UI.
+    /// <summary>
+    /// Handles close settings for UI display, input, or player feedback.
+    /// </summary>
     public void CloseSettings()
     {
         if (settingsPanel != null)
@@ -135,6 +153,9 @@ public class GlobalUIManager : MonoBehaviour
     }
 
     // Shows a temporary toast message and hides it after toastDuration seconds.
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     public void ShowToast(string message)
     {
         Debug.Log(message);
@@ -170,8 +191,14 @@ public class GlobalUIManager : MonoBehaviour
     }
 
     // Coroutine used by ShowToast so repeated messages reset the hide timer.
+    /// <summary>
+    /// Hides toast after delay and clears temporary visual state.
+    /// </summary>
     private IEnumerator HideToastAfterDelay()
     {
+        /// <summary>
+        /// Handles wait for seconds for global UI manager.
+        /// </summary>
         yield return new WaitForSeconds(toastDuration);
 
         if (toastRoot != null)

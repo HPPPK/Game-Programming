@@ -48,11 +48,17 @@ public class SimpleFrameAnimator : MonoBehaviour
     private float frameTimer = 0f;
     private bool isPlaying = false;
 
+    /// <summary>
+    /// Finds and stores simple frame animator references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
+    /// <summary>
+    /// Sets up simple frame animator when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         if (!HasFrames())
@@ -76,6 +82,9 @@ public class SimpleFrameAnimator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks simple frame animator input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!isPlaying || !HasFrames() || spriteRenderer == null)
@@ -96,6 +105,9 @@ public class SimpleFrameAnimator : MonoBehaviour
     }
 
     // Starts or resumes frame animation.
+    /// <summary>
+    /// Plays play in the current scene context.
+    /// </summary>
     public void Play()
     {
         if (!HasFrames() || spriteRenderer == null)
@@ -107,12 +119,18 @@ public class SimpleFrameAnimator : MonoBehaviour
     }
 
     // Pauses frame animation on the current frame.
+    /// <summary>
+    /// Stops stop and disables its related gameplay flow.
+    /// </summary>
     public void Stop()
     {
         isPlaying = false;
     }
 
     // Moves animation back to frame 0 and displays it immediately.
+    /// <summary>
+    /// Resets to first frame for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetToFirstFrame()
     {
         currentFrameIndex = 0;
@@ -120,6 +138,9 @@ public class SimpleFrameAnimator : MonoBehaviour
         ApplyCurrentFrame();
     }
 
+    /// <summary>
+    /// Advances frame to the next turn, wave, player, or tutorial step.
+    /// </summary>
     private void AdvanceFrame()
     {
         currentFrameIndex++;
@@ -140,6 +161,9 @@ public class SimpleFrameAnimator : MonoBehaviour
         ApplyCurrentFrame();
     }
 
+    /// <summary>
+    /// Applies current frame to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyCurrentFrame()
     {
         if (!HasFrames() || spriteRenderer == null)
@@ -150,6 +174,9 @@ public class SimpleFrameAnimator : MonoBehaviour
         spriteRenderer.sprite = frames[currentFrameIndex];
     }
 
+    /// <summary>
+    /// Checks whether frames is present before the code depends on it.
+    /// </summary>
     private bool HasFrames()
     {
         return frames != null && frames.Length > 0;

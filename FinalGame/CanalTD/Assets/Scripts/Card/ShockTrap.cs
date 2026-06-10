@@ -63,6 +63,9 @@ public class ShockTrap : MonoBehaviour
     private PlayerManager cachedPlayerManager;
     private Sprite ownerIdleSprite;
 
+    /// <summary>
+    /// Finds and stores shock trap references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (animator == null)
@@ -76,11 +79,17 @@ public class ShockTrap : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Initializes initialize and prepares the references needed before use.
+    /// </summary>
     public void Initialize(int playerId, PlayerResource resource)
     {
         Initialize(playerId, resource, null);
     }
 
+    /// <summary>
+    /// Initializes initialize and prepares the references needed before use.
+    /// </summary>
     public void Initialize(int playerId, PlayerResource resource, Transform routeNode)
     {
         ownerPlayerId = playerId;
@@ -94,6 +103,9 @@ public class ShockTrap : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies owner visual to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOwnerVisual(PlayerManager playerManager)
     {
         cachedPlayerManager = playerManager;
@@ -122,6 +134,9 @@ public class ShockTrap : MonoBehaviour
         EnsureVisibleAlpha();
     }
 
+    /// <summary>
+    /// Keeps shock trap visuals aligned after normal frame updates finish.
+    /// </summary>
     private void LateUpdate()
     {
         if (!triggered)
@@ -130,6 +145,9 @@ public class ShockTrap : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies owner idle sprite to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyOwnerIdleSprite()
     {
         if (!useOwnerSprite)
@@ -153,6 +171,9 @@ public class ShockTrap : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Searches scene objects or cached lists to find trap renderer.
+    /// </summary>
     private SpriteRenderer FindTrapRenderer()
     {
         Transform visual = transform.Find("Visual");
@@ -177,6 +198,9 @@ public class ShockTrap : MonoBehaviour
         return GetComponentInChildren<SpriteRenderer>(true);
     }
 
+    /// <summary>
+    /// Ensures visible alpha exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureVisibleAlpha()
     {
         if (trapRenderer == null)
@@ -194,6 +218,9 @@ public class ShockTrap : MonoBehaviour
         trapRenderer.color = color;
     }
 
+    /// <summary>
+    /// Checks shock trap input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!activeDuringWave || triggered)
@@ -211,22 +238,34 @@ public class ShockTrap : MonoBehaviour
         TriggerTrap();
     }
 
+    /// <summary>
+    /// Responds to on wave started and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnWaveStarted()
     {
         activeDuringWave = true;
     }
 
+    /// <summary>
+    /// Responds to on wave ended and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnWaveEnded()
     {
         activeDuringWave = false;
     }
 
     // Shared radius query used separately for trigger detection and explosion damage.
+    /// <summary>
+    /// Returns enemies in radius used by card handling or target selection.
+    /// </summary>
     private EnemyHealth[] GetEnemiesInRadius(float searchRadius)
     {
         if (enemyLayer.value != 0)
         {
             Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, searchRadius, enemyLayer);
+            /// <summary>
+            /// Handles collect enemies from hits for shock trap.
+            /// </summary>
             return CollectEnemiesFromHits(hits);
         }
 
@@ -244,6 +283,9 @@ public class ShockTrap : MonoBehaviour
         return enemies.ToArray();
     }
 
+    /// <summary>
+    /// Handles collect enemies from hits for card state, hand state, or targeting.
+    /// </summary>
     private EnemyHealth[] CollectEnemiesFromHits(Collider2D[] hits)
     {
         System.Collections.Generic.List<EnemyHealth> enemies = new System.Collections.Generic.List<EnemyHealth>();
@@ -271,6 +313,9 @@ public class ShockTrap : MonoBehaviour
         return enemies.ToArray();
     }
 
+    /// <summary>
+    /// Handles trigger trap for card state, hand state, or targeting.
+    /// </summary>
     private void TriggerTrap()
     {
         triggered = true;
@@ -280,8 +325,14 @@ public class ShockTrap : MonoBehaviour
         StartCoroutine(DamageAfterDelay());
     }
 
+    /// <summary>
+    /// Handles damage after delay for card state, hand state, or targeting.
+    /// </summary>
     private IEnumerator DamageAfterDelay()
     {
+        /// <summary>
+        /// Handles wait for seconds for shock trap.
+        /// </summary>
         yield return new WaitForSeconds(damageDelayAfterTrigger);
 
         EnemyHealth[] enemies = GetEnemiesInRadius(explosionRadius);
@@ -299,6 +350,9 @@ public class ShockTrap : MonoBehaviour
         PlayExplosionAndDestroy();
     }
 
+    /// <summary>
+    /// Handles disable colliders for card state, hand state, or targeting.
+    /// </summary>
     private void DisableColliders()
     {
         Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
@@ -312,6 +366,9 @@ public class ShockTrap : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Plays explosion and destroy in the current scene context.
+    /// </summary>
     private void PlayExplosionAndDestroy()
     {
         if (animator != null && !string.IsNullOrEmpty(explodeTriggerName))
@@ -324,11 +381,17 @@ public class ShockTrap : MonoBehaviour
         Destroy(gameObject);
     }
 
+    /// <summary>
+    /// Removes shock trap listeners and temporary references before destruction.
+    /// </summary>
     private void OnDestroy()
     {
         UnregisterTrap();
     }
 
+    /// <summary>
+    /// Unregisters trap so old callbacks or duplicate listeners cannot fire.
+    /// </summary>
     private void UnregisterTrap()
     {
         if (routeNodeTransform != null)
@@ -338,11 +401,17 @@ public class ShockTrap : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles blocks placement for card state, hand state, or targeting.
+    /// </summary>
     public bool BlocksPlacement()
     {
         return countsAsActiveTrap && !triggered;
     }
 
+    /// <summary>
+    /// Draws editor-only gizmos when this object is selected in the Scene view.
+    /// </summary>
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.9f);

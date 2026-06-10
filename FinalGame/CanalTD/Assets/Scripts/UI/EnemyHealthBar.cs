@@ -45,6 +45,9 @@ public class EnemyHealthBar : MonoBehaviour
 
     private Coroutine flashCoroutine;
 
+    /// <summary>
+    /// Sets health and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetHealth(int currentHP, int maxHP)
     {
         if (fillImage == null)
@@ -62,6 +65,9 @@ public class EnemyHealthBar : MonoBehaviour
         fillImage.fillAmount = ratio;
     }
 
+    /// <summary>
+    /// Plays damage flash in the current scene context.
+    /// </summary>
     public void PlayDamageFlash()
     {
         if (fillImage == null)
@@ -77,9 +83,15 @@ public class EnemyHealthBar : MonoBehaviour
         flashCoroutine = StartCoroutine(DamageFlashRoutine());
     }
 
+    /// <summary>
+    /// Handles damage flash routine for UI display, input, or player feedback.
+    /// </summary>
     private IEnumerator DamageFlashRoutine()
     {
         fillImage.color = damageColor;
+        /// <summary>
+        /// Handles wait for seconds for enemy health bar.
+        /// </summary>
         yield return new WaitForSeconds(flashTime);
         fillImage.color = normalColor;
     }

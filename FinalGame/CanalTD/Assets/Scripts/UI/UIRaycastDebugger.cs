@@ -35,21 +35,33 @@ using UnityEngine.EventSystems;
 
 public class UIRaycastDebugger : MonoBehaviour
 {
+    /// <summary>
+    /// Finds and stores UI raycast debugger references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         Debug.Log("UIRaycastDebugger AWAKE");
     }
 
+    /// <summary>
+    /// Subscribes UI raycast debugger to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         Debug.Log("UIRaycastDebugger ENABLED");
     }
 
+    /// <summary>
+    /// Sets up UI raycast debugger when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         Debug.Log("UIRaycastDebugger START");
     }
 
+    /// <summary>
+    /// Checks UI raycast debugger input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!Input.GetMouseButtonDown(0)) return;

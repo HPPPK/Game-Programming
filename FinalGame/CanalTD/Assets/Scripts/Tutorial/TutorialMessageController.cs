@@ -67,6 +67,9 @@ public class TutorialMessageController : MonoBehaviour
     private Vector2 defaultPartTitleSizeDelta;
     private bool cachedDefaultTextRects;
 
+    /// <summary>
+    /// Finds and stores tutorial message controller references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         ResolveButtonReferences();
@@ -101,11 +104,17 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Initializes initialize and prepares the references needed before use.
+    /// </summary>
     public void Initialize(TutorialManager manager)
     {
         tutorialManager = manager;
     }
 
+    /// <summary>
+    /// Shows step with the correct current context.
+    /// </summary>
     public void ShowStep(TutorialStep step)
     {
         if (messageRoot != null)
@@ -151,6 +160,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows completion panel with the correct current context.
+    /// </summary>
     public void ShowCompletionPanel(string completionMessage = null)
     {
         ResolveCompletionPanelReference();
@@ -181,6 +193,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Hides all and clears temporary visual state.
+    /// </summary>
     public void HideAll()
     {
         RestoreDefaultStepLayout();
@@ -196,21 +211,33 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on click previous and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickPrevious()
     {
         tutorialManager?.PreviousStep();
     }
 
+    /// <summary>
+    /// Responds to on click next and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickNext()
     {
         tutorialManager?.NextStep();
     }
 
+    /// <summary>
+    /// Responds to on click skip part and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickSkipPart()
     {
         tutorialManager?.SkipCurrentPart();
     }
 
+    /// <summary>
+    /// Looks up the target for button references and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveButtonReferences()
     {
         if (previousButton == null)
@@ -231,6 +258,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for background reference and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveBackgroundReference()
     {
         if (messagePanelBackground == null)
@@ -245,6 +275,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for completion panel reference and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveCompletionPanelReference()
     {
         if (completionPanel != null)
@@ -273,6 +306,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for completion text references and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveCompletionTextReferences()
     {
         if (completionPanel == null)
@@ -301,6 +337,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for message root layout defaults and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveMessageRootLayoutDefaults()
     {
         if (messageRootRect == null)
@@ -316,6 +355,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for font defaults and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveFontDefaults()
     {
         if (!cachedDefaultFontSizes && messageText != null && partTitleText != null)
@@ -326,6 +368,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for text rect defaults and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveTextRectDefaults()
     {
         if (messageTextRect == null && messageText != null)
@@ -348,12 +393,18 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Searches scene objects or cached lists to find child button.
+    /// </summary>
     private Button FindChildButton(string objectName)
     {
         Transform child = transform.Find(objectName);
         return child != null ? child.GetComponent<Button>() : null;
     }
 
+    /// <summary>
+    /// Handles bind button for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private void BindButton(Button button, UnityEngine.Events.UnityAction callback)
     {
         if (button == null || callback == null)
@@ -370,6 +421,9 @@ public class TutorialMessageController : MonoBehaviour
         button.onClick.AddListener(callback);
     }
 
+    /// <summary>
+    /// Handles normalize tutorial button colors for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private void NormalizeTutorialButtonColors(Button button)
     {
         if (button == null)
@@ -383,6 +437,9 @@ public class TutorialMessageController : MonoBehaviour
         button.colors = colors;
     }
 
+    /// <summary>
+    /// Applies tutorial background color to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyTutorialBackgroundColor()
     {
         ResolveBackgroundReference();
@@ -393,6 +450,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies step layout to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyStepLayout(TutorialStep step)
     {
         ResolveMessageRootLayoutDefaults();
@@ -407,6 +467,9 @@ public class TutorialMessageController : MonoBehaviour
         RestoreDefaultStepLayout();
     }
 
+    /// <summary>
+    /// Applies final summary layout to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyFinalSummaryLayout()
     {
         ResolveTextRectDefaults();
@@ -446,6 +509,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles restore default step layout for tutorial guidance, highlights, or step progression.
+    /// </summary>
     private void RestoreDefaultStepLayout()
     {
         ResolveMessageRootLayoutDefaults();
@@ -481,6 +547,9 @@ public class TutorialMessageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether final summary step is true.
+    /// </summary>
     private bool IsFinalSummaryStep(TutorialStep step)
     {
         return step != null &&
@@ -488,6 +557,9 @@ public class TutorialMessageController : MonoBehaviour
                step.stepId == "part5_step_12";
     }
 
+    /// <summary>
+    /// Applies completion background color to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyCompletionBackgroundColor()
     {
         ResolveBackgroundReference();
