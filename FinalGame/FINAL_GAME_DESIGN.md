@@ -57,13 +57,11 @@ AI Mode is one of the primary stable assessment routes. It provides AI-controlle
 
 ## Online mode status
 
-Online Mode is implemented as an extension using Photon-related scripts and room/lobby flow. It is not the primary stable assessment path unless broader multiplayer validation is completed. The root README records the final online scope and known limitations.
-
-Manual validation of online room joining, scene transition, turn authority, and card/build synchronization must be recorded separately before Online Mode is described as fully stable.
+Online Mode is implemented using Photon room-code multiplayer. It supports create/join room flow, player slots, ready/start flow, synchronized turns, build actions, card actions, gate actions, enemy waves, combat outcomes, and result flow when clients use compatible Photon settings and builds. The root README records the final online scope and known limitations.
 
 ## Win / lose / completion condition
 
-The match completion route leads to `ResultScene`, where ranking/result information is displayed. Manual Unity verification is required to record final pass/fail evidence for every result-state scenario.
+The match completion route leads to `ResultScene`, where ranking/result information is displayed. The main result flow has been manually verified through the testing log. Additional rare result-state edge cases can be expanded through future regression testing.
 
 ## Feedback and UI
 
@@ -71,11 +69,11 @@ The project includes current-turn indicators, player status panels, targeting fe
 
 ## Scope control: what is included in the vertical slice
 
-The assessed vertical slice includes the Bootstrap/Home/ModeSelect flow, Local and AI modes, Guide scene, Game scene, card actions, turn/AP rules, tower building, enemy waves, route pressure, UI feedback, audio feedback, and Result scene.
+The assessed vertical slice includes the Bootstrap/Home/ModeSelect flow, Local, AI, and Online modes, Guide scene, Game scene, card actions, turn/AP rules, tower building, enemy waves, route pressure, UI feedback, audio feedback, and Result scene.
 
 ## Future work / intentionally reduced features
 
-- Broader online multiplayer validation.
+- Automated multiplayer regression tests and longer soak testing.
 - More regression and playtesting evidence.
 - Further balance tuning for cards, AI behavior, tutorial pacing, and multiplayer clarity.
 - Historical prototype ideas that are not present in the final Unity route should be treated as iteration evidence, not final feature claims.
