@@ -80,6 +80,9 @@ public class BuildTowerManager : MonoBehaviour
     private TowerBuildArea lastClickedArea;
     private int lastClickedFrame = -1;
 
+    /// <summary>
+    /// Finds and stores build tower manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         Instance = this;
@@ -100,6 +103,9 @@ public class BuildTowerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks build tower manager input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -108,6 +114,9 @@ public class BuildTowerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Attempts to build tower at mouse and returns false if rules, resources, or references block it.
+    /// </summary>
     private void TryBuildTowerAtMouse()
     {
         if (ShouldBlockOnlineAction())
@@ -170,6 +179,9 @@ public class BuildTowerManager : MonoBehaviour
         float distanceFromCamera = Mathf.Abs(targetCamera.transform.position.z);
 
         Vector3 worldPosition = targetCamera.ScreenToWorldPoint(
+            /// <summary>
+            /// Handles vector3 for build tower manager.
+            /// </summary>
             new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, distanceFromCamera)
         );
 
@@ -211,6 +223,9 @@ public class BuildTowerManager : MonoBehaviour
         HandleBuildAreaClicked(buildArea);
     }
 
+    /// <summary>
+    /// Chooses whether the clicked land opens buy-land, build-tower, or manage-tower UI.
+    /// </summary>
     public void HandleBuildAreaClicked(TowerBuildArea buildArea)
     {
         if (!CanInteractWithBuildAreas())
@@ -289,6 +304,9 @@ public class BuildTowerManager : MonoBehaviour
         ShowBuildMenuOrFallback(buildArea);
     }
 
+    /// <summary>
+    /// Handles clicks on an occupied tile by checking ownership and opening tower management.
+    /// </summary>
     private void HandleOccupiedBuildAreaClick(TowerBuildArea buildArea)
     {
         int activePlayerId = GetCurrentPlayerId();
@@ -313,6 +331,9 @@ public class BuildTowerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Hides build interaction UI and clears temporary visual state.
+    /// </summary>
     public void HideBuildInteractionUI()
     {
         if (radialTowerMenu != null)
@@ -321,6 +342,9 @@ public class BuildTowerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Attempts to buy land and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryBuyLand(TowerBuildArea buildArea)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.BuyLand, buildArea != null ? buildArea.gameObject : null))
@@ -353,12 +377,21 @@ public class BuildTowerManager : MonoBehaviour
             return syncManager.RequestBuyLand(buildArea);
         }
 
+        /// <summary>
+        /// Attempts to buy land for player and reports whether it succeeded.
+        /// </summary>
         return TryBuyLandForPlayer(buildArea, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
     }
 
+    /// <summary>
+    /// Attempts to buy land for player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryBuyLandForPlayer(TowerBuildArea buildArea, int playerId)
     {
         PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        /// <summary>
+        /// Attempts to buy land for player and reports whether it succeeded.
+        /// </summary>
         return TryBuyLandForPlayer(buildArea, playerId, playerResource, false);
     }
 
@@ -411,11 +444,20 @@ public class BuildTowerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Attempts to purchase land and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryPurchaseLand(TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Attempts to buy land and reports whether it succeeded.
+        /// </summary>
         return TryBuyLand(buildArea);
     }
 
+    /// <summary>
+    /// Attempts to build tower and returns false if rules, resources, or references block it.
+    /// </summary>
     private void TryBuildTower(TowerBuildArea buildArea)
     {
         TryBuildTower(buildArea, TowerType.Cannon, GetCurrentPlayerId(), GetCurrentPlayerResource(), true);
@@ -516,21 +558,33 @@ public class BuildTowerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Attempts to build tower from menu and returns false if rules, resources, or references block it.
+    /// </summary>
     public void TryBuildTowerFromMenu(TowerBuildArea buildArea, TowerType towerType)
     {
         TryBuildTower(buildArea, towerType);
     }
 
+    /// <summary>
+    /// Attempts to upgrade tower from menu and returns false if rules, resources, or references block it.
+    /// </summary>
     public void TryUpgradeTowerFromMenu(TowerBuildArea buildArea)
     {
         TryUpgradeTower(buildArea);
     }
 
+    /// <summary>
+    /// Attempts to sell tower from menu and returns false if rules, resources, or references block it.
+    /// </summary>
     public void TrySellTowerFromMenu(TowerBuildArea buildArea)
     {
         TrySellTower(buildArea);
     }
 
+    /// <summary>
+    /// Attempts to build tower and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryBuildTower(TowerBuildArea buildArea, TowerType towerType)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.BuildTower, buildArea != null ? buildArea.gameObject : null))
@@ -563,40 +617,82 @@ public class BuildTowerManager : MonoBehaviour
             return syncManager.RequestBuildTower(buildArea, towerType);
         }
 
+        /// <summary>
+        /// Attempts to build tower for player and reports whether it succeeded.
+        /// </summary>
         return TryBuildTowerForPlayer(buildArea, towerType, GetCurrentPlayerId(), true);
     }
 
+    /// <summary>
+    /// Attempts to build tower for player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryBuildTowerForPlayer(TowerBuildArea buildArea, TowerType towerType, int playerId)
     {
+        /// <summary>
+        /// Attempts to build tower for player and reports whether it succeeded.
+        /// </summary>
         return TryBuildTowerForPlayer(buildArea, towerType, playerId, false);
     }
 
+    /// <summary>
+    /// Attempts to build tower for player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryBuildTowerForPlayer(TowerBuildArea buildArea, TowerType towerType, int playerId, bool showMessages)
     {
         PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        /// <summary>
+        /// Attempts to build tower and reports whether it succeeded.
+        /// </summary>
         return TryBuildTower(buildArea, towerType, playerId, playerResource, showMessages);
     }
 
+    /// <summary>
+    /// Confirms buy land and applies the selected action if it is valid.
+    /// </summary>
     public bool ConfirmBuyLand(TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Attempts to buy land and reports whether it succeeded.
+        /// </summary>
         return TryBuyLand(buildArea);
     }
 
+    /// <summary>
+    /// Confirms build tower and applies the selected action if it is valid.
+    /// </summary>
     public bool ConfirmBuildTower(TowerBuildArea buildArea, TowerType towerType)
     {
+        /// <summary>
+        /// Attempts to build tower and reports whether it succeeded.
+        /// </summary>
         return TryBuildTower(buildArea, towerType);
     }
 
+    /// <summary>
+    /// Confirms upgrade tower and applies the selected action if it is valid.
+    /// </summary>
     public bool ConfirmUpgradeTower(TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Attempts to upgrade tower and reports whether it succeeded.
+        /// </summary>
         return TryUpgradeTower(buildArea);
     }
 
+    /// <summary>
+    /// Confirms sell tower and applies the selected action if it is valid.
+    /// </summary>
     public bool ConfirmSellTower(TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Attempts to sell tower and reports whether it succeeded.
+        /// </summary>
         return TrySellTower(buildArea);
     }
 
+    /// <summary>
+    /// Attempts to upgrade tower and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryUpgradeTower(TowerBuildArea buildArea)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.UpgradeTower, buildArea != null ? buildArea.gameObject : null))
@@ -629,20 +725,38 @@ public class BuildTowerManager : MonoBehaviour
             return syncManager.RequestUpgradeTower(buildArea);
         }
 
+        /// <summary>
+        /// Attempts to upgrade tower for player and reports whether it succeeded.
+        /// </summary>
         return TryUpgradeTowerForPlayer(buildArea, GetCurrentPlayerId(), true);
     }
 
+    /// <summary>
+    /// Attempts to upgrade tower for player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryUpgradeTowerForPlayer(TowerBuildArea buildArea, int playerId)
     {
+        /// <summary>
+        /// Attempts to upgrade tower for player and reports whether it succeeded.
+        /// </summary>
         return TryUpgradeTowerForPlayer(buildArea, playerId, false);
     }
 
+    /// <summary>
+    /// Attempts to upgrade tower for player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryUpgradeTowerForPlayer(TowerBuildArea buildArea, int playerId, bool showMessages)
     {
         PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        /// <summary>
+        /// Attempts to upgrade tower and reports whether it succeeded.
+        /// </summary>
         return TryUpgradeTower(buildArea, playerId, playerResource, showMessages);
     }
 
+    /// <summary>
+    /// Attempts to sell tower and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TrySellTower(TowerBuildArea buildArea)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.SellTower, buildArea != null ? buildArea.gameObject : null))
@@ -675,46 +789,94 @@ public class BuildTowerManager : MonoBehaviour
             return syncManager.RequestSellTower(buildArea);
         }
 
+        /// <summary>
+        /// Attempts to sell tower for player and reports whether it succeeded.
+        /// </summary>
         return TrySellTowerForPlayer(buildArea, GetCurrentPlayerId(), true);
     }
 
+    /// <summary>
+    /// Attempts to sell tower for player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TrySellTowerForPlayer(TowerBuildArea buildArea, int playerId)
     {
+        /// <summary>
+        /// Attempts to sell tower for player and reports whether it succeeded.
+        /// </summary>
         return TrySellTowerForPlayer(buildArea, playerId, false);
     }
 
+    /// <summary>
+    /// Attempts to sell tower for player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TrySellTowerForPlayer(TowerBuildArea buildArea, int playerId, bool showMessages)
     {
         PlayerResource playerResource = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+        /// <summary>
+        /// Attempts to sell tower and reports whether it succeeded.
+        /// </summary>
         return TrySellTower(buildArea, playerId, playerResource, showMessages);
     }
 
+    /// <summary>
+    /// Attempts to build tower for AI and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryBuildTowerForAI(TowerBuildArea buildArea, TowerType type, int playerId)
     {
+        /// <summary>
+        /// Attempts to build tower for player and reports whether it succeeded.
+        /// </summary>
         return TryBuildTowerForPlayer(buildArea, type, playerId, false);
     }
 
+    /// <summary>
+    /// Attempts to upgrade tower for AI and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryUpgradeTowerForAI(TowerBuildArea buildArea, int playerId)
     {
+        /// <summary>
+        /// Attempts to upgrade tower for player and reports whether it succeeded.
+        /// </summary>
         return TryUpgradeTowerForPlayer(buildArea, playerId, false);
     }
 
+    /// <summary>
+    /// Attempts to sell tower for AI and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TrySellTowerForAI(TowerBuildArea buildArea, int playerId)
     {
+        /// <summary>
+        /// Attempts to sell tower for player and reports whether it succeeded.
+        /// </summary>
         return TrySellTowerForPlayer(buildArea, playerId, false);
     }
 
+    /// <summary>
+    /// Returns tower cost used by land, tower, cost, or build decisions.
+    /// </summary>
     public int GetTowerCost(TowerType towerType)
     {
+        /// <summary>
+        /// Returns tower cost needed by this gameplay system.
+        /// </summary>
         return GetTowerCost(towerType, GetCurrentPlayerId());
     }
 
     // Used by RadialTowerMenu previews so the ghost tower matches the real build prefab.
+    /// <summary>
+    /// Returns tower preview prefab used by land, tower, cost, or build decisions.
+    /// </summary>
     public GameObject GetTowerPreviewPrefab(TowerType towerType)
     {
+        /// <summary>
+        /// Handles resolve tower prefab for build tower manager.
+        /// </summary>
         return ResolveTowerPrefab(towerType, GetCurrentPlayerId());
     }
 
+    /// <summary>
+    /// Returns tower cost used by land, tower, cost, or build decisions.
+    /// </summary>
     public int GetTowerCost(TowerType towerType, int playerId)
     {
         GameObject prefab = ResolveTowerPrefab(towerType, playerId);
@@ -733,11 +895,20 @@ public class BuildTowerManager : MonoBehaviour
         return cannonTowerCost;
     }
 
+    /// <summary>
+    /// Returns resolved tower prefab used by land, tower, cost, or build decisions.
+    /// </summary>
     public GameObject GetResolvedTowerPrefab(TowerType towerType, int playerId)
     {
+        /// <summary>
+        /// Handles resolve tower prefab for build tower manager.
+        /// </summary>
         return ResolveTowerPrefab(towerType, playerId);
     }
 
+    /// <summary>
+    /// Looks up the target for build area by stable ID and applies the resolved gameplay result.
+    /// </summary>
     public TowerBuildArea ResolveBuildAreaByStableId(string buildAreaId)
     {
         if (string.IsNullOrWhiteSpace(buildAreaId))
@@ -758,6 +929,9 @@ public class BuildTowerManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Applies online buy land to gameplay data and updates visible feedback.
+    /// </summary>
     public bool ApplyOnlineBuyLand(string buildAreaId, int ownerPlayerId, int newGold)
     {
         TowerBuildArea buildArea = ResolveBuildAreaByStableId(buildAreaId);
@@ -774,6 +948,9 @@ public class BuildTowerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Applies online build tower to gameplay data and updates visible feedback.
+    /// </summary>
     public bool ApplyOnlineBuildTower(string buildAreaId, string towerId, TowerType towerType, int ownerPlayerId, int level, int newGold)
     {
         TowerBuildArea buildArea = ResolveBuildAreaByStableId(buildAreaId);
@@ -796,6 +973,9 @@ public class BuildTowerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Applies online upgrade tower to gameplay data and updates visible feedback.
+    /// </summary>
     public bool ApplyOnlineUpgradeTower(string buildAreaId, string towerId, int ownerPlayerId, int newLevel, int newGold)
     {
         TowerBuildArea buildArea = ResolveBuildAreaByStableId(buildAreaId);
@@ -825,6 +1005,9 @@ public class BuildTowerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Applies online sell tower to gameplay data and updates visible feedback.
+    /// </summary>
     public bool ApplyOnlineSellTower(string buildAreaId, string towerId, int ownerPlayerId, int newGold)
     {
         TowerBuildArea buildArea = ResolveBuildAreaByStableId(buildAreaId);
@@ -928,6 +1111,9 @@ public class BuildTowerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Ensures online tower state exists or is initialized before the flow continues.
+    /// </summary>
     private GameObject EnsureOnlineTowerState(TowerBuildArea buildArea, string towerId, TowerType towerType, int ownerPlayerId, int level)
     {
         if (buildArea == null)
@@ -1034,6 +1220,9 @@ public class BuildTowerManager : MonoBehaviour
         return buildArea.currentTower;
     }
 
+    /// <summary>
+    /// Shows build menu or fallback with the correct current context.
+    /// </summary>
     private void ShowBuildMenuOrFallback(TowerBuildArea buildArea)
     {
         if (buildArea != null)
@@ -1050,6 +1239,9 @@ public class BuildTowerManager : MonoBehaviour
         TryBuildTower(buildArea);
     }
 
+    /// <summary>
+    /// Returns area menu position used by land, tower, cost, or build decisions.
+    /// </summary>
     private Vector3 GetAreaMenuPosition(TowerBuildArea buildArea)
     {
         if (buildArea == null)
@@ -1061,6 +1253,9 @@ public class BuildTowerManager : MonoBehaviour
         return spawnPoint.position;
     }
 
+    /// <summary>
+    /// Returns tower stats from area used by land, tower, cost, or build decisions.
+    /// </summary>
     private TowerStats GetTowerStatsFromArea(TowerBuildArea buildArea)
     {
         if (buildArea == null || buildArea.currentTower == null)
@@ -1072,6 +1267,9 @@ public class BuildTowerManager : MonoBehaviour
         return stats != null ? stats : buildArea.currentTower.GetComponentInChildren<TowerStats>();
     }
 
+    /// <summary>
+    /// Ensures tower stats exists or is initialized before the flow continues.
+    /// </summary>
     private TowerStats EnsureTowerStats(GameObject tower, TowerType towerType, int baseCost, int ownerPlayerId)
     {
         TowerStats stats = tower != null ? tower.GetComponent<TowerStats>() : null;
@@ -1105,11 +1303,17 @@ public class BuildTowerManager : MonoBehaviour
         return stats;
     }
 
+    /// <summary>
+    /// Returns current player ID used by land, tower, cost, or build decisions.
+    /// </summary>
     private int GetCurrentPlayerId()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerId() : currentPlayerId;
     }
 
+    /// <summary>
+    /// Returns current player resource used by land, tower, cost, or build decisions.
+    /// </summary>
     private PlayerResource GetCurrentPlayerResource()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerResource() : currentPlayerResource;
@@ -1117,11 +1321,17 @@ public class BuildTowerManager : MonoBehaviour
 
     // Phase 2B is still local-only gameplay execution, so non-turn online
     // clients must be blocked at the shared build/tower entry points.
+    /// <summary>
+    /// Decides whether should block online action should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldBlockOnlineAction()
     {
         return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
+    /// <summary>
+    /// Checks whether interact with build areas is allowed before enabling that action.
+    /// </summary>
     private bool CanInteractWithBuildAreas()
     {
         if (TurnSourceResolver.IsAIPrototypeActive())
@@ -1149,6 +1359,9 @@ public class BuildTowerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks whether perform tower or land action is allowed before enabling that action.
+    /// </summary>
     private bool CanPerformTowerOrLandAction()
     {
         if (!CanInteractWithBuildAreas())
@@ -1159,6 +1372,9 @@ public class BuildTowerManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Decides whether should block tutorial build area click should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldBlockTutorialBuildAreaClick(TowerBuildArea buildArea)
     {
         if (buildArea == null)
@@ -1190,6 +1406,9 @@ public class BuildTowerManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Returns player manager tower prefab used by land, tower, cost, or build decisions.
+    /// </summary>
     private GameObject GetPlayerManagerTowerPrefab(int playerId)
     {
         if (playerManager != null)
@@ -1205,6 +1424,9 @@ public class BuildTowerManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Looks up the target for tower prefab and applies the resolved gameplay result.
+    /// </summary>
     private GameObject ResolveTowerPrefab(TowerType towerType, int playerId)
     {
         GameObject typedPlayerPrefab = GetPlayerTypedTowerPrefab(towerType, playerId);
@@ -1233,16 +1455,28 @@ public class BuildTowerManager : MonoBehaviour
         return cannonTowerPrefab;
     }
 
+    /// <summary>
+    /// Checks whether player specific tower prefab is present before the code depends on it.
+    /// </summary>
     private bool HasPlayerSpecificTowerPrefab(int playerId)
     {
         return playerManager != null && playerManager.GetTowerPrefabForPlayer(playerId) != null;
     }
 
+    /// <summary>
+    /// Checks whether player specific tower prefab is present before the code depends on it.
+    /// </summary>
     private bool HasPlayerSpecificTowerPrefab(TowerType towerType, int playerId)
     {
+        /// <summary>
+        /// Returns player typed tower prefab needed by this gameplay system.
+        /// </summary>
         return GetPlayerTypedTowerPrefab(towerType, playerId) != null || HasPlayerSpecificTowerPrefab(playerId);
     }
 
+    /// <summary>
+    /// Returns player typed tower prefab used by land, tower, cost, or build decisions.
+    /// </summary>
     private GameObject GetPlayerTypedTowerPrefab(TowerType towerType, int playerId)
     {
         GameObject[] prefabs = GetTypedPrefabArray(towerType);
@@ -1255,6 +1489,9 @@ public class BuildTowerManager : MonoBehaviour
         return prefabs[playerId];
     }
 
+    /// <summary>
+    /// Returns typed prefab array used by land, tower, cost, or build decisions.
+    /// </summary>
     private GameObject[] GetTypedPrefabArray(TowerType towerType)
     {
         if (towerType == TowerType.Archer) return archerPrefabsByPlayerId;
@@ -1264,6 +1501,9 @@ public class BuildTowerManager : MonoBehaviour
         return cannonPrefabsByPlayerId;
     }
 
+    /// <summary>
+    /// Returns default tower prefab used by land, tower, cost, or build decisions.
+    /// </summary>
     private GameObject GetDefaultTowerPrefab(TowerType towerType)
     {
         if (towerType == TowerType.Archer) return defaultArcherPrefab;
@@ -1273,6 +1513,9 @@ public class BuildTowerManager : MonoBehaviour
         return defaultCannonPrefab != null ? defaultCannonPrefab : cannonTowerPrefab;
     }
 
+    /// <summary>
+    /// Applies owner visual to generic tower to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyOwnerVisualToGenericTower(GameObject tower, int playerId)
     {
         if (tower == null || playerManager == null)
@@ -1299,6 +1542,9 @@ public class BuildTowerManager : MonoBehaviour
         spriteRenderer.color = color;
     }
 
+    /// <summary>
+    /// Handles force tower alpha opaque for land ownership, tower actions, or build UI.
+    /// </summary>
     private void ForceTowerAlphaOpaque(GameObject tower)
     {
         if (tower == null)
@@ -1318,6 +1564,9 @@ public class BuildTowerManager : MonoBehaviour
         spriteRenderer.color = color;
     }
 
+    /// <summary>
+    /// Ensures tower collider exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureTowerCollider(GameObject tower)
     {
         if (tower == null)
@@ -1336,6 +1585,9 @@ public class BuildTowerManager : MonoBehaviour
         boxCollider.isTrigger = true;
     }
 
+    /// <summary>
+    /// Refreshes current player UI from the latest gameplay data.
+    /// </summary>
     private void RefreshCurrentPlayerUI()
     {
         if (playerManager != null)
@@ -1344,6 +1596,9 @@ public class BuildTowerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies synced player gold to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplySyncedPlayerGold(PlayerResource playerResource, int newGold)
     {
         if (playerResource == null || newGold < 0)
@@ -1355,6 +1610,9 @@ public class BuildTowerManager : MonoBehaviour
         playerResource.RefreshUI();
     }
 
+    /// <summary>
+    /// Handles finalize synced area change for land ownership, tower actions, or build UI.
+    /// </summary>
     private void FinalizeSyncedAreaChange(TowerBuildArea buildArea)
     {
         if (buildArea != null)
@@ -1374,6 +1632,9 @@ public class BuildTowerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         bool shown = TryCallToastMethod(message);
@@ -1386,6 +1647,9 @@ public class BuildTowerManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)
@@ -1424,6 +1688,9 @@ public class BuildTowerManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Shows toast object with the correct current context.
+    /// </summary>
     private void ShowToastObject(string message)
     {
         if (toastMessageObject == null && toastText == null)
@@ -1462,8 +1729,14 @@ public class BuildTowerManager : MonoBehaviour
         toastCoroutine = StartCoroutine(HideToastAfterDelay());
     }
 
+    /// <summary>
+    /// Hides toast after delay and clears temporary visual state.
+    /// </summary>
     private IEnumerator HideToastAfterDelay()
     {
+        /// <summary>
+        /// Handles wait for seconds for build tower manager.
+        /// </summary>
         yield return new WaitForSeconds(toastDuration);
 
         if (toastMessageObject != null)
@@ -1472,6 +1745,9 @@ public class BuildTowerManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns toast font size used by land, tower, cost, or build decisions.
+    /// </summary>
     private float GetToastFontSize(string message)
     {
         if (string.IsNullOrEmpty(message))

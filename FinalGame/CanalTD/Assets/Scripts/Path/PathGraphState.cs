@@ -30,6 +30,9 @@ public static class PathGraphState
 {
     public static int Version = 0;
 
+    /// <summary>
+    /// Marks dirty so later turns or systems can react to it.
+    /// </summary>
     public static void MarkDirty()
     {
         Version++;

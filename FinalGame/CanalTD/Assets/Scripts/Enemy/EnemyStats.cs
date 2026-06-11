@@ -49,6 +49,9 @@ public class EnemyStats : MonoBehaviour
     public int splitCount = 2;
     public bool isBoss = false;
 
+    /// <summary>
+    /// Returns final HP used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public int GetFinalHP(int round, float hpScalePerRound)
     {
         int safeRound = Mathf.Max(1, round);
@@ -57,6 +60,9 @@ public class EnemyStats : MonoBehaviour
         return Mathf.Max(1, Mathf.CeilToInt(baseHP * hpMultiplier * bossHpMultiplier));
     }
 
+    /// <summary>
+    /// Returns final speed used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public float GetFinalSpeed(int round, float speedScalePerRound)
     {
         int safeRound = Mathf.Max(1, round);
@@ -65,6 +71,9 @@ public class EnemyStats : MonoBehaviour
         return Mathf.Max(0.01f, baseSpeed * speedMultiplier * bossSlowdown);
     }
 
+    /// <summary>
+    /// Returns final reward used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public int GetFinalReward(int round)
     {
         int safeRound = Mathf.Max(1, round);
@@ -73,12 +82,18 @@ public class EnemyStats : MonoBehaviour
         return Mathf.Max(0, rewardGold + roundBonus + bossBonus);
     }
 
+    /// <summary>
+    /// Returns final score reward used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public int GetFinalScoreReward(int round)
     {
         int bossBonus = isBoss || enemyType == EnemyType.Boss ? scoreReward : 0;
         return Mathf.Max(0, scoreReward + bossBonus);
     }
 
+    /// <summary>
+    /// Returns final damage used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public int GetFinalDamage(int rawDamage)
     {
         int safeDamage = Mathf.Max(1, rawDamage);

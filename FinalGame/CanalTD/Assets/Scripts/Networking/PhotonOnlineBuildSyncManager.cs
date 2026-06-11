@@ -61,6 +61,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
     private readonly Dictionary<string, TowerBuildArea> buildAreasById = new Dictionary<string, TowerBuildArea>();
     private bool initializedForOnlineMatch;
 
+    /// <summary>
+    /// Finds and stores Photon online build sync manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -74,6 +77,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         RebuildBuildAreaRegistry();
     }
 
+    /// <summary>
+    /// Subscribes Photon online build sync manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -81,6 +87,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Unsubscribes Photon online build sync manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -93,6 +102,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Prepares this manager for a Photon match and loads or sends the starting synchronized state.
+    /// </summary>
     public void InitializeForOnlineMatch()
     {
         AutoAssignReferences();
@@ -117,6 +129,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Reads updated Photon room properties and reapplies the matching local synced state.
+    /// </summary>
     public void HandleRoomPropertiesUpdated()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -129,23 +144,47 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Sends a Photon request for buy land so the Master Client can validate it.
+    /// </summary>
     public bool RequestBuyLand(TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Handles request action for Photon online build sync manager.
+        /// </summary>
         return RequestAction(OnlineBuildActionType.BuyLand, buildArea, TowerType.Cannon);
     }
 
+    /// <summary>
+    /// Sends a Photon request for build tower so the Master Client can validate it.
+    /// </summary>
     public bool RequestBuildTower(TowerBuildArea buildArea, TowerType towerType)
     {
+        /// <summary>
+        /// Handles request action for Photon online build sync manager.
+        /// </summary>
         return RequestAction(OnlineBuildActionType.BuildTower, buildArea, towerType);
     }
 
+    /// <summary>
+    /// Sends a Photon request for upgrade tower so the Master Client can validate it.
+    /// </summary>
     public bool RequestUpgradeTower(TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Handles request action for Photon online build sync manager.
+        /// </summary>
         return RequestAction(OnlineBuildActionType.UpgradeTower, buildArea, TowerType.Cannon);
     }
 
+    /// <summary>
+    /// Sends a Photon request for sell tower so the Master Client can validate it.
+    /// </summary>
     public bool RequestSellTower(TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Handles request action for Photon online build sync manager.
+        /// </summary>
         return RequestAction(OnlineBuildActionType.SellTower, buildArea, TowerType.Cannon);
     }
 
@@ -184,6 +223,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Clears expired freeze claims for player and removes its temporary gameplay or visual effect.
+    /// </summary>
     public int ClearExpiredFreezeClaimsForPlayer(int playerId)
     {
         int clearedCount = 0;
@@ -233,6 +275,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return clearedCount;
     }
 
+    /// <summary>
+    /// Responds to on event and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnEvent(EventData photonEvent)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -281,6 +326,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Sends a Photon request for action so the Master Client can validate it.
+    /// </summary>
     private bool RequestAction(OnlineBuildActionType actionType, TowerBuildArea buildArea, TowerType towerType)
     {
 #if !PHOTON_UNITY_NETWORKING
@@ -336,6 +384,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
     }
 
 #if PHOTON_UNITY_NETWORKING
+    /// <summary>
+    /// Master Client validates the incoming request, changes authoritative state, and sends the result.
+    /// </summary>
     private void ProcessRequestAsMaster(OnlineBuildRequestData request, int senderActorNumber)
     {
         AutoAssignReferences();
@@ -375,6 +426,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Checks whether request has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private OnlineBuildApplyData ValidateRequest(OnlineBuildRequestData request, int senderActorNumber)
     {
         OnlineBuildApplyData result = new OnlineBuildApplyData
@@ -454,6 +508,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
     }
 #endif
 
+    /// <summary>
+    /// Checks whether buy land has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private void ValidateBuyLand(TowerBuildArea buildArea, PlayerResource actor, OnlineBuildApplyData result)
     {
         if (buildArea.IsFrozen())
@@ -479,6 +536,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         result.newGold = actor.money - buildArea.landPurchaseCost;
     }
 
+    /// <summary>
+    /// Checks whether build tower has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private void ValidateBuildTower(TowerBuildArea buildArea, PlayerResource actor, OnlineBuildRequestData request, OnlineBuildApplyData result)
     {
         if (!System.Enum.IsDefined(typeof(TowerType), request.towerTypeId))
@@ -522,6 +582,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         result.level = 1;
     }
 
+    /// <summary>
+    /// Checks whether upgrade tower has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private void ValidateUpgradeTower(TowerBuildArea buildArea, PlayerResource actor, OnlineBuildApplyData result)
     {
         TowerStats stats = GetTowerStats(buildArea);
@@ -559,6 +622,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         result.level = stats.level + 1;
     }
 
+    /// <summary>
+    /// Checks whether sell tower has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private void ValidateSellTower(TowerBuildArea buildArea, PlayerResource actor, OnlineBuildApplyData result)
     {
         TowerStats stats = GetTowerStats(buildArea);
@@ -582,6 +648,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         result.level = 0;
     }
 
+    /// <summary>
+    /// Applies an accepted online action to local gameplay state and visible UI feedback.
+    /// </summary>
     private void ApplyConfirmedAction(OnlineBuildApplyData applyData)
     {
         AutoAssignReferences();
@@ -659,6 +728,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
     }
 
 #if PHOTON_UNITY_NETWORKING
+    /// <summary>
+    /// Ensures snapshot initialized exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureSnapshotInitialized()
     {
         if (PhotonNetwork.CurrentRoom == null)
@@ -675,6 +747,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         WriteSnapshotToRoom(CreateSnapshotFromScene());
     }
 
+    /// <summary>
+    /// Applies synchronized snapshot from room properties to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplySnapshotFromRoomProperties()
     {
         if (PhotonNetwork.CurrentRoom == null ||
@@ -702,6 +777,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         ApplySnapshot(snapshot);
     }
 
+    /// <summary>
+    /// Updates snapshot property so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateSnapshotProperty(OnlineBuildApplyData applyData)
     {
         OnlineBuildSnapshot snapshot = GetSnapshotFromRoomOrScene();
@@ -738,6 +816,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         WriteSnapshotToRoom(snapshot);
     }
 
+    /// <summary>
+    /// Returns snapshot from room or scene from Photon, room data, or the online player cache.
+    /// </summary>
     private OnlineBuildSnapshot GetSnapshotFromRoomOrScene()
     {
         if (PhotonNetwork.CurrentRoom != null &&
@@ -757,9 +838,15 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
             }
         }
 
+        /// <summary>
+        /// Handles create snapshot from scene for Photon online build sync manager.
+        /// </summary>
         return CreateSnapshotFromScene();
     }
 
+    /// <summary>
+    /// Coordinates write snapshot to room for Photon synchronization and local scene state.
+    /// </summary>
     private void WriteSnapshotToRoom(OnlineBuildSnapshot snapshot)
     {
         if (PhotonNetwork.CurrentRoom == null || snapshot == null)
@@ -776,6 +863,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
     }
 #endif
 
+    /// <summary>
+    /// Creates snapshot from scene and configures it for the current scene or interaction.
+    /// </summary>
     private OnlineBuildSnapshot CreateSnapshotFromScene()
     {
         RebuildBuildAreaRegistryIfNeeded();
@@ -809,6 +899,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return snapshot;
     }
 
+    /// <summary>
+    /// Applies synchronized snapshot to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplySnapshot(OnlineBuildSnapshot snapshot)
     {
         if (snapshot == null || buildTowerManager == null)
@@ -879,6 +972,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns or create area state from Photon, room data, or the online player cache.
+    /// </summary>
     private OnlineBuildAreaState GetOrCreateAreaState(OnlineBuildSnapshot snapshot, string buildAreaId)
     {
         foreach (OnlineBuildAreaState area in snapshot.areas)
@@ -894,6 +990,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return created;
     }
 
+    /// <summary>
+    /// Looks up the target for build area by ID and applies the resolved gameplay result.
+    /// </summary>
     private TowerBuildArea ResolveBuildAreaById(string buildAreaId)
     {
         RebuildBuildAreaRegistryIfNeeded();
@@ -907,6 +1006,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return buildArea;
     }
 
+    /// <summary>
+    /// Rebuilds build area registry if needed from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildBuildAreaRegistryIfNeeded()
     {
         if (buildAreasById.Count == 0)
@@ -915,6 +1017,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Rebuilds build area registry from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildBuildAreaRegistry()
     {
         buildAreasById.Clear();
@@ -937,16 +1042,25 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns build area ID from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetBuildAreaId(TowerBuildArea buildArea)
     {
         return buildArea != null ? buildArea.name : string.Empty;
     }
 
+    /// <summary>
+    /// Returns tower ID from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetTowerId(string buildAreaId)
     {
         return buildAreaId + "_tower";
     }
 
+    /// <summary>
+    /// Returns tower stats from Photon, room data, or the online player cache.
+    /// </summary>
     private TowerStats GetTowerStats(TowerBuildArea buildArea)
     {
         if (buildArea == null || buildArea.currentTower == null)
@@ -958,6 +1072,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return stats != null ? stats : buildArea.currentTower.GetComponentInChildren<TowerStats>();
     }
 
+    /// <summary>
+    /// Coordinates auto assign references for Photon synchronization and local scene state.
+    /// </summary>
     private void AutoAssignReferences()
     {
         if (playerManager == null)
@@ -981,6 +1098,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Writes validation details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogValidation(OnlineBuildApplyData result)
     {
         Debug.Log(GetValidateLogPrefix(result.actionType) +
@@ -992,6 +1112,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
             ", reason=" + (result.accepted ? "Accepted" : result.rejectReason));
     }
 
+    /// <summary>
+    /// Returns request log prefix from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetRequestLogPrefix(OnlineBuildActionType actionType)
     {
         switch (actionType)
@@ -1005,6 +1128,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return "RequestBuildAction";
     }
 
+    /// <summary>
+    /// Returns validate log prefix from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetValidateLogPrefix(OnlineBuildActionType actionType)
     {
         switch (actionType)
@@ -1018,6 +1144,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return "ValidateBuildAction";
     }
 
+    /// <summary>
+    /// Returns apply log prefix from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetApplyLogPrefix(OnlineBuildActionType actionType)
     {
         switch (actionType)
@@ -1031,6 +1160,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         return "ApplyBuildAction";
     }
 
+    /// <summary>
+    /// Shows applied action toast with the correct current context.
+    /// </summary>
     private void ShowAppliedActionToast(OnlineBuildApplyData applyData)
     {
         if (onlineGameSceneManager == null)
@@ -1064,6 +1196,9 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
         onlineGameSceneManager.ShowOnlineToast(actorName + " " + actionText + ".");
     }
 
+    /// <summary>
+    /// Returns toast action text from Photon, room data, or the online player cache.
+    /// </summary>
     private string GetToastActionText(OnlineBuildActionType actionType)
     {
         switch (actionType)

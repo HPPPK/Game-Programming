@@ -37,11 +37,17 @@ public class PlayerHand : MonoBehaviour
     public int maxHandSize = 5;
     public List<GameObject> handCardPrefabs = new List<GameObject>();
 
+    /// <summary>
+    /// Checks whether add card is allowed before enabling that action.
+    /// </summary>
     public bool CanAddCard()
     {
         return GetCardCount() < maxHandSize;
     }
 
+    /// <summary>
+    /// Adds card to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public bool AddCard(GameObject cardPrefab)
     {
         if (cardPrefab == null)
@@ -63,6 +69,9 @@ public class PlayerHand : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Removes card from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public bool RemoveCard(GameObject cardPrefab)
     {
         if (handCardPrefabs == null || cardPrefab == null)
@@ -73,6 +82,9 @@ public class PlayerHand : MonoBehaviour
         return handCardPrefabs.Remove(cardPrefab);
     }
 
+    /// <summary>
+    /// Removes random card from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public GameObject RemoveRandomCard()
     {
         if (handCardPrefabs == null || handCardPrefabs.Count == 0)
@@ -86,11 +98,17 @@ public class PlayerHand : MonoBehaviour
         return cardPrefab;
     }
 
+    /// <summary>
+    /// Returns card count used by card handling or target selection.
+    /// </summary>
     public int GetCardCount()
     {
         return handCardPrefabs != null ? handCardPrefabs.Count : 0;
     }
 
+    /// <summary>
+    /// Clears clear and removes its temporary gameplay or visual effect.
+    /// </summary>
     public void Clear()
     {
         if (handCardPrefabs == null)
@@ -102,6 +120,9 @@ public class PlayerHand : MonoBehaviour
         handCardPrefabs.Clear();
     }
 
+    /// <summary>
+    /// Returns cards used by card handling or target selection.
+    /// </summary>
     public List<GameObject> GetCards()
     {
         if (handCardPrefabs == null)
@@ -112,6 +133,9 @@ public class PlayerHand : MonoBehaviour
         return handCardPrefabs;
     }
 
+    /// <summary>
+    /// Handles copy from for this gameplay system.
+    /// </summary>
     public void CopyFrom(List<GameObject> cardPrefabs)
     {
         if (handCardPrefabs == null)

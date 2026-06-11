@@ -44,6 +44,9 @@ public class GateFrameAnimation : MonoBehaviour
     private SpriteRenderer sr;
     private Collider2D col;
 
+    /// <summary>
+    /// Sets up gate frame animation when this scene object starts running.
+    /// </summary>
     void Start()
     {
         sr = GetComponent<SpriteRenderer>();
@@ -58,6 +61,9 @@ public class GateFrameAnimation : MonoBehaviour
         Debug.Log(name + " starts " + (isBlocking ? "BLOCKED" : "UNBLOCKED"));
     }
 
+    /// <summary>
+    /// Checks gate frame animation input, timing, animation, or UI state once per frame.
+    /// </summary>
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -66,6 +72,9 @@ public class GateFrameAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks whether the player clicked this gate and should trigger gate interaction.
+    /// </summary>
     void CheckClick()
     {
         if (isPlaying) return;
@@ -95,6 +104,9 @@ public class GateFrameAnimation : MonoBehaviour
         GateTargetingManager.Instance.SelectGate(this);
     }
 
+    /// <summary>
+    /// Handles on mouse enter for gate frame animation.
+    /// </summary>
     void OnMouseEnter()
     {
         if (GateTargetingManager.Instance != null)
@@ -103,6 +115,9 @@ public class GateFrameAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles on mouse exit for gate frame animation.
+    /// </summary>
     void OnMouseExit()
     {
         if (GateTargetingManager.Instance != null)
@@ -111,6 +126,9 @@ public class GateFrameAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets highlight and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetHighlight(bool highlighted, Color color)
     {
         if (sr == null)
@@ -132,11 +150,17 @@ public class GateFrameAnimation : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks whether open is allowed before enabling that action.
+    /// </summary>
     public bool CanOpen()
     {
         return !isLocked && isBlocking && !isPlaying;
     }
 
+    /// <summary>
+    /// Handles open gate for this gameplay system.
+    /// </summary>
     public bool OpenGate()
     {
         if (isPlaying)
@@ -164,6 +188,9 @@ public class GateFrameAnimation : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Handles lock gate for this gameplay system.
+    /// </summary>
     public bool LockGate()
     {
         if (isPlaying)
@@ -195,12 +222,18 @@ public class GateFrameAnimation : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Handles unlock gate for this gameplay system.
+    /// </summary>
     public void UnlockGate()
     {
         isLocked = false;
         Debug.Log(name + " is now UNLOCKED");
     }
 
+    /// <summary>
+    /// Plays the gate opening animation, then marks the gate as passable for pathfinding.
+    /// </summary>
     IEnumerator UnblockGate()
     {
         isPlaying = true;
@@ -212,6 +245,9 @@ public class GateFrameAnimation : MonoBehaviour
             for (int i = 0; i < frames.Length; i++)
             {
                 sr.sprite = frames[i];
+                /// <summary>
+                /// Handles wait for seconds for gate frame animation.
+                /// </summary>
                 yield return new WaitForSeconds(frameRate);
             }
 
@@ -226,6 +262,9 @@ public class GateFrameAnimation : MonoBehaviour
         FinishGateTargeting();
     }
 
+    /// <summary>
+    /// Plays the gate closing animation, then marks the gate as blocking pathfinding.
+    /// </summary>
     IEnumerator BlockGate()
     {
         isPlaying = true;
@@ -237,6 +276,9 @@ public class GateFrameAnimation : MonoBehaviour
             for (int i = frames.Length - 1; i >= 0; i--)
             {
                 sr.sprite = frames[i];
+                /// <summary>
+                /// Handles wait for seconds for gate frame animation.
+                /// </summary>
                 yield return new WaitForSeconds(frameRate);
             }
         }
@@ -247,12 +289,18 @@ public class GateFrameAnimation : MonoBehaviour
         FinishGateTargeting();
     }
 
+    /// <summary>
+    /// Waits one frame before closing the gate-targeting state after a gate action.
+    /// </summary>
     IEnumerator FinishGateTargetingNextFrame()
     {
         yield return null;
         FinishGateTargeting();
     }
 
+    /// <summary>
+    /// Updates the gate sprite and collider state to match whether the path is blocked.
+    /// </summary>
     void ApplyBlockingVisual()
     {
         if (sr == null)
@@ -272,6 +320,9 @@ public class GateFrameAnimation : MonoBehaviour
         isBlocking = true;
     }
 
+    /// <summary>
+    /// Notifies gate targeting that the selected gate action has finished.
+    /// </summary>
     void FinishGateTargeting()
     {
         if (GateTargetingManager.Instance != null &&
@@ -283,16 +334,25 @@ public class GateFrameAnimation : MonoBehaviour
         // GateTargetingManager exits the cursor/tool state.
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether blocking is true.
+    /// </summary>
     public bool IsBlocking()
     {
         return isBlocking;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether locked is true.
+    /// </summary>
     public bool IsLocked()
     {
         return isLocked;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether playing is true.
+    /// </summary>
     public bool IsPlaying()
     {
         return isPlaying;

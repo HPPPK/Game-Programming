@@ -38,6 +38,9 @@ public class PlayerSetupData
     public AIDifficulty aiDifficulty;
     public bool isReady;
 
+    /// <summary>
+    /// Plays player setup data in the current scene context.
+    /// </summary>
     public PlayerSetupData(int playerId, string displayName, bool isAI, AIDifficulty aiDifficulty)
     {
         this.playerId = playerId;

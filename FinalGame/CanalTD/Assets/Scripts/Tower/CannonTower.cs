@@ -56,6 +56,9 @@ public class CannonTower : MonoBehaviour
     private Color normalTowerColor = Color.white;
     private TowerStats towerStats;
 
+    /// <summary>
+    /// Finds and stores cannon tower references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         towerStats = GetComponent<TowerStats>();
@@ -78,6 +81,9 @@ public class CannonTower : MonoBehaviour
         SetBoostVisual(false);
     }
 
+    /// <summary>
+    /// Checks cannon tower input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (disabledByFreeze)
@@ -100,6 +106,9 @@ public class CannonTower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Searches scene objects or cached lists to find target enemy.
+    /// </summary>
     private EnemyHealth FindTargetEnemy()
     {
         SyncAttackFieldsFromStats();
@@ -135,6 +144,9 @@ public class CannonTower : MonoBehaviour
         return bestEnemy;
     }
 
+    /// <summary>
+    /// Returns target score used by card handling or target selection.
+    /// </summary>
     private float GetTargetScore(EnemyHealth enemy, float distance)
     {
         TargetPriority priority = towerStats != null ? towerStats.targetPriority : TargetPriority.Closest;
@@ -158,6 +170,9 @@ public class CannonTower : MonoBehaviour
         return distance;
     }
 
+    /// <summary>
+    /// Handles attack target for card state, hand state, or targeting.
+    /// </summary>
     private void AttackTarget(EnemyHealth target)
     {
         if (target == null)
@@ -189,11 +204,17 @@ public class CannonTower : MonoBehaviour
         ApplySingleTargetDamage(target);
     }
 
+    /// <summary>
+    /// Applies single target damage to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplySingleTargetDamage(EnemyHealth target)
     {
         ShootProjectileOrDamage(target);
     }
 
+    /// <summary>
+    /// Applies cannon damage to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyCannonDamage(EnemyHealth target)
     {
         float radius = towerStats != null ? towerStats.splashRadius : 0f;
@@ -212,6 +233,9 @@ public class CannonTower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies shock damage to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyShockDamage(EnemyHealth target)
     {
         int maxTargets = towerStats != null ? Mathf.Max(1, towerStats.chainCount + 1) : 1;
@@ -232,6 +256,9 @@ public class CannonTower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies slow to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplySlow(EnemyHealth target)
     {
         EnemySlowEffect slowEffect = target.GetComponent<EnemySlowEffect>();
@@ -246,6 +273,9 @@ public class CannonTower : MonoBehaviour
         slowEffect.ApplySlow(slowPercent, slowDuration);
     }
 
+    /// <summary>
+    /// Returns enemies near used by land, tower, cost, or build decisions.
+    /// </summary>
     private System.Collections.Generic.List<EnemyHealth> GetEnemiesNear(Vector3 center, float radius)
     {
         System.Collections.Generic.List<EnemyHealth> enemies = new System.Collections.Generic.List<EnemyHealth>();
@@ -269,6 +299,9 @@ public class CannonTower : MonoBehaviour
         return enemies;
     }
 
+    /// <summary>
+    /// Handles shoot projectile or damage for land ownership, tower actions, or build UI.
+    /// </summary>
     private void ShootProjectileOrDamage(EnemyHealth target)
     {
         if (projectilePrefab == null || target == null)
@@ -302,12 +335,18 @@ public class CannonTower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns current damage used by land, tower, cost, or build decisions.
+    /// </summary>
     public float GetCurrentDamage()
     {
         SyncAttackFieldsFromStats();
         return boostActive ? boostedDamage : baseDamage;
     }
 
+    /// <summary>
+    /// Handles sync attack fields from stats for land ownership, tower actions, or build UI.
+    /// </summary>
     public void SyncAttackFieldsFromStats()
     {
         if (towerStats == null)
@@ -326,11 +365,17 @@ public class CannonTower : MonoBehaviour
         damage = Mathf.RoundToInt(towerStats.damage);
     }
 
+    /// <summary>
+    /// Applies owner visual to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOwnerVisual(PlayerManager playerManager, int playerId)
     {
         ApplyOwnerVisual(playerManager, playerId, false);
     }
 
+    /// <summary>
+    /// Applies owner visual to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOwnerVisual(PlayerManager playerManager, int playerId, bool applyFallbackVisual)
     {
         if (towerSpriteRenderer == null)
@@ -364,16 +409,25 @@ public class CannonTower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets disabled by freeze and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetDisabledByFreeze(bool disabled)
     {
         disabledByFreeze = disabled;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether disabled by freeze is true.
+    /// </summary>
     public bool IsDisabledByFreeze()
     {
         return disabledByFreeze;
     }
 
+    /// <summary>
+    /// Applies power boost for next wave to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyPowerBoostForNextWave()
     {
         if (boostPendingForNextWave || boostActive)
@@ -384,6 +438,9 @@ public class CannonTower : MonoBehaviour
         boostPendingForNextWave = true;
     }
 
+    /// <summary>
+    /// Responds to on wave started and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnWaveStarted()
     {
         if (boostPendingForNextWave)
@@ -395,6 +452,9 @@ public class CannonTower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on wave ended and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnWaveEnded()
     {
         if (boostActive || boostPendingForNextWave)
@@ -407,6 +467,9 @@ public class CannonTower : MonoBehaviour
         SetBoostVisual(false);
     }
 
+    /// <summary>
+    /// Sets boost visual and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetBoostVisual(bool active)
     {
         // 只控制 boost icon 的显示/隐藏，不再改变塔的颜色
@@ -416,6 +479,9 @@ public class CannonTower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Draws editor-only gizmos when this object is selected in the Scene view.
+    /// </summary>
     private void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireSphere(transform.position, attackRange);

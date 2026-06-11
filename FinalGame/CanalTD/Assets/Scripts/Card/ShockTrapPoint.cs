@@ -42,6 +42,9 @@ public class ShockTrapPoint : MonoBehaviour
     private Color originalColor = Color.white;
     private int originalSortingOrder = 0;
 
+    /// <summary>
+    /// Finds and stores shock trap point references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (highlightRenderer == null)
@@ -56,16 +59,25 @@ public class ShockTrapPoint : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows valid with the correct current context.
+    /// </summary>
     public void ShowValid(int sortingOrder)
     {
         ApplyVisual(validHighlightColor, sortingOrder);
     }
 
+    /// <summary>
+    /// Shows selected with the correct current context.
+    /// </summary>
     public void ShowSelected(int sortingOrder)
     {
         ApplyVisual(selectedColor, sortingOrder);
     }
 
+    /// <summary>
+    /// Handles restore visual for card state, hand state, or targeting.
+    /// </summary>
     public void RestoreVisual()
     {
         if (highlightRenderer == null)
@@ -77,6 +89,9 @@ public class ShockTrapPoint : MonoBehaviour
         highlightRenderer.sortingOrder = originalSortingOrder;
     }
 
+    /// <summary>
+    /// Applies visual to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyVisual(Color color, int sortingOrder)
     {
         if (highlightRenderer == null)

@@ -99,6 +99,9 @@ public class RadialTowerMenu : MonoBehaviour
     private GameObject towerPreviewInstance;
     private TowerBuildArea highlightedPreviewArea;
 
+    /// <summary>
+    /// Finds and stores radial tower menu references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         EnsureRoot();
@@ -109,6 +112,9 @@ public class RadialTowerMenu : MonoBehaviour
         get { return currentState != RadialTowerMenuState.None; }
     }
 
+    /// <summary>
+    /// Checks radial tower menu input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!IsOpen || !Input.GetMouseButtonDown(0))
@@ -129,11 +135,17 @@ public class RadialTowerMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Initializes initialize and prepares the references needed before use.
+    /// </summary>
     public void Initialize(BuildTowerManager manager)
     {
         buildTowerManager = manager;
     }
 
+    /// <summary>
+    /// Shows buy land confirm with the correct current context.
+    /// </summary>
     public void ShowBuyLandConfirm(TowerBuildArea area, int cost)
     {
         selectedBuildArea = area;
@@ -143,6 +155,9 @@ public class RadialTowerMenu : MonoBehaviour
         ShowConfirm(area, cost);
     }
 
+    /// <summary>
+    /// Shows build selection with the correct current context.
+    /// </summary>
     public void ShowBuildSelection(TowerBuildArea area)
     {
         selectedBuildArea = area;
@@ -160,6 +175,9 @@ public class RadialTowerMenu : MonoBehaviour
         RefreshCosts();
     }
 
+    /// <summary>
+    /// Shows tower management with the correct current context.
+    /// </summary>
     public void ShowTowerManagement(TowerBuildArea area)
     {
         selectedBuildArea = area;
@@ -176,6 +194,9 @@ public class RadialTowerMenu : MonoBehaviour
         RefreshTowerInfoText();
     }
 
+    /// <summary>
+    /// Shows build confirm with the correct current context.
+    /// </summary>
     public void ShowBuildConfirm(TowerType type, int cost)
     {
         pendingTowerType = type;
@@ -184,6 +205,9 @@ public class RadialTowerMenu : MonoBehaviour
         ShowConfirm(selectedBuildArea, cost);
     }
 
+    /// <summary>
+    /// Shows upgrade confirm with the correct current context.
+    /// </summary>
     public void ShowUpgradeConfirm(int cost)
     {
         pendingConfirmAction = RadialTowerConfirmAction.UpgradeTower;
@@ -191,6 +215,9 @@ public class RadialTowerMenu : MonoBehaviour
         ShowConfirm(selectedBuildArea, cost);
     }
 
+    /// <summary>
+    /// Shows sell confirm with the correct current context.
+    /// </summary>
     public void ShowSellConfirm(int refund)
     {
         pendingConfirmAction = RadialTowerConfirmAction.SellTower;
@@ -199,6 +226,9 @@ public class RadialTowerMenu : MonoBehaviour
     }
 
     // Compatibility wrapper for older BuildTowerManager calls.
+    /// <summary>
+    /// Shows build menu with the correct current context.
+    /// </summary>
     public void ShowBuildMenu(TowerBuildArea area, Vector3 worldPosition)
     {
         lastWorldPosition = GetMenuWorldPosition(area, worldPosition);
@@ -206,6 +236,9 @@ public class RadialTowerMenu : MonoBehaviour
     }
 
     // Compatibility wrapper for older BuildTowerManager calls.
+    /// <summary>
+    /// Shows tower menu with the correct current context.
+    /// </summary>
     public void ShowTowerMenu(TowerBuildArea area, TowerStats tower, Vector3 worldPosition)
     {
         lastWorldPosition = GetMenuWorldPosition(area, worldPosition);
@@ -213,6 +246,9 @@ public class RadialTowerMenu : MonoBehaviour
         ShowTowerManagement(area);
     }
 
+    /// <summary>
+    /// Hides this UI element and clears temporary visual state.
+    /// </summary>
     public void Hide()
     {
         currentState = RadialTowerMenuState.None;
@@ -224,6 +260,9 @@ public class RadialTowerMenu : MonoBehaviour
         root.SetActive(false);
     }
 
+    /// <summary>
+    /// Refreshes costs from the latest gameplay data.
+    /// </summary>
     public void RefreshCosts()
     {
         if (buildTowerManager != null)
@@ -252,12 +291,18 @@ public class RadialTowerMenu : MonoBehaviour
         RefreshTowerInfoText();
     }
 
+    /// <summary>
+    /// Handles force show for debug for land ownership, tower actions, or build UI.
+    /// </summary>
     public void ForceShowForDebug()
     {
         EnsureRoot();
         ShowAtWorldPosition(transform.position);
     }
 
+    /// <summary>
+    /// Responds to on click confirm and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickConfirm()
     {
         Debug.Log("Confirm action: " + pendingConfirmAction + (pendingConfirmAction == RadialTowerConfirmAction.BuildTower ? " " + pendingTowerType : ""));
@@ -321,36 +366,54 @@ public class RadialTowerMenu : MonoBehaviour
         ShowToast("Choose an action first.");
     }
 
+    /// <summary>
+    /// Responds to on click build cannon and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickBuildCannon()
     {
         Debug.Log("Build Cannon clicked");
         SelectTowerForBuild(TowerType.Cannon);
     }
 
+    /// <summary>
+    /// Responds to on click build archer and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickBuildArcher()
     {
         Debug.Log("Build Archer clicked");
         SelectTowerForBuild(TowerType.Archer);
     }
 
+    /// <summary>
+    /// Responds to on click build frost and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickBuildFrost()
     {
         Debug.Log("Build Frost clicked");
         SelectTowerForBuild(TowerType.Frost);
     }
 
+    /// <summary>
+    /// Responds to on click build shock and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickBuildShock()
     {
         Debug.Log("Build Shock clicked");
         SelectTowerForBuild(TowerType.Shock);
     }
 
+    /// <summary>
+    /// Responds to on click build sniper and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickBuildSniper()
     {
         Debug.Log("Build Sniper clicked");
         SelectTowerForBuild(TowerType.Sniper);
     }
 
+    /// <summary>
+    /// Responds to on click upgrade and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickUpgrade()
     {
         Debug.Log("Upgrade clicked");
@@ -378,6 +441,9 @@ public class RadialTowerMenu : MonoBehaviour
         ShowUpgradeConfirm(currentTowerStats.GetUpgradeCost());
     }
 
+    /// <summary>
+    /// Responds to on click sell and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickSell()
     {
         Debug.Log("Sell clicked");
@@ -399,6 +465,9 @@ public class RadialTowerMenu : MonoBehaviour
         ShowSellConfirm(currentTowerStats.GetSellValue());
     }
 
+    /// <summary>
+    /// Responds to on click cancel and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickCancel()
     {
         Debug.Log("Cancel clicked");
@@ -412,6 +481,9 @@ public class RadialTowerMenu : MonoBehaviour
         Hide();
     }
 
+    /// <summary>
+    /// Selects tower for build and updates the related targeting or UI highlight.
+    /// </summary>
     private void SelectTowerForBuild(TowerType towerType)
     {
         if (!HasSelectedAreaAndManager())
@@ -422,6 +494,9 @@ public class RadialTowerMenu : MonoBehaviour
         ShowBuildConfirm(towerType, buildTowerManager.GetTowerCost(towerType));
     }
 
+    /// <summary>
+    /// Checks whether selected area and manager is present before the code depends on it.
+    /// </summary>
     private bool HasSelectedAreaAndManager()
     {
         if (selectedBuildArea == null)
@@ -439,6 +514,9 @@ public class RadialTowerMenu : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Shows confirm with the correct current context.
+    /// </summary>
     private void ShowConfirm(TowerBuildArea area, int value)
     {
         currentState = RadialTowerMenuState.Confirm;
@@ -452,6 +530,9 @@ public class RadialTowerMenu : MonoBehaviour
         RefreshConfirmPreview();
     }
 
+    /// <summary>
+    /// Returns menu world position used to update UI text, layout, or feedback.
+    /// </summary>
     private Vector3 GetMenuWorldPosition(TowerBuildArea area, Vector3 fallbackWorldPosition)
     {
         if (area == null)
@@ -464,6 +545,9 @@ public class RadialTowerMenu : MonoBehaviour
             : area.transform.position;
     }
 
+    /// <summary>
+    /// Shows at world position with the correct current context.
+    /// </summary>
     private void ShowAtWorldPosition(Vector3 worldPosition)
     {
         EnsureRoot();
@@ -475,6 +559,9 @@ public class RadialTowerMenu : MonoBehaviour
         Debug.Log("RadialTowerMenu activeSelf=" + root.activeSelf);
     }
 
+    /// <summary>
+    /// Refreshes confirm preview from the latest gameplay data.
+    /// </summary>
     private void RefreshConfirmPreview()
     {
         ClearPreview();
@@ -492,6 +579,9 @@ public class RadialTowerMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles highlight selected area for land ownership, tower actions, or build UI.
+    /// </summary>
     private void HighlightSelectedArea()
     {
         highlightedPreviewArea = selectedBuildArea;
@@ -502,6 +592,9 @@ public class RadialTowerMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Creates tower preview and configures it for the current scene or interaction.
+    /// </summary>
     private void CreateTowerPreview(TowerType towerType)
     {
         if (buildTowerManager == null || selectedBuildArea == null)
@@ -526,6 +619,9 @@ public class RadialTowerMenu : MonoBehaviour
         PrepareTowerPreviewObject(towerPreviewInstance);
     }
 
+    /// <summary>
+    /// Handles prepare tower preview object for land ownership, tower actions, or build UI.
+    /// </summary>
     private void PrepareTowerPreviewObject(GameObject previewObject)
     {
         if (previewObject == null)
@@ -551,6 +647,9 @@ public class RadialTowerMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Clears preview and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearPreview()
     {
         if (towerPreviewInstance != null)
@@ -566,6 +665,9 @@ public class RadialTowerMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over this menu is true.
+    /// </summary>
     private bool IsPointerOverThisMenu()
     {
         if (EventSystem.current == null)
@@ -583,6 +685,9 @@ public class RadialTowerMenu : MonoBehaviour
         return selectedObject == gameObject || selectedObject.transform.IsChildOf(transform);
     }
 
+    /// <summary>
+    /// Returns tower stats used to update UI text, layout, or feedback.
+    /// </summary>
     private TowerStats GetTowerStats(TowerBuildArea area)
     {
         if (area == null || area.currentTower == null)
@@ -594,6 +699,9 @@ public class RadialTowerMenu : MonoBehaviour
         return stats != null ? stats : area.currentTower.GetComponentInChildren<TowerStats>();
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (GlobalUIManager.Instance != null)
@@ -613,6 +721,9 @@ public class RadialTowerMenu : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Ensures root exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsureRoot()
     {
         if (root == null)
@@ -621,12 +732,18 @@ public class RadialTowerMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets confirm visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetConfirmVisible(bool visible)
     {
         SetButtonVisible(confirmButton, visible);
         SetTextVisible(confirmCostText, visible);
     }
 
+    /// <summary>
+    /// Refreshes tower info text from the latest gameplay data.
+    /// </summary>
     private void RefreshTowerInfoText()
     {
         if (currentState != RadialTowerMenuState.TowerManagement)
@@ -647,11 +764,17 @@ public class RadialTowerMenu : MonoBehaviour
         SetTowerInfoVisible(true);
     }
 
+    /// <summary>
+    /// Sets tower info visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetTowerInfoVisible(bool visible)
     {
         SetTextVisible(towerInfoText, visible);
     }
 
+    /// <summary>
+    /// Sets build buttons visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetBuildButtonsVisible(bool visible)
     {
         SetButtonVisible(cannonButton, visible);
@@ -661,12 +784,18 @@ public class RadialTowerMenu : MonoBehaviour
         SetButtonVisible(sniperButton, visible);
     }
 
+    /// <summary>
+    /// Sets tower buttons visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetTowerButtonsVisible(bool visible)
     {
         SetButtonVisible(upgradeButton, visible);
         SetButtonVisible(sellButton, visible);
     }
 
+    /// <summary>
+    /// Sets button visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetButtonVisible(Button button, bool visible)
     {
         if (button != null)
@@ -675,6 +804,9 @@ public class RadialTowerMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets text visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetTextVisible(TMP_Text text, bool visible)
     {
         if (text != null)
@@ -683,6 +815,9 @@ public class RadialTowerMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets text and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetText(TMP_Text text, string value)
     {
         if (text != null)

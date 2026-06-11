@@ -83,6 +83,9 @@ public class WaveManager : MonoBehaviour
         get { return isWaveRunning; }
     }
 
+    /// <summary>
+    /// Checks wave manager input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -99,11 +102,17 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up wave manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         RefreshWaveCounterUI();
     }
 
+    /// <summary>
+    /// Shows wave incoming with the correct current context.
+    /// </summary>
     public void ShowWaveIncoming(int waveNumber)
     {
         activeWaveNumber = Mathf.Max(1, waveNumber);
@@ -112,6 +121,9 @@ public class WaveManager : MonoBehaviour
         ShowToast("Wave " + activeWaveNumber + " Incoming!");
     }
 
+    /// <summary>
+    /// Starts wave and enables its related gameplay flow.
+    /// </summary>
     public void StartWave()
     {
         if (isSpawning || isWaveRunning)
@@ -149,16 +161,31 @@ public class WaveManager : MonoBehaviour
         StartCoroutine(SpawnWaveRoutine());
     }
 
+    /// <summary>
+    /// Returns online enemy count for round used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     public int GetOnlineEnemyCountForRound(int round)
     {
+        /// <summary>
+        /// Returns enemy count for round needed by this gameplay system.
+        /// </summary>
         return GetEnemyCountForRound(round);
     }
 
+    /// <summary>
+    /// Builds online enemy spawn plan from configured scene objects and runtime state.
+    /// </summary>
     public List<GameObject> BuildOnlineEnemySpawnPlan(int round, int enemyCount)
     {
+        /// <summary>
+        /// Handles build enemy spawn plan for wave manager.
+        /// </summary>
         return BuildEnemySpawnPlan(round, enemyCount);
     }
 
+    /// <summary>
+    /// Looks up the target for online enemy prefab and applies the resolved gameplay result.
+    /// </summary>
     public GameObject ResolveOnlineEnemyPrefab(string enemyTypeId)
     {
         if (string.IsNullOrWhiteSpace(enemyTypeId))
@@ -195,6 +222,9 @@ public class WaveManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Applies online wave started to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOnlineWaveStarted(int waveIndex)
     {
         activeWaveNumber = Mathf.Max(1, waveIndex);
@@ -205,6 +235,9 @@ public class WaveManager : MonoBehaviour
         ShowToast("Enemy Wave Started");
     }
 
+    /// <summary>
+    /// Applies online wave ended to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOnlineWaveEnded(int nextRound)
     {
         isSpawning = false;
@@ -213,6 +246,9 @@ public class WaveManager : MonoBehaviour
         RefreshWaveCounterUI();
     }
 
+    /// <summary>
+    /// Spawns wave routine into the scene and initializes its runtime state.
+    /// </summary>
     private IEnumerator SpawnWaveRoutine()
     {
         isSpawning = true;
@@ -231,10 +267,16 @@ public class WaveManager : MonoBehaviour
                 );
             }
 
+            /// <summary>
+            /// Handles wait for seconds for wave manager.
+            /// </summary>
             yield return new WaitForSeconds(SpawnIntervalSeconds);
         }
 
         isSpawning = false;
+        /// <summary>
+        /// Handles wait until for wave manager.
+        /// </summary>
         yield return new WaitUntil(IsWaveFinished);
 
         ShowToast("Wave " + activeWaveNumber + " cleared.");
@@ -242,6 +284,9 @@ public class WaveManager : MonoBehaviour
 
         if (WaveClearedDelaySeconds > 0f)
         {
+            /// <summary>
+            /// Handles wait for seconds for wave manager.
+            /// </summary>
             yield return new WaitForSeconds(WaveClearedDelaySeconds);
         }
 
@@ -249,6 +294,9 @@ public class WaveManager : MonoBehaviour
         NotifyWaveFinished();
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether wave finished is true.
+    /// </summary>
     private bool IsWaveFinished()
     {
         if (isSpawning)
@@ -260,6 +308,9 @@ public class WaveManager : MonoBehaviour
         return enemies.Length == 0;
     }
 
+    /// <summary>
+    /// Notifies connected systems that wave finished occurred.
+    /// </summary>
     private void NotifyWaveFinished()
     {
         if (aiPrototypeTurnManager != null)
@@ -274,6 +325,9 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns current wave index used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private int GetCurrentWaveIndex()
     {
         if (aiPrototypeTurnManager != null)
@@ -290,6 +344,9 @@ public class WaveManager : MonoBehaviour
     }
 
     // Keeps the optional round text synchronized in both local and AI prototype scenes.
+    /// <summary>
+    /// Refreshes wave counter UI from the latest gameplay data.
+    /// </summary>
     public void RefreshWaveCounterUI()
     {
         if (waveCounterText == null)
@@ -301,6 +358,9 @@ public class WaveManager : MonoBehaviour
         waveCounterText.text = "Round: " + currentWave + "/" + GetMaxWaveCount();
     }
 
+    /// <summary>
+    /// Returns max wave count used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private int GetMaxWaveCount()
     {
         if (aiPrototypeTurnManager != null)
@@ -316,12 +376,18 @@ public class WaveManager : MonoBehaviour
         return Mathf.Max(1, maxWaveCount);
     }
 
+    /// <summary>
+    /// Returns enemy count for round used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private int GetEnemyCountForRound(int round)
     {
         int safeRound = Mathf.Max(1, round);
         return Mathf.Max(1, baseEnemyCount + (safeRound - 1) * Mathf.Max(0, enemyCountIncreasePerRound));
     }
 
+    /// <summary>
+    /// Returns enemy prefab for spawn used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private GameObject GetEnemyPrefabForSpawn(int spawnIndex)
     {
         if (activeEnemySpawnPlan != null &&
@@ -334,6 +400,9 @@ public class WaveManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Builds enemy spawn plan from configured scene objects and runtime state.
+    /// </summary>
     private List<GameObject> BuildEnemySpawnPlan(int round, int enemyCount)
     {
         List<GameObject> spawnPlan = new List<GameObject>();
@@ -369,6 +438,9 @@ public class WaveManager : MonoBehaviour
         return spawnPlan;
     }
 
+    /// <summary>
+    /// Returns valid enemy entries used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private List<WaveEnemyEntry> GetValidEnemyEntries(int round, bool bossOnly)
     {
         List<WaveEnemyEntry> validEntries = new List<WaveEnemyEntry>();
@@ -389,6 +461,9 @@ public class WaveManager : MonoBehaviour
         return validEntries;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid enemy entry is true.
+    /// </summary>
     private bool IsValidEnemyEntry(WaveEnemyEntry entry, int round, bool bossOnly)
     {
         if (entry == null || entry.enemyPrefab == null || entry.weight <= 0f)
@@ -442,11 +517,17 @@ public class WaveManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether boss round is true.
+    /// </summary>
     private bool IsBossRound(int round)
     {
         return spawnBossEveryTenRounds && round > 0 && round % 10 == 0;
     }
 
+    /// <summary>
+    /// Returns boss entry used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private WaveEnemyEntry GetBossEntry(int round)
     {
         List<WaveEnemyEntry> bossEntries = GetValidEnemyEntries(round, true);
@@ -459,6 +540,9 @@ public class WaveManager : MonoBehaviour
         return bossEntries[Random.Range(0, bossEntries.Count)];
     }
 
+    /// <summary>
+    /// Returns weighted enemy prefab used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private GameObject GetWeightedEnemyPrefab(List<WaveEnemyEntry> validEntries, int round)
     {
         float totalWeight = 0f;
@@ -489,6 +573,9 @@ public class WaveManager : MonoBehaviour
         return validEntries[validEntries.Count - 1].enemyPrefab;
     }
 
+    /// <summary>
+    /// Returns effective weight used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private float GetEffectiveWeight(WaveEnemyEntry entry, int round)
     {
         if (entry == null)
@@ -501,6 +588,9 @@ public class WaveManager : MonoBehaviour
         return Mathf.Max(0f, entry.weight + bonus);
     }
 
+    /// <summary>
+    /// Writes enemy type counts details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogEnemyTypeCounts(List<GameObject> spawnPlan, int round)
     {
         Dictionary<EnemyType, int> typeCounts = new Dictionary<EnemyType, int>();
@@ -535,6 +625,9 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Writes wave spawn plan details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogWaveSpawnPlan(List<GameObject> spawnPlan, int round)
     {
         if (!logWaveSpawnPlan || spawnPlan == null)
@@ -562,6 +655,9 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns enemy type from prefab used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private EnemyType GetEnemyTypeFromPrefab(GameObject prefab)
     {
         if (prefab == null)
@@ -573,6 +669,9 @@ public class WaveManager : MonoBehaviour
         return stats != null ? stats.enemyType : EnemyType.Normal;
     }
 
+    /// <summary>
+    /// Shuffles spawn plan so future selections happen in random order.
+    /// </summary>
     private void ShuffleSpawnPlan(List<GameObject> spawnPlan)
     {
         if (spawnPlan == null)
@@ -589,6 +688,9 @@ public class WaveManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -607,6 +709,9 @@ public class WaveManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null && gamePhaseManager != null)

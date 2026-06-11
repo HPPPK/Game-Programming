@@ -57,11 +57,17 @@ public class PlayerStatusPanelUI : MonoBehaviour
     public int mediumNameLength = 8;
     public int longNameLength = 12;
 
+    /// <summary>
+    /// Checks player status panel UI input, timing, animation, or UI state once per frame.
+    /// </summary>
     void Update()
     {
         Refresh();
     }
 
+    /// <summary>
+    /// Refreshes this display from the latest gameplay data.
+    /// </summary>
     public void Refresh()
     {
         if (playerNameText != null)
@@ -105,6 +111,9 @@ public class PlayerStatusPanelUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles bind for UI display, input, or player feedback.
+    /// </summary>
     public void Bind(PlayerResource resource, CastleBase castle)
     {
         linkedResource = resource;
@@ -123,6 +132,9 @@ public class PlayerStatusPanelUI : MonoBehaviour
         Refresh();
     }
 
+    /// <summary>
+    /// Returns panel display name used to update UI text, layout, or feedback.
+    /// </summary>
     private string GetPanelDisplayName()
     {
         string displayName = linkedResource != null ? linkedResource.GetDisplayName() : playerName;
@@ -141,6 +153,9 @@ public class PlayerStatusPanelUI : MonoBehaviour
         return displayName;
     }
 
+    /// <summary>
+    /// Returns name font size used to update UI text, layout, or feedback.
+    /// </summary>
     private float GetNameFontSize(string displayName)
     {
         if (string.IsNullOrEmpty(displayName))

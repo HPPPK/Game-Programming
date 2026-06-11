@@ -48,11 +48,17 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
 
     private int currentPlayerId = -1;
 
+    /// <summary>
+    /// Finds and stores current turn indicator manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         Instance = this;
     }
 
+    /// <summary>
+    /// Sets up current turn indicator manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         // 初始化时隐藏所有 marker
@@ -63,6 +69,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         UpdateCurrentTurnIndicator(initialPlayerId);
     }
 
+    /// <summary>
+    /// Returns initial player ID used to update UI text, layout, or feedback.
+    /// </summary>
     private int GetInitialPlayerId()
     {
         TurnManager turnManager = FindObjectOfType<TurnManager>();
@@ -74,6 +83,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         return 0;
     }
 
+    /// <summary>
+    /// Updates current turn indicator so the display or cached state matches current gameplay data.
+    /// </summary>
     public void UpdateCurrentTurnIndicator(int playerId)
     {
         currentPlayerId = playerId;
@@ -81,6 +93,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         UpdateRoundText();
     }
 
+    /// <summary>
+    /// Hides all markers and clears temporary visual state.
+    /// </summary>
     public void HideAllMarkers()
     {
         if (turnMarkers == null) return;
@@ -90,6 +105,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows action markers with the correct current context.
+    /// </summary>
     public void ShowActionMarkers(int[] targetPlayerIds, Color actionColor)
     {
         if (turnMarkers == null) return;
@@ -117,6 +135,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Resets markers to turn indicator for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetMarkersToTurnIndicator()
     {
         if (turnMarkers == null) return;
@@ -133,6 +154,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         UpdateCurrentTurnIndicator(currentPlayerId);
     }
 
+    /// <summary>
+    /// Updates turn markers so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateTurnMarkers(int playerId)
     {
         if (turnMarkers == null) 
@@ -191,6 +215,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
             }
         }
     }
+    /// <summary>
+    /// Updates round text so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateRoundText()
     {
         if (roundText == null) return;
@@ -203,6 +230,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         roundText.color = turnColor;
     }
 
+    /// <summary>
+    /// Returns player display name used to update UI text, layout, or feedback.
+    /// </summary>
     private string GetPlayerDisplayName(int playerId)
     {
         PlayerResource[] players = FindObjectsOfType<PlayerResource>();
@@ -217,6 +247,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         return $"Player {playerId + 1}";
     }
 
+    /// <summary>
+    /// Returns current round used to update UI text, layout, or feedback.
+    /// </summary>
     private int GetCurrentRound()
     {
         AIPrototypeTurnManager aiTurnManager = FindObjectOfType<AIPrototypeTurnManager>();
@@ -228,6 +261,9 @@ public class CurrentTurnIndicatorManager : MonoBehaviour
         return 1;
     }
 
+    /// <summary>
+    /// Returns max waves used to update UI text, layout, or feedback.
+    /// </summary>
     private int GetMaxWaves()
     {
         AIPrototypeTurnManager aiTurnManager = FindObjectOfType<AIPrototypeTurnManager>();

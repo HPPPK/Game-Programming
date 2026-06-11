@@ -84,6 +84,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         get { return onlineWaveRunning; }
     }
 
+    /// <summary>
+    /// Finds and stores Photon online wave combat sync manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -96,6 +99,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         AutoAssignReferences();
     }
 
+    /// <summary>
+    /// Subscribes Photon online wave combat sync manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -103,6 +109,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Unsubscribes Photon online wave combat sync manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -115,6 +124,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks Photon online wave combat sync manager input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -136,6 +148,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Prepares this manager for a Photon match and loads or sends the starting synchronized state.
+    /// </summary>
     public void InitializeForOnlineMatch()
     {
         AutoAssignReferences();
@@ -144,6 +159,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         RebuildEnemyRegistryFromScene("InitializeForOnlineMatch");
     }
 
+    /// <summary>
+    /// Attempts to start wave as master and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryStartWaveAsMaster(int round, int waveIndex)
     {
 #if !PHOTON_UNITY_NETWORKING
@@ -215,6 +233,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Decides whether should block local enemy damage should happen in the current mode and turn state.
+    /// </summary>
     public static bool ShouldBlockLocalEnemyDamage()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -227,11 +248,20 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Decides whether should block local castle damage should happen in the current mode and turn state.
+    /// </summary>
     public static bool ShouldBlockLocalCastleDamage()
     {
+        /// <summary>
+        /// Handles should block local enemy damage for Photon online wave combat sync manager.
+        /// </summary>
         return ShouldBlockLocalEnemyDamage();
     }
 
+    /// <summary>
+    /// Notifies connected systems that enemy damaged by master occurred.
+    /// </summary>
     public static void NotifyEnemyDamagedByMaster(EnemyHealth enemy, int damage, PlayerResource damageOwner)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -244,6 +274,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Notifies connected systems that enemy killed by master occurred.
+    /// </summary>
     public static void NotifyEnemyKilledByMaster(EnemyHealth enemy, PlayerResource rewardOwner)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -256,6 +289,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Notifies connected systems that enemy resolved at castle by master occurred.
+    /// </summary>
     public static void NotifyEnemyResolvedAtCastleByMaster(GameObject enemy, CastleBase castle)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -273,6 +309,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Notifies connected systems that castle damaged by master occurred.
+    /// </summary>
     public static void NotifyCastleDamagedByMaster(CastleBase castle, int damage)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -285,6 +324,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Notifies connected systems that reward granted by master occurred.
+    /// </summary>
     public static void NotifyRewardGrantedByMaster(PlayerResource player)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -298,6 +340,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
     }
 
 #if PHOTON_UNITY_NETWORKING
+    /// <summary>
+    /// Responds to on event and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnEvent(EventData photonEvent)
     {
         if (!CanRunOnlineWaveSync())
@@ -337,6 +382,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Responds to on player left room and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         if (!CanRunOnlineWaveSync())
@@ -348,6 +396,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         RebuildEnemyRegistryFromScene("OnPlayerLeftRoom");
     }
 
+    /// <summary>
+    /// Responds to on master client switched and updates the affected gameplay or UI systems.
+    /// </summary>
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         if (!CanRunOnlineWaveSync())
@@ -365,6 +416,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
     }
 #endif
 
+    /// <summary>
+    /// Applies synchronized wave start to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyWaveStart(OnlineWaveStartData waveData)
     {
         if (waveData == null)
@@ -401,6 +455,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         spawnRoutine = StartCoroutine(SpawnOnlineWaveRoutine(waveData));
     }
 
+    /// <summary>
+    /// Spawns online wave routine into the scene and initializes its runtime state.
+    /// </summary>
     private IEnumerator SpawnOnlineWaveRoutine(OnlineWaveStartData waveData)
     {
         if (EnemyPathAssignmentManager.Instance != null && waveManager != null)
@@ -413,6 +470,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         for (int i = 0; i < entries.Count; i++)
         {
             SpawnOnlineEnemy(entries[i], waveData.round, waveData.waveIndex);
+            /// <summary>
+            /// Handles wait for seconds for Photon online wave combat sync manager.
+            /// </summary>
             yield return new WaitForSeconds(spawnIntervalSeconds);
         }
 
@@ -420,6 +480,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         spawnRoutine = null;
     }
 
+    /// <summary>
+    /// Spawns online enemy into the scene and initializes its runtime state.
+    /// </summary>
     private void SpawnOnlineEnemy(OnlineEnemySpawnData spawnData, int round, int waveIndex)
     {
         if (spawnData == null)
@@ -471,6 +534,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Coordinates broadcast enemy positions for Photon synchronization and local scene state.
+    /// </summary>
     private void BroadcastEnemyPositions()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -506,6 +572,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Coordinates broadcast enemy health for Photon synchronization and local scene state.
+    /// </summary>
     private void BroadcastEnemyHealth(EnemyHealth enemy, int damage, PlayerResource damageOwner)
     {
         OnlineEnemyIdentity identity = enemy.GetComponent<OnlineEnemyIdentity>();
@@ -538,6 +607,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         RaiseToAll(EnemyHealthEventCode, data);
     }
 
+    /// <summary>
+    /// Coordinates broadcast enemy killed for Photon synchronization and local scene state.
+    /// </summary>
     private void BroadcastEnemyKilled(EnemyHealth enemy, PlayerResource rewardOwner)
     {
         OnlineEnemyIdentity identity = enemy.GetComponent<OnlineEnemyIdentity>();
@@ -566,6 +638,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         RaiseToAll(EnemyKilledEventCode, data);
     }
 
+    /// <summary>
+    /// Coordinates broadcast castle damage for Photon synchronization and local scene state.
+    /// </summary>
     private void BroadcastCastleDamage(CastleBase castle, int damage)
     {
         OnlineCastleDamageData data = new OnlineCastleDamageData
@@ -588,6 +663,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         RaiseToAll(CastleDamageEventCode, data);
     }
 
+    /// <summary>
+    /// Coordinates broadcast reward for Photon synchronization and local scene state.
+    /// </summary>
     private void BroadcastReward(PlayerResource player)
     {
         OnlineRewardData data = new OnlineRewardData
@@ -609,6 +687,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         RaiseToAll(RewardEventCode, data);
     }
 
+    /// <summary>
+    /// Coordinates end wave after delay for Photon synchronization and local scene state.
+    /// </summary>
     private IEnumerator EndWaveAfterDelay()
     {
         if (waveEndPending)
@@ -618,6 +699,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 
         waveEndPending = true;
         onlineWaveSpawning = true;
+        /// <summary>
+        /// Handles wait for seconds for Photon online wave combat sync manager.
+        /// </summary>
         yield return new WaitForSeconds(waveEndDelaySeconds);
 
         if (!AreAllOnlineEnemiesResolved())
@@ -644,6 +728,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies synchronized enemy positions to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyEnemyPositions(OnlineEnemyPositionBatchData batch)
     {
         if (batch == null || batch.enemies == null)
@@ -667,6 +754,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies synchronized enemy health to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyEnemyHealth(OnlineEnemyHealthData data)
     {
         if (data == null || !enemiesById.TryGetValue(data.enemyId, out OnlineEnemyIdentity identity) || identity == null)
@@ -678,6 +768,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         enemy?.ApplyOnlineHealthState(data.currentHP, data.maxHP);
     }
 
+    /// <summary>
+    /// Applies synchronized enemy killed to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyEnemyKilled(OnlineEnemyKilledData data)
     {
         if (data == null || !enemiesById.TryGetValue(data.enemyId, out OnlineEnemyIdentity identity) || identity == null)
@@ -690,6 +783,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         enemiesById.Remove(data.enemyId);
     }
 
+    /// <summary>
+    /// Applies synchronized castle damage to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyCastleDamage(OnlineCastleDamageData data)
     {
         if (data == null)
@@ -701,6 +797,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         castle?.ApplyOnlineHealthState(data.currentHP);
     }
 
+    /// <summary>
+    /// Applies synchronized reward to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyReward(OnlineRewardData data)
     {
         if (data == null || playerManager == null)
@@ -721,6 +820,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         playerManager.RefreshAllPlayerStatusPanels();
     }
 
+    /// <summary>
+    /// Applies synchronized wave end to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyWaveEnd(OnlineWaveEndData data)
     {
         onlineWaveRunning = false;
@@ -732,6 +834,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         ShowOnlineToast("Enemy Wave Cleared");
     }
 
+    /// <summary>
+    /// Coordinates are all online enemies resolved for Photon synchronization and local scene state.
+    /// </summary>
     private bool AreAllOnlineEnemiesResolved()
     {
         List<string> staleIds = new List<string>();
@@ -752,11 +857,17 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         return enemiesById.Count == 0;
     }
 
+    /// <summary>
+    /// Clears online enemies and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearOnlineEnemies()
     {
         enemiesById.Clear();
     }
 
+    /// <summary>
+    /// Rebuilds enemy registry from scene from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildEnemyRegistryFromScene(string context)
     {
         enemiesById.Clear();
@@ -781,6 +892,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         Debug.Log("Online enemy registry rebuilt during " + context + ". count=" + enemiesById.Count + ", waveRunning=" + onlineWaveRunning + ".");
     }
 
+    /// <summary>
+    /// Coordinates auto assign references for Photon synchronization and local scene state.
+    /// </summary>
     private void AutoAssignReferences()
     {
         if (onlineGameSceneManager == null)
@@ -806,6 +920,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Rebuilds spawner registry from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildSpawnerRegistry()
     {
         spawnersById.Clear();
@@ -830,6 +947,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for spawner and applies the resolved gameplay result.
+    /// </summary>
     private EnemySpawner ResolveSpawner(string spawnPointId)
     {
         if (spawnersById.Count == 0)
@@ -841,6 +961,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         return spawner;
     }
 
+    /// <summary>
+    /// Looks up the target for castle by player ID and applies the resolved gameplay result.
+    /// </summary>
     private CastleBase ResolveCastleByPlayerId(int playerId)
     {
         CastleBase[] castles = FindObjectsOfType<CastleBase>();
@@ -856,6 +979,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Shows online toast with the correct current context.
+    /// </summary>
     private void ShowOnlineToast(string message)
     {
         if (onlineGameSceneManager != null)
@@ -879,6 +1005,9 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Checks whether run online wave sync is allowed before enabling that action.
+    /// </summary>
     private bool CanRunOnlineWaveSync()
     {
 #if PHOTON_UNITY_NETWORKING

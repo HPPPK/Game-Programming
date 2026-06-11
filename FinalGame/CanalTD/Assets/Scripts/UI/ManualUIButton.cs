@@ -39,11 +39,17 @@ public class ManualUIButton : MonoBehaviour
     public UnityEvent onClick;
     public bool debugLog = true;
 
+    /// <summary>
+    /// Finds and stores manual UI button references before scene gameplay begins.
+    /// </summary>
     void Awake()
     {
         ResolveTargetRect();
     }
 
+    /// <summary>
+    /// Checks manual UI button input, timing, animation, or UI state once per frame.
+    /// </summary>
     void Update()
     {
         if (!Input.GetMouseButtonDown(0))
@@ -85,6 +91,9 @@ public class ManualUIButton : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for target rect and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveTargetRect()
     {
         if (targetRect != null)

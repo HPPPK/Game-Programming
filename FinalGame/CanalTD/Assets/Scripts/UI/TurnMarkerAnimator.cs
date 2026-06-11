@@ -45,6 +45,9 @@ public class TurnMarkerAnimator : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
 
+    /// <summary>
+    /// Finds and stores turn marker animator references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         originalPosition = transform.localPosition;
@@ -56,6 +59,9 @@ public class TurnMarkerAnimator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks turn marker animator input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!isAnimating) return;
@@ -69,18 +75,27 @@ public class TurnMarkerAnimator : MonoBehaviour
         transform.localScale = originalScale * scaleOffset;
     }
 
+    /// <summary>
+    /// Shows this UI element with the correct current context.
+    /// </summary>
     public void Show()
     {
         isAnimating = true;
         gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// Hides this UI element and clears temporary visual state.
+    /// </summary>
     public void Hide()
     {
         isAnimating = false;
         gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Sets marker color and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetMarkerColor(Color color)
     {
         if (spriteRenderer != null)
@@ -89,6 +104,9 @@ public class TurnMarkerAnimator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Resets marker color for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetMarkerColor()
     {
         if (spriteRenderer != null)

@@ -36,12 +36,18 @@ public class CardHoverUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 {
     public GameObject tooltip;
 
+    /// <summary>
+    /// Responds to on pointer enter and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (tooltip != null)
             tooltip.SetActive(true);
     }
 
+    /// <summary>
+    /// Responds to on pointer exit and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnPointerExit(PointerEventData eventData)
     {
         if (tooltip != null)

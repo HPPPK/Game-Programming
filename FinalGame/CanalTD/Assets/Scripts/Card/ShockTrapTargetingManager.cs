@@ -84,6 +84,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
     private PathNode selectedNode;
     private bool isTargeting = false;
 
+    /// <summary>
+    /// Registers trap so later callbacks, lookups, or sync messages can use it.
+    /// </summary>
     public static void RegisterTrap(Transform routeNode, ShockTrap trap)
     {
         if (routeNode == null || trap == null)
@@ -94,6 +97,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         occupiedRouteNodes[routeNode] = trap;
     }
 
+    /// <summary>
+    /// Unregisters trap so old callbacks or duplicate listeners cannot fire.
+    /// </summary>
     public static void UnregisterTrap(Transform routeNode, ShockTrap trap)
     {
         if (routeNode == null)
@@ -108,6 +114,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Finds and stores shock trap targeting manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (playerManager == null)
@@ -126,6 +135,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Subscribes shock trap targeting manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         if (confirmButton != null)
@@ -139,6 +151,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Unsubscribes shock trap targeting manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         if (confirmButton != null)
@@ -152,11 +167,17 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up shock trap targeting manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         ExitTargetingMode();
     }
 
+    /// <summary>
+    /// Checks shock trap targeting manager input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!isTargeting)
@@ -186,6 +207,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles begin shock trap targeting for card state, hand state, or targeting.
+    /// </summary>
     public bool BeginShockTrapTargeting()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PlaceShockTrap, null))
@@ -229,6 +253,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Confirms selection and applies the selected action if it is valid.
+    /// </summary>
     public void ConfirmSelection()
     {
         if (!isTargeting)
@@ -277,11 +304,20 @@ public class ShockTrapTargetingManager : MonoBehaviour
         ResolveShockTrapPlacement(playerManager != null ? playerManager.GetCurrentPlayerId() : 0, selectedNode, true);
     }
 
+    /// <summary>
+    /// Looks up the target for shock trap placement and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolveShockTrapPlacement(int playerId, PathNode node)
     {
+        /// <summary>
+        /// Handles resolve shock trap placement for shock trap targeting manager.
+        /// </summary>
         return ResolveShockTrapPlacement(playerId, node, false);
     }
 
+    /// <summary>
+    /// Looks up the target for shock trap placement and applies the resolved gameplay result.
+    /// </summary>
     public bool ResolveShockTrapPlacement(int playerId, PathNode node, bool consumePendingCard)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.PlaceShockTrap, node != null ? node.gameObject : null))
@@ -363,11 +399,17 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks whether place shock trap at node is allowed before enabling that action.
+    /// </summary>
     public bool CanPlaceShockTrapAtNode(PathNode node)
     {
         return IsValidRouteNode(node) && shockTrapPrefab != null;
     }
 
+    /// <summary>
+    /// Applies shock trap placement from online to gameplay data and updates visible feedback.
+    /// </summary>
     public bool ApplyShockTrapPlacementFromOnline(int playerId, PathNode node)
     {
         if (node == null || shockTrapPrefab == null)
@@ -401,6 +443,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks whether selection is allowed before enabling that action.
+    /// </summary>
     public void CancelSelection()
     {
         if (!isTargeting)
@@ -416,21 +461,33 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether targeting is true.
+    /// </summary>
     public bool IsTargeting()
     {
         return isTargeting;
     }
 
+    /// <summary>
+    /// Handles exit without consuming card for card state, hand state, or targeting.
+    /// </summary>
     public void ExitWithoutConsumingCard()
     {
         ExitTargetingMode();
     }
 
+    /// <summary>
+    /// Decides whether should block online action should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldBlockOnlineAction()
     {
         return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
+    /// <summary>
+    /// Handles scan route nodes for card state, hand state, or targeting.
+    /// </summary>
     private void ScanRouteNodes()
     {
         if (routeNodesParent != null)
@@ -450,6 +507,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Attempts to select hovered node and returns false if rules, resources, or references block it.
+    /// </summary>
     private void TrySelectHoveredNode()
     {
         if (ShouldBlockOnlineAction())
@@ -482,6 +542,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         Debug.Log("Selected RouteNode: " + selectedNode.name);
     }
 
+    /// <summary>
+    /// Returns nearest route node used by card handling or target selection.
+    /// </summary>
     private PathNode GetNearestRouteNode(Vector3 worldPosition)
     {
         PathNode nearestNode = null;
@@ -506,6 +569,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return nearestNode;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid route node is true.
+    /// </summary>
     private bool IsValidRouteNode(PathNode node)
     {
         if (node == null)
@@ -531,6 +597,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether route node occupied is true.
+    /// </summary>
     private bool IsRouteNodeOccupied(PathNode node)
     {
         if (node == null)
@@ -552,6 +621,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether too close to active trap is true.
+    /// </summary>
     private bool IsTooCloseToActiveTrap(Vector3 worldPosition)
     {
         ShockTrap[] traps = FindObjectsOfType<ShockTrap>();
@@ -569,6 +641,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Updates hover node so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateHoverNode(PathNode node)
     {
         if (hoveredNode == node || selectedNode != null)
@@ -589,6 +664,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Creates route node highlights and configures it for the current scene or interaction.
+    /// </summary>
     private void CreateRouteNodeHighlights()
     {
         int createdCount = 0;
@@ -610,6 +688,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         Debug.Log("Route node highlights created: " + createdCount);
     }
 
+    /// <summary>
+    /// Handles highlight node for card state, hand state, or targeting.
+    /// </summary>
     private void HighlightNode(PathNode node, Color highlightColor)
     {
         SpriteRenderer renderer = EnsureNodeHighlight(node);
@@ -631,6 +712,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         renderer.sortingOrder = nodeHighlightSortingOrder;
     }
 
+    /// <summary>
+    /// Ensures node highlight exists or is initialized before the flow continues.
+    /// </summary>
     private SpriteRenderer EnsureNodeHighlight(PathNode node)
     {
         if (node == null)
@@ -660,6 +744,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return renderer;
     }
 
+    /// <summary>
+    /// Creates generated highlight object and configures it for the current scene or interaction.
+    /// </summary>
     private GameObject CreateGeneratedHighlightObject(Transform parent)
     {
         GameObject highlightObject = new GameObject("ShockTrapNodeHighlight");
@@ -672,6 +759,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return highlightObject;
     }
 
+    /// <summary>
+    /// Returns generated highlight sprite used by card handling or target selection.
+    /// </summary>
     private Sprite GetGeneratedHighlightSprite()
     {
         if (generatedHighlightSprite != null)
@@ -697,6 +787,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return generatedHighlightSprite;
     }
 
+    /// <summary>
+    /// Handles restore node highlight for card state, hand state, or targeting.
+    /// </summary>
     private void RestoreNodeHighlight(PathNode node)
     {
         SpriteRenderer renderer = node != null ? node.GetComponentInChildren<SpriteRenderer>() : null;
@@ -717,6 +810,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles restore all node highlights for card state, hand state, or targeting.
+    /// </summary>
     private void RestoreAllNodeHighlights()
     {
         foreach (KeyValuePair<SpriteRenderer, Color> entry in originalNodeColors)
@@ -749,6 +845,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         runtimeNodeHighlights.Clear();
     }
 
+    /// <summary>
+    /// Ensures preview exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsurePreview()
     {
         if (previewTrap != null)
@@ -793,6 +892,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         previewRenderer = previewTrap.GetComponentInChildren<SpriteRenderer>();
     }
 
+    /// <summary>
+    /// Updates preview so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdatePreview(Vector3 position, Color color)
     {
         EnsurePreview();
@@ -814,6 +916,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies current player preview sprite to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyCurrentPlayerPreviewSprite()
     {
         if (playerManager == null || previewRenderer == null)
@@ -829,6 +934,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns mouse world position used by card handling or target selection.
+    /// </summary>
     private Vector3 GetMouseWorldPosition()
     {
         if (targetCamera == null)
@@ -844,10 +952,16 @@ public class ShockTrapTargetingManager : MonoBehaviour
         Vector3 mouseScreenPosition = Input.mousePosition;
         float distanceFromCamera = Mathf.Abs(targetCamera.transform.position.z);
         return targetCamera.ScreenToWorldPoint(
+            /// <summary>
+            /// Handles vector3 for shock trap targeting manager.
+            /// </summary>
             new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, distanceFromCamera)
         );
     }
 
+    /// <summary>
+    /// Sets targeting visuals and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetTargetingVisuals(bool active)
     {
         if (active && BuildTowerManager.Instance != null)
@@ -895,6 +1009,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets normal gameplay UI enabled and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetNormalGameplayUIEnabled(bool enabled)
     {
         ResolveNormalGameplayUI();
@@ -908,6 +1025,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         normalGameplayUI.blocksRaycasts = enabled;
     }
 
+    /// <summary>
+    /// Sets overlay raycast blocking and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetOverlayRaycastBlocking(bool blocking)
     {
         if (darkOverlay == null)
@@ -923,11 +1043,20 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over targeting controls is true.
+    /// </summary>
     private bool IsPointerOverTargetingControls()
     {
+        /// <summary>
+        /// Handles is pointer over button for shock trap targeting manager.
+        /// </summary>
         return IsPointerOverButton(confirmButton) || IsPointerOverButton(cancelButton);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over button is true.
+    /// </summary>
     private bool IsPointerOverButton(Button button)
     {
         if (button == null)
@@ -953,6 +1082,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, uiCamera);
     }
 
+    /// <summary>
+    /// Looks up the target for normal gameplay UI and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveNormalGameplayUI()
     {
         if (normalGameplayUI != null)
@@ -972,6 +1104,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles exit targeting mode for card state, hand state, or targeting.
+    /// </summary>
     private void ExitTargetingMode()
     {
         if (previewTrap != null)
@@ -991,6 +1126,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         UpdateConfirmButtonState();
     }
 
+    /// <summary>
+    /// Updates confirm button state so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateConfirmButtonState()
     {
         if (confirmButton == null)
@@ -1007,6 +1145,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         confirmButton.interactable = isTargeting && selectedNode != null;
     }
 
+    /// <summary>
+    /// Sets route node visuals active and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetRouteNodeVisualsActive(bool active)
     {
         if (routeNodesParent == null)
@@ -1030,6 +1171,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensures placed trap visual exists or is initialized before the flow continues.
+    /// </summary>
     private void EnsurePlacedTrapVisual(GameObject trapObject)
     {
         SpriteRenderer renderer = trapObject != null ? trapObject.GetComponentInChildren<SpriteRenderer>() : null;
@@ -1043,6 +1187,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         renderer.sortingOrder = trapSortingOrder;
     }
 
+    /// <summary>
+    /// Returns active trap count used by card handling or target selection.
+    /// </summary>
     private int GetActiveTrapCount()
     {
         int count = 0;
@@ -1067,6 +1214,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         return count;
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -1083,6 +1233,9 @@ public class ShockTrapTargetingManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

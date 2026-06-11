@@ -75,6 +75,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         get { return initializedForOnlineMatch; }
     }
 
+    /// <summary>
+    /// Finds and stores Photon online card sync manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -87,6 +90,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         AutoAssignReferences();
     }
 
+    /// <summary>
+    /// Unsubscribes Photon online card sync manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         UnregisterPhotonCallbacksIfNeeded();
@@ -97,6 +103,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Prepares this manager for a Photon match and loads or sends the starting synchronized state.
+    /// </summary>
     public void InitializeForOnlineMatch()
     {
         AutoAssignReferences();
@@ -131,6 +140,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Reads updated Photon room properties and reapplies the matching local synced state.
+    /// </summary>
     public void HandleRoomPropertiesUpdated()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -143,16 +155,31 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Asks the Master Client to validate and synchronize this player's card draw.
+    /// </summary>
     public bool RequestDrawCard()
     {
+        /// <summary>
+        /// Handles request action for Photon online card sync manager.
+        /// </summary>
         return RequestAction(OnlineCardActionType.Draw, string.Empty, string.Empty, string.Empty, -1);
     }
 
+    /// <summary>
+    /// Asks the Master Client to validate and synchronize discarding the selected card.
+    /// </summary>
     public bool RequestDiscardCard(string cardId, string cardName)
     {
+        /// <summary>
+        /// Handles request action for Photon online card sync manager.
+        /// </summary>
         return RequestAction(OnlineCardActionType.Discard, cardId, cardName, string.Empty, -1);
     }
 
+    /// <summary>
+    /// Sends the selected card and target to the Master Client for validation and broadcast.
+    /// </summary>
     public bool RequestPlayCard(string cardId, string cardName, string targetId, int targetPlayerId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
@@ -230,9 +257,15 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             );
         }
 
+        /// <summary>
+        /// Handles request action for Photon online card sync manager.
+        /// </summary>
         return RequestAction(OnlineCardActionType.Play, cardId, cardName, targetId, targetPlayerId);
     }
 
+    /// <summary>
+    /// Responds to on event and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnEvent(EventData photonEvent)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -350,6 +383,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
     }
 
 #if PHOTON_UNITY_NETWORKING
+    /// <summary>
+    /// Master Client validates the incoming request, changes authoritative state, and sends the result.
+    /// </summary>
     private void ProcessRequestAsMaster(OnlineCardRequestData request, int senderActorNumber)
     {
         if (!CanRunOnlineGameSceneCardSync())
@@ -376,6 +412,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         SendPrivateHandStatesForAcceptedAction(applyData);
     }
 
+    /// <summary>
+    /// Checks whether request has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private OnlineCardApplyData ValidateRequest(OnlineCardRequestData request, int senderActorNumber)
     {
         OnlineCardApplyData result = new OnlineCardApplyData
@@ -398,16 +437,25 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
         if (!PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext())
         {
+            /// <summary>
+            /// Handles reject validation for Photon online card sync manager.
+            /// </summary>
             return RejectValidation(request, result, "Online game inactive.");
         }
 
         if (!initializedForOnlineMatch)
         {
+            /// <summary>
+            /// Handles reject validation for Photon online card sync manager.
+            /// </summary>
             return RejectValidation(request, result, "Card sync not ready.");
         }
 
         if (resolvedSenderPlayerId != request.actorPlayerId)
         {
+            /// <summary>
+            /// Handles reject validation for Photon online card sync manager.
+            /// </summary>
             return RejectValidation(request, result, "Sender mismatch.");
         }
 
@@ -415,6 +463,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             onlineGameSceneManager.CurrentTurnPlayerId != request.actorPlayerId ||
             request.currentTurnPlayerId != request.actorPlayerId)
         {
+            /// <summary>
+            /// Handles reject validation for Photon online card sync manager.
+            /// </summary>
             return RejectValidation(request, result, "Not current turn player.");
         }
 
@@ -426,16 +477,25 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             case OnlineCardActionType.Draw:
                 if (turnManager != null && !turnManager.CanDrawCard())
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Draw already used.");
                 }
 
                 if (deckCardIds.Count <= 0)
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Deck is empty.");
                 }
 
                 if (authoritativeHand.Count >= handLimit)
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Hand limit reached.");
                 }
                 break;
@@ -443,11 +503,17 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             case OnlineCardActionType.Discard:
                 if (turnManager != null && !turnManager.CanDiscardCard())
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Discard already used.");
                 }
 
                 if (!HandContainsCardId(authoritativeHand, request.cardId))
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Card not in hand.");
                 }
                 break;
@@ -455,21 +521,33 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             case OnlineCardActionType.Play:
                 if (turnManager != null && !turnManager.CanPlayCard())
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Play unavailable.");
                 }
 
                 if (turnManager != null && IsGateControlCardId(request.cardId) && !turnManager.CanChangeGate())
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Gate change already used.");
                 }
 
                 if (!HandContainsCardId(authoritativeHand, request.cardId))
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Card not in hand.");
                 }
 
                 if (!HasValidTargetMetadata(request.cardId, request.targetId, request.targetPlayerId, request.actorPlayerId))
                 {
+                    /// <summary>
+                    /// Handles reject validation for Photon online card sync manager.
+                    /// </summary>
                     return RejectValidation(request, result, "Invalid target metadata.");
                 }
 
@@ -479,6 +557,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
                     if (!string.IsNullOrWhiteSpace(cardEffectRejectReason))
                     {
+                        /// <summary>
+                        /// Handles reject validation for Photon online card sync manager.
+                        /// </summary>
                         return RejectValidation(request, result, cardEffectRejectReason);
                     }
                 }
@@ -488,6 +569,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
                     if (!string.IsNullOrWhiteSpace(tileRejectReason))
                     {
+                        /// <summary>
+                        /// Handles reject validation for Photon online card sync manager.
+                        /// </summary>
                         return RejectValidation(request, result, tileRejectReason);
                     }
                 }
@@ -497,6 +581,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
                     if (!string.IsNullOrWhiteSpace(gateRejectReason))
                     {
+                        /// <summary>
+                        /// Handles reject validation for Photon online card sync manager.
+                        /// </summary>
                         return RejectValidation(request, result, gateRejectReason);
                     }
                 }
@@ -506,6 +593,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
                     if (!string.IsNullOrWhiteSpace(powerBoostRejectReason))
                     {
+                        /// <summary>
+                        /// Handles reject validation for Photon online card sync manager.
+                        /// </summary>
                         return RejectValidation(request, result, powerBoostRejectReason);
                     }
                 }
@@ -515,12 +605,18 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
                     if (!string.IsNullOrWhiteSpace(shockTrapRejectReason))
                     {
+                        /// <summary>
+                        /// Handles reject validation for Photon online card sync manager.
+                        /// </summary>
                         return RejectValidation(request, result, shockTrapRejectReason);
                     }
                 }
                 break;
 
             default:
+                /// <summary>
+                /// Handles reject validation for Photon online card sync manager.
+                /// </summary>
                 return RejectValidation(request, result, "Unsupported card action.");
         }
 
@@ -555,6 +651,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return result;
     }
 
+    /// <summary>
+    /// Applies synchronized authoritative mutation to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyAuthoritativeMutation(OnlineCardRequestData request, OnlineCardApplyData applyData)
     {
         List<string> authoritativeHand = GetOrCreateAuthoritativeHand(request.actorPlayerId);
@@ -622,6 +721,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Coordinates broadcast apply to all for Photon synchronization and local scene state.
+    /// </summary>
     private void BroadcastApplyToAll(OnlineCardApplyData applyData)
     {
         if (!CanRunOnlineGameSceneCardSync())
@@ -637,6 +739,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Sends a Photon request for private hand state from master so the Master Client can validate it.
+    /// </summary>
     private void RequestPrivateHandStateFromMaster()
     {
         if (!CanRunOnlineGameSceneCardSync() ||
@@ -663,6 +768,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Processes private hand state request and routes the result to the correct state-changing logic.
+    /// </summary>
     private void ProcessPrivateHandStateRequest(EventData photonEvent)
     {
         if (!CanRunOnlineGameSceneCardSync() || !PhotonNetwork.IsMasterClient)
@@ -697,16 +805,28 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         SendPrivateHandStateToOwner(requestedPlayerId);
     }
 
+    /// <summary>
+    /// Extracts requested private hand player ID from event data, JSON, or Photon payloads.
+    /// </summary>
     private int ExtractRequestedPrivateHandPlayerId(object requestData)
     {
         if (requestData is object[] requestArray && requestArray.Length > 0)
         {
+            /// <summary>
+            /// Handles convert to int for Photon online card sync manager.
+            /// </summary>
             return ConvertToInt(requestArray[0], -1);
         }
 
+        /// <summary>
+        /// Handles convert to int for Photon online card sync manager.
+        /// </summary>
         return ConvertToInt(requestData, -1);
     }
 
+    /// <summary>
+    /// Sends apply to requester to the correct Photon receiver or player owner.
+    /// </summary>
     private void SendApplyToRequester(int targetActorNumber, OnlineCardApplyData applyData)
     {
         if (!CanRunOnlineGameSceneCardSync() || targetActorNumber < 0)
@@ -722,6 +842,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Sends private hand state to owner to the correct Photon receiver or player owner.
+    /// </summary>
     private void SendPrivateHandStateToOwner(int ownerPlayerId)
     {
         if (!CanRunOnlineGameSceneCardSync())
@@ -759,6 +882,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Coordinates bootstrap authoritative state as master for Photon synchronization and local scene state.
+    /// </summary>
     private void BootstrapAuthoritativeStateAsMaster()
     {
         if (!CanRunOnlineGameSceneCardSync())
@@ -808,6 +934,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         SendPrivateHandStateToAllActivePlayers();
     }
 
+    /// <summary>
+    /// Sends private hand state to all active players to the correct Photon receiver or player owner.
+    /// </summary>
     private void SendPrivateHandStateToAllActivePlayers()
     {
         foreach (PlayerResource player in GetActivePlayers())
@@ -816,6 +945,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies synchronized snapshot from room properties to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplySnapshotFromRoomProperties()
     {
         if (!CanRunOnlineGameSceneCardSync() ||
@@ -868,6 +1000,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         Debug.Log("Applied public online card snapshot: " + FormatSnapshotCounts(snapshot));
     }
 
+    /// <summary>
+    /// Updates snapshot property so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateSnapshotProperty()
     {
         if (!CanRunOnlineGameSceneCardSync() || PhotonNetwork.CurrentRoom == null)
@@ -884,6 +1019,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         PhotonNetwork.CurrentRoom.SetCustomProperties(properties);
     }
 
+    /// <summary>
+    /// Builds public snapshot for Photon messages, room properties, or debug logs.
+    /// </summary>
     private OnlineCardPublicSnapshot BuildPublicSnapshot()
     {
         OnlineCardPublicSnapshot snapshot = new OnlineCardPublicSnapshot
@@ -923,6 +1061,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
     }
 #endif
 
+    /// <summary>
+    /// Applies an accepted online action to local gameplay state and visible UI feedback.
+    /// </summary>
     private void ApplyConfirmedAction(OnlineCardApplyData applyData)
     {
         AutoAssignReferences();
@@ -1014,6 +1155,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         ShowActionToast(applyData);
     }
 
+    /// <summary>
+    /// Applies synchronized private hand state to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyPrivateHandState(OnlinePrivateHandStateData privateState)
     {
         AutoAssignReferences();
@@ -1040,6 +1184,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies synchronized synced tile state to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplySyncedTileState(OnlineCardApplyData applyData)
     {
         if (applyData == null || !IsLandControlCardId(applyData.cardId))
@@ -1059,6 +1206,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Applies synchronized synced gate state to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplySyncedGateState(OnlineCardApplyData applyData)
     {
         if (applyData == null || !IsGateControlCardId(applyData.cardId))
@@ -1078,6 +1228,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Applies synchronized synced power boost state to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplySyncedPowerBoostState(OnlineCardApplyData applyData)
     {
         if (applyData == null || !IsPowerBoostCardId(applyData.cardId))
@@ -1096,6 +1249,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Applies synchronized synced shock trap state to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplySyncedShockTrapState(OnlineCardApplyData applyData)
     {
         if (applyData == null || !IsShockTrapCardId(applyData.cardId))
@@ -1115,6 +1271,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Applies synchronized tile state to scene to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyTileStateToScene(OnlineCardApplyData applyData)
     {
         if (playerManager == null)
@@ -1169,6 +1328,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Applies synchronized gate state to scene to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyGateStateToScene(OnlineCardApplyData applyData)
     {
         GateFrameAnimation targetGate = ResolveGateTargetById(applyData.targetGateId);
@@ -1223,6 +1385,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Applies synchronized power boost state to scene to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyPowerBoostStateToScene(OnlineCardApplyData applyData)
     {
         CannonTower targetTower = ResolveTowerTargetById(applyData.targetTowerId);
@@ -1255,6 +1420,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies synchronized shock trap state to scene to this client so it matches the authoritative state.
+    /// </summary>
     private void ApplyShockTrapStateToScene(OnlineCardApplyData applyData)
     {
         PathNode targetNode = ResolvePathNodeById(applyData.targetNodeId);
@@ -1288,6 +1456,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Updates build snapshot for tile state so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateBuildSnapshotForTileState(OnlineCardApplyData applyData)
     {
 #if PHOTON_UNITY_NETWORKING
@@ -1317,6 +1488,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Consumes local turn state and records that the player has used that action.
+    /// </summary>
     private void ConsumeLocalTurnState(OnlineCardApplyData applyData)
     {
         if (turnManager == null || onlineGameSceneManager == null)
@@ -1358,6 +1532,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Shows action toast with the correct current context.
+    /// </summary>
     private void ShowActionToast(OnlineCardApplyData applyData)
     {
         if (onlineGameSceneManager == null)
@@ -1488,6 +1665,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             : actorName + " played " + playedCardName + ".");
     }
 
+    /// <summary>
+    /// Coordinates auto assign references for Photon synchronization and local scene state.
+    /// </summary>
     private void AutoAssignReferences()
     {
         if (playerManager == null)
@@ -1518,6 +1698,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         RebuildPathNodeRegistryIfNeeded();
     }
 
+    /// <summary>
+    /// Looks up the target for tile target by ID and applies the resolved gameplay result.
+    /// </summary>
     private TowerBuildArea ResolveTileTargetById(string targetTileId)
     {
         RebuildTileTargetRegistryIfNeeded();
@@ -1531,6 +1714,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return targetTile;
     }
 
+    /// <summary>
+    /// Rebuilds tile target registry if needed from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildTileTargetRegistryIfNeeded()
     {
         if (tileTargetsById.Count > 0)
@@ -1541,6 +1727,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         RebuildTileTargetRegistry();
     }
 
+    /// <summary>
+    /// Rebuilds tile target registry from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildTileTargetRegistry()
     {
         tileTargetsById.Clear();
@@ -1563,6 +1752,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for gate target by ID and applies the resolved gameplay result.
+    /// </summary>
     private GateFrameAnimation ResolveGateTargetById(string targetGateId)
     {
         RebuildGateTargetRegistryIfNeeded();
@@ -1576,6 +1768,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return targetGate;
     }
 
+    /// <summary>
+    /// Rebuilds gate target registry if needed from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildGateTargetRegistryIfNeeded()
     {
         if (gateTargetsById.Count > 0)
@@ -1586,6 +1781,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         RebuildGateTargetRegistry();
     }
 
+    /// <summary>
+    /// Rebuilds gate target registry from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildGateTargetRegistry()
     {
         gateTargetsById.Clear();
@@ -1608,6 +1806,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Looks up the target for tower target by ID and applies the resolved gameplay result.
+    /// </summary>
     private CannonTower ResolveTowerTargetById(string targetTowerId)
     {
         RebuildTowerTargetRegistryIfNeeded();
@@ -1621,6 +1822,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return targetTower;
     }
 
+    /// <summary>
+    /// Rebuilds tower target registry if needed from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildTowerTargetRegistryIfNeeded()
     {
         if (towerTargetsById.Count > 0)
@@ -1631,6 +1835,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         RebuildTowerTargetRegistry();
     }
 
+    /// <summary>
+    /// Rebuilds tower target registry from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildTowerTargetRegistry()
     {
         towerTargetsById.Clear();
@@ -1647,6 +1854,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Registers tower target ID so later callbacks, lookups, or sync messages can use it.
+    /// </summary>
     private void RegisterTowerTargetId(string targetTowerId, CannonTower tower)
     {
         if (tower == null || string.IsNullOrWhiteSpace(targetTowerId))
@@ -1663,6 +1873,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         towerTargetsById.Add(targetTowerId, tower);
     }
 
+    /// <summary>
+    /// Looks up the target for path node by ID and applies the resolved gameplay result.
+    /// </summary>
     private PathNode ResolvePathNodeById(string targetNodeId)
     {
         RebuildPathNodeRegistryIfNeeded();
@@ -1676,6 +1889,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return targetNode;
     }
 
+    /// <summary>
+    /// Rebuilds path node registry if needed from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildPathNodeRegistryIfNeeded()
     {
         if (pathNodesById.Count > 0)
@@ -1686,6 +1902,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         RebuildPathNodeRegistry();
     }
 
+    /// <summary>
+    /// Rebuilds path node registry from current scene objects or synchronized data.
+    /// </summary>
     private void RebuildPathNodeRegistry()
     {
         pathNodesById.Clear();
@@ -1708,6 +1927,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns active players from Photon, room data, or the online player cache.
+    /// </summary>
     private List<PlayerResource> GetActivePlayers()
     {
         List<PlayerResource> players = new List<PlayerResource>();
@@ -1729,6 +1951,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return players;
     }
 
+    /// <summary>
+    /// Returns or create authoritative hand from Photon, room data, or the online player cache.
+    /// </summary>
     private List<string> GetOrCreateAuthoritativeHand(int playerId)
     {
         if (!playerHandCardIds.TryGetValue(playerId, out List<string> hand))
@@ -1740,6 +1965,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return hand;
     }
 
+    /// <summary>
+    /// Coordinates hand contains card ID for Photon synchronization and local scene state.
+    /// </summary>
     private bool HandContainsCardId(List<string> hand, string cardId)
     {
         if (hand == null)
@@ -1758,12 +1986,21 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Removes card ID from hand from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     private bool RemoveCardIdFromHand(List<string> hand, string cardId)
     {
         string removedCardId;
+        /// <summary>
+        /// Handles remove card ID from hand for Photon online card sync manager.
+        /// </summary>
         return RemoveCardIdFromHand(hand, cardId, out removedCardId);
     }
 
+    /// <summary>
+    /// Removes card ID from hand from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     private bool RemoveCardIdFromHand(List<string> hand, string cardId, out string removedCardId)
     {
         removedCardId = string.Empty;
@@ -1788,16 +2025,28 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Coordinates card IDs match for Photon synchronization and local scene state.
+    /// </summary>
     private bool CardIdsMatch(string leftCardId, string rightCardId)
     {
+        /// <summary>
+        /// Handles canonical card ID for Photon online card sync manager.
+        /// </summary>
         return CanonicalCardId(leftCardId) == CanonicalCardId(rightCardId);
     }
 
+    /// <summary>
+    /// Checks whether canonical card ID is allowed before enabling that action.
+    /// </summary>
     private string CanonicalCardId(string cardId)
     {
         return CardDrawManager.NormalizeCardId(cardId).Replace(" ", string.Empty);
     }
 
+    /// <summary>
+    /// Builds private hand state for Photon messages, room properties, or debug logs.
+    /// </summary>
     private OnlinePrivateHandStateData BuildPrivateHandState(int ownerPlayerId)
     {
         List<string> hand = GetOrCreateAuthoritativeHand(ownerPlayerId);
@@ -1810,6 +2059,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         };
     }
 
+    /// <summary>
+    /// Shuffles deck card IDs so future selections happen in random order.
+    /// </summary>
     private void ShuffleDeckCardIds()
     {
         for (int i = 0; i < deckCardIds.Count; i++)
@@ -1821,6 +2073,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks whether valid target metadata is present before the code depends on it.
+    /// </summary>
     private bool HasValidTargetMetadata(string cardId, string targetId, int targetPlayerId, int actorPlayerId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
@@ -1838,6 +2093,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Coordinates reject validation for Photon synchronization and local scene state.
+    /// </summary>
     private OnlineCardApplyData RejectValidation(OnlineCardRequestData request, OnlineCardApplyData result, string rejectReason)
     {
         result.rejectReason = rejectReason;
@@ -1874,6 +2132,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return result;
     }
 
+    /// <summary>
+    /// Checks whether player interaction card effect has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private string ValidatePlayerInteractionCardEffect(OnlineCardRequestData request)
     {
         if (request == null)
@@ -1919,6 +2180,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return string.Empty;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether active target player is true.
+    /// </summary>
     private bool IsActiveTargetPlayer(int playerId)
     {
         if (playerManager == null || playerId < 0)
@@ -1930,68 +2194,113 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return targetPlayer != null && !targetPlayer.isEliminated && !IsKnownEmptyPlayerSlot(targetPlayer);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether player interaction card ID is true.
+    /// </summary>
     private bool IsPlayerInteractionCardId(string cardId)
     {
+        /// <summary>
+        /// Handles is steal card ID for Photon online card sync manager.
+        /// </summary>
         return IsStealCardId(cardId) || IsTradeHandsCardId(cardId) || IsDisruptCardId(cardId);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether land control card ID is true.
+    /// </summary>
     private bool IsLandControlCardId(string cardId)
     {
+        /// <summary>
+        /// Handles is take over card ID for Photon online card sync manager.
+        /// </summary>
         return IsTakeOverCardId(cardId) || IsFreezeClaimCardId(cardId);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether gate control card ID is true.
+    /// </summary>
     private bool IsGateControlCardId(string cardId)
     {
+        /// <summary>
+        /// Handles is lock gate card ID for Photon online card sync manager.
+        /// </summary>
         return IsLockGateCardId(cardId) || IsOpenGateCardId(cardId);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether power boost card ID is true.
+    /// </summary>
     private bool IsPowerBoostCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
         return normalizedCardId == "powerboost" || normalizedCardId == "power boost";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether shock trap card ID is true.
+    /// </summary>
     private bool IsShockTrapCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
         return normalizedCardId == "shocktrap" || normalizedCardId == "shock trap";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether steal card ID is true.
+    /// </summary>
     private bool IsStealCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
         return normalizedCardId == "stealcard" || normalizedCardId == "steal card";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether trade hands card ID is true.
+    /// </summary>
     private bool IsTradeHandsCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
         return normalizedCardId == "tradehands" || normalizedCardId == "trade hands";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether disrupt card ID is true.
+    /// </summary>
     private bool IsDisruptCardId(string cardId)
     {
         return CardDrawManager.NormalizeCardId(cardId) == "disrupt";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether take over card ID is true.
+    /// </summary>
     private bool IsTakeOverCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
         return normalizedCardId == "takeover" || normalizedCardId == "take over";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether freeze claim card ID is true.
+    /// </summary>
     private bool IsFreezeClaimCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
         return normalizedCardId == "freezeclaim" || normalizedCardId == "freeze claim";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether lock gate card ID is true.
+    /// </summary>
     private bool IsLockGateCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
         return normalizedCardId == "lockgate" || normalizedCardId == "lock gate";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether open gate card ID is true.
+    /// </summary>
     private bool IsOpenGateCardId(string cardId)
     {
         string normalizedCardId = CardDrawManager.NormalizeCardId(cardId);
@@ -2001,6 +2310,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             normalizedCardId == "redirect flow";
     }
 
+    /// <summary>
+    /// Checks whether land control card effect has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private string ValidateLandControlCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
     {
         if (request == null)
@@ -2076,6 +2388,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return "Unsupported land-control card.";
     }
 
+    /// <summary>
+    /// Checks whether gate control card effect has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private string ValidateGateControlCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
     {
         if (request == null)
@@ -2132,6 +2447,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 
         if (!targetIsValid)
         {
+            /// <summary>
+            /// Handles is lock gate card ID for Photon online card sync manager.
+            /// </summary>
             return IsLockGateCardId(request.cardId)
                 ? "This gate cannot be locked."
                 : "This gate cannot be opened.";
@@ -2151,6 +2469,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return string.Empty;
     }
 
+    /// <summary>
+    /// Checks whether power boost card effect has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private string ValidatePowerBoostCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
     {
         if (request == null)
@@ -2191,6 +2512,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return string.Empty;
     }
 
+    /// <summary>
+    /// Checks whether shock trap card effect has valid state, permissions, targets, and resources before applying it.
+    /// </summary>
     private string ValidateShockTrapCardEffect(OnlineCardRequestData request, OnlineCardApplyData result)
     {
         if (request == null)
@@ -2501,6 +2825,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Builds affected hand counts for Photon messages, room properties, or debug logs.
+    /// </summary>
     private List<OnlinePlayerHandCountState> BuildAffectedHandCounts(params int[] playerIds)
     {
         List<OnlinePlayerHandCountState> affectedCounts = new List<OnlinePlayerHandCountState>();
@@ -2518,6 +2845,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return affectedCounts;
     }
 
+    /// <summary>
+    /// Adds affected hand count state to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     private void AddAffectedHandCountState(List<OnlinePlayerHandCountState> affectedCounts, int playerId)
     {
         if (affectedCounts == null || playerId < 0)
@@ -2540,6 +2870,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Sends private hand states for accepted action to the correct Photon receiver or player owner.
+    /// </summary>
     private void SendPrivateHandStatesForAcceptedAction(OnlineCardApplyData applyData)
     {
         if (applyData == null || !applyData.accepted)
@@ -2557,6 +2890,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Writes card effect validation details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogCardEffectValidation(OnlineCardRequestData request, OnlineCardApplyData applyData)
     {
         if (request == null || applyData == null || !IsPlayerInteractionCardId(request.cardId))
@@ -2575,6 +2911,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Writes land control validation details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogLandControlValidation(string label, OnlineCardRequestData request, OnlineCardApplyData applyData, string reason)
     {
         if (request == null || applyData == null)
@@ -2593,6 +2932,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Writes gate control validation details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogGateControlValidation(string label, OnlineCardRequestData request, OnlineCardApplyData applyData, string reason)
     {
         if (request == null || applyData == null)
@@ -2611,6 +2953,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Writes power boost validation details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogPowerBoostValidation(string label, OnlineCardRequestData request, OnlineCardApplyData applyData, string reason)
     {
         if (request == null || applyData == null)
@@ -2628,6 +2973,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Writes shock trap validation details to the Unity Console for debugging and validation.
+    /// </summary>
     private void LogShockTrapValidation(string label, OnlineCardRequestData request, OnlineCardApplyData applyData, string reason)
     {
         if (request == null || applyData == null)
@@ -2646,6 +2994,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Builds a readable description of gate state for debug logging.
+    /// </summary>
     private string DescribeGateState(GateFrameAnimation gate)
     {
         if (gate == null)
@@ -2656,6 +3007,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return gate.IsBlocking() ? "Closed" : "Open";
     }
 
+    /// <summary>
+    /// Builds a readable description of boost state for debug logging.
+    /// </summary>
     private string DescribeBoostState(CannonTower tower)
     {
         if (tower == null)
@@ -2671,21 +3025,33 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return tower.boostPendingForNextWave ? "PendingForNextWave" : "None";
     }
 
+    /// <summary>
+    /// Builds trap ID for Photon messages, room properties, or debug logs.
+    /// </summary>
     private string BuildTrapId(int ownerPlayerId, string targetNodeId)
     {
         return "ShockTrap_P" + ownerPlayerId + "_" + (string.IsNullOrWhiteSpace(targetNodeId) ? "UnknownNode" : targetNodeId);
     }
 
+    /// <summary>
+    /// Coordinates tower targeting manager instance for Photon synchronization and local scene state.
+    /// </summary>
     private TowerTargetingManager TowerTargetingManagerInstance()
     {
         return FindObjectOfType<TowerTargetingManager>();
     }
 
+    /// <summary>
+    /// Coordinates shock trap targeting manager instance for Photon synchronization and local scene state.
+    /// </summary>
     private ShockTrapTargetingManager ShockTrapTargetingManagerInstance()
     {
         return FindObjectOfType<ShockTrapTargetingManager>();
     }
 
+    /// <summary>
+    /// Looks up the target for actor number for player ID and applies the resolved gameplay result.
+    /// </summary>
     private int ResolveActorNumberForPlayerId(int playerId)
     {
 #if !PHOTON_UNITY_NETWORKING
@@ -2714,6 +3080,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Looks up the target for player ID for actor number and applies the resolved gameplay result.
+    /// </summary>
     private int ResolvePlayerIdForActorNumber(int actorNumber)
     {
 #if !PHOTON_UNITY_NETWORKING
@@ -2738,6 +3107,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         {
             if (photonPlayer != null && photonPlayer.ActorNumber == actorNumber)
             {
+                /// <summary>
+                /// Returns Photon player int property needed by this gameplay system.
+                /// </summary>
                 return GetPhotonPlayerIntProperty(photonPlayer, PhotonLobbyPropertyKeys.PlayerId, -1);
             }
         }
@@ -2746,6 +3118,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Returns Photon player int property from Photon, room data, or the online player cache.
+    /// </summary>
     private int GetPhotonPlayerIntProperty(Player photonPlayer, string key, int fallbackValue)
     {
         if (photonPlayer == null ||
@@ -2755,9 +3130,15 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             return fallbackValue;
         }
 
+        /// <summary>
+        /// Handles convert to int for Photon online card sync manager.
+        /// </summary>
         return ConvertToInt(photonPlayer.CustomProperties[key], fallbackValue);
     }
 
+    /// <summary>
+    /// Converts to int into the expected value type and falls back safely if needed.
+    /// </summary>
     private int ConvertToInt(object value, int fallbackValue)
     {
         if (value == null)
@@ -2788,21 +3169,33 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return fallbackValue;
     }
 
+    /// <summary>
+    /// Parses request JSON into the matching runtime sync data object.
+    /// </summary>
     private OnlineCardRequestData DeserializeRequest(string json)
     {
         return string.IsNullOrWhiteSpace(json) ? null : JsonUtility.FromJson<OnlineCardRequestData>(json);
     }
 
+    /// <summary>
+    /// Parses apply JSON into the matching runtime sync data object.
+    /// </summary>
     private OnlineCardApplyData DeserializeApply(string json)
     {
         return string.IsNullOrWhiteSpace(json) ? null : JsonUtility.FromJson<OnlineCardApplyData>(json);
     }
 
+    /// <summary>
+    /// Parses private state JSON into the matching runtime sync data object.
+    /// </summary>
     private OnlinePrivateHandStateData DeserializePrivateState(string json)
     {
         return string.IsNullOrWhiteSpace(json) ? null : JsonUtility.FromJson<OnlinePrivateHandStateData>(json);
     }
 
+    /// <summary>
+    /// Handles build hand count map for Photon online card sync manager.
+    /// </summary>
     private Dictionary<int, int> BuildHandCountMap(OnlineCardPublicSnapshot snapshot)
     {
         Dictionary<int, int> counts = new Dictionary<int, int>();
@@ -2827,6 +3220,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return counts;
     }
 
+    /// <summary>
+    /// Formats snapshot counts into readable text for UI or debug logs.
+    /// </summary>
     private string FormatSnapshotCounts(OnlineCardPublicSnapshot snapshot)
     {
         if (snapshot == null || snapshot.playerHandCounts == null || snapshot.playerHandCounts.Count == 0)
@@ -2876,6 +3272,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether known empty player slot is true.
+    /// </summary>
     private bool IsKnownEmptyPlayerSlot(PlayerResource player)
     {
         if (player == null)
@@ -2886,6 +3285,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         return string.Equals(player.displayName, "Empty", System.StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Registers Photon callbacks if needed so later callbacks, lookups, or sync messages can use it.
+    /// </summary>
     private void RegisterPhotonCallbacksIfNeeded()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -2899,6 +3301,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Unregisters Photon callbacks if needed so old callbacks or duplicate listeners cannot fire.
+    /// </summary>
     private void UnregisterPhotonCallbacksIfNeeded()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -2912,6 +3317,9 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Checks whether run online game scene card sync is allowed before enabling that action.
+    /// </summary>
     private bool CanRunOnlineGameSceneCardSync()
     {
 #if PHOTON_UNITY_NETWORKING

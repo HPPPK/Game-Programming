@@ -67,11 +67,17 @@ public class TurnManager : MonoBehaviour, ITurnSource
         get { return true; }
     }
 
+    /// <summary>
+    /// Finds and stores turn manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         Instance = this;
     }
 
+    /// <summary>
+    /// Sets up turn manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         if (FindObjectOfType<GamePhaseManager>() == null)
@@ -80,11 +86,17 @@ public class TurnManager : MonoBehaviour, ITurnSource
         }
     }
 
+    /// <summary>
+    /// Starts turn and enables its related gameplay flow.
+    /// </summary>
     public void StartTurn()
     {
         StartTurn(false);
     }
 
+    /// <summary>
+    /// Starts turn and enables its related gameplay flow.
+    /// </summary>
     public void StartTurn(bool disruptedThisTurn)
     {
         ClearExpiredFreezeClaimsForPlayer(currentPlayerId);
@@ -111,6 +123,9 @@ public class TurnManager : MonoBehaviour, ITurnSource
         Debug.Log("Start turn. AP = " + currentAP + " / " + maxAP);
     }
 
+    /// <summary>
+    /// Clears expired freeze claims for player and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearExpiredFreezeClaimsForPlayer(int playerId)
     {
         TowerBuildArea[] buildAreas = FindObjectsOfType<TowerBuildArea>();
@@ -136,11 +151,17 @@ public class TurnManager : MonoBehaviour, ITurnSource
         }
     }
 
+    /// <summary>
+    /// Handles end turn for this gameplay system.
+    /// </summary>
     public void EndTurn()
     {
         EndCurrentTurn();
     }
 
+    /// <summary>
+    /// Handles end current turn for this gameplay system.
+    /// </summary>
     public void EndCurrentTurn()
     {
         ITurnSource activeTurnSource = TurnSourceResolver.GetActiveTurnSource(this);
@@ -154,11 +175,17 @@ public class TurnManager : MonoBehaviour, ITurnSource
         StartTurn();
     }
 
+    /// <summary>
+    /// Checks whether draw card is allowed before enabling that action.
+    /// </summary>
     public bool CanDrawCard()
     {
         return !cardActionsBlockedThisTurn && !hasDrawnCard;
     }
 
+    /// <summary>
+    /// Attempts to consume draw and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryConsumeDraw()
     {
         if (cardActionsBlockedThisTurn)
@@ -177,16 +204,25 @@ public class TurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    /// <summary>
+    /// Applies authoritative draw consumed to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyAuthoritativeDrawConsumed()
     {
         hasDrawnCard = true;
     }
 
+    /// <summary>
+    /// Checks whether play card is allowed before enabling that action.
+    /// </summary>
     public bool CanPlayCard()
     {
         return !cardActionsBlockedThisTurn && !hasPlayedCard && HasEnoughAP(1);
     }
 
+    /// <summary>
+    /// Attempts to consume play card and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryConsumePlayCard()
     {
         if (cardActionsBlockedThisTurn)
@@ -212,17 +248,26 @@ public class TurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    /// <summary>
+    /// Applies authoritative play consumed to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyAuthoritativePlayConsumed(int apCost)
     {
         hasPlayedCard = true;
         currentAP = Mathf.Max(0, currentAP - Mathf.Max(0, apCost));
     }
 
+    /// <summary>
+    /// Checks whether change gate is allowed before enabling that action.
+    /// </summary>
     public bool CanChangeGate()
     {
         return !hasChangedGate;
     }
 
+    /// <summary>
+    /// Attempts to consume gate change and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryConsumeGateChange()
     {
         if (hasChangedGate)
@@ -235,16 +280,25 @@ public class TurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    /// <summary>
+    /// Applies authoritative gate change consumed to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyAuthoritativeGateChangeConsumed()
     {
         hasChangedGate = true;
     }
 
+    /// <summary>
+    /// Checks whether discard card is allowed before enabling that action.
+    /// </summary>
     public bool CanDiscardCard()
     {
         return !cardActionsBlockedThisTurn && !hasDiscardedCard;
     }
 
+    /// <summary>
+    /// Attempts to consume discard and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryConsumeDiscard()
     {
         if (cardActionsBlockedThisTurn)
@@ -263,21 +317,33 @@ public class TurnManager : MonoBehaviour, ITurnSource
         return true;
     }
 
+    /// <summary>
+    /// Applies authoritative discard consumed to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyAuthoritativeDiscardConsumed()
     {
         hasDiscardedCard = true;
     }
 
+    /// <summary>
+    /// Checks whether enough AP is present before the code depends on it.
+    /// </summary>
     public bool HasEnoughAP(int cost)
     {
         return currentAP >= cost;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether card actions blocked this turn is true.
+    /// </summary>
     public bool IsCardActionsBlockedThisTurn()
     {
         return cardActionsBlockedThisTurn;
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -296,6 +362,9 @@ public class TurnManager : MonoBehaviour, ITurnSource
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

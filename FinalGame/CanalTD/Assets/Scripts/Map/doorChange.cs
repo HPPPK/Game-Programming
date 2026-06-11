@@ -58,16 +58,25 @@ public class doorChange : MonoBehaviour
     public DoorState CurrentState => currentState;
     public bool IsOpen => currentState == DoorState.Open;
 
+    /// <summary>
+    /// Finds and stores door change references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         ApplyVisuals();
     }
 
+    /// <summary>
+    /// Handles toggle door for this gameplay system.
+    /// </summary>
     public void ToggleDoor()
     {
         SetDoorState(IsOpen ? DoorState.Closed : DoorState.Open);
     }
 
+    /// <summary>
+    /// Responds to a mouse click on this scene object and starts the related action.
+    /// </summary>
     private void OnMouseDown()
     {
         if (!clickToToggle)
@@ -78,16 +87,25 @@ public class doorChange : MonoBehaviour
         ToggleDoor();
     }
 
+    /// <summary>
+    /// Handles open door for this gameplay system.
+    /// </summary>
     public void OpenDoor()
     {
         SetDoorState(DoorState.Open);
     }
 
+    /// <summary>
+    /// Handles close door for this gameplay system.
+    /// </summary>
     public void CloseDoor()
     {
         SetDoorState(DoorState.Closed);
     }
 
+    /// <summary>
+    /// Sets door state and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetDoorState(DoorState newState)
     {
         if (currentState == newState)
@@ -108,6 +126,9 @@ public class doorChange : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies visuals to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyVisuals()
     {
         bool open = IsOpen;

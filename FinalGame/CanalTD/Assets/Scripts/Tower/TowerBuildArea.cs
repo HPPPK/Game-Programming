@@ -77,6 +77,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
     private Color neutralAreaColor = Color.white;
     private Sprite neutralAreaSprite;
 
+    /// <summary>
+    /// Finds and stores tower build area references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (towerSpawnPoint == null)
@@ -107,16 +110,25 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         RefreshOwnershipVisual(playerManager);
     }
 
+    /// <summary>
+    /// Responds to a mouse click on this scene object and starts the related action.
+    /// </summary>
     private void OnMouseDown()
     {
         ReportBuildAreaClicked();
     }
 
+    /// <summary>
+    /// Responds to a UI click and forwards it to the related menu or gameplay action.
+    /// </summary>
     public void OnPointerClick(PointerEventData eventData)
     {
         ReportBuildAreaClicked();
     }
 
+    /// <summary>
+    /// Handles report build area clicked for land ownership, tower actions, or build UI.
+    /// </summary>
     private void ReportBuildAreaClicked()
     {
         // Check if any targeting mode is active - build areas should not be clickable during targeting
@@ -141,6 +153,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         buildTowerManager.HandleBuildAreaClicked(this);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether any targeting mode active is true.
+    /// </summary>
     private bool IsAnyTargetingModeActive()
     {
         // Check Gate targeting
@@ -180,6 +195,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         return false;
     }
 
+    /// <summary>
+    /// Checks whether build tower is allowed before enabling that action.
+    /// </summary>
     public bool CanBuildTower(int playerId)
     {
         if (!CanUseForLandOrTowerAction())
@@ -205,31 +223,49 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         return false;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether public is true.
+    /// </summary>
     public bool IsPublic()
     {
         return areaType == BuildAreaType.Public || isPublicBuildArea;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether claimable is true.
+    /// </summary>
     public bool IsClaimable()
     {
         return areaType == BuildAreaType.Claimable;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether owned by is true.
+    /// </summary>
     public bool IsOwnedBy(int playerId)
     {
         return isOwned && ownerPlayerId == playerId;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether owned by other player is true.
+    /// </summary>
     public bool IsOwnedByOtherPlayer(int playerId)
     {
         return isOwned && ownerPlayerId != playerId;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether unowned is true.
+    /// </summary>
     public bool IsUnowned()
     {
         return !isOwned || ownerPlayerId < 0;
     }
 
+    /// <summary>
+    /// Checks whether control gate is allowed before enabling that action.
+    /// </summary>
     public bool CanControlGate(int playerId)
     {
         if (IsInactiveForPlayer(playerId))
@@ -250,6 +286,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         return false;
     }
 
+    /// <summary>
+    /// Handles controls gate for land ownership, tower actions, or build UI.
+    /// </summary>
     public bool ControlsGate(GameObject gate)
     {
         if (gate == null)
@@ -260,16 +299,25 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         return linkedGates.Contains(gate);
     }
 
+    /// <summary>
+    /// Returns linked gates used by land, tower, cost, or build decisions.
+    /// </summary>
     public List<GameObject> GetLinkedGates()
     {
         return linkedGates;
     }
 
+    /// <summary>
+    /// Handles claim area for land ownership, tower actions, or build UI.
+    /// </summary>
     public void ClaimArea(int playerId)
     {
         SetOwner(playerId, playerManager);
     }
 
+    /// <summary>
+    /// Sets owner and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetOwner(int playerId, PlayerManager visualPlayerManager)
     {
         if (!CanUseForLandOrTowerAction())
@@ -282,6 +330,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         RefreshOwnershipVisual(visualPlayerManager);
     }
 
+    /// <summary>
+    /// Clears owner and removes its temporary gameplay or visual effect.
+    /// </summary>
     public void ClearOwner()
     {
         isOwned = false;
@@ -290,6 +341,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         RefreshOwnershipVisual(playerManager);
     }
 
+    /// <summary>
+    /// Resets for eliminated player for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetForEliminatedPlayer(int eliminatedPlayerId)
     {
         if (frozenByPlayerId == eliminatedPlayerId)
@@ -325,6 +379,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    /// <summary>
+    /// Checks whether be taken over by is allowed before enabling that action.
+    /// </summary>
     public bool CanBeTakenOverBy(int playerId)
     {
         if (playerManager != null && playerManager.IsPlayerEliminated(ownerPlayerId))
@@ -339,31 +396,49 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
             CanUseForLandOrTowerAction();
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether frozen is true.
+    /// </summary>
     public bool IsFrozen()
     {
         return isFrozenOrSealed;
     }
 
+    /// <summary>
+    /// Checks whether use for land or tower action is allowed before enabling that action.
+    /// </summary>
     public bool CanUseForLandOrTowerAction()
     {
         return !isFrozenOrSealed;
     }
 
+    /// <summary>
+    /// Returns normal takeover cost used by land, tower, cost, or build decisions.
+    /// </summary>
     public int GetNormalTakeoverCost()
     {
         return Mathf.CeilToInt(landPurchaseCost * 1.5f);
     }
 
+    /// <summary>
+    /// Returns take over card cost used by card handling or target selection.
+    /// </summary>
     public int GetTakeOverCardCost()
     {
         return Mathf.CeilToInt(GetNormalTakeoverCost() / 2f);
     }
 
+    /// <summary>
+    /// Checks whether be frozen is allowed before enabling that action.
+    /// </summary>
     public bool CanBeFrozen()
     {
         return areaType == BuildAreaType.Claimable && !isFrozenOrSealed;
     }
 
+    /// <summary>
+    /// Handles freeze for player for land ownership, tower actions, or build UI.
+    /// </summary>
     public void FreezeForPlayer(int playerId)
     {
         isFrozenOrSealed = true;
@@ -372,6 +447,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         SetFrozenVisual(true);
     }
 
+    /// <summary>
+    /// Clears freeze and removes its temporary gameplay or visual effect.
+    /// </summary>
     public void ClearFreeze()
     {
         isFrozenOrSealed = false;
@@ -380,6 +458,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         SetFrozenVisual(false);
     }
 
+    /// <summary>
+    /// Sets frozen visual and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetFrozenVisual(bool frozen)
     {
         if (freezeIcon != null)
@@ -400,6 +481,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    /// <summary>
+    /// Clears freeze if pending for player and removes its temporary gameplay or visual effect.
+    /// </summary>
     public void ClearFreezeIfPendingForPlayer(int playerId)
     {
         if (isFrozenOrSealed && frozenUntilPlayerNextTurn && frozenByPlayerId == playerId)
@@ -408,12 +492,18 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    /// <summary>
+    /// Marks inactive until next turn so later turns or systems can react to it.
+    /// </summary>
     public void MarkInactiveUntilNextTurn(int playerId)
     {
         inactiveForPlayerId = playerId;
         activatesNextTurn = true;
     }
 
+    /// <summary>
+    /// Activates for player if pending once its pending condition is satisfied.
+    /// </summary>
     public void ActivateForPlayerIfPending(int playerId)
     {
         if (IsInactiveForPlayer(playerId))
@@ -422,17 +512,26 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether inactive for player is true.
+    /// </summary>
     public bool IsInactiveForPlayer(int playerId)
     {
         return activatesNextTurn && inactiveForPlayerId == playerId;
     }
 
+    /// <summary>
+    /// Clears activation delay and removes its temporary gameplay or visual effect.
+    /// </summary>
     public void ClearActivationDelay()
     {
         inactiveForPlayerId = -1;
         activatesNextTurn = false;
     }
 
+    /// <summary>
+    /// Removes current tower from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public void RemoveCurrentTower()
     {
         if (currentTower != null)
@@ -445,6 +544,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         towerOwnerPlayerId = -1;
     }
 
+    /// <summary>
+    /// Refreshes ownership visual from the latest gameplay data.
+    /// </summary>
     public void RefreshOwnershipVisual(PlayerManager visualPlayerManager)
     {
         if (areaVisualRenderer == null)
@@ -476,6 +578,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         areaVisualRenderer.color = manager.GetOwnedLandColor(ownerPlayerId);
     }
 
+    /// <summary>
+    /// Sets tower and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetTower(GameObject tower)
     {
         currentTower = tower;
@@ -500,6 +605,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         SetFrozenVisual(isFrozenOrSealed);
     }
 
+    /// <summary>
+    /// Shows available with the correct current context.
+    /// </summary>
     public void ShowAvailable(bool available)
     {
         if (highlightRenderer == null)
@@ -511,6 +619,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         highlightRenderer.color = available ? availableColor : unavailableColor;
     }
 
+    /// <summary>
+    /// Shows highlight with the correct current context.
+    /// </summary>
     public void ShowHighlight(Color color)
     {
         if (highlightRenderer == null)
@@ -522,6 +633,9 @@ public class TowerBuildArea : MonoBehaviour, IPointerClickHandler
         highlightRenderer.color = color;
     }
 
+    /// <summary>
+    /// Hides highlight and clears temporary visual state.
+    /// </summary>
     public void HideHighlight()
     {
         if (highlightRenderer == null)

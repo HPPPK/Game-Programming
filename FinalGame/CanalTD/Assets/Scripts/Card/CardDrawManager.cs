@@ -99,6 +99,9 @@ public class CardDrawManager : MonoBehaviour
     private CardInstanceSelectable selectedCard;
     private CardInstanceSelectable pendingPlayedCard;
 
+    /// <summary>
+    /// Subscribes card draw manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         if (playerManager != null)
@@ -107,6 +110,9 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Unsubscribes card draw manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         if (playerManager != null)
@@ -115,6 +121,9 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up card draw manager when this scene object starts running.
+    /// </summary>
     void Start()
     {
         if (!deckInitialized)
@@ -125,6 +134,9 @@ public class CardDrawManager : MonoBehaviour
         RenderCurrentPlayerHand();
     }
 
+    /// <summary>
+    /// Builds the runtime draw deck from configured card entries, then shuffles it for play.
+    /// </summary>
     public void InitializeDeck()
     {
         runtimeDeck.Clear();
@@ -156,6 +168,9 @@ public class CardDrawManager : MonoBehaviour
         Debug.Log("Deck ready. Total cards = " + runtimeDeck.Count);
     }
 
+    /// <summary>
+    /// Builds the draw deck from the older card prefab array when no deck entries are configured.
+    /// </summary>
     private void BuildDeckFromLegacyPrefabs()
     {
         if (cardTypePrefabs == null)
@@ -177,6 +192,9 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks whether the Inspector deck list contains at least one usable card prefab.
+    /// </summary>
     private bool HasConfiguredDeckEntries()
     {
         if (deckEntries == null || deckEntries.Count == 0)
@@ -195,6 +213,9 @@ public class CardDrawManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Randomizes the runtime deck order so future card draws are not predictable.
+    /// </summary>
     private void ShuffleRuntimeDeck()
     {
         for (int i = 0; i < runtimeDeck.Count; i++)
@@ -206,11 +227,17 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles draw card for card state, hand state, or targeting.
+    /// </summary>
     public void DrawCard()
     {
         TryDrawCardForCurrentPlayer();
     }
 
+    /// <summary>
+    /// Attempts to draw card for current player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryDrawCardForCurrentPlayer()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.DrawCard, null))
@@ -268,6 +295,9 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Finds the first free card slot where a newly drawn card can be placed.
+    /// </summary>
     int FindEmptySlot()
     {
         for (int i = 0; i < cardSlots.Length; i++)
@@ -281,6 +311,9 @@ public class CardDrawManager : MonoBehaviour
         return -1;
     }
 
+    /// <summary>
+    /// Animates drawing a card, adds it to the hand, and refreshes the hand UI.
+    /// </summary>
     IEnumerator DrawCardRoutine()
     {
         isBusy = true;
@@ -290,6 +323,9 @@ public class CardDrawManager : MonoBehaviour
             drawPileVisual.SetActive(true);
         }
 
+        /// <summary>
+        /// Handles wait for seconds for card draw manager.
+        /// </summary>
         yield return new WaitForSeconds(animationTime);
 
         GameObject cardPrefab = DrawOneCardFromDeck();
@@ -335,11 +371,17 @@ public class CardDrawManager : MonoBehaviour
         isBusy = false;
     }
 
+    /// <summary>
+    /// Deals initial hands to players and refreshes their hand state.
+    /// </summary>
     public void DealInitialHands()
     {
         DealInitialHands(initialCardsPerPlayer);
     }
 
+    /// <summary>
+    /// Deals initial hands to players and refreshes their hand state.
+    /// </summary>
     public void DealInitialHands(int cardsPerPlayer)
     {
         if (initialHandsDealt)
@@ -390,12 +432,18 @@ public class CardDrawManager : MonoBehaviour
         RenderCurrentPlayerHand();
     }
 
+    /// <summary>
+    /// Attempts to draw for current player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryDrawForCurrentPlayer(bool countsAsTurnDraw)
     {
         PlayerResource currentPlayer = GetCurrentPlayerResource();
         return currentPlayer != null && TryDrawForPlayer(currentPlayer.playerId, countsAsTurnDraw);
     }
 
+    /// <summary>
+    /// Attempts to draw for player and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryDrawForPlayer(int playerId, bool countsAsTurnDraw)
     {
         PlayerResource player = GetPlayerResource(playerId);
@@ -445,6 +493,9 @@ public class CardDrawManager : MonoBehaviour
         return added;
     }
 
+    /// <summary>
+    /// Attempts to add card to hand and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryAddCardToHand(PlayerHand hand, bool showWarnings)
     {
         if (hand == null)
@@ -478,11 +529,17 @@ public class CardDrawManager : MonoBehaviour
         return hand.AddCard(cardPrefab);
     }
 
+    /// <summary>
+    /// Checks whether select cards is allowed before enabling that action.
+    /// </summary>
     public bool CanSelectCards()
     {
         return !isBusy && pendingPlayedCard == null && CanHumanUseCardsNow();
     }
 
+    /// <summary>
+    /// Returns hand card count used by card handling or target selection.
+    /// </summary>
     public int GetHandCardCount()
     {
         PlayerHand currentHand = GetCurrentPlayerHand();
@@ -517,6 +574,9 @@ public class CardDrawManager : MonoBehaviour
         return count;
     }
 
+    /// <summary>
+    /// Selects card and updates the related targeting or UI highlight.
+    /// </summary>
     public void SelectCard(CardInstanceSelectable card)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.SelectCard, card != null ? card.gameObject : null))
@@ -551,11 +611,17 @@ public class CardDrawManager : MonoBehaviour
         TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.SelectCard, selectedCard.gameObject);
     }
 
+    /// <summary>
+    /// Handles discard selected card for card state, hand state, or targeting.
+    /// </summary>
     public void DiscardSelectedCard()
     {
         TryDiscardSelectedCard();
     }
 
+    /// <summary>
+    /// Attempts to discard selected card and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryDiscardSelectedCard()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.DiscardCard, selectedCard != null ? selectedCard.gameObject : null))
@@ -640,11 +706,17 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Plays the selected card audio feedback.
+    /// </summary>
     public void PlaySelectedCard()
     {
         TryBeginPlaySelectedCard();
     }
 
+    /// <summary>
+    /// Attempts to begin play selected card and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryBeginPlaySelectedCard()
     {
         TutorialActionType tutorialActionType = GetTutorialActionTypeForCardName(
@@ -748,6 +820,9 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Animates the selected card play before resolving its effect or targeting flow.
+    /// </summary>
     IEnumerator PlayCardRoutine(CardInstanceSelectable card)
     {
         isBusy = true;
@@ -797,6 +872,9 @@ public class CardDrawManager : MonoBehaviour
             drawPileVisual.SetActive(true);
         }
 
+        /// <summary>
+        /// Handles wait for seconds for card draw manager.
+        /// </summary>
         yield return new WaitForSeconds(playCenterHoldTime);
 
         if (drawPileVisual != null)
@@ -964,6 +1042,9 @@ public class CardDrawManager : MonoBehaviour
         isBusy = false;
     }
 
+    /// <summary>
+    /// Handles enter pending targeting card for card state, hand state, or targeting.
+    /// </summary>
     private void EnterPendingTargetingCard(CardInstanceSelectable card)
     {
         pendingPlayedCard = card;
@@ -974,26 +1055,47 @@ public class CardDrawManager : MonoBehaviour
         TutorialManager.Instance?.NotifyTutorialAction(TutorialActionType.PlayCard, card.gameObject);
     }
 
+    /// <summary>
+    /// Confirms pending card and applies the selected action if it is valid.
+    /// </summary>
     public void ConfirmPendingCard()
     {
         ConfirmPendingCard(true);
     }
 
+    /// <summary>
+    /// Confirms card consume after successful resolution and applies the selected action if it is valid.
+    /// </summary>
     public bool ConfirmCardConsumeAfterSuccessfulResolution()
     {
+        /// <summary>
+        /// Handles confirm pending card internal for card draw manager.
+        /// </summary>
         return ConfirmPendingCardInternal(true);
     }
 
+    /// <summary>
+    /// Confirms card consume after successful resolution and applies the selected action if it is valid.
+    /// </summary>
     public bool ConfirmCardConsumeAfterSuccessfulResolution(bool consumePlayAction)
     {
+        /// <summary>
+        /// Handles confirm pending card internal for card draw manager.
+        /// </summary>
         return ConfirmPendingCardInternal(consumePlayAction);
     }
 
+    /// <summary>
+    /// Confirms pending card and applies the selected action if it is valid.
+    /// </summary>
     public void ConfirmPendingCard(bool consumePlayAction)
     {
         ConfirmPendingCardInternal(consumePlayAction);
     }
 
+    /// <summary>
+    /// Confirms pending card internal and applies the selected action if it is valid.
+    /// </summary>
     public bool ConfirmPendingCardInternal(bool consumePlayAction)
     {
         if (pendingPlayedCard == null) return false;
@@ -1017,11 +1119,20 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Consumes selected card after successful targeting and records that the player has used that action.
+    /// </summary>
     public bool ConsumeSelectedCardAfterSuccessfulTargeting()
     {
+        /// <summary>
+        /// Handles confirm pending card internal for card draw manager.
+        /// </summary>
         return ConfirmPendingCardInternal(true);
     }
 
+    /// <summary>
+    /// Consumes pending targeting card from player hand and records that the player has used that action.
+    /// </summary>
     public bool ConsumePendingTargetingCardFromPlayerHand(int playerId, bool consumePlayAction)
     {
         if (pendingPlayedCard == null || pendingPlayedCard.sourcePrefab == null)
@@ -1047,6 +1158,9 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks whether consume selected card after successful targeting is allowed before enabling that action.
+    /// </summary>
     public bool CanConsumeSelectedCardAfterSuccessfulTargeting()
     {
         if (pendingPlayedCard == null)
@@ -1058,11 +1172,17 @@ public class CardDrawManager : MonoBehaviour
         return manager == null || manager.CanPlayCard();
     }
 
+    /// <summary>
+    /// Returns pending card prefab for targeting used by card handling or target selection.
+    /// </summary>
     public GameObject GetPendingCardPrefabForTargeting()
     {
         return pendingPlayedCard != null ? pendingPlayedCard.sourcePrefab : null;
     }
 
+    /// <summary>
+    /// Checks whether pending card is allowed before enabling that action.
+    /// </summary>
     public void CancelPendingCard()
     {
         if (pendingPlayedCard == null) return;
@@ -1106,11 +1226,20 @@ public class CardDrawManager : MonoBehaviour
         Debug.Log("Pending card cancelled and returned to hand.");
     }
 
+    /// <summary>
+    /// Attempts to consume direct played card and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryConsumeDirectPlayedCard(int playerId, GameObject cardPrefab)
     {
+        /// <summary>
+        /// Attempts to consume direct played card and reports whether it succeeded.
+        /// </summary>
         return TryConsumeDirectPlayedCard(playerId, cardPrefab, true);
     }
 
+    /// <summary>
+    /// Attempts to consume direct played card and returns false if rules, resources, or references block it.
+    /// </summary>
     public bool TryConsumeDirectPlayedCard(int playerId, GameObject cardPrefab, bool consumePlayAction)
     {
         PlayerResource player = GetPlayerResource(playerId);
@@ -1152,6 +1281,9 @@ public class CardDrawManager : MonoBehaviour
     }
 
     // Returns a list of card prefabs to the runtime deck and reshuffles once.
+    /// <summary>
+    /// Handles return cards to deck for card state, hand state, or targeting.
+    /// </summary>
     public void ReturnCardsToDeck(IEnumerable<GameObject> cardPrefabs)
     {
         if (cardPrefabs == null)
@@ -1184,6 +1316,9 @@ public class CardDrawManager : MonoBehaviour
     }
 
     // Returns every card in one player's hand to the runtime deck, then clears the hand.
+    /// <summary>
+    /// Handles return player hand to deck for card state, hand state, or targeting.
+    /// </summary>
     public bool ReturnPlayerHandToDeck(int playerId)
     {
         PlayerResource player = GetPlayerResource(playerId);
@@ -1223,6 +1358,9 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Handles force give tutorial card for card state, hand state, or targeting.
+    /// </summary>
     public bool ForceGiveTutorialCard(string cardId)
     {
         PlayerResource player = GetVisibleHandPlayerResource();
@@ -1268,11 +1406,20 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Handles force single tutorial card for card state, hand state, or targeting.
+    /// </summary>
     public bool ForceSingleTutorialCard(string cardId)
     {
+        /// <summary>
+        /// Handles force tutorial hand for card draw manager.
+        /// </summary>
         return ForceTutorialHand(new[] { cardId });
     }
 
+    /// <summary>
+    /// Handles force tutorial hand for card state, hand state, or targeting.
+    /// </summary>
     public bool ForceTutorialHand(IEnumerable<string> cardIds)
     {
         PlayerResource player = GetVisibleHandPlayerResource();
@@ -1320,6 +1467,9 @@ public class CardDrawManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Resets tutorial card action for a new turn, wave, player, scene, or match state.
+    /// </summary>
     public void ResetTutorialCardAction()
     {
         if (selectedCard != null)
@@ -1332,11 +1482,20 @@ public class CardDrawManager : MonoBehaviour
         RenderCurrentPlayerHand();
     }
 
+    /// <summary>
+    /// Handles prepare tutorial card demo for card state, hand state, or targeting.
+    /// </summary>
     public bool PrepareTutorialCardDemo(string cardId)
     {
+        /// <summary>
+        /// Handles prepare tutorial card demo for card draw manager.
+        /// </summary>
         return PrepareTutorialCardDemo(cardId, null);
     }
 
+    /// <summary>
+    /// Handles prepare tutorial card demo for card state, hand state, or targeting.
+    /// </summary>
     public bool PrepareTutorialCardDemo(string cardId, IEnumerable<string> handCardIds)
     {
         ResetTutorialCardAction();
@@ -1353,9 +1512,15 @@ public class CardDrawManager : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Attempts to select visible card by ID and reports whether it succeeded.
+        /// </summary>
         return TrySelectVisibleCardById(cardId);
     }
 
+    /// <summary>
+    /// Restores a card UI transform to its normal anchored position and scale.
+    /// </summary>
     void ResetCardRect(RectTransform cardRect)
     {
         if (cardRect == null) return;
@@ -1368,6 +1533,9 @@ public class CardDrawManager : MonoBehaviour
         cardRect.localScale = Vector3.one;
     }
 
+    /// <summary>
+    /// Returns gate action type needed by this gameplay system.
+    /// </summary>
     GateActionType GetGateActionType(string cardName)
     {
         cardName = NormalizeCardName(cardName);
@@ -1390,68 +1558,116 @@ public class CardDrawManager : MonoBehaviour
         return GateActionType.None;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether take over card is true.
+    /// </summary>
     private bool IsTakeOverCard(string cardName)
     {
         cardName = NormalizeCardName(cardName);
         return cardName == "takeover" || cardName == "take over";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether freeze claim card is true.
+    /// </summary>
     private bool IsFreezeClaimCard(string cardName)
     {
         cardName = NormalizeCardName(cardName);
         return cardName == "freezeclaim" || cardName == "freeze claim";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether steal card is true.
+    /// </summary>
     private bool IsStealCard(string cardName)
     {
         cardName = NormalizeCardName(cardName);
         return cardName == "stealcard" || cardName == "steal card";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether trade hands card is true.
+    /// </summary>
     private bool IsTradeHandsCard(string cardName)
     {
         cardName = NormalizeCardName(cardName);
         return cardName == "tradehands" || cardName == "trade hands";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether disrupt card is true.
+    /// </summary>
     private bool IsDisruptCard(string cardName)
     {
         cardName = NormalizeCardName(cardName);
         return cardName == "disrupt";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether power boost card is true.
+    /// </summary>
     private bool IsPowerBoostCard(string cardName)
     {
         cardName = NormalizeCardName(cardName);
         return cardName == "powerboost" || cardName == "power boost";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether shock trap card is true.
+    /// </summary>
     private bool IsShockTrapCard(string cardName)
     {
         cardName = NormalizeCardName(cardName);
         return cardName == "shocktrap" || cardName == "shock trap";
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether tile targeting card is true.
+    /// </summary>
     private bool IsTileTargetingCard(string cardName)
     {
+        /// <summary>
+        /// Handles is take over card for card draw manager.
+        /// </summary>
         return IsTakeOverCard(cardName) || IsFreezeClaimCard(cardName);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether player targeting card is true.
+    /// </summary>
     private bool IsPlayerTargetingCard(string cardName)
     {
+        /// <summary>
+        /// Handles is steal card for card draw manager.
+        /// </summary>
         return IsStealCard(cardName) || IsTradeHandsCard(cardName) || IsDisruptCard(cardName);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether tower targeting card is true.
+    /// </summary>
     private bool IsTowerTargetingCard(string cardName)
     {
+        /// <summary>
+        /// Handles is power boost card for card draw manager.
+        /// </summary>
         return IsPowerBoostCard(cardName);
     }
 
+    /// <summary>
+    /// Handles normalize card name for card state, hand state, or targeting.
+    /// </summary>
     private string NormalizeCardName(string cardName)
     {
+        /// <summary>
+        /// Handles normalize card ID for card draw manager.
+        /// </summary>
         return NormalizeCardId(cardName);
     }
 
+    /// <summary>
+    /// Displays a temporary card warning message, then hides it after a delay.
+    /// </summary>
     IEnumerator ShowWarning(string message)
     {
         if (warningText != null)
@@ -1467,6 +1683,9 @@ public class CardDrawManager : MonoBehaviour
             warningText.fontSize = GetWarningFontSize(message);
         }
 
+        /// <summary>
+        /// Handles wait for seconds for card draw manager.
+        /// </summary>
         yield return new WaitForSeconds(warningTime);
 
         if (warningText != null)
@@ -1480,11 +1699,17 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows warning message with the correct current context.
+    /// </summary>
     public void ShowWarningMessage(string message)
     {
         StartCoroutine(ShowWarning(message));
     }
 
+    /// <summary>
+    /// Returns warning font size used by card handling or target selection.
+    /// </summary>
     private float GetWarningFontSize(string message)
     {
         if (string.IsNullOrEmpty(message))
@@ -1505,6 +1730,9 @@ public class CardDrawManager : MonoBehaviour
         return 4f;
     }
 
+    /// <summary>
+    /// Refreshes present number UI from the latest gameplay data.
+    /// </summary>
     private void RefreshPresentNumberUI()
     {
         if (playerManager != null)
@@ -1539,17 +1767,26 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes present number UI next frame from the latest gameplay data.
+    /// </summary>
     private IEnumerator RefreshPresentNumberUINextFrame()
     {
         yield return null;
         RefreshPresentNumberUI();
     }
 
+    /// <summary>
+    /// Returns turn manager used by card handling or target selection.
+    /// </summary>
     private TurnManager GetTurnManager()
     {
         return turnManager != null ? turnManager : TurnManager.Instance;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether disrupted this turn is true.
+    /// </summary>
     private bool IsDisruptedThisTurn()
     {
         TurnManager manager = GetTurnManager();
@@ -1557,6 +1794,9 @@ public class CardDrawManager : MonoBehaviour
     }
 
     // In GameScene_AIPrototype, ITurnSource is AIPrototypeTurnManager; in old GameScene it is TurnManager.
+    /// <summary>
+    /// Checks whether human use cards now is allowed before enabling that action.
+    /// </summary>
     private bool CanHumanUseCardsNow(bool showBlockedTurnToast = false)
     {
         if (OnlineTurnPermissionManager.ShouldBlockLocalGameplayAction(showBlockedTurnToast))
@@ -1575,11 +1815,17 @@ public class CardDrawManager : MonoBehaviour
     }
 
     // AIPrototypeTurnManager owns phase flow in GameScene_AIPrototype, so old GamePhaseManager state is ignored there.
+    /// <summary>
+    /// Decides whether should use legacy phase check should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldUseLegacyPhaseCheck()
     {
         return !TurnSourceResolver.IsAIPrototypeActive();
     }
 
+    /// <summary>
+    /// Responds to current player changed and updates the affected gameplay or UI systems.
+    /// </summary>
     private void HandleCurrentPlayerChanged(int playerId)
     {
         if (pendingPlayedCard != null)
@@ -1590,6 +1836,9 @@ public class CardDrawManager : MonoBehaviour
         RenderCurrentPlayerHand();
     }
 
+    /// <summary>
+    /// Rebuilds the visible card slots for whichever player currently has the turn.
+    /// </summary>
     public void RenderCurrentPlayerHand()
     {
         selectedCard = null;
@@ -1624,6 +1873,9 @@ public class CardDrawManager : MonoBehaviour
     }
 
     // In AIPrototype mode, the visible hand belongs to the local human player, not the AI whose turn is running.
+    /// <summary>
+    /// Returns visible hand player resource used by card handling or target selection.
+    /// </summary>
     private PlayerResource GetVisibleHandPlayerResource()
     {
         if (PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&
@@ -1636,11 +1888,17 @@ public class CardDrawManager : MonoBehaviour
 
         if (!TurnSourceResolver.IsAIPrototypeActive())
         {
+            /// <summary>
+            /// Returns current player resource needed by this gameplay system.
+            /// </summary>
             return GetCurrentPlayerResource();
         }
 
         if (playerManager == null || playerManager.players == null)
         {
+            /// <summary>
+            /// Returns current player resource needed by this gameplay system.
+            /// </summary>
             return GetCurrentPlayerResource();
         }
 
@@ -1657,6 +1915,9 @@ public class CardDrawManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Clears visible hand and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearVisibleHand()
     {
         if (cardSlots == null)
@@ -1683,6 +1944,9 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Creates card view and configures it for the current scene or interaction.
+    /// </summary>
     private GameObject CreateCardView(GameObject cardPrefab, Transform slot)
     {
         if (cardPrefab == null || slot == null)
@@ -1706,11 +1970,17 @@ public class CardDrawManager : MonoBehaviour
         return newCard;
     }
 
+    /// <summary>
+    /// Returns current player resource used by card handling or target selection.
+    /// </summary>
     private PlayerResource GetCurrentPlayerResource()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
     }
 
+    /// <summary>
+    /// Returns blocked turn message used by card handling or target selection.
+    /// </summary>
     private string GetBlockedTurnMessage()
     {
         return PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext()
@@ -1718,6 +1988,9 @@ public class CardDrawManager : MonoBehaviour
             : "Wait for your turn.";
     }
 
+    /// <summary>
+    /// Returns current player ID used by card handling or target selection.
+    /// </summary>
     private int GetCurrentPlayerId()
     {
         if (playerManager != null)
@@ -1730,6 +2003,9 @@ public class CardDrawManager : MonoBehaviour
         return turnSource != null ? turnSource.CurrentPlayerId : 0;
     }
 
+    /// <summary>
+    /// Returns current player hand used by card handling or target selection.
+    /// </summary>
     private PlayerHand GetCurrentPlayerHand()
     {
         if (playerManager != null)
@@ -1741,6 +2017,9 @@ public class CardDrawManager : MonoBehaviour
         return currentPlayer != null ? currentPlayer.GetPlayerHand() : null;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether current hand full is true.
+    /// </summary>
     private bool IsCurrentHandFull()
     {
         PlayerHand currentHand = GetCurrentPlayerHand();
@@ -1754,6 +2033,9 @@ public class CardDrawManager : MonoBehaviour
         return maxCards > 0 && GetHandCardCount() >= maxCards;
     }
 
+    /// <summary>
+    /// Removes card from current hand from the scene, list, UI, hand, deck, or gameplay state.
+    /// </summary>
     private void RemoveCardFromCurrentHand(GameObject cardPrefab)
     {
         PlayerHand currentHand = GetCurrentPlayerHand();
@@ -1765,6 +2047,9 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles sync current player card count for card state, hand state, or targeting.
+    /// </summary>
     private void SyncCurrentPlayerCardCount()
     {
         PlayerResource currentPlayer = GetCurrentPlayerResource();
@@ -1775,11 +2060,17 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks whether drawable card is present before the code depends on it.
+    /// </summary>
     private bool HasDrawableCard()
     {
         return GetRemainingDeckCount() > 0;
     }
 
+    /// <summary>
+    /// Handles draw one card from deck for card state, hand state, or targeting.
+    /// </summary>
     private GameObject DrawOneCardFromDeck()
     {
         if (!deckInitialized)
@@ -1802,6 +2093,9 @@ public class CardDrawManager : MonoBehaviour
         return cardPrefab;
     }
 
+    /// <summary>
+    /// Adds card to deck to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     private void AddCardToDeck(GameObject cardPrefab)
     {
         if (cardPrefab == null)
@@ -1813,6 +2107,9 @@ public class CardDrawManager : MonoBehaviour
         ShuffleRuntimeDeck();
     }
 
+    /// <summary>
+    /// Returns remaining deck count used by card handling or target selection.
+    /// </summary>
     private int GetRemainingDeckCount()
     {
         if (!deckInitialized)
@@ -1828,6 +2125,9 @@ public class CardDrawManager : MonoBehaviour
         return runtimeDeck.Count;
     }
 
+    /// <summary>
+    /// Notifies connected systems that tutorial card played occurred.
+    /// </summary>
     private void NotifyTutorialCardPlayed(GameObject cardPrefab)
     {
         TutorialActionType actionType = cardPrefab != null
@@ -1837,6 +2137,9 @@ public class CardDrawManager : MonoBehaviour
         TutorialManager.Instance?.NotifyCardPlayed(actionType, cardPrefab);
     }
 
+    /// <summary>
+    /// Returns tutorial action type for card name used by card handling or target selection.
+    /// </summary>
     private TutorialActionType GetTutorialActionTypeForCardName(string cardName)
     {
         if (IsTakeOverCard(cardName)) return TutorialActionType.TakeOver;
@@ -1855,6 +2158,9 @@ public class CardDrawManager : MonoBehaviour
         return TutorialActionType.PlayCard;
     }
 
+    /// <summary>
+    /// Searches scene objects or cached lists to find card prefab by ID.
+    /// </summary>
     private GameObject FindCardPrefabById(string cardId)
     {
         string normalizedId = NormalizeCardName(cardId);
@@ -1891,6 +2197,9 @@ public class CardDrawManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Attempts to select visible card by ID and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TrySelectVisibleCardById(string cardId)
     {
         string normalizedId = NormalizeCardName(cardId);
@@ -1930,6 +2239,9 @@ public class CardDrawManager : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Returns player resource used by card handling or target selection.
+    /// </summary>
     private PlayerResource GetPlayerResource(int playerId)
     {
         if (playerManager == null || playerManager.players == null)
@@ -1948,6 +2260,9 @@ public class CardDrawManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Handles normalize card ID for card state, hand state, or targeting.
+    /// </summary>
     public static string NormalizeCardId(string cardName)
     {
         if (string.IsNullOrWhiteSpace(cardName))
@@ -1958,6 +2273,9 @@ public class CardDrawManager : MonoBehaviour
         return cardName.Replace("(Clone)", "").Trim().ToLowerInvariant();
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether player targeting card ID is true.
+    /// </summary>
     public static bool IsPlayerTargetingCardId(string cardId)
     {
         return cardId == "stealcard" ||
@@ -1967,6 +2285,9 @@ public class CardDrawManager : MonoBehaviour
             cardId == "disrupt";
     }
 
+    /// <summary>
+    /// Handles requires board target ID for card state, hand state, or targeting.
+    /// </summary>
     public static bool RequiresBoardTargetId(string cardId)
     {
         return cardId == "opengate" ||
@@ -1985,12 +2306,21 @@ public class CardDrawManager : MonoBehaviour
             cardId == "shock trap";
     }
 
+    /// <summary>
+    /// Handles requires target selection for card state, hand state, or targeting.
+    /// </summary>
     public bool RequiresTargetSelection(string cardId)
     {
         string normalizedCardId = NormalizeCardId(cardId);
+        /// <summary>
+        /// Handles is player targeting card ID for card draw manager.
+        /// </summary>
         return IsPlayerTargetingCardId(normalizedCardId) || RequiresBoardTargetId(normalizedCardId);
     }
 
+    /// <summary>
+    /// Builds configured deck card IDs from configured scene objects and runtime state.
+    /// </summary>
     public List<string> BuildConfiguredDeckCardIds()
     {
         List<string> deckCardIds = new List<string>();
@@ -2032,12 +2362,18 @@ public class CardDrawManager : MonoBehaviour
         return deckCardIds;
     }
 
+    /// <summary>
+    /// Returns max hand size for player used by card handling or target selection.
+    /// </summary>
     public int GetMaxHandSizeForPlayer(int playerId)
     {
         PlayerHand hand = playerManager != null ? playerManager.GetPlayerHand(playerId) : null;
         return hand != null ? hand.maxHandSize : 5;
     }
 
+    /// <summary>
+    /// Clears all player hands for online bootstrap and removes its temporary gameplay or visual effect.
+    /// </summary>
     public void ClearAllPlayerHandsForOnlineBootstrap()
     {
         if (playerManager == null || playerManager.players == null)
@@ -2067,6 +2403,9 @@ public class CardDrawManager : MonoBehaviour
         RenderCurrentPlayerHand();
     }
 
+    /// <summary>
+    /// Applies online private hand state to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyOnlinePrivateHandState(int ownerPlayerId, IEnumerable<string> cardIds, int handCount)
     {
         PlayerResource owner = GetPlayerResource(ownerPlayerId);
@@ -2114,6 +2453,9 @@ public class CardDrawManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Decides whether should use authoritative online card sync should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldUseAuthoritativeOnlineCardSync()
     {
         return PhotonOnlineGameSceneManager.IsLiveOnlineGameSceneContext() &&

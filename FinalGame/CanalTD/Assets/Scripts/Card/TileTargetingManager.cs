@@ -79,6 +79,9 @@ public class TileTargetingManager : MonoBehaviour
     private TileTargetingMode currentMode = TileTargetingMode.None;
     private bool isTargeting = false;
 
+    /// <summary>
+    /// Finds and stores tile targeting manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (targetCamera == null)
@@ -87,6 +90,9 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Subscribes tile targeting manager to the events it needs while enabled.
+    /// </summary>
     private void OnEnable()
     {
         if (confirmButton != null)
@@ -100,6 +106,9 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Unsubscribes tile targeting manager from events so disabled objects stop receiving callbacks.
+    /// </summary>
     private void OnDisable()
     {
         if (confirmButton != null)
@@ -113,11 +122,17 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up tile targeting manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         ExitTargetingMode();
     }
 
+    /// <summary>
+    /// Checks tile targeting manager input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (!isTargeting)
@@ -131,6 +146,9 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Starts Take Over targeting and highlights opponent-owned tiles that can be captured.
+    /// </summary>
     public bool BeginTakeOverTargeting()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TakeOver, null))
@@ -143,9 +161,15 @@ public class TileTargetingManager : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Handles begin targeting for tile targeting manager.
+        /// </summary>
         return BeginTargeting(TileTargetingMode.TakeOver, "No land available to take over.");
     }
 
+    /// <summary>
+    /// Starts Freeze Claim targeting and highlights tiles that can be frozen.
+    /// </summary>
     public bool BeginFreezeClaimTargeting()
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.FreezeClaim, null))
@@ -158,9 +182,15 @@ public class TileTargetingManager : MonoBehaviour
             return false;
         }
 
+        /// <summary>
+        /// Handles begin targeting for tile targeting manager.
+        /// </summary>
         return BeginTargeting(TileTargetingMode.FreezeClaim, "No land available to freeze.");
     }
 
+    /// <summary>
+    /// Handles begin targeting for card state, hand state, or targeting.
+    /// </summary>
     private bool BeginTargeting(TileTargetingMode mode, string noTargetMessage)
     {
         currentMode = mode;
@@ -207,6 +237,9 @@ public class TileTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Confirms selection and applies the selected action if it is valid.
+    /// </summary>
     public void ConfirmSelection()
     {
         if (!isTargeting)
@@ -229,6 +262,9 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks whether selection is allowed before enabling that action.
+    /// </summary>
     public void CancelSelection()
     {
         if (!isTargeting)
@@ -244,16 +280,25 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether targeting is true.
+    /// </summary>
     public bool IsTargeting()
     {
         return isTargeting;
     }
 
+    /// <summary>
+    /// Handles exit without consuming card for card state, hand state, or targeting.
+    /// </summary>
     public void ExitWithoutConsumingCard()
     {
         ExitTargetingMode();
     }
 
+    /// <summary>
+    /// Confirms take over and applies the selected action if it is valid.
+    /// </summary>
     private void ConfirmTakeOver()
     {
         if (selectedTile == null)
@@ -298,6 +343,9 @@ public class TileTargetingManager : MonoBehaviour
         ResolveTakeOver(GetCurrentPlayerId(), selectedTile, true);
     }
 
+    /// <summary>
+    /// Confirms freeze claim and applies the selected action if it is valid.
+    /// </summary>
     private void ConfirmFreezeClaim()
     {
         if (selectedTile == null)
@@ -342,11 +390,20 @@ public class TileTargetingManager : MonoBehaviour
         ResolveFreezeClaim(GetCurrentPlayerId(), selectedTile, true);
     }
 
+    /// <summary>
+    /// Captures the selected tile for the acting player and updates ownership, cost, and visuals.
+    /// </summary>
     public bool ResolveTakeOver(int playerId, TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Handles resolve take over for tile targeting manager.
+        /// </summary>
         return ResolveTakeOver(playerId, buildArea, false);
     }
 
+    /// <summary>
+    /// Captures the selected tile for the acting player and updates ownership, cost, and visuals.
+    /// </summary>
     public bool ResolveTakeOver(int playerId, TowerBuildArea buildArea, bool consumePendingCard)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.TakeOver, buildArea != null ? buildArea.gameObject : null))
@@ -428,11 +485,20 @@ public class TileTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Freezes the selected tile for the card duration and updates tile visuals and card state.
+    /// </summary>
     public bool ResolveFreezeClaim(int playerId, TowerBuildArea buildArea)
     {
+        /// <summary>
+        /// Handles resolve freeze claim for tile targeting manager.
+        /// </summary>
         return ResolveFreezeClaim(playerId, buildArea, false);
     }
 
+    /// <summary>
+    /// Freezes the selected tile for the card duration and updates tile visuals and card state.
+    /// </summary>
     public bool ResolveFreezeClaim(int playerId, TowerBuildArea buildArea, bool consumePendingCard)
     {
         if (TutorialActionGate.BlockIfNotAllowed(TutorialActionType.FreezeClaim, buildArea != null ? buildArea.gameObject : null))
@@ -488,6 +554,9 @@ public class TileTargetingManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Attempts to select tile at mouse and returns false if rules, resources, or references block it.
+    /// </summary>
     private void TrySelectTileAtMouse()
     {
         if (ShouldBlockOnlineAction())
@@ -527,6 +596,9 @@ public class TileTargetingManager : MonoBehaviour
         Debug.Log($"Selected tile: {selectedTile.name}");
     }
 
+    /// <summary>
+    /// Returns tile under mouse used by card handling or target selection.
+    /// </summary>
     private TowerBuildArea GetTileUnderMouse()
     {
         if (targetCamera == null)
@@ -542,6 +614,9 @@ public class TileTargetingManager : MonoBehaviour
         Vector3 mouseScreenPosition = Input.mousePosition;
         float distanceFromCamera = Mathf.Abs(targetCamera.transform.position.z);
         Vector3 worldPosition = targetCamera.ScreenToWorldPoint(
+            /// <summary>
+            /// Handles vector3 for tile targeting manager.
+            /// </summary>
             new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, distanceFromCamera)
         );
 
@@ -570,6 +645,9 @@ public class TileTargetingManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Returns build areas used by card handling or target selection.
+    /// </summary>
     private List<TowerBuildArea> GetBuildAreas()
     {
         List<TowerBuildArea> results = new List<TowerBuildArea>();
@@ -586,31 +664,49 @@ public class TileTargetingManager : MonoBehaviour
         return results;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid take over target is true.
+    /// </summary>
     private bool IsValidTakeOverTarget(TowerBuildArea buildArea, int currentPlayerId)
     {
         return buildArea != null && buildArea.CanBeTakenOverBy(currentPlayerId);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid freeze claim target is true.
+    /// </summary>
     private bool IsValidFreezeClaimTarget(TowerBuildArea buildArea)
     {
         return buildArea != null && buildArea.CanBeFrozen();
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether valid target for mode is true.
+    /// </summary>
     private bool IsValidTargetForMode(TowerBuildArea buildArea, int currentPlayerId, TileTargetingMode mode)
     {
         if (mode == TileTargetingMode.TakeOver)
         {
+            /// <summary>
+            /// Handles is valid take over target for tile targeting manager.
+            /// </summary>
             return IsValidTakeOverTarget(buildArea, currentPlayerId);
         }
 
         if (mode == TileTargetingMode.FreezeClaim)
         {
+            /// <summary>
+            /// Handles is valid freeze claim target for tile targeting manager.
+            /// </summary>
             return IsValidFreezeClaimTarget(buildArea);
         }
 
         return false;
     }
 
+    /// <summary>
+    /// Returns take over cost used by card handling or target selection.
+    /// </summary>
     private int GetTakeOverCost(TowerBuildArea buildArea)
     {
         if (buildArea == null)
@@ -622,26 +718,41 @@ public class TileTargetingManager : MonoBehaviour
         return Mathf.CeilToInt(normalTakeoverCost / 2f);
     }
 
+    /// <summary>
+    /// Returns current player ID used by card handling or target selection.
+    /// </summary>
     private int GetCurrentPlayerId()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerId() : 0;
     }
 
+    /// <summary>
+    /// Returns current player resource used by card handling or target selection.
+    /// </summary>
     private PlayerResource GetCurrentPlayerResource()
     {
         return playerManager != null ? playerManager.GetCurrentPlayerResource() : null;
     }
 
+    /// <summary>
+    /// Returns player resource used by card handling or target selection.
+    /// </summary>
     private PlayerResource GetPlayerResource(int playerId)
     {
         return playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
     }
 
+    /// <summary>
+    /// Decides whether should block online action should happen in the current mode and turn state.
+    /// </summary>
     private bool ShouldBlockOnlineAction()
     {
         return PhotonOnlineGameSceneManager.ShouldBlockLocalGameplayAction(true);
     }
 
+    /// <summary>
+    /// Refreshes player UI from the latest gameplay data.
+    /// </summary>
     private void RefreshPlayerUI(int playerId)
     {
         if (playerManager == null)
@@ -653,6 +764,9 @@ public class TileTargetingManager : MonoBehaviour
         playerManager.RefreshCurrentPlayerUI();
     }
 
+    /// <summary>
+    /// Sets targeting visuals and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetTargetingVisuals(bool active)
     {
         if (active && BuildTowerManager.Instance != null)
@@ -700,6 +814,9 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets normal gameplay UI enabled and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetNormalGameplayUIEnabled(bool enabled)
     {
         ResolveNormalGameplayUI();
@@ -713,6 +830,9 @@ public class TileTargetingManager : MonoBehaviour
         normalGameplayUI.blocksRaycasts = enabled;
     }
 
+    /// <summary>
+    /// Sets overlay raycast blocking and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetOverlayRaycastBlocking(bool blocking)
     {
         if (darkOverlay == null)
@@ -728,11 +848,20 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over targeting controls is true.
+    /// </summary>
     private bool IsPointerOverTargetingControls()
     {
+        /// <summary>
+        /// Handles is pointer over button for tile targeting manager.
+        /// </summary>
         return IsPointerOverButton(confirmButton) || IsPointerOverButton(cancelButton);
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether pointer over button is true.
+    /// </summary>
     private bool IsPointerOverButton(Button button)
     {
         if (button == null)
@@ -758,6 +887,9 @@ public class TileTargetingManager : MonoBehaviour
         return RectTransformUtility.RectangleContainsScreenPoint(rectTransform, Input.mousePosition, uiCamera);
     }
 
+    /// <summary>
+    /// Looks up the target for normal gameplay UI and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveNormalGameplayUI()
     {
         if (normalGameplayUI != null)
@@ -777,6 +909,9 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles exit targeting mode for card state, hand state, or targeting.
+    /// </summary>
     private void ExitTargetingMode()
     {
         ClearHighlights();
@@ -787,6 +922,9 @@ public class TileTargetingManager : MonoBehaviour
         UpdateConfirmButtonState();
     }
 
+    /// <summary>
+    /// Updates confirm button state so the display or cached state matches current gameplay data.
+    /// </summary>
     private void UpdateConfirmButtonState()
     {
         if (confirmButton == null)
@@ -803,6 +941,9 @@ public class TileTargetingManager : MonoBehaviour
         confirmButton.interactable = isTargeting && selectedTile != null;
     }
 
+    /// <summary>
+    /// Clears highlights and removes its temporary gameplay or visual effect.
+    /// </summary>
     private void ClearHighlights()
     {
         foreach (TowerBuildArea target in highlightedAreas)
@@ -820,6 +961,9 @@ public class TileTargetingManager : MonoBehaviour
         originalSortingOrders.Clear();
     }
 
+    /// <summary>
+    /// Handles store original visual for card state, hand state, or targeting.
+    /// </summary>
     private void StoreOriginalVisual(TowerBuildArea buildArea)
     {
         if (buildArea == null || buildArea.areaVisualRenderer == null)
@@ -838,6 +982,9 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies tile visual to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyTileVisual(TowerBuildArea buildArea, Color color, int sortingOrder, bool isSelected)
     {
         if (buildArea == null)
@@ -862,6 +1009,9 @@ public class TileTargetingManager : MonoBehaviour
         buildArea.areaVisualRenderer.sortingOrder = sortingOrder;
     }
 
+    /// <summary>
+    /// Handles restore tile visual for card state, hand state, or targeting.
+    /// </summary>
     private void RestoreTileVisual(TowerBuildArea buildArea)
     {
         if (buildArea == null || buildArea.areaVisualRenderer == null)
@@ -886,6 +1036,9 @@ public class TileTargetingManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shows toast with the correct current context.
+    /// </summary>
     private void ShowToast(string message)
     {
         if (TryCallToastMethod(message))
@@ -902,6 +1055,9 @@ public class TileTargetingManager : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

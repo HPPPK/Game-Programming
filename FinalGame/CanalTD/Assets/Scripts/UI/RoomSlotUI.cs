@@ -54,6 +54,9 @@ public class RoomSlotUI : MonoBehaviour
     [Header("Background")]
     public Image slotBackgroundImage;
 
+    /// <summary>
+    /// Finds and stores room slot UI references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (removeButton != null)
@@ -63,6 +66,9 @@ public class RoomSlotUI : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Removes room slot UI listeners and temporary references before destruction.
+    /// </summary>
     private void OnDestroy()
     {
         if (removeButton != null)
@@ -73,6 +79,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Renders this slot as empty and hides interaction/character visuals.
+    /// <summary>
+    /// Sets empty and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetEmpty()
     {
         if (slotNameText != null)
@@ -96,6 +105,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Renders the local human slot. Local humans cannot be removed, but they can toggle ready.
+    /// <summary>
+    /// Sets human and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetHuman(string playerName, bool isReady)
     {
         if (slotNameText != null)
@@ -115,6 +127,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Renders an AI slot. Difficulty is displayed here but controlled by one shared lobby dropdown.
+    /// <summary>
+    /// Sets AI and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetAI(string aiName, AIDifficulty difficulty, bool isReady)
     {
         if (slotNameText != null)
@@ -134,6 +149,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Renders an online-mode empty slot using only the final product fields.
+    /// <summary>
+    /// Sets online empty and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetOnlineEmpty()
     {
         if (slotNameText != null)
@@ -152,6 +170,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Renders one online player slot with only name and ready/waiting state.
+    /// <summary>
+    /// Sets online player and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetOnlinePlayer(string playerName, bool isReady)
     {
         if (slotNameText != null)
@@ -170,6 +191,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Updates the ready text for occupied slots.
+    /// <summary>
+    /// Sets ready and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetReady(bool isReady)
     {
         if (readyText != null)
@@ -179,6 +203,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Shows or hides this slot's remove button object.
+    /// <summary>
+    /// Sets remove button visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetRemoveButtonVisible(bool visible)
     {
         if (removeButton != null)
@@ -188,6 +215,9 @@ public class RoomSlotUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets type text visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetTypeTextVisible(bool visible)
     {
         if (slotTypeText != null)
@@ -197,6 +227,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Shows or hides this slot's character visual and starts/stops frame animation.
+    /// <summary>
+    /// Sets character visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetCharacterVisible(bool visible)
     {
         if (characterVisualRoot != null)
@@ -220,6 +253,9 @@ public class RoomSlotUI : MonoBehaviour
     }
 
     // Removes this slot only; it does not remove the last AI globally.
+    /// <summary>
+    /// Responds to on remove button clicked and updates the affected gameplay or UI systems.
+    /// </summary>
     private void OnRemoveButtonClicked()
     {
         if (manager == null)

@@ -38,6 +38,9 @@ public class PlayerResultEntry
     public int rank;
     public bool isEliminated;
 
+    /// <summary>
+    /// Plays player result entry in the current scene context.
+    /// </summary>
     public PlayerResultEntry(int playerId, string displayName, int score, int money, int castleHp, bool isEliminated = false)
     {
         this.playerId = playerId;
@@ -54,11 +57,17 @@ public static class GameResultData
 {
     public static List<PlayerResultEntry> Results = new List<PlayerResultEntry>();
 
+    /// <summary>
+    /// Sets results and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public static void SetResults(List<PlayerResultEntry> results)
     {
         Results = results != null ? new List<PlayerResultEntry>(results) : new List<PlayerResultEntry>();
     }
 
+    /// <summary>
+    /// Clears clear and removes its temporary gameplay or visual effect.
+    /// </summary>
     public static void Clear()
     {
         Results.Clear();

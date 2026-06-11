@@ -36,6 +36,9 @@ public class PathNode : MonoBehaviour
 
     private int nextEdgeIndex = 0;
 
+    /// <summary>
+    /// Returns next node from the current scene or gameplay state.
+    /// </summary>
     public PathNode GetNextNode(PathNode previousNode)
     {
         List<PathEdge> availableEdges = new List<PathEdge>();
@@ -66,6 +69,9 @@ public class PathNode : MonoBehaviour
         return selectedEdge.targetNode;
     }
 
+    /// <summary>
+    /// Draws editor-only gizmos that show this object in the Scene view.
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (edges == null) return;

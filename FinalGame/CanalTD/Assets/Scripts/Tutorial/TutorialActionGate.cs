@@ -42,6 +42,9 @@ public class TutorialActionGate : MonoBehaviour
     [SerializeField] private string guideSceneName = "GuideScene";
     [SerializeField] private string defaultBlockedMessage = "Follow the tutorial step first.";
 
+    /// <summary>
+    /// Finds and stores tutorial action gate references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         Instance = this;
@@ -52,6 +55,9 @@ public class TutorialActionGate : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether action allowed is true.
+    /// </summary>
     public bool IsActionAllowed(TutorialActionType actionType, GameObject target)
     {
         if (!IsGateActive())
@@ -62,6 +68,9 @@ public class TutorialActionGate : MonoBehaviour
         return tutorialManager != null && tutorialManager.IsActionAllowed(actionType, target);
     }
 
+    /// <summary>
+    /// Notifies connected systems that blocked action occurred.
+    /// </summary>
     public void NotifyBlockedAction(TutorialActionType actionType)
     {
         if (!IsGateActive())
@@ -81,6 +90,9 @@ public class TutorialActionGate : MonoBehaviour
         Debug.Log(message);
     }
 
+    /// <summary>
+    /// Handles block if not allowed for tutorial guidance, highlights, or step progression.
+    /// </summary>
     public static bool BlockIfNotAllowed(TutorialActionType actionType, GameObject target)
     {
         if (Instance == null || Instance.IsActionAllowed(actionType, target))
@@ -92,6 +104,9 @@ public class TutorialActionGate : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether gate active is true.
+    /// </summary>
     public bool IsGateActive()
     {
         if (tutorialManager == null)
@@ -112,6 +127,9 @@ public class TutorialActionGate : MonoBehaviour
         return SceneManager.GetActiveScene().name == guideSceneName;
     }
 
+    /// <summary>
+    /// Attempts to call toast method and returns false if rules, resources, or references block it.
+    /// </summary>
     private bool TryCallToastMethod(string message)
     {
         if (toastMessage == null)

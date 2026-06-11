@@ -62,6 +62,9 @@ public class PlayerExitManager : MonoBehaviour
     private const string LocalFourPlayerMode = "Local4Player";
     private const string OnlineAIPrototypeMode = "OnlineAIPrototype";
 
+    /// <summary>
+    /// Finds and stores player exit manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (playerManager == null)
@@ -113,6 +116,9 @@ public class PlayerExitManager : MonoBehaviour
     }
 
     // Unity Button entrypoint for both GameScene and GameScene_AIPrototype.
+    /// <summary>
+    /// Responds to on click exit game and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnClickExitGame()
     {
         Debug.Log("EXIT BUTTON CLICKED");
@@ -128,6 +134,9 @@ public class PlayerExitManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Confirms exit and applies the selected action if it is valid.
+    /// </summary>
     public void ConfirmExit()
     {
         Debug.Log("EXIT CONFIRMED");
@@ -155,6 +164,9 @@ public class PlayerExitManager : MonoBehaviour
         ExitCurrentMatch();
     }
 
+    /// <summary>
+    /// Checks whether exit is allowed before enabling that action.
+    /// </summary>
     public void CancelExit()
     {
         Debug.Log("EXIT CANCELLED");
@@ -165,6 +177,9 @@ public class PlayerExitManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles exit current match for this gameplay system.
+    /// </summary>
     public void ExitCurrentMatch()
     {
         string sceneName = SceneManager.GetActiveScene().name;
@@ -220,6 +235,9 @@ public class PlayerExitManager : MonoBehaviour
         ExitLocalOrAIMatch();
     }
 
+    /// <summary>
+    /// Handles exit local or AI match for this gameplay system.
+    /// </summary>
     public void ExitLocalOrAIMatch()
     {
         Debug.Log("Match ended locally via Exit Game.");
@@ -238,6 +256,9 @@ public class PlayerExitManager : MonoBehaviour
         SceneManager.LoadScene(resultSceneName);
     }
 
+    /// <summary>
+    /// Handles exit online player for this gameplay system.
+    /// </summary>
     public void ExitOnlinePlayer(int playerId)
     {
         Debug.Log("Online player exited: playerId = " + playerId);
@@ -256,6 +277,9 @@ public class PlayerExitManager : MonoBehaviour
         Debug.LogWarning("ExitOnlinePlayer was called without an active local Photon online player. No ResultScene fallback will be used.");
     }
 
+    /// <summary>
+    /// Returns Photon online game scene manager from the current scene or gameplay state.
+    /// </summary>
     private PhotonOnlineGameSceneManager GetPhotonOnlineGameSceneManager()
     {
         if (photonOnlineGameSceneManager == null)
@@ -266,6 +290,9 @@ public class PlayerExitManager : MonoBehaviour
         return photonOnlineGameSceneManager;
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether online game scene exit path is true.
+    /// </summary>
     private bool IsOnlineGameSceneExitPath(string sceneName, PhotonOnlineGameSceneManager activeOnlineManager)
     {
         if (sceneName != "GameScene")
@@ -286,9 +313,15 @@ public class PlayerExitManager : MonoBehaviour
             return true;
         }
 
+        /// <summary>
+        /// Handles is in Photon room for player exit manager.
+        /// </summary>
         return IsInPhotonRoom();
     }
 
+    /// <summary>
+    /// Checks the current state to decide whether in Photon room is true.
+    /// </summary>
     private bool IsInPhotonRoom()
     {
 #if PHOTON_UNITY_NETWORKING
@@ -298,6 +331,9 @@ public class PlayerExitManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>
+    /// Cleans player state from scene state, UI state, or saved runtime data.
+    /// </summary>
     public void CleanupPlayerState(int playerId)
     {
         Debug.Log("Cleaning player state for player " + playerId + ".");
@@ -385,6 +421,9 @@ public class PlayerExitManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles are all players inactive or eliminated for this gameplay system.
+    /// </summary>
     public bool AreAllPlayersInactiveOrEliminated()
     {
         if (aiPrototypeTurnManager != null && aiPrototypeTurnManager.isActiveAndEnabled)
@@ -419,6 +458,9 @@ public class PlayerExitManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Cleans owned build areas and towers from scene state, UI state, or saved runtime data.
+    /// </summary>
     private void CleanupOwnedBuildAreasAndTowers(int playerId)
     {
         TowerBuildArea[] buildAreas = FindObjectsOfType<TowerBuildArea>();
@@ -458,6 +500,9 @@ public class PlayerExitManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Cleans owned shock traps from scene state, UI state, or saved runtime data.
+    /// </summary>
     private void CleanupOwnedShockTraps(int playerId)
     {
         ShockTrap[] traps = FindObjectsOfType<ShockTrap>();
@@ -471,6 +516,9 @@ public class PlayerExitManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns local online player ID from the current scene or gameplay state.
+    /// </summary>
     private int GetLocalOnlinePlayerId()
     {
         if (localOnlinePlayerId >= 0)
@@ -494,6 +542,9 @@ public class PlayerExitManager : MonoBehaviour
         return 0;
     }
 
+    /// <summary>
+    /// Builds current result entries from configured scene objects and runtime state.
+    /// </summary>
     private List<PlayerResultEntry> BuildCurrentResultEntries()
     {
         List<PlayerResultEntry> results = new List<PlayerResultEntry>();
@@ -526,6 +577,9 @@ public class PlayerExitManager : MonoBehaviour
         return results;
     }
 
+    /// <summary>
+    /// Returns castle for player from the current scene or gameplay state.
+    /// </summary>
     private CastleBase GetCastleForPlayer(PlayerResource player)
     {
         if (player == null)
@@ -557,6 +611,9 @@ public class PlayerExitManager : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Handles sort results by score for this gameplay system.
+    /// </summary>
     private void SortResultsByScore(List<PlayerResultEntry> results)
     {
         results.Sort((a, b) =>
@@ -596,6 +653,9 @@ public class PlayerExitManager : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Handles assign ranks for this gameplay system.
+    /// </summary>
     private void AssignRanks(List<PlayerResultEntry> results)
     {
         int activeRank = 1;

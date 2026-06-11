@@ -73,6 +73,9 @@ public class AudioManager : MonoBehaviour
     private const string SfxEnabledKey = "Settings_SfxEnabled";
     private const string MasterVolumeKey = "Settings_MasterVolume";
 
+    /// <summary>
+    /// Finds and stores audio manager references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -89,6 +92,9 @@ public class AudioManager : MonoBehaviour
         PlayBackgroundMusic();
     }
 
+    /// <summary>
+    /// Loads audio settings from saved settings, room data, or scene references.
+    /// </summary>
     private void LoadAudioSettings()
     {
         musicEnabled = PlayerPrefs.GetInt(MusicEnabledKey, 1) == 1;
@@ -96,6 +102,9 @@ public class AudioManager : MonoBehaviour
         masterVolume = PlayerPrefs.GetFloat(MasterVolumeKey, 1f);
     }
 
+    /// <summary>
+    /// Applies audio settings to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyAudioSettings()
     {
         if (bgmSource != null)
@@ -112,6 +121,9 @@ public class AudioManager : MonoBehaviour
         AudioListener.volume = masterVolume;
     }
 
+    /// <summary>
+    /// Plays the background music audio feedback.
+    /// </summary>
     public void PlayBackgroundMusic()
     {
         if (bgmSource == null || backgroundMusic == null)
@@ -128,6 +140,9 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets music enabled and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetMusicEnabled(bool enabled)
     {
         musicEnabled = enabled;
@@ -154,6 +169,9 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets SFX enabled and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetSfxEnabled(bool enabled)
     {
         sfxEnabled = enabled;
@@ -166,6 +184,9 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets master volume and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetMasterVolume(float volume)
     {
         masterVolume = Mathf.Clamp01(volume);
@@ -175,6 +196,9 @@ public class AudioManager : MonoBehaviour
         ApplyAudioSettings();
     }
 
+    /// <summary>
+    /// Plays the SFX audio feedback.
+    /// </summary>
     public void PlaySfx(AudioClip clip, float pitch = 1f, float volume = 1f)
     {
         if (!sfxEnabled || sfxSource == null || clip == null)
@@ -187,31 +211,49 @@ public class AudioManager : MonoBehaviour
         sfxSource.pitch = 1f;
     }
 
+    /// <summary>
+    /// Plays the UI click audio feedback.
+    /// </summary>
     public void PlayUiClick()
     {
         PlaySfx(uiClickSound, uiClickPitch, uiClickVolume);
     }
 
+    /// <summary>
+    /// Plays the tower shoot audio feedback.
+    /// </summary>
     public void PlayTowerShoot()
     {
         PlaySfx(towerShootSound, towerShootPitch, towerShootVolume);
     }
 
+    /// <summary>
+    /// Plays the enemy death audio feedback.
+    /// </summary>
     public void PlayEnemyDeath()
     {
         PlaySfx(enemyDeathSound, enemyDeathPitch, enemyDeathVolume);
     }
 
+    /// <summary>
+    /// Plays the build audio feedback.
+    /// </summary>
     public void PlayBuild()
     {
         PlaySfx(buildSound, buildPitch, buildVolume);
     }
 
+    /// <summary>
+    /// Plays the victory audio feedback.
+    /// </summary>
     public void PlayVictory()
     {
         PlaySfx(victorySound, victoryPitch, victoryVolume);
     }
 
+    /// <summary>
+    /// Plays the card play audio feedback.
+    /// </summary>
     public void PlayCardPlay()
     {
         PlaySfx(cardPlaySound, cardPlayPitch, cardPlayVolume);

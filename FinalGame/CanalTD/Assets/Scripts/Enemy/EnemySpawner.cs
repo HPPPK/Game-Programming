@@ -38,11 +38,20 @@ public class EnemySpawner : MonoBehaviour
     [Header("Start Node")]
     public PathNode startNode;
 
+    /// <summary>
+    /// Spawns one into the scene and initializes its runtime state.
+    /// </summary>
     public GameObject SpawnOne()
     {
+        /// <summary>
+        /// Handles spawn one for enemy spawner.
+        /// </summary>
         return SpawnOne(null, 1, 0f, 0f);
     }
 
+    /// <summary>
+    /// Spawns one into the scene and initializes its runtime state.
+    /// </summary>
     public GameObject SpawnOne(GameObject waveEnemyPrefab, int round, float hpScalePerRound, float speedScalePerRound)
     {
         GameObject prefabToSpawn = waveEnemyPrefab != null ? waveEnemyPrefab : enemyPrefab;

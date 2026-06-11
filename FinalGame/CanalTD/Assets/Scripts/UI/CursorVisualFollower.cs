@@ -40,6 +40,9 @@ public class CursorVisualFollower : MonoBehaviour
     public Sprite hammerCursorSprite;
     public bool showCustomVisual = true;
 
+    /// <summary>
+    /// Finds and stores cursor visual follower references before scene gameplay begins.
+    /// </summary>
     void Awake()
     {
         if (cursorImage == null)
@@ -58,12 +61,18 @@ public class CursorVisualFollower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets up cursor visual follower when this scene object starts running.
+    /// </summary>
     void Start()
     {
         Cursor.visible = false;
         RefreshVisual();
     }
 
+    /// <summary>
+    /// Checks cursor visual follower input, timing, animation, or UI state once per frame.
+    /// </summary>
     void Update()
     {
         Cursor.visible = false;
@@ -76,6 +85,9 @@ public class CursorVisualFollower : MonoBehaviour
         RefreshVisual();
     }
 
+    /// <summary>
+    /// Refreshes visual from the latest gameplay data.
+    /// </summary>
     private void RefreshVisual()
     {
         if (cursorImage == null)
@@ -111,6 +123,9 @@ public class CursorVisualFollower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets cursor sprite and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetCursorSprite(Sprite sprite)
     {
         if (cursorGraphic == null)
@@ -124,6 +139,9 @@ public class CursorVisualFollower : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets visual visible and immediately updates the related state, UI, or visuals.
+    /// </summary>
     private void SetVisualVisible(bool visible)
     {
         if (cursorGraphic != null)

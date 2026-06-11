@@ -59,6 +59,9 @@ public class EnemyMover : MonoBehaviour
 
     private bool initialized = false;
 
+    /// <summary>
+    /// Finds and stores enemy mover references before scene gameplay begins.
+    /// </summary>
     void Awake()
     {
         enemyStats = GetComponent<EnemyStats>();
@@ -69,6 +72,9 @@ public class EnemyMover : MonoBehaviour
             : GetComponent<SpriteRenderer>();
     }
 
+    /// <summary>
+    /// Handles init for enemy movement, health, waves, or routing.
+    /// </summary>
     public void Init(PathNode startNode)
     {
         if (startNode == null)
@@ -103,6 +109,9 @@ public class EnemyMover : MonoBehaviour
         ApplyStatsSpeed();
     }
 
+    /// <summary>
+    /// Applies stats speed to gameplay data and updates visible feedback.
+    /// </summary>
     public void ApplyStatsSpeed(int round, float speedScalePerRound)
     {
         appliedRound = Mathf.Max(1, round);
@@ -110,6 +119,9 @@ public class EnemyMover : MonoBehaviour
         ApplyStatsSpeed();
     }
 
+    /// <summary>
+    /// Handles copy path progress from for enemy movement, health, waves, or routing.
+    /// </summary>
     public void CopyPathProgressFrom(EnemyMover source, Vector3 spawnPosition)
     {
         if (source == null || source.path == null || source.path.Count == 0)
@@ -125,6 +137,9 @@ public class EnemyMover : MonoBehaviour
         ApplyStatsSpeed();
     }
 
+    /// <summary>
+    /// Checks enemy mover input, timing, animation, or UI state once per frame.
+    /// </summary>
     void Update()
     {
         if (!initialized) return;
@@ -133,6 +148,9 @@ public class EnemyMover : MonoBehaviour
         MoveAlongPath();
     }
 
+    /// <summary>
+    /// Keeps enemy mover visuals aligned after normal frame updates finish.
+    /// </summary>
     void LateUpdate()
     {
         if (!enforceVisualOffsetEveryFrame)
@@ -144,6 +162,9 @@ public class EnemyMover : MonoBehaviour
         ApplyVisualOffset();
     }
 
+    /// <summary>
+    /// Moves the enemy toward the next node on its assigned path.
+    /// </summary>
     void MoveAlongPath()
     {
         PathNode targetNode = path[currentPathIndex];
@@ -182,6 +203,9 @@ public class EnemyMover : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies stats speed to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyStatsSpeed()
     {
         enemyStats = enemyStats != null ? enemyStats : GetComponent<EnemyStats>();
@@ -194,6 +218,9 @@ public class EnemyMover : MonoBehaviour
         moveSpeed = enemyStats.GetFinalSpeed(appliedRound, appliedSpeedScalePerRound);
     }
 
+    /// <summary>
+    /// Looks up the target for visual root and applies the resolved gameplay result.
+    /// </summary>
     private void ResolveVisualRoot()
     {
         if (visualRoot != null)
@@ -217,6 +244,9 @@ public class EnemyMover : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Applies visual offset to gameplay data and updates visible feedback.
+    /// </summary>
     private void ApplyVisualOffset()
     {
         if (visualRoot == null)
@@ -232,6 +262,9 @@ public class EnemyMover : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles align sprite center to path center for enemy movement, health, waves, or routing.
+    /// </summary>
     private void AlignSpriteCenterToPathCenter()
     {
         if (visualRoot == null)
@@ -255,6 +288,9 @@ public class EnemyMover : MonoBehaviour
         visualRoot.position += correction;
     }
 
+    /// <summary>
+    /// Returns node position used by enemy spawning, movement, waves, or routing.
+    /// </summary>
     private Vector3 GetNodePosition(PathNode node)
     {
         if (node == null)

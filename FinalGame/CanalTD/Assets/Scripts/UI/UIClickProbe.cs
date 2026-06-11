@@ -34,11 +34,17 @@ using UnityEngine.EventSystems;
 
 public class UIClickProbe : MonoBehaviour, IPointerClickHandler, IPointerDownHandler
 {
+    /// <summary>
+    /// Responds to on pointer down and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnPointerDown(PointerEventData eventData)
     {
         Debug.Log("UI Pointer Down: " + gameObject.name);
     }
 
+    /// <summary>
+    /// Responds to a UI click and forwards it to the related menu or gameplay action.
+    /// </summary>
     public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log("UI Click: " + gameObject.name);

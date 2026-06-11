@@ -37,6 +37,9 @@ public class TowerProjectile : MonoBehaviour
     private int damage;
     private PlayerResource damageOwner;
 
+    /// <summary>
+    /// Initializes initialize and prepares the references needed before use.
+    /// </summary>
     public void Initialize(EnemyHealth targetEnemy, int projectileDamage, PlayerResource owner)
     {
         target = targetEnemy;
@@ -44,6 +47,9 @@ public class TowerProjectile : MonoBehaviour
         damageOwner = owner;
     }
 
+    /// <summary>
+    /// Checks tower projectile input, timing, animation, or UI state once per frame.
+    /// </summary>
     private void Update()
     {
         if (target == null)
@@ -69,6 +75,9 @@ public class TowerProjectile : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
+    /// <summary>
+    /// Handles hit target for card state, hand state, or targeting.
+    /// </summary>
     private void HitTarget()
     {
         if (target != null)

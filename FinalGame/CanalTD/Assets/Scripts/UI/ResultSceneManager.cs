@@ -53,6 +53,9 @@ public class ResultSceneManager : MonoBehaviour
     public string modeSelectSceneName = "ModeSelectScene";
     public string homeSceneName = "HomeScene";
 
+    /// <summary>
+    /// Sets up result scene manager when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         BuildResultList();
@@ -70,6 +73,9 @@ public class ResultSceneManager : MonoBehaviour
     }
 
     // Rebuilds the final ranking rows from the static result data.
+    /// <summary>
+    /// Builds result list from configured scene objects and runtime state.
+    /// </summary>
     private void BuildResultList()
     {
         List<PlayerResultEntry> results = GameResultData.Results;
@@ -104,6 +110,9 @@ public class ResultSceneManager : MonoBehaviour
     }
 
     // Returns to ModeSelectScene so the player can configure and start another match.
+    /// <summary>
+    /// Plays again in the current scene context.
+    /// </summary>
     public void PlayAgain()
     {
         GameResultData.Clear();
@@ -111,24 +120,36 @@ public class ResultSceneManager : MonoBehaviour
     }
 
     // Kept for older button references; it now behaves the same as PlayAgain.
+    /// <summary>
+    /// Handles new game for UI display, input, or player feedback.
+    /// </summary>
     public void NewGame()
     {
         PlayAgain();
     }
 
     // Returns from the result screen to HomeScene.
+    /// <summary>
+    /// Handles back to home for UI display, input, or player feedback.
+    /// </summary>
     public void BackToHome()
     {
         SceneManager.LoadScene(homeSceneName);
     }
 
     // Kept for older button references; it now behaves the same as PlayAgain.
+    /// <summary>
+    /// Handles restart game for UI display, input, or player feedback.
+    /// </summary>
     public void RestartGame()
     {
         PlayAgain();
     }
 
     // Kept for older button references; it now returns to HomeScene.
+    /// <summary>
+    /// Handles quit game for UI display, input, or player feedback.
+    /// </summary>
     public void QuitGame()
     {
         BackToHome();

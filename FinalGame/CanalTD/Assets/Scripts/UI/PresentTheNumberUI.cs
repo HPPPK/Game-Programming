@@ -42,23 +42,35 @@ public class PresentTheNumberUI : MonoBehaviour
     public int currentMoney = 0;
     public int currentCardCount = 0;
 
+    /// <summary>
+    /// Sets up present the number UI when this scene object starts running.
+    /// </summary>
     private void Start()
     {
         RefreshUI();
     }
 
+    /// <summary>
+    /// Sets money and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetMoney(int money)
     {
         currentMoney = money;
         RefreshUI();
     }
 
+    /// <summary>
+    /// Sets card count and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetCardCount(int cardCount)
     {
         currentCardCount = cardCount;
         RefreshUI();
     }
 
+    /// <summary>
+    /// Sets numbers and immediately updates the related state, UI, or visuals.
+    /// </summary>
     public void SetNumbers(int money, int cardCount)
     {
         currentMoney = money;
@@ -66,12 +78,18 @@ public class PresentTheNumberUI : MonoBehaviour
         RefreshUI();
     }
 
+    /// <summary>
+    /// Adds money to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public void AddMoney(int amount)
     {
         currentMoney += amount;
         RefreshUI();
     }
 
+    /// <summary>
+    /// Adds card count to the relevant list, UI, hand, deck, or gameplay state.
+    /// </summary>
     public void AddCardCount(int amount)
     {
         currentCardCount += amount;
@@ -84,6 +102,9 @@ public class PresentTheNumberUI : MonoBehaviour
         RefreshUI();
     }
 
+    /// <summary>
+    /// Refreshes UI from the latest gameplay data.
+    /// </summary>
     private void RefreshUI()
     {
         if (moneyText != null)

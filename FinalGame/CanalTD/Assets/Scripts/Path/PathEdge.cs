@@ -39,6 +39,9 @@ public class PathEdge
     [Header("Priority")]
     public int priority = 0;
 
+    /// <summary>
+    /// Checks the current state to decide whether open is true.
+    /// </summary>
     public bool IsOpen()
     {
         if (targetNode == null)

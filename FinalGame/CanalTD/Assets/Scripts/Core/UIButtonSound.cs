@@ -33,6 +33,9 @@ public class UIButtonSound : MonoBehaviour
 {
     private Button button;
 
+    /// <summary>
+    /// Finds and stores UI button sound references before scene gameplay begins.
+    /// </summary>
     private void Awake()
     {
         button = GetComponent<Button>();
@@ -43,6 +46,9 @@ public class UIButtonSound : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Removes UI button sound listeners and temporary references before destruction.
+    /// </summary>
     private void OnDestroy()
     {
         if (button != null)
@@ -51,6 +57,9 @@ public class UIButtonSound : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Plays the click sound audio feedback.
+    /// </summary>
     private void PlayClickSound()
     {
         if (AudioManager.Instance != null)

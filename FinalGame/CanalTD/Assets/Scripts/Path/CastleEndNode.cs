@@ -36,6 +36,9 @@ public class CastleEndNode : PathNode
     [Header("Damage")]
     public int damagePerEnemy = 1;
 
+    /// <summary>
+    /// Responds to on enemy arrive and updates the affected gameplay or UI systems.
+    /// </summary>
     public void OnEnemyArrive(GameObject enemy)
     {
         if (PhotonOnlineWaveCombatSyncManager.ShouldBlockLocalCastleDamage())
