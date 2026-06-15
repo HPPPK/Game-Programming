@@ -276,6 +276,63 @@ public class PhotonOnlineBuildSyncManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Removes all build snapshot state owned by a player who left or was eliminated.
+    /// </summary>
+    public void RemovePlayerOwnedStateFromSnapshot(int playerId)
+    {
+#if PHOTON_UNITY_NETWORKING
+        if (!PhotonNetwork.IsMasterClient || PhotonNetwork.CurrentRoom == null || playerId < 0)
+        {
+            return;
+        }
+
+        AutoAssignReferences();
+        RebuildBuildAreaRegistryIfNeeded();
+
+        OnlineBuildSnapshot snapshot = GetSnapshotFromRoomOrScene();
+        bool changed = false;
+
+        foreach (OnlineBuildAreaState areaState in snapshot.areas)
+        {
+            if (areaState == null)
+            {
+                continue;
+            }
+
+            if (areaState.ownerPlayerId == playerId)
+            {
+                areaState.isOwned = false;
+                areaState.ownerPlayerId = -1;
+                changed = true;
+            }
+
+            if (areaState.towerOwnerPlayerId == playerId)
+            {
+                areaState.towerExists = false;
+                areaState.towerOwnerPlayerId = -1;
+                areaState.towerTypeId = -1;
+                areaState.towerLevel = 0;
+                changed = true;
+            }
+
+            if (areaState.frozenByPlayerId == playerId)
+            {
+                areaState.isFrozen = false;
+                areaState.frozenByPlayerId = -1;
+                areaState.frozenUntilPlayerNextTurn = false;
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            WriteSnapshotToRoom(snapshot);
+            Debug.Log("Removed online build snapshot state for departed playerId=" + playerId + ".");
+        }
+#endif
+    }
+
+    /// <summary>
     /// Responds to on event and updates the affected gameplay or UI systems.
     /// </summary>
     public void OnEvent(EventData photonEvent)

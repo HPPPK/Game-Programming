@@ -338,12 +338,19 @@ public class ShockTrap : MonoBehaviour
         EnemyHealth[] enemies = GetEnemiesInRadius(explosionRadius);
         int finalDamage = Mathf.RoundToInt(damage);
 
-        foreach (EnemyHealth enemy in enemies)
+        if (!PhotonOnlineWaveCombatSyncManager.ShouldBlockLocalEnemyDamage())
         {
-            if (enemy != null)
+            foreach (EnemyHealth enemy in enemies)
             {
-                enemy.TakeDamage(finalDamage, ownerResource);
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(finalDamage, ownerResource);
+                }
             }
+        }
+        else
+        {
+            Debug.Log("Shock Trap visual trigger only on non-master online client.");
         }
 
         UnregisterTrap();

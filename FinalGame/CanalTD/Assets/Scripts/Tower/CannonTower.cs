@@ -240,19 +240,51 @@ public class CannonTower : MonoBehaviour
     {
         int maxTargets = towerStats != null ? Mathf.Max(1, towerStats.chainCount + 1) : 1;
         float radius = towerStats != null ? towerStats.chainRange : attackRange;
-        int appliedCount = 0;
+        int appliedCount = 1;
+        int currentDamage = Mathf.RoundToInt(GetCurrentDamage());
 
         AudioManager.Instance?.PlayTowerShoot();
+        FireProjectileAtTarget(target, currentDamage);
 
         foreach (EnemyHealth enemy in GetEnemiesNear(target.transform.position, radius))
         {
-            enemy.TakeDamage(Mathf.RoundToInt(GetCurrentDamage()), ownerResource);
+            if (enemy == null || enemy == target)
+            {
+                continue;
+            }
+
+            enemy.TakeDamage(currentDamage, ownerResource);
             appliedCount++;
 
             if (appliedCount >= maxTargets)
             {
                 break;
             }
+        }
+    }
+
+    /// <summary>
+    /// Spawns a projectile that follows the target and applies damage on hit.
+    /// </summary>
+    private void FireProjectileAtTarget(EnemyHealth target, int projectileDamage)
+    {
+        if (projectilePrefab == null || target == null)
+        {
+            if (target != null)
+            {
+                target.TakeDamage(projectileDamage, ownerResource);
+            }
+
+            return;
+        }
+
+        Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
+        GameObject projectileObject = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+        TowerProjectile projectile = projectileObject.GetComponent<TowerProjectile>();
+
+        if (projectile != null)
+        {
+            projectile.Initialize(target, projectileDamage, ownerResource);
         }
     }
 

@@ -359,8 +359,23 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
-        player.MarkEliminated();
-        ClearPlayerLandAndTowers(playerId);
+        PlayerExitManager exitManager = FindObjectOfType<PlayerExitManager>();
+
+        if (exitManager != null)
+        {
+            if (exitManager.playerManager == null)
+            {
+                exitManager.playerManager = this;
+            }
+
+            exitManager.CleanupPlayerOwnedRuntimeState(playerId);
+        }
+        else
+        {
+            player.MarkEliminated();
+            ClearPlayerLandAndTowers(playerId);
+        }
+
         RefreshAllPlayerStatusPanels();
         RefreshCurrentPlayerUI();
         ShowToast(player.GetDisplayName() + " has been eliminated.");

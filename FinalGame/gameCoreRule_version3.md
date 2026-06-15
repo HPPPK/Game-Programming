@@ -1,6 +1,6 @@
 # Game Rules and System Design (v3)
 
-> This is a historical design iteration document. The final assessed design is summarised in [FinalGame/FINAL_GAME_DESIGN.md](./FINAL_GAME_DESIGN.md).
+> This is a historical design iteration document. The final assessed design is summarised in [FinalGame/FINAL_GAME_DESIGN.md](./FINAL_GAME_DESIGN.md). Older AP and gate-focused rule wording here records design evolution and should not be read as the final implemented rule set.
 
 ## 1. Game Positioning
 

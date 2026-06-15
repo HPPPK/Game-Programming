@@ -303,11 +303,20 @@ public class PlayerResource : MonoBehaviour
     /// </summary>
     public void SetCardCount(int count)
     {
-        if (isEliminated)
+        if (isEliminated && count > 0)
         {
             return;
         }
 
+        cardCount = Mathf.Max(0, count);
+        RefreshUI();
+    }
+
+    /// <summary>
+    /// Forces card count for cleanup paths where eliminated or empty slots must show zero.
+    /// </summary>
+    public void ForceSetCardCount(int count)
+    {
         cardCount = Mathf.Max(0, count);
         RefreshUI();
     }

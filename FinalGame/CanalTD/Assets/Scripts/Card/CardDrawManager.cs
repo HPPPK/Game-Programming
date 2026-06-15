@@ -15,7 +15,7 @@
  *
  * Inputs:
  * - Inspector references configured in Unity.
- * - Card selections, targeting choices, turn permissions, AP state, and player hand data.
+ * - Card selections, targeting choices, turn permissions, card action flags, and player hand data.
  *
  * Outputs / effects:
  * - Updates hand/deck/discard state, applies card outcomes, and drives targeting feedback.
@@ -26,7 +26,7 @@
  * for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
- * - Manually verify draw-once-per-turn behavior, hand updates, play/discard flow, targeting confirm/cancel, and AP/turn restrictions.
+ * - Manually verify per-turn draw/play/discard limits, hand updates, targeting confirm/cancel, Disrupt blocking, and turn restrictions.
  * - Online card synchronization requires separate manual validation before claiming full stability.
  */
 using UnityEngine;
@@ -1343,7 +1343,7 @@ public class CardDrawManager : MonoBehaviour
 
         ReturnCardsToDeck(cardsToReturn);
         hand.Clear();
-        player.SyncCardCountFromHand();
+        player.ForceSetCardCount(0);
 
         if (playerManager != null && playerManager.GetCurrentPlayerId() == playerId)
         {
@@ -2395,7 +2395,7 @@ public class CardDrawManager : MonoBehaviour
                 hand.Clear();
             }
 
-            player.SetCardCount(0);
+            player.ForceSetCardCount(0);
         }
 
         selectedCard = null;

@@ -512,6 +512,12 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
         int leftPlayerId = GetPlayerIntProperty(otherPlayer, PhotonLobbyPropertyKeys.PlayerId, -1);
         bool wasCurrentTurnPlayer = leftPlayerId >= 0 && leftPlayerId == GetRoomCurrentTurnPlayerId();
         Debug.Log("Player left. actor=" + otherPlayer.ActorNumber + ", playerId=" + leftPlayerId + ", name=" + otherPlayer.NickName);
+
+        if (leftPlayerId >= 0)
+        {
+            CleanupLeftOnlinePlayerRuntimeState(leftPlayerId);
+        }
+
         RebuildOnlineRosterFromPhoton();
         LogOnlineRoomStateDiagnostics("OnPlayerLeftRoom");
         ShowOnlineToast(otherPlayer.IsMasterClient ? "Host left the match." : GetPhotonPlayerDisplayName(otherPlayer) + " left the game.");
@@ -542,6 +548,38 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
                 onlineCardSyncManager.InitializeForOnlineMatch();
             }
         }
+    }
+
+    private void CleanupLeftOnlinePlayerRuntimeState(int playerId)
+    {
+        PlayerExitManager exitManager = FindObjectOfType<PlayerExitManager>();
+
+        if (exitManager == null)
+        {
+            Debug.LogWarning("Online player left, but PlayerExitManager was not found. Runtime state was not fully cleaned for player " + playerId + ".");
+            return;
+        }
+
+        if (exitManager.playerManager == null)
+        {
+            exitManager.playerManager = playerManager;
+        }
+
+        EnsureOnlineCardSyncManagerExists();
+
+        if (PhotonNetwork.IsMasterClient && onlineCardSyncManager != null)
+        {
+            onlineCardSyncManager.ReturnOnlinePlayerHandToDeck(playerId);
+        }
+
+        EnsureOnlineBuildSyncManagerExists();
+
+        if (PhotonNetwork.IsMasterClient && onlineBuildSyncManager != null)
+        {
+            onlineBuildSyncManager.RemovePlayerOwnedStateFromSnapshot(playerId);
+        }
+
+        exitManager.CleanupPlayerOwnedRuntimeState(playerId);
     }
 
     /// <summary>
@@ -762,6 +800,7 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
             {
                 playerResource.displayName = "Empty";
                 playerResource.isEliminated = true;
+                ClearInactiveOnlinePlayerCardDisplay(playerResource);
                 Debug.Log("Skipped inactive player slot " + playerResource.playerId + ".");
             }
 
@@ -770,6 +809,28 @@ public class PhotonOnlineGameSceneManager : MonoBehaviour
 
         playerManager.RefreshAllPlayerStatusPanels();
         Debug.Log(BuildActiveOnlinePlayerListLog(photonPlayers));
+    }
+
+    private void ClearInactiveOnlinePlayerCardDisplay(PlayerResource playerResource)
+    {
+        if (playerResource == null)
+        {
+            return;
+        }
+
+        PlayerHand hand = playerResource.GetPlayerHand();
+
+        if (hand != null)
+        {
+            hand.Clear();
+        }
+
+        if (playerResource.handCards != null)
+        {
+            playerResource.handCards.Clear();
+        }
+
+        playerResource.ForceSetCardCount(0);
     }
 
     /// <summary>

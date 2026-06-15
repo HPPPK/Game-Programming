@@ -50,7 +50,7 @@ If someone opens the Unity project folder directly on GitHub, this file should h
 
 ## Final playable scene flow
 
-`BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI mode -> `GameScene` -> `ResultScene`
+`BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI / Online mode -> `GameScene` -> `ResultScene`
 
 `GuideScene` is the onboarding/help route for learning the rules and controls.
 
@@ -58,7 +58,12 @@ If someone opens the Unity project folder directly on GitHub, this file should h
 
 - Local Mode: primary assessment route.
 - AI Mode: primary assessment route when human opponents are not available.
-- Online Mode: implemented extension; broader multiplayer validation is required before treating it as the stable marking route.
+- Online Mode: implemented Photon room-code multiplayer extension for compatible clients. It supports 2-4 players and uses the current 20 CCU development/prototype Photon plan, so it should be presented as limited coursework/prototype online play rather than a large-scale public service.
+
+## Exit and player-left behavior
+
+- Local / AI Exit: ends the shared local match and loads `ResultScene`.
+- Online player left: remaining clients can continue; the departed player's cards, land, towers, traps, and synchronized build/card state are cleaned up by the online lifecycle managers.
 
 ## Important documentation
 

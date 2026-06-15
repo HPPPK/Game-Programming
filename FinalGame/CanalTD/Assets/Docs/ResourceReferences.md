@@ -7,6 +7,7 @@ This file records the main external resources, AI-assisted support, and referenc
 | Resource type | Local / project use | Source / creator | Source link | Licence / attribution note | Traceability status |
 |---|---|---|---|---|---|
 | Main visual asset pack | Environment, castle, enemy, tower, and map-style assets | `Tiny Swords` / Pixel Frog | https://pixelfrog-assets.itch.io/tiny-swords | Source page for the asset pack | Source link recorded |
+| Font | Main stylised UI font used for medieval/fantasy interface text | `Medieval Sharp` / DaFont font page | https://www.dafont.com/medieval-sharp.font | Source page recorded; check the font page licence text before commercial redistribution | Source link recorded |
 | Project-specific generated visuals | Card art and card-slot presentation visuals | AI-assisted visual generation workflow | No separate public asset page; generated specifically for this project | Disclosed as AI-assisted project visuals | Disclosed in project documentation |
 
 ## Audio
@@ -44,7 +45,7 @@ This file records the main external resources, AI-assisted support, and referenc
   - Link: `No single tutorial page is being claimed here. This project used normal Unity documentation and standard editor reference during development.`
 - Networking / Photon reference:
   - Topic: `Photon PUN 2 and Photon Realtime documentation`
-  - Link: `Used as the technical basis for the online room and multiplayer sync implementation together with the Photon package included in the project.`
+  - Link: `Used as the technical basis for the online room and multiplayer sync implementation together with the Photon package included in the project. The current app is on a 20 CCU development/prototype plan, so Online mode is documented as limited prototype/coursework multiplayer rather than a large-scale online service.`
 - AI / gameplay / pathfinding reference:
   - Topic: `Internal design iteration and project-specific implementation discussion`
   - Link: `No single external gameplay or pathfinding article is being formally cited here.`
