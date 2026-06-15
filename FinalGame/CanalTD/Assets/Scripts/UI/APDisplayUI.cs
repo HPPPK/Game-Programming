@@ -2,32 +2,30 @@
  * File: APDisplayUI.cs
  *
  * Purpose:
- * Implements APDisplayUI for the ui layer of CanalTD and supports the playable vertical slice of the project.
+ * Legacy compatibility component for old AP UI in the ui layer of CanalTD.
  *
  * Attached GameObject:
  * Canvas objects, scene UI roots, status panels, buttons, or cursor feedback objects.
  *
  * Main responsibilities:
- * - Provide the runtime behaviour for APDisplayUI within the ui system.
- * - Update the owning object state and react to gameplay events during play.
- * - Present readable feedback so players can understand turns, actions, and results.
+ * - Keep old scene references valid without showing AP as a final gameplay rule.
+ * - Hide the attached AP text if it remains assigned in a scene.
+ * - Avoid changing Unity scene references during final cleanup.
  *
  * Inputs:
  * - Inspector references configured in Unity.
  * - Runtime state from connected managers, scene objects, or event callbacks.
- * - Player input, button clicks, pointer events, or scene transition requests.
  *
  * Outputs or effects:
- * - Changes scene state, gameplay data, or visual feedback in the active match.
- * - Updates visible UI, indicators, prompts, and player-facing status messages.
+ * - Disables or clears legacy AP text so the final UI does not present AP as a rule.
  *
  * Authorship or assistance:
  * - Core gameplay design, Unity setup, and project integration were developed by Jingyu Pan.
  * - This documentation header was expanded with AI assistance to match the assessment comment standard.
  *
  * Testing notes:
- * - Verify APDisplayUI in the scene or prefab where it is used and confirm the main happy path still works.
- * - Confirm the related UI remains readable in both the normal scene flow and edge/error states.
+ * - Verify any object using APDisplayUI no longer shows AP in the final scene flow.
+ * - Confirm turn/card-action feedback remains readable through the normal HUD and toasts.
  */
 using TMPro;
 using UnityEngine;
@@ -38,7 +36,7 @@ public class APDisplayUI : MonoBehaviour
     public TextMeshProUGUI apText;
 
     /// <summary>
-    /// Finds and stores AP display UI references before scene gameplay begins.
+    /// Finds and stores legacy display references before scene gameplay begins.
     /// </summary>
     void Awake()
     {
@@ -49,7 +47,7 @@ public class APDisplayUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Checks AP display UI input, timing, animation, or UI state once per frame.
+    /// Keeps the legacy AP display hidden if the component remains in a scene.
     /// </summary>
     void Update()
     {
@@ -57,22 +55,16 @@ public class APDisplayUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Refreshes this display from the latest gameplay data.
+    /// Clears or hides this legacy AP display.
     /// </summary>
     public void Refresh()
     {
-        TurnManager manager = turnManager != null ? turnManager : TurnManager.Instance;
-        ITurnSource turnSource = TurnSourceResolver.GetActiveTurnSource(manager);
-
-        if (manager == null || apText == null)
+        if (apText == null)
         {
             return;
         }
 
-        string prefix = turnSource != null && !turnSource.CanHumanAct && TurnSourceResolver.IsAIPrototypeActive()
-            ? "AI AP: "
-            : "AP: ";
-
-        apText.text = prefix + manager.currentAP + " / " + manager.maxAP;
+        apText.text = "";
+        apText.gameObject.SetActive(false);
     }
 }

@@ -2,15 +2,15 @@
 
 ## Short description
 
-CanalTD is a turn-based multiplayer strategy and tower-defense game where players control canal gates, use cards, build towers, and redirect enemy pressure toward opponents instead of attacking directly.
+CanalTD is a turn-based multiplayer tower-defense and card-strategy game where players build towers, use tactical cards, manage enemy pressure, and compete for the strongest score.
 
 ## One-sentence game idea
 
-Players survive enemy waves by combining map control, card interaction, canal-flow control, and tower placement to manipulate where enemies travel.
+Players compete for score by surviving enemy waves, killing or helping kill enemies, protecting their castle, and using card/tower decisions to influence the match.
 
 ## Player goal
 
-Protect your own castle, manage enemy pressure better than the other players, and finish the match with the strongest score and survival outcome.
+Protect your own castle and finish with the strongest score. Killing or helping kill enemies increases score, while castle damage reduces score.
 
 ## Assessment readiness
 
@@ -58,7 +58,7 @@ No downloadable release is currently provided. The assessed project should be op
 - Local mode is playable.
 - AI mode includes three difficulty levels and playable turn logic.
 - Core card, tower, enemy, path, and result systems are integrated.
-- Online multiplayer uses Photon room-code inviting for 2-4 players. Players create or join a private room using a room code, ready up, and play with synchronized turns, building, cards, gates, waves, combat, and results.
+- Online multiplayer uses Photon room-code inviting for 2-4 players. Players create or join a private room using a room code, ready up, and play with synchronized turns, building, cards, gates, waves, combat, and results. The current Photon Realtime app is a 20 CCU development/prototype plan, so Online mode is suitable for coursework demonstration and limited free prototype testing rather than large-scale public service.
 - Tutorial / guide flow exists through the dedicated Guide scene.
 
 ## Final assessment route
@@ -67,7 +67,7 @@ For marking, the project can be assessed through Local, AI, or Online mode:
 
 `BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI / Online mode -> `GameScene` -> `ResultScene`
 
-Online mode is an implemented Photon multiplayer route. Local and AI modes remain available as offline assessment routes, while Online mode can be demonstrated when Photon connectivity and compatible clients are available.
+Online mode is an implemented Photon multiplayer route. Local and AI modes remain available as offline assessment routes, while Online mode can be demonstrated when Photon connectivity and compatible clients are available. Local mode treats the Exit button as ending the shared local match and moving to `ResultScene`; Online mode treats a remote player leaving as a player-left event and cleans that player's cards, land, towers, shock traps, and synchronized build/card state so the remaining clients can continue.
 
 ## Final multiplayer demo checklist
 
@@ -90,7 +90,7 @@ Use this as the live presentation flow if Online mode is shown:
 - Clear player goal through castle defence, score pressure, and enemy routing
 - Working interaction through card play, targeting, tower building, and turn progression
 - Feedback through current-turn UI, status panels, targeting highlights, toasts, and result screens
-- Challenge and decision-making through shared enemy pressure, path control, and tactical card use
+- Challenge and decision-making through shared enemy pressure, tower placement, scoring pressure, and tactical card use
 
 ## Future work
 
@@ -103,6 +103,7 @@ Use this as the live presentation flow if Online mode is shown:
 - Online mode is room-code invitation multiplayer only; random player pairing is not part of the final design.
 - There is no reconnect, late-join recovery, spectator mode, ranked mode, database persistence, or dedicated server.
 - Online room joining requires clients to use the same Photon AppId, fixed region, game version, and compatible build.
+- The current Photon plan is limited to 20 concurrent users and is intended for development/prototype use.
 - Balance and tutorial pacing can be improved with more playtesting.
 
 ## Development tracking / Kanban evidence
@@ -124,7 +125,7 @@ Known limitations are documented as future work above. If any limitation needs a
 
 | System | Main scripts / scenes | Assessment relevance |
 |---|---|---|
-| Turn / AP management | `Assets/Scripts/Core/TurnManager.cs`, `GamePhaseManager.cs` | Core rule structure, turn limits, AP costs, and player action flow. |
+| Turn / card action management | `Assets/Scripts/Core/TurnManager.cs`, `GamePhaseManager.cs` | Core rule structure, turn limits, draw/play/discard flags, Disrupt blocking, and player action flow. |
 | Cards and targeting | `Assets/Scripts/Card`, `GameScene` | Draw, play, discard, targeting confirm/cancel, and tactical interaction. |
 | Towers and resources | `Assets/Scripts/Tower`, `PlayerResource.cs` | Land ownership, build, upgrade, sell, tower combat, and resource decisions. |
 | Enemy routing / canal pressure | `Assets/Scripts/Enemy`, `Assets/Scripts/Path`, `Assets/Scripts/Map` | Main strategic pressure mechanic and enemy-wave challenge. |
@@ -136,6 +137,8 @@ Known limitations are documented as future work above. If any limitation needs a
 - Game design, Unity implementation, and project integration: Jingyu Pan.
 - Multiplayer networking package: Photon PUN 2.
 - Text rendering and UI support: TextMeshPro.
+- UI font: `Medieval Sharp`
+  - https://www.dafont.com/medieval-sharp.font
 - Main environment art / map / enemy / tower asset pack: `Tiny Swords`
   - https://pixelfrog-assets.itch.io/tiny-swords
 - Card visuals and card-slot visuals:
@@ -147,6 +150,7 @@ Known limitations are documented as future work above. If any limitation needs a
   - [FinalGame/CanalTD/Assets/Docs/ResourceReferences.md](./FinalGame/CanalTD/Assets/Docs/ResourceReferences.md)
 - Main external resource platforms:
   - Tiny Swords asset pack: https://pixelfrog-assets.itch.io/tiny-swords
+  - Medieval Sharp font: https://www.dafont.com/medieval-sharp.font
   - Pixabay sound effects: https://pixabay.com/zh/music/search/sound%20effects/
   - Pixabay game music: https://pixabay.com/zh/music/search/game%20music/
 - Confirmed audio items currently identified:

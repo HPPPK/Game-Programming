@@ -2,13 +2,13 @@
  * CanalTD - TurnManager
  *
  * Purpose:
- * Controls the active player turn, AP state, and per-turn action permissions for the main match flow.
+ * Controls the active player turn and per-turn card action permissions for the main match flow.
  *
  * Attached GameObject:
  * Configured in the Unity scene / Inspector as part of the core gameplay manager setup.
  *
  * Main responsibilities:
- * - Track current player, round/turn state, and remaining AP.
+ * - Track current player, round/turn state, and card action flags.
  * - Reset draw, play, discard, and gate-action flags at turn boundaries.
  * - Provide permission checks used by card, gate, tower, and UI systems.
  * - Apply authoritative online turn updates when online mode is active.
@@ -18,14 +18,14 @@
  * - Runtime calls from card, gate, tower, AI, and online synchronization systems.
  *
  * Outputs / effects:
- * - Updates turn/AP state and action availability.
+ * - Updates turn state and card action availability.
  * - Triggers UI feedback through connected scene managers.
  *
  * Authorship / assistance:
  * Game design, Unity implementation, integration, and final documentation were developed by Jingyu Pan for an individual coursework submission. AI assistance was used as disclosed in the project documentation.
  *
  * Testing notes:
- * - Manually verify AP reset, turn start/end, draw/play/discard/gate flags, UI feedback, and invalid-action feedback in Local and AI modes.
+ * - Manually verify turn start/end, draw/play/discard/gate flags, Disrupt card blocking, UI feedback, and invalid-action feedback in Local and AI modes.
  */
 using System.Reflection;
 using UnityEngine;
@@ -37,7 +37,7 @@ public class TurnManager : MonoBehaviour, ITurnSource
     [Header("Player")]
     public int currentPlayerId = 0;
 
-    [Header("Action Points")]
+    [Header("Legacy Action Points Compatibility")]
     public int maxAP = 2;
     public int currentAP = 2;
 
@@ -104,23 +104,12 @@ public class TurnManager : MonoBehaviour, ITurnSource
         currentAP = maxAP;
         cardActionsBlockedThisTurn = disruptedThisTurn;
 
-        if (disruptedThisTurn)
-        {
-            maxAP = 1;
-            currentAP = 1;
-        }
-        else
-        {
-            maxAP = 2;
-            currentAP = maxAP;
-        }
-
         hasDrawnCard = false;
         hasPlayedCard = false;
         hasChangedGate = false;
         hasDiscardedCard = false;
 
-        Debug.Log("Start turn. AP = " + currentAP + " / " + maxAP);
+        Debug.Log("Start turn. Card actions blocked=" + cardActionsBlockedThisTurn);
     }
 
     /// <summary>
@@ -217,7 +206,7 @@ public class TurnManager : MonoBehaviour, ITurnSource
     /// </summary>
     public bool CanPlayCard()
     {
-        return !cardActionsBlockedThisTurn && !hasPlayedCard && HasEnoughAP(1);
+        return !cardActionsBlockedThisTurn && !hasPlayedCard;
     }
 
     /// <summary>
@@ -237,13 +226,6 @@ public class TurnManager : MonoBehaviour, ITurnSource
             return false;
         }
 
-        if (!HasEnoughAP(1))
-        {
-            ShowToast("Not enough AP.");
-            return false;
-        }
-
-        currentAP -= 1;
         hasPlayedCard = true;
         return true;
     }
@@ -254,7 +236,6 @@ public class TurnManager : MonoBehaviour, ITurnSource
     public void ApplyAuthoritativePlayConsumed(int apCost)
     {
         hasPlayedCard = true;
-        currentAP = Mathf.Max(0, currentAP - Mathf.Max(0, apCost));
     }
 
     /// <summary>
@@ -326,11 +307,11 @@ public class TurnManager : MonoBehaviour, ITurnSource
     }
 
     /// <summary>
-    /// Checks whether enough AP is present before the code depends on it.
+    /// Compatibility method for older callers. Final card rules no longer use AP.
     /// </summary>
     public bool HasEnoughAP(int cost)
     {
-        return currentAP >= cost;
+        return true;
     }
 
     /// <summary>

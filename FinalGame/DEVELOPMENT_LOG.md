@@ -18,16 +18,16 @@ The periods below are broad development stages. Exact dates should be read from 
 | Home/menu flow | Provide a clear first-screen route. | Added/maintained Home scene and main menu navigation. | [Home Scene UI & Main Menu System #61](https://github.com/HPPPK/Game-Programming/issues/61), `Assets/Scenes/HomeScene.unity` | Markers need a clear way to enter the game. | README and inner project guide identify the scene flow. | Easier assessment navigation. |
 | Mode selection / AI / Online room work | Support Local, AI, Guide, and Online entry points. | Built mode selection and room setup support. | [Game Mode Selection & Online/AI Room System #62](https://github.com/HPPPK/Game-Programming/issues/62), `Assets/Scenes/ModeSelectScene.unity` | Online mode increased validation risk. | Local/AI route prioritised; Online documented as extension. | More realistic final submission scope. |
 | Audio feedback | Add sound and music feedback. | Integrated central audio manager and mapped sourced audio. | [Audio System Integration and Sound Effects Implementation #87](https://github.com/HPPPK/Game-Programming/issues/87), [ResourceReferences.md](./CanalTD/Assets/Docs/ResourceReferences.md) | Audio sources needed clearer traceability. | Resource references now map current audio files to source links. | Stronger credits and feedback documentation. |
-| Online extension work | Improve online scene and lifecycle behavior. | Added Photon-related room, card, build, and turn-sync support. | [Online Match Start Does Not Synchronize Scene Transition #89](https://github.com/HPPPK/Game-Programming/issues/89), [Online Turn Authority & Player Lifecycle Goal #91](https://github.com/HPPPK/Game-Programming/issues/91), `Assets/Scripts/Networking` | Full multiplayer edge-case validation is harder than Local/AI verification. | Online mode documented in README as an implemented extension, not core marking route. | Honest scope and reduced final-assessment risk. |
+| Online extension work | Improve online scene and lifecycle behavior. | Added Photon-related room, card, build, turn-sync, wave-sync, and player-left cleanup support. | [Online Match Start Does Not Synchronize Scene Transition #89](https://github.com/HPPPK/Game-Programming/issues/89), [Online Turn Authority & Player Lifecycle Goal #91](https://github.com/HPPPK/Game-Programming/issues/91), `Assets/Scripts/Networking` | Full multiplayer edge-case validation is harder than Local/AI verification. Player-left cases also needed cleanup of cards, land, towers, traps, and synchronized build snapshots. | Online mode documented in README as an implemented extension, not core marking route. Player-left cleanup now removes owned runtime state and clears build/card sync state so towers do not reappear after wave-end snapshot application. | Honest scope and reduced final-assessment risk. |
 | UI / tutorial polish | Improve clarity, onboarding, and feedback. | Added clearer turn indication, HUD/player information, Guide scene, and tutorial sections. | [Turn Marker Animation - User Indication #90](https://github.com/HPPPK/Game-Programming/issues/90), [Step by step instruction guidance #92](https://github.com/HPPPK/Game-Programming/issues/92), [Player Information, Color, HUD, and Score #93](https://github.com/HPPPK/Game-Programming/issues/93), [Tutorial Part 3 #95](https://github.com/HPPPK/Game-Programming/issues/95), [Tutorial Part 4 #96](https://github.com/HPPPK/Game-Programming/issues/96), [Tutorial Part 5 #97](https://github.com/HPPPK/Game-Programming/issues/97) | Players needed clearer explanation of whose turn it was and how systems worked. | Added guide/onboarding and stronger current-turn feedback. | Better accessibility and assessability. |
-| Final documentation and submission preparation | Make the repository professional and assessment-facing. | Consolidated the final evidence into the root README, final design, development log, testing log, contribution notes, and resource references. | `README.md`, [TESTING_LOG.md](./TESTING_LOG.md), [FINAL_GAME_DESIGN.md](./FINAL_GAME_DESIGN.md), [CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md](./CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md), [CanalTD/Assets/Docs/ResourceReferences.md](./CanalTD/Assets/Docs/ResourceReferences.md) | Too many separate support files made the repository look cluttered. | Merged short online, systems, Kanban, and checklist evidence into the core documents. | Clearer final evidence with fewer Markdown files. |
+| Final documentation and submission preparation | Make the repository professional and assessment-facing. | Consolidated the final evidence into the root README, final design, development log, testing log, contribution notes, and resource references. Added font source traceability. | `README.md`, [TESTING_LOG.md](./TESTING_LOG.md), [FINAL_GAME_DESIGN.md](./FINAL_GAME_DESIGN.md), [CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md](./CanalTD/CONTRIBUTIONS_AND_FEEDBACK.md), [CanalTD/Assets/Docs/ResourceReferences.md](./CanalTD/Assets/Docs/ResourceReferences.md) | Too many separate support files made the repository look cluttered, and all externally sourced assets needed traceable references. | Merged short online, systems, Kanban, and checklist evidence into the core documents. Added Medieval Sharp font source to resource references. | Clearer final evidence with fewer Markdown files and stronger asset traceability. |
 
 ## Major milestones
 
 - Core concept and prototype documented.
 - Local/AI vertical slice prioritised for final assessment.
 - Enemy routing and path-pressure system developed.
-- Card, turn, AP, tower, enemy, UI, tutorial, and result systems integrated.
+- Card, turn/card-action, tower, enemy, UI, tutorial, and result systems integrated.
 - Online mode implemented as an extension and documented in the README/development log rather than as a primary assessment route.
 - GitHub Issues, Project/Kanban board, and milestone evidence linked for process review.
 
@@ -35,7 +35,7 @@ The periods below are broad development stages. Exact dates should be read from 
 
 | System area | Main scripts / folders | Role in the final vertical slice |
 |---|---|---|
-| Turn and AP rules | `Assets/Scripts/Core/TurnManager.cs`, `GamePhaseManager.cs` | Controls turn progression, AP, and action restrictions. |
+| Turn and card action rules | `Assets/Scripts/Core/TurnManager.cs`, `GamePhaseManager.cs` | Controls turn progression, draw/play/discard limits, Disrupt blocking, and action restrictions. |
 | Card play and targeting | `Assets/Scripts/Card` | Handles draw, play, discard, targeting confirm/cancel, and card effects. |
 | Towers and resources | `Assets/Scripts/Tower`, `PlayerResource.cs` | Supports land ownership, tower build/upgrade/sell, and resource decisions. |
 | Enemy routing and canal pressure | `Assets/Scripts/Enemy`, `Assets/Scripts/Path`, `Assets/Scripts/Map` | Drives enemy waves, path selection, gates, and pressure distribution. |
@@ -48,6 +48,8 @@ The periods below are broad development stages. Exact dates should be read from 
 - New players needed onboarding, so Guide scene and tutorial flow were added.
 - Online mode carried validation risk, so it was documented as an extension rather than the core assessment route.
 - Audio and resource references needed clearer traceability, so current audio files were mapped to source links.
+- Font source traceability was added for the Medieval Sharp UI font from DaFont.
+- Online player-left behavior needed state cleanup beyond the visible scene objects, so the cleanup now also clears card counts and the synchronized build snapshot.
 - Historical design documents could be mistaken for final scope, so a final design document was created and historical files were labelled.
 
 ## What changed after feedback/testing
@@ -57,6 +59,7 @@ The periods below are broad development stages. Exact dates should be read from 
 - UI readability improvements were made through status panels, labels, warnings/toasts, and result feedback.
 - Local/AI route was prioritised as the stable assessment path.
 - Online mode was treated as an extension because broader validation is still required.
+- Local/AI Exit is documented as ending the shared local match and loading `ResultScene`, while Online player-left cleanup is documented as a separate continuation flow.
 
 ## GitHub Issues / Kanban evidence
 
@@ -72,11 +75,11 @@ Examples of tracked work include enemy routing [#29](https://github.com/HPPPK/Ga
 
 - Final assessed Unity project: `FinalGame/CanalTD`
 - Primary assessment route: `BootstrapScene` -> `HomeScene` -> `ModeSelectScene` -> Local / AI mode -> `GameScene` -> `ResultScene`
-- Online Mode: implemented extension requiring broader validation
+- Online Mode: implemented extension requiring compatible Photon settings and broader validation; current Photon Realtime app uses a 20 CCU development/prototype plan
 - Runtime verification status: Local and AI route checks are recorded in `FinalGame/TESTING_LOG.md` based on student manual verification.
 
 ## Remaining limitations
 
-- Online multiplayer edge cases require broader validation.
+- Online multiplayer edge cases require broader validation, especially player-left cases during wave/combat and MasterClient migration.
 - Balance and tutorial pacing may need further polish after more playtesting.
 - Unity batchmode compilation was attempted but blocked by Unity licensing IPC before compilation.

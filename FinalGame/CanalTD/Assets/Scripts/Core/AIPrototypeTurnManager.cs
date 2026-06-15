@@ -236,6 +236,37 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         playerManager.RefreshCurrentPlayerUI();
     }
 
+    private CastleBase GetCastleForPlayer(PlayerResource player)
+    {
+        if (player == null)
+        {
+            return null;
+        }
+
+        CastleBase castle = player.GetComponent<CastleBase>();
+
+        if (castle != null)
+        {
+            return castle;
+        }
+
+        if (player.statusPanel != null && player.statusPanel.linkedCastle != null)
+        {
+            return player.statusPanel.linkedCastle;
+        }
+
+        PlayerVisualConfig visualConfig = playerManager != null
+            ? playerManager.GetVisualConfig(player.playerId)
+            : null;
+
+        if (visualConfig != null && visualConfig.castleReference != null)
+        {
+            return visualConfig.castleReference.GetComponent<CastleBase>();
+        }
+
+        return null;
+    }
+
     // Called by the End Turn button during a human player's turn.
     /// <summary>
     /// Responds to on end turn button clicked and updates the affected gameplay or UI systems.
@@ -340,9 +371,7 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
     /// </summary>
     private void EndGame()
     {
-        List<PlayerResultEntry> results = BuildResultEntries();
-        SortResultsByScore(results);
-        AssignRanks(results);
+        List<PlayerResultEntry> results = GameResultBuilder.BuildRankedResults(playerManager, true);
         GameResultData.SetResults(results);
 
         if (string.IsNullOrEmpty(resultSceneName))
@@ -352,142 +381,6 @@ public class AIPrototypeTurnManager : MonoBehaviour, ITurnSource
         }
 
         SceneManager.LoadScene(resultSceneName);
-    }
-
-    // Builds final ranking data from every non-empty player slot.
-    /// <summary>
-    /// Builds result entries from configured scene objects and runtime state.
-    /// </summary>
-    private List<PlayerResultEntry> BuildResultEntries()
-    {
-        List<PlayerResultEntry> results = new List<PlayerResultEntry>();
-
-        if (playerManager == null || playerManager.players == null)
-        {
-            return results;
-        }
-
-        foreach (PlayerResource player in playerManager.players)
-        {
-            if (player == null || player.playerType == PlayerType.Empty)
-            {
-                continue;
-            }
-
-            CastleBase castle = GetCastleForPlayer(player);
-            int castleHp = castle != null ? castle.currentHP : 0;
-
-            results.Add(new PlayerResultEntry(
-                player.playerId,
-                player.GetDisplayName(),
-                player.score,
-                player.money,
-                castleHp,
-                player.isEliminated
-            ));
-        }
-
-        return results;
-    }
-
-    // Finds the castle linked to a player for final HP display.
-    /// <summary>
-    /// Returns castle for player from the current scene or gameplay state.
-    /// </summary>
-    private CastleBase GetCastleForPlayer(PlayerResource player)
-    {
-        if (player == null)
-        {
-            return null;
-        }
-
-        CastleBase castle = player.GetComponent<CastleBase>();
-
-        if (castle != null)
-        {
-            return castle;
-        }
-
-        if (player.statusPanel != null && player.statusPanel.linkedCastle != null)
-        {
-            return player.statusPanel.linkedCastle;
-        }
-
-        PlayerVisualConfig visualConfig = playerManager != null
-            ? playerManager.GetVisualConfig(player.playerId)
-            : null;
-
-        if (visualConfig != null && visualConfig.castleReference != null)
-        {
-            return visualConfig.castleReference.GetComponent<CastleBase>();
-        }
-
-        return null;
-    }
-
-    // Sorts active players first, then score, castle HP, money, and playerId.
-    /// <summary>
-    /// Handles sort results by score for this gameplay system.
-    /// </summary>
-    private void SortResultsByScore(List<PlayerResultEntry> results)
-    {
-        results.Sort((a, b) =>
-        {
-            if (a.isEliminated != b.isEliminated)
-            {
-                return a.isEliminated ? 1 : -1;
-            }
-
-            if (a.isEliminated && b.isEliminated)
-            {
-                return a.playerId.CompareTo(b.playerId);
-            }
-
-            int scoreCompare = b.score.CompareTo(a.score);
-
-            if (scoreCompare != 0)
-            {
-                return scoreCompare;
-            }
-
-            int hpCompare = b.castleHp.CompareTo(a.castleHp);
-
-            if (hpCompare != 0)
-            {
-                return hpCompare;
-            }
-
-            int moneyCompare = b.money.CompareTo(a.money);
-
-            if (moneyCompare != 0)
-            {
-                return moneyCompare;
-            }
-
-            return a.playerId.CompareTo(b.playerId);
-        });
-    }
-
-    // Assigns final ranks. Eliminated players are placed at the bottom.
-    /// <summary>
-    /// Handles assign ranks for this gameplay system.
-    /// </summary>
-    private void AssignRanks(List<PlayerResultEntry> results)
-    {
-        int activeRank = 1;
-
-        for (int i = 0; i < results.Count; i++)
-        {
-            if (results[i].isEliminated)
-            {
-                results[i].rank = 4;
-            }
-            else
-            {
-                results[i].rank = activeRank;
-                activeRank += 1;
-            }
-        }
     }
 
     // Finds optional scene references so the prototype can work with minimal Inspector wiring.

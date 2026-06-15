@@ -73,3 +73,140 @@ public static class GameResultData
         Results.Clear();
     }
 }
+
+public static class GameResultBuilder
+{
+    public static List<PlayerResultEntry> BuildRankedResults(PlayerManager playerManager, bool skipEmptyPlayers)
+    {
+        List<PlayerResultEntry> results = BuildResultEntries(playerManager, skipEmptyPlayers);
+        SortResultsByScore(results);
+        AssignRanks(results);
+        return results;
+    }
+
+    private static List<PlayerResultEntry> BuildResultEntries(PlayerManager playerManager, bool skipEmptyPlayers)
+    {
+        List<PlayerResultEntry> results = new List<PlayerResultEntry>();
+
+        if (playerManager == null || playerManager.players == null)
+        {
+            return results;
+        }
+
+        foreach (PlayerResource player in playerManager.players)
+        {
+            if (player == null)
+            {
+                continue;
+            }
+
+            if (skipEmptyPlayers && player.playerType == PlayerType.Empty)
+            {
+                continue;
+            }
+
+            CastleBase castle = GetCastleForPlayer(playerManager, player);
+            int castleHp = castle != null ? castle.currentHP : 0;
+
+            results.Add(new PlayerResultEntry(
+                player.playerId,
+                player.GetDisplayName(),
+                player.score,
+                player.money,
+                castleHp,
+                player.isEliminated
+            ));
+        }
+
+        return results;
+    }
+
+    private static CastleBase GetCastleForPlayer(PlayerManager playerManager, PlayerResource player)
+    {
+        if (player == null)
+        {
+            return null;
+        }
+
+        CastleBase castle = player.GetComponent<CastleBase>();
+
+        if (castle != null)
+        {
+            return castle;
+        }
+
+        if (player.statusPanel != null && player.statusPanel.linkedCastle != null)
+        {
+            return player.statusPanel.linkedCastle;
+        }
+
+        PlayerVisualConfig visualConfig = playerManager != null
+            ? playerManager.GetVisualConfig(player.playerId)
+            : null;
+
+        if (visualConfig != null && visualConfig.castleReference != null)
+        {
+            return visualConfig.castleReference.GetComponent<CastleBase>();
+        }
+
+        return null;
+    }
+
+    private static void SortResultsByScore(List<PlayerResultEntry> results)
+    {
+        results.Sort((a, b) =>
+        {
+            if (a.isEliminated != b.isEliminated)
+            {
+                return a.isEliminated ? 1 : -1;
+            }
+
+            if (a.isEliminated && b.isEliminated)
+            {
+                return a.playerId.CompareTo(b.playerId);
+            }
+
+            int scoreCompare = b.score.CompareTo(a.score);
+
+            if (scoreCompare != 0)
+            {
+                return scoreCompare;
+            }
+
+            int hpCompare = b.castleHp.CompareTo(a.castleHp);
+
+            if (hpCompare != 0)
+            {
+                return hpCompare;
+            }
+
+            int moneyCompare = b.money.CompareTo(a.money);
+
+            if (moneyCompare != 0)
+            {
+                return moneyCompare;
+            }
+
+            return a.playerId.CompareTo(b.playerId);
+        });
+    }
+
+    private static void AssignRanks(List<PlayerResultEntry> results)
+    {
+        int activeRank = 1;
+        int eliminatedRank = results != null ? results.Count : 0;
+
+        for (int i = 0; i < results.Count; i++)
+        {
+            if (results[i].isEliminated)
+            {
+                results[i].rank = eliminatedRank;
+            }
+            else
+            {
+                results[i].rank = activeRank;
+                activeRank += 1;
+            }
+        }
+    }
+}

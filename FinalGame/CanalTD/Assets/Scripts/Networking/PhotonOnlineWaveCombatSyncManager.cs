@@ -443,6 +443,8 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         }
 
         waveManager?.ApplyOnlineWaveStarted(activeWaveIndex);
+        NotifyTowersWaveStarted();
+        NotifyShockTrapsWaveStarted();
         CurrentTurnIndicatorManager.Instance?.HideAllMarkers();
         ShowOnlineToast("Enemy Wave Started");
 
@@ -830,8 +832,54 @@ public class PhotonOnlineWaveCombatSyncManager : MonoBehaviour
         waveEndPending = false;
         ClearOnlineEnemies();
         int nextRound = data != null ? data.nextRound : activeRound + 1;
+        NotifyTowersWaveEnded();
+        NotifyShockTrapsWaveEnded();
         waveManager?.ApplyOnlineWaveEnded(nextRound);
         ShowOnlineToast("Enemy Wave Cleared");
+    }
+
+    private void NotifyTowersWaveStarted()
+    {
+        foreach (CannonTower tower in FindObjectsOfType<CannonTower>())
+        {
+            if (tower != null)
+            {
+                tower.OnWaveStarted();
+            }
+        }
+    }
+
+    private void NotifyTowersWaveEnded()
+    {
+        foreach (CannonTower tower in FindObjectsOfType<CannonTower>())
+        {
+            if (tower != null)
+            {
+                tower.OnWaveEnded();
+            }
+        }
+    }
+
+    private void NotifyShockTrapsWaveStarted()
+    {
+        foreach (ShockTrap trap in FindObjectsOfType<ShockTrap>())
+        {
+            if (trap != null)
+            {
+                trap.OnWaveStarted();
+            }
+        }
+    }
+
+    private void NotifyShockTrapsWaveEnded()
+    {
+        foreach (ShockTrap trap in FindObjectsOfType<ShockTrap>())
+        {
+            if (trap != null)
+            {
+                trap.OnWaveEnded();
+            }
+        }
     }
 
     /// <summary>

@@ -242,9 +242,7 @@ public class PlayerExitManager : MonoBehaviour
     {
         Debug.Log("Match ended locally via Exit Game.");
 
-        List<PlayerResultEntry> results = BuildCurrentResultEntries();
-        SortResultsByScore(results);
-        AssignRanks(results);
+        List<PlayerResultEntry> results = GameResultBuilder.BuildRankedResults(playerManager, true);
         GameResultData.SetResults(results);
 
         if (string.IsNullOrEmpty(resultSceneName))
@@ -348,40 +346,7 @@ public class PlayerExitManager : MonoBehaviour
 
         bool exitingCurrentPlayer = playerManager != null && playerManager.GetCurrentPlayerId() == playerId;
 
-        if (exitingCurrentPlayer && cardDrawManager != null)
-        {
-            // Cancel local pending card state before clearing owned gameplay state.
-            cardDrawManager.CancelPendingCard();
-        }
-
-        player.ClearPendingDisrupt();
-
-        if (cardDrawManager != null)
-        {
-            cardDrawManager.ReturnPlayerHandToDeck(playerId);
-        }
-        else
-        {
-            PlayerHand hand = player.GetPlayerHand();
-
-            if (hand != null)
-            {
-                hand.Clear();
-                player.SyncCardCountFromHand();
-                Debug.LogWarning("CardDrawManager missing. Cleared hand for player " + playerId + " without returning cards to deck.");
-            }
-        }
-
-        CleanupOwnedBuildAreasAndTowers(playerId);
-        CleanupOwnedShockTraps(playerId);
-
-        // Future improvement: gates do not currently track ownership for lock state,
-        // so owned locks cannot be released precisely here. Land ownership cleanup still releases control.
-        Debug.LogWarning("Future improvement: gate lock ownership is not tracked yet. No direct gate unlock cleanup was applied for player " + playerId + ".");
-        Debug.LogWarning("Future improvement: temporary boost ownership is not tracked separately yet. Player-owned towers were removed, but foreign boosted towers are not explicitly reset.");
-
-        player.MarkEliminated();
-        player.RefreshUI();
+        CleanupPlayerOwnedRuntimeState(playerId);
 
         if (playerManager != null)
         {
@@ -418,6 +383,53 @@ public class PlayerExitManager : MonoBehaviour
         if (playerManager != null)
         {
             playerManager.RefreshCurrentPlayerUI();
+        }
+    }
+
+    public void CleanupPlayerOwnedRuntimeState(int playerId)
+    {
+        PlayerResource player = playerManager != null ? playerManager.GetPlayerResource(playerId) : null;
+
+        if (player == null)
+        {
+            Debug.LogWarning("CleanupPlayerOwnedRuntimeState skipped because player " + playerId + " was not found.");
+            return;
+        }
+
+        if (playerManager != null && playerManager.GetCurrentPlayerId() == playerId && cardDrawManager != null)
+        {
+            cardDrawManager.CancelPendingCard();
+        }
+
+        player.ClearPendingDisrupt();
+        ReturnPlayerCardsToDeckOrClearHand(playerId, player);
+        CleanupOwnedBuildAreasAndTowers(playerId);
+        CleanupOwnedShockTraps(playerId);
+
+        // Future improvement: gates do not currently track ownership for lock state,
+        // so owned locks cannot be released precisely here. Land ownership cleanup still releases control.
+        Debug.LogWarning("Future improvement: gate lock ownership is not tracked yet. No direct gate unlock cleanup was applied for player " + playerId + ".");
+        Debug.LogWarning("Future improvement: temporary boost ownership is not tracked separately yet. Player-owned towers were removed, but foreign boosted towers are not explicitly reset.");
+
+        player.MarkEliminated();
+        player.RefreshUI();
+    }
+
+    private void ReturnPlayerCardsToDeckOrClearHand(int playerId, PlayerResource player)
+    {
+        if (cardDrawManager != null)
+        {
+            cardDrawManager.ReturnPlayerHandToDeck(playerId);
+            return;
+        }
+
+        PlayerHand hand = player != null ? player.GetPlayerHand() : null;
+
+        if (hand != null)
+        {
+            hand.Clear();
+            player.SyncCardCountFromHand();
+            Debug.LogWarning("CardDrawManager missing. Cleared hand for player " + playerId + " without returning cards to deck.");
         }
     }
 
@@ -542,136 +554,4 @@ public class PlayerExitManager : MonoBehaviour
         return 0;
     }
 
-    /// <summary>
-    /// Builds current result entries from configured scene objects and runtime state.
-    /// </summary>
-    private List<PlayerResultEntry> BuildCurrentResultEntries()
-    {
-        List<PlayerResultEntry> results = new List<PlayerResultEntry>();
-
-        if (playerManager == null || playerManager.players == null)
-        {
-            return results;
-        }
-
-        foreach (PlayerResource player in playerManager.players)
-        {
-            if (player == null || player.playerType == PlayerType.Empty)
-            {
-                continue;
-            }
-
-            CastleBase castle = GetCastleForPlayer(player);
-            int castleHp = castle != null ? castle.currentHP : 0;
-
-            results.Add(new PlayerResultEntry(
-                player.playerId,
-                player.GetDisplayName(),
-                player.score,
-                player.money,
-                castleHp,
-                player.isEliminated
-            ));
-        }
-
-        return results;
-    }
-
-    /// <summary>
-    /// Returns castle for player from the current scene or gameplay state.
-    /// </summary>
-    private CastleBase GetCastleForPlayer(PlayerResource player)
-    {
-        if (player == null)
-        {
-            return null;
-        }
-
-        CastleBase castle = player.GetComponent<CastleBase>();
-
-        if (castle != null)
-        {
-            return castle;
-        }
-
-        if (player.statusPanel != null && player.statusPanel.linkedCastle != null)
-        {
-            return player.statusPanel.linkedCastle;
-        }
-
-        PlayerVisualConfig visualConfig = playerManager != null
-            ? playerManager.GetVisualConfig(player.playerId)
-            : null;
-
-        if (visualConfig != null && visualConfig.castleReference != null)
-        {
-            return visualConfig.castleReference.GetComponent<CastleBase>();
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Handles sort results by score for this gameplay system.
-    /// </summary>
-    private void SortResultsByScore(List<PlayerResultEntry> results)
-    {
-        results.Sort((a, b) =>
-        {
-            if (a.isEliminated != b.isEliminated)
-            {
-                return a.isEliminated ? 1 : -1;
-            }
-
-            if (a.isEliminated && b.isEliminated)
-            {
-                return a.playerId.CompareTo(b.playerId);
-            }
-
-            int scoreCompare = b.score.CompareTo(a.score);
-
-            if (scoreCompare != 0)
-            {
-                return scoreCompare;
-            }
-
-            int hpCompare = b.castleHp.CompareTo(a.castleHp);
-
-            if (hpCompare != 0)
-            {
-                return hpCompare;
-            }
-
-            int moneyCompare = b.money.CompareTo(a.money);
-
-            if (moneyCompare != 0)
-            {
-                return moneyCompare;
-            }
-
-            return a.playerId.CompareTo(b.playerId);
-        });
-    }
-
-    /// <summary>
-    /// Handles assign ranks for this gameplay system.
-    /// </summary>
-    private void AssignRanks(List<PlayerResultEntry> results)
-    {
-        int activeRank = 1;
-        int eliminatedRank = results != null ? results.Count : 0;
-
-        for (int i = 0; i < results.Count; i++)
-        {
-            if (results[i].isEliminated)
-            {
-                results[i].rank = eliminatedRank;
-            }
-            else
-            {
-                results[i].rank = activeRank;
-                activeRank += 1;
-            }
-        }
-    }
 }

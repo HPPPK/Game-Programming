@@ -1493,7 +1493,7 @@ public class ModeSelectSceneManager : MonoBehaviour
     /// </summary>
     private void HideToastVisuals(GameObject root, TMP_Text text)
     {
-        if (root != null)
+        if (root != null && !IsUnsafeToastRoot(root))
         {
             root.SetActive(false);
         }
@@ -1501,6 +1501,38 @@ public class ModeSelectSceneManager : MonoBehaviour
         {
             text.gameObject.SetActive(false);
         }
+    }
+
+    private bool IsUnsafeToastRoot(GameObject root)
+    {
+        if (root == null)
+        {
+            return false;
+        }
+
+        if (root == localModePanel || root == aiPrototypePanel || root == onlineModePanel)
+        {
+            return true;
+        }
+
+        if (ContainsButton(root, aiPrototypeCloseButton) || ContainsButton(root, onlineCloseButton))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool ContainsButton(GameObject root, Button button)
+    {
+        if (root == null || button == null)
+        {
+            return false;
+        }
+
+        Transform rootTransform = root.transform;
+        Transform buttonTransform = button.transform;
+        return buttonTransform == rootTransform || buttonTransform.IsChildOf(rootTransform);
     }
 
     // Safely shows or hides an optional panel and logs a warning if it is missing.

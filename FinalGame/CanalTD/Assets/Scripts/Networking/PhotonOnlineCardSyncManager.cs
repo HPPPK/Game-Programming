@@ -945,6 +945,28 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
         }
     }
 
+    public void ReturnOnlinePlayerHandToDeck(int playerId)
+    {
+        if (!CanRunOnlineGameSceneCardSync() || !PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+
+        List<string> hand = GetOrCreateAuthoritativeHand(playerId);
+        int returnedCount = hand.Count;
+
+        if (returnedCount > 0)
+        {
+            deckCardIds.AddRange(hand);
+            hand.Clear();
+            ShuffleDeckCardIds();
+        }
+
+        UpdateSnapshotProperty();
+        SendPrivateHandStateToOwner(playerId);
+        Debug.Log("Returned " + returnedCount + " online cards from player " + playerId + " back to the authoritative deck.");
+    }
+
     /// <summary>
     /// Applies synchronized snapshot from room properties to this client so it matches the authoritative state.
     /// </summary>
@@ -1528,7 +1550,7 @@ public class PhotonOnlineCardSyncManager : MonoBehaviour
             " hasDrawnCard=" + turnManager.hasDrawnCard +
             " hasPlayedCard=" + turnManager.hasPlayedCard +
             " hasDiscardedCard=" + turnManager.hasDiscardedCard +
-            " currentAP=" + turnManager.currentAP
+            " cardActionsBlocked=" + turnManager.cardActionsBlockedThisTurn
         );
     }
 
